@@ -376,7 +376,7 @@ from any folder.
 #!/usr/bin/env bash
 # Windows-readiness scan of the harness. Read-only: git grep on a commit.
 set -u
-cd /var/www/html/personal/setup_scripts || exit 1
+cd /var/www/html/personal/harness || exit 1
 REV=HEAD                                               # 504215e for the numbers below
 PY=('dotfiles/*.py' dotfiles/codex/bin/codex-worktree) # 31 *.py files + 1 extensionless Python file
 SH=('dotfiles/*.sh')                                   # 25 files
@@ -422,7 +422,7 @@ Ruff comparison (ruff 0.14.10). Ruff reads the working tree. One tracked file
 has local changes (`tools/agent_sessions_mcp.py`), and ruff reports nothing in it.
 
 ```bash
-cd /var/www/html/personal/setup_scripts
+cd /var/www/html/personal/harness
 git ls-files -z 'dotfiles/*.py' | xargs -0 ruff check --preview --select PLW1514 --no-cache --output-format concise --exit-zero
 ```
 
@@ -459,7 +459,7 @@ Other Linux-only commands give no hits in the shell files. This command
 prints 0:
 
 ```bash
-cd /var/www/html/personal/setup_scripts
+cd /var/www/html/personal/harness
 git grep -n -P '^(?!\s*#).*(\benv\s+-i\b|/proc/|\bflock\b|\bsetsid\b|\btmux\b|\bpgrep\b|\bpkill\b|\blsof\b|\bsudo\b|\bkill\s+-0\b|\breadlink\s+-f\b|\brealpath\b|\bsed\s+-i\b|\bstat\s+-|\bdate\s+-d\b|\bsystemctl\b|\bcrontab\b|\bOSTYPE\b|\bstty\b|\btput\b)' HEAD -- 'dotfiles/*.sh' | wc -l
 ```
 

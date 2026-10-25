@@ -998,7 +998,7 @@ def render():
                      for k, n, *_ in SKINS) + '</div></nav>',
            '<main>']
 
-    out.append('<header class="top"><div class="kicker">stanimirdim92/setup_scripts · dotfiles</div>'
+    out.append('<header class="top"><div class="kicker">stanimirdim92/harness · dotfiles</div>'
                '<h1>Harness Map</h1>'
                '<p>How a ticket moves through the Claude Code harness, who does the work at each step, and which '
                'rules the host enforces. Generated from the harness files; CI fails when it is out of date.</p>'

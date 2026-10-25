@@ -55,7 +55,7 @@ against what changed: the share of changed files its tasks named. Run it from
 the project checkout:
 
 ```bash
-python3 ~/path/to/setup_scripts/dotfiles/tools/evals/plan-recall/recall.py --repo ./ \
+python3 ~/path/to/harness/dotfiles/tools/evals/plan-recall/recall.py --repo ./ \
     --ticket LD-380 --subject-only --show-commits \
     --plan docs/tasks/LD-380-plan.md --plan docs/tasks/LD-380-todo.md \
     --range <commit before the ticket>..<last commit of the ticket>

@@ -106,5 +106,5 @@ trusted_hash = "sha256:f7e2d1769a0fa5988fd8612ed0986032cb70100bf17b71c963cbe3af5
 [hooks.state."/home/stanimir/.codex/hooks.json:subagent_stop:0:0"]
 trusted_hash = "sha256:8a5b6016a4bfc467da57d1195ac1936accd7d4de1d80c2bac7966e195b9b770a"
 
-[projects."/var/www/html/personal/setup_scripts"]
+[projects."/var/www/html/personal/harness"]
 trust_level = "trusted"

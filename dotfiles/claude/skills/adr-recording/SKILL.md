@@ -10,7 +10,7 @@ description: Records a technical/architectural decision as one file in that proj
 A decision with no recorded reasoning gets re-proposed and re-litigated
 every time someone forgets — or never knew — it already lost once. This
 skill is the portable version of the practice this machine's own
-`setup_scripts` repo uses on itself: one file per decision under
+`harness` repo uses on itself: one file per decision under
 `docs/adr/`, an index that keeps them scannable, and a hard rule that a
 reversed decision stays on the record instead of being edited away.
 
