@@ -242,6 +242,34 @@ class EvaluatorIntegrity(unittest.TestCase):
             self.assertNotIn(junk, terms)
 
 
+class SplitAndTags(unittest.TestCase):
+    def test_results_name_the_split_and_the_tags(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            fixture = tmp / 'fixtures' / 'LD-7'
+            fixture.mkdir(parents=True)
+            (fixture / 'expectations.json').write_text(json.dumps({
+                'ticket': 'LD-7', 'split': 'holdout', 'tags': ['contradiction'], 'expectations': [
+                    {'id': 'draft', 'regex': 'Draft', 'why': 'w', 'tags': ['shape']},
+                    {'id': 'clash', 'regex': 'EX-2', 'why': 'w', 'tags': ['contradiction']}]}))
+            (tmp / 'spec.md').write_text('Status: Draft\n')
+            saved, run.HERE = run.HERE, tmp
+            try:
+                with redirect_stdout(io.StringIO()) as out:
+                    rc = run.main(['--fixture', 'LD-7', '--spec', str(tmp / 'spec.md'), '--output', str(tmp / 'o')])
+                self.assertEqual(rc, 1)                                       # clash is a must, and missed
+                self.assertIn('LD-7 (holdout; tags contradiction)', out.getvalue())
+                self.assertIn('By tag: contradiction 0/1; shape 1/1', out.getvalue())
+                results = json.loads((tmp / 'o' / 'results.json').read_text())
+                self.assertEqual((results['split'], results['tags']), ('holdout', ['contradiction']))
+                with redirect_stdout(io.StringIO()) as out:
+                    rc = run.main(['--fixture', 'LD-7', '--spec', str(tmp / 'spec.md'), '--tag', 'shape'])
+                self.assertEqual(rc, 0)                                       # only the shape expectation judged
+                self.assertIn('1 checked, 0 failed', out.getvalue())
+            finally:
+                run.HERE = saved
+
+
 class Paired(unittest.TestCase):
     """SAGE (arXiv 2609.36043): compare per item, not by the average."""
 

@@ -15,8 +15,12 @@ Usage:
     run.py --fixture fix-feed-order --fixture quiet-ui --repo ~/app --output ./before
     run.py --fixture ... --repo ~/app --output ./after --baseline ./before/results.json
     run.py --fixture fix-feed-order --findings review.sarif    # judge a saved SARIF (free)
+    run.py --all --tag tenant --repo ~/app --output ./tenant   # every case carrying a tag
 
-Producing drives the real model and costs money: never in CI.
+A case carries `tags` (what behavior it exercises) and a `split`: `optimization`,
+the cases you read while changing the harness, or `holdout`, the cases you do
+not. A change is accepted only when no holdout case the baseline passed is lost
+(ADR 0117). Producing drives the real model and costs money: never in CI.
 """
 import argparse
 import importlib.util
@@ -93,6 +97,26 @@ def bug_case(repo, fix, bug=None):
 
 def clean_case(repo, commit):
     return {'kind': 'clean', 'change': git(repo, 'rev-parse', commit).strip(), 'targets': {}}
+
+
+def load(name):
+    return json.loads((FIXTURES / name / 'case.json').read_text())
+
+
+def selected(names, every=False, tags=(), split=None):
+    """The cases to run: the named ones, or every case under fixtures/, narrowed to those carrying
+    any of `tags` and, with `split`, to that split. A case without a split is optimization."""
+    if every:
+        names = sorted(p.parent.name for p in FIXTURES.glob('*/case.json'))
+    out = []
+    for name in names:
+        case = load(name)
+        if tags and not set(tags) & set(case.get('tags', [])):
+            continue
+        if split and case.get('split', 'optimization') != split:
+            continue
+        out.append(name)
+    return out
 
 
 # ---------------------------------------------------------------- judging
@@ -174,6 +198,27 @@ def item(case, result):
     return result['caught'] if case['kind'] == 'bug' else result['blocking'] == 0
 
 
+def compare(baseline, items, splits):
+    """The paired verdict, with the holdout rule on top: a holdout case the baseline passed and this run
+    lost makes the change WORSE whatever the optimization cases gained. Returns (pair, word, why, lost holdout)."""
+    pair = spec_eval.paired(baseline, items)
+    lost = [n for n in pair['regressions'] if splits.get(n) == 'holdout']
+    word, why = spec_eval.verdict(pair)
+    if lost:
+        word, why = 'WORSE', 'a holdout case the baseline passed is now lost'
+    return pair, word, why, lost
+
+
+def tally(names, items, kinds):
+    """'bugs a/b, clean c/d' over `names`; the parts that exist."""
+    parts = []
+    for kind, label in (('bug', 'bugs'), ('clean', 'clean')):
+        of = [n for n in names if kinds.get(n) == kind]
+        if of:
+            parts.append(f'{label} {sum(bool(items.get(n)) for n in of)}/{len(of)}')
+    return ', '.join(parts)
+
+
 # ---------------------------------------------------------------- producing
 
 def produce(case, repo, budget):
@@ -208,7 +253,12 @@ def main(argv=None):
     parser.add_argument('--fix', help='with --new: the bugfix commit')
     parser.add_argument('--bug', help='with --new --fix: the commit that introduced the bug (default: found by blame)')
     parser.add_argument('--clean', help='with --new: a commit nobody had to fix')
+    parser.add_argument('--tag', action='append', default=[],
+                        help='with --new: a behavior tag for the case; otherwise run only cases carrying any given tag')
+    parser.add_argument('--holdout', action='store_true', help='with --new: the case is holdout, never read while tuning')
     parser.add_argument('--fixture', action='append', default=[])
+    parser.add_argument('--all', action='store_true', help='every case under fixtures/')
+    parser.add_argument('--split', choices=('optimization', 'holdout'), help='run only this split')
     parser.add_argument('--repo', type=Path)
     parser.add_argument('--findings', type=Path, help='judge this SARIF file instead of producing (free; one fixture)')
     parser.add_argument('--output', type=Path)
@@ -222,16 +272,23 @@ def main(argv=None):
         case = bug_case(args.repo, args.fix, args.bug) if args.fix else clean_case(args.repo, args.clean)
         out = FIXTURES / args.new
         out.mkdir(parents=True, exist_ok=True)
+        case.update(tags=sorted(set(args.tag)), split='holdout' if args.holdout else 'optimization')
         (out / 'case.json').write_text(json.dumps({'name': args.new, **case}, indent=2) + '\n')
         where = ', '.join(f'{p} ({len(v)} line(s))' for p, v in case['targets'].items()) or 'none (clean case)'
-        print(f'Case {out}: {case["kind"]}, change {case["change"][:10]}, targets: {where}.')
+        print(f'Case {out}: {case["kind"]}, {case["split"]}, tags {", ".join(case["tags"]) or "-"}, '
+              f'change {case["change"][:10]}, targets: {where}.')
         return 0
 
-    if not args.fixture:
-        parser.error('give --new, or one or more --fixture')
+    if not args.fixture and not args.all:
+        parser.error('give --new, or one or more --fixture, or --all')
+    names = selected(args.fixture, args.all, args.tag, args.split)
+    if not names:
+        parser.error('no case matches')
     results, items, spent, errored = {}, {}, 0.0, []
-    for name in args.fixture:
-        case = json.loads((FIXTURES / name / 'case.json').read_text())
+    kinds, splits, tags = {}, {}, {}
+    for name in names:
+        case = load(name)
+        kinds[name], splits[name], tags[name] = case['kind'], case.get('split', 'optimization'), case.get('tags', [])
         if args.findings:
             findings, source = sarif_findings(args.findings.read_text()), 'given'
         else:
@@ -247,7 +304,7 @@ def main(argv=None):
                 continue
             spent += meta.get('total_cost_usd', 0) or 0
         result = judge(case, findings)
-        results[name] = {**result, 'kind': case['kind'], 'source': source}
+        results[name] = {**result, 'kind': case['kind'], 'source': source, 'split': splits[name], 'tags': tags[name]}
         items[name] = item(case, result)
         mark = ('CAUGHT' if result['caught'] else 'missed') if case['kind'] == 'bug' else \
             ('quiet' if result['blocking'] == 0 else f'{result["blocking"]} blocking finding(s)')
@@ -259,6 +316,12 @@ def main(argv=None):
         print(f'Bugs caught: {sum(results[n]["caught"] for n in bugs)}/{len(bugs)}')
     if clean:
         print(f'Clean cases quiet: {sum(results[n]["blocking"] == 0 for n in clean)}/{len(clean)}')
+    holdout = [n for n in items if splits[n] == 'holdout']
+    if holdout:
+        print(f'Holdout: {tally(holdout, items, kinds)}')
+    every_tag = sorted({t for n in items for t in tags[n]})
+    if every_tag:
+        print('By tag: ' + '; '.join(f'{t} {tally([n for n in items if t in tags[n]], items, kinds)}' for t in every_tag))
     if errored:
         print(f'Errored, not scored: {len(errored)} ({", ".join(errored)})')
     if spent:
@@ -266,14 +329,18 @@ def main(argv=None):
 
     if args.output:
         args.output.mkdir(parents=True, exist_ok=True)
-        (args.output / 'results.json').write_text(json.dumps({'results': items, 'detail': results}, indent=2) + '\n')
+        (args.output / 'results.json').write_text(json.dumps(
+            {'results': items, 'splits': splits, 'tags': tags, 'detail': results}, indent=2) + '\n')
     if args.baseline:
-        pair = spec_eval.paired(json.loads(args.baseline.read_text())['results'], items)
-        word, why = spec_eval.verdict(pair)
+        base = json.loads(args.baseline.read_text())['results']
+        pair, word, why, lost = compare(base, items, splits)
         for n in pair['wins']:
             print(f'  gained {n}')
         for n in pair['regressions']:
-            print(f'  lost   {n}')
+            print(f'  lost   {n}' + (' (holdout)' if n in lost else ''))
+        if holdout:
+            before = sum(bool(base.get(n)) for n in holdout if n in base)
+            print(f'Holdout: {before}/{len(holdout)} -> {sum(bool(items[n]) for n in holdout)}/{len(holdout)}')
         print(f'{word}: {why}')
         return 0 if word in ('BETTER', 'SAME') and not errored else 1
     return 1 if errored else 0

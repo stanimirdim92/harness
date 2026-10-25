@@ -124,6 +124,7 @@ that explanation here, just the index.
 | [0114](0114-pipeline-runner-supplies-gate-handoffs.md) | The pipeline runner supplies gate handoffs | Accepted |
 | [0115](0115-ticket-runner-end-to-end.md) | One ticket runs end to end; only High-risk questions wait | Accepted |
 | [0116](0116-lessons-from-ld-507.md) | Lessons from LD-507: same quality, less owner time and fewer tokens | Accepted (evals pending) |
+| [0117](0117-evals-carry-tags-and-a-holdout-split.md) | Evals carry tags and a holdout split | Accepted |
 
 Adding a new decision: create the next-numbered `NNNN-kebab-title.md`
 (4-digit, zero-padded — MADR-style, matches the files already here) and

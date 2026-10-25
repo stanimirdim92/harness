@@ -101,6 +101,20 @@ class Judge(unittest.TestCase):
         self.assertIsNone(rows[0][1])
 
 
+class Tags(unittest.TestCase):
+    FIXTURE = {'expectations': [{'id': 'a', 'why': 'w', 'regex': 'alpha', 'tags': ['x']},
+                                {'id': 'b', 'why': 'w', 'regex': 'beta', 'tags': ['y']},
+                                {'id': 'c', 'why': 'w', 'regex': 'gamma'}]}
+
+    def test_tag_filter_judges_only_the_tagged_expectations(self):
+        rows, failed = se.judge(self.FIXTURE, 'alpha', tags=['x'])
+        self.assertEqual(([r[0]['id'] for r in rows], failed), (['a'], 0))
+        rows, failed = se.judge(self.FIXTURE, 'alpha', tags=['x', 'y'])
+        self.assertEqual(([r[0]['id'] for r in rows], failed), (['a', 'b'], 1))
+        rows, failed = se.judge(self.FIXTURE, 'alpha')
+        self.assertEqual((len(rows), failed), (3, 2))
+
+
 class ExampleFixture(unittest.TestCase):
     """The committed example must stay loadable and every predicate valid."""
 

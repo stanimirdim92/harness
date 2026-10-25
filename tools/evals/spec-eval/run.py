@@ -84,10 +84,12 @@ def evaluate(expectation, spec):
     raise ValueError(f"expectation {expectation['id']}: no predicate (near / regex / absent_regex)")
 
 
-def judge(fixture, spec):
-    """Apply every expectation. Returns (rows, failed_must)."""
+def judge(fixture, spec, tags=()):
+    """Apply every expectation, or with `tags` only those carrying one of them. Returns (rows, failed_must)."""
     rows, failed = [], 0
     for expectation in fixture['expectations']:
+        if tags and not set(tags) & set(expectation.get('tags', [])):
+            continue
         met, detail = evaluate(expectation, spec)
         must = expectation.get('severity', 'must') == 'must'
         if met is False and must:
@@ -458,6 +460,8 @@ def main(argv=None):
     parser.add_argument('--as-of', help='with --new: intake cutoff date YYYY-MM-DD (default: the date the spec was first committed)')
     parser.add_argument('--baseline', type=Path,
                         help='results.json of an earlier run (from --output): compare item by item, exit 1 unless BETTER or SAME')
+    parser.add_argument('--tag', action='append', default=[],
+                        help='judge only the expectations carrying one of these tags (the fixture keeps its own tags and split)')
     args = parser.parse_args(argv)
 
     if args.new:
@@ -476,6 +480,7 @@ def main(argv=None):
         print('spec-eval: fixtures hold real ticket content and are gitignored; see README.md', file=sys.stderr)
         return 2
     fixture = json.loads(definition.read_text())
+    split = fixture.get('split', 'optimization')
     at = args.at or fixture.get('repo', {}).get('at')
     if args.repo and not at:
         parser.error('--repo needs a commit: set "repo": {"at": ...} in the fixture or pass --at')
@@ -483,9 +488,10 @@ def main(argv=None):
         parser.error(f"fixture {args.fixture} reads the project at {fixture['repo'].get('at')}; pass --repo PATH "
                      '(judging an existing spec with --spec needs no repository)')
 
+    label = f"{fixture['ticket']} ({split}" + (f"; tags {', '.join(fixture['tags'])}" if fixture.get('tags') else '') + ')'
     if args.spec:
         spec, meta = Path(args.spec).read_text(), None
-        print(f"Judging {args.spec} against {fixture['ticket']} expectations.\n")
+        print(f"Judging {args.spec} against {label} expectations.\n")
     else:
         spec, meta = produce(fixture, fixture_dir, args.budget, args.repo, at)
         if args.repo:
@@ -493,7 +499,7 @@ def main(argv=None):
         print(f"Produced a spec for {fixture['ticket']}: {len(spec)} chars, "
               f"${meta.get('total_cost_usd', 0):.2f}, {meta.get('duration_ms', 0) / 1000:.0f}s.\n")
 
-    rows, failed = judge(fixture, spec)
+    rows, failed = judge(fixture, spec, args.tag)
 
     if args.output:
         out = Path(args.output); out.mkdir(parents=True, exist_ok=True)
@@ -501,8 +507,14 @@ def main(argv=None):
         if meta:
             (out / 'run.json').write_text(json.dumps(meta, indent=2))
         (out / 'results.json').write_text(json.dumps(
-            {'ticket': fixture['ticket'], 'results': results_of(rows)}, indent=2) + '\n')
+            {'ticket': fixture['ticket'], 'split': split, 'tags': fixture.get('tags', []),
+             'results': results_of(rows)}, indent=2) + '\n')
     semantic = [r for r in rows if r[1] is None]
+    by_tag = sorted({t for e, met, _, _ in rows if met is not None for t in e.get('tags', [])})
+    if by_tag:
+        print('By tag: ' + '; '.join(
+            f'{t} {sum(1 for e, met, _, _ in rows if met and t in e.get("tags", []))}'
+            f'/{sum(1 for e, met, _, _ in rows if met is not None and t in e.get("tags", []))}' for t in by_tag))
 
     for expectation, met, detail, must in rows:
         if met is None or expectation.get('reference_term'):

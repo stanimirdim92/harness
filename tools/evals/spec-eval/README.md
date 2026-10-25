@@ -145,6 +145,17 @@ Intake is frozen rather than re-fetched on purpose. Re-running `jira-ticket`
 each time moves two variables at once and makes a regression impossible to
 attribute. Refresh the intake deliberately, when the tickets change.
 
+## Split and tags
+
+A fixture carries `split` (`optimization`, the fixtures you read while
+changing the harness, or `holdout`, the ones you do not; default
+optimization) and `tags`, the behaviors it exercises. Each expectation may
+carry `tags` too. `--tag T` judges only the expectations carrying one of the
+given tags, and the run prints `By tag:` counts. A holdout fixture is the
+one to run last, after the change looks good on the others: its verdict is
+the one that says the change generalizes (ADR 0117). `results.json` records
+the split and the tags beside the results.
+
 ## Expectations
 
 Each carries an `id`, a `why` in plain language, and one predicate:
@@ -156,7 +167,8 @@ Each carries an `id`, a `why` in plain language, and one predicate:
 | `absent_regex: "..."` | must **not** match |
 | `kind: "semantic"` | not machine-checkable; printed for human review |
 
-`severity: "should"` reports a miss without failing the run.
+`severity: "should"` reports a miss without failing the run. `tags: [...]`
+names the behaviors the expectation covers.
 
 `near` exists because presence is not noticing. A spec that says "email"
 somewhere has not seen that one ticket promises a notification and another

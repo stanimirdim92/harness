@@ -5,12 +5,14 @@ History: A adds feed.py; B introduces the bug on line 3; C edits another file;
 F fixes line 3. The case must name B and the line B wrote, and a finding there
 must count as caught. Producing drives the model and is not tested here."""
 import importlib.util
+import io
 import json
 import os
 import stat
 import subprocess
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -146,6 +148,79 @@ class Produce(unittest.TestCase):
         self.assertEqual(saved['results'], {})
         self.assertIn('error', saved['detail']['quiet'])
         self.assertEqual(rc, 1)
+
+
+class TagsAndSplit(unittest.TestCase):
+    """A case carries behavior tags and a split; a holdout case the baseline passed and a change
+    loses makes the change WORSE, whatever the optimization cases gained (ADR 0117)."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        base = Path(self.tmp.name)
+        self.repo = base / 'repo'
+        self.repo.mkdir()
+        git(self.repo, 'init', '-q')
+        (self.repo / 'feed.py').write_text('x = 1\n')
+        git(self.repo, 'add', '-A'); git(self.repo, 'commit', '-qm', 'A')
+        self.fixtures = base / 'fixtures'
+        self.fixtures.mkdir()
+        self.saved, rev.FIXTURES = rev.FIXTURES, self.fixtures
+        self.out = base / 'out'
+
+    def tearDown(self):
+        rev.FIXTURES = self.saved
+        self.tmp.cleanup()
+
+    def new(self, name, *extra):
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(rev.main(['--new', name, '--repo', str(self.repo), '--clean', 'HEAD', *extra]), 0)
+        return json.loads((self.fixtures / name / 'case.json').read_text())
+
+    def test_new_case_records_tags_and_split(self):
+        case = self.new('q1', '--tag', 'tenant', '--tag', 'auth', '--holdout')
+        self.assertEqual((case['tags'], case['split']), (['auth', 'tenant'], 'holdout'))
+        case = self.new('q2')
+        self.assertEqual((case['tags'], case['split']), ([], 'optimization'))
+
+    def test_selection_by_all_tag_and_split(self):
+        self.new('q1', '--tag', 'tenant', '--holdout')
+        self.new('q2', '--tag', 'auth')
+        self.assertEqual(rev.selected([], every=True), ['q1', 'q2'])
+        self.assertEqual(rev.selected([], every=True, tags=['tenant']), ['q1'])
+        self.assertEqual(rev.selected([], every=True, split='optimization'), ['q2'])
+        self.assertEqual(rev.selected(['q2'], tags=['tenant']), [])
+        self.assertEqual(rev.selected(['q2', 'q1'], tags=['tenant', 'auth']), ['q2', 'q1'])
+
+    def test_a_lost_holdout_case_is_worse_whatever_else_gained(self):
+        base = {'a': True, 'b': False, 'c': False, 'h': True}
+        now = {'a': True, 'b': True, 'c': True, 'h': False}
+        pair, word, why, lost = rev.compare(base, now, {'h': 'holdout'})
+        self.assertEqual((word, lost, pair['wins']), ('WORSE', ['h'], ['b', 'c']))
+        self.assertEqual(rev.compare(base, now, {})[1], 'BETTER')           # the same loss, not a holdout case
+
+    def test_tally(self):
+        self.assertEqual(rev.tally(['a', 'b', 'c'], {'a': True, 'b': False, 'c': True},
+                                   {'a': 'bug', 'b': 'bug', 'c': 'clean'}), 'bugs 1/2, clean 1/1')
+
+    def test_results_carry_split_and_tags_and_the_holdout_line(self):
+        self.new('q1', '--tag', 'tenant', '--holdout')
+        quiet = Path(self.tmp.name) / 'quiet.sarif'
+        quiet.write_text(json.dumps({'runs': []}))
+        noisy = Path(self.tmp.name) / 'noisy.sarif'
+        noisy.write_text(json.dumps({'runs': [{'results': [{'ruleId': 'CODE-1', 'properties': {'disposition': 'REQUIRED'},
+            'locations': [{'physicalLocation': {'artifactLocation': {'uri': 'feed.py'}, 'region': {'startLine': 1}}}]}]}]}))
+        with redirect_stdout(io.StringIO()) as out:
+            self.assertEqual(rev.main(['--fixture', 'q1', '--findings', str(quiet), '--output', str(self.out)]), 0)
+        self.assertIn('Holdout: clean 1/1', out.getvalue())
+        self.assertIn('By tag: tenant clean 1/1', out.getvalue())
+        saved = json.loads((self.out / 'results.json').read_text())
+        self.assertEqual((saved['splits'], saved['tags'], saved['results']), ({'q1': 'holdout'}, {'q1': ['tenant']}, {'q1': True}))
+        with redirect_stdout(io.StringIO()) as out:
+            rc = rev.main(['--fixture', 'q1', '--findings', str(noisy), '--baseline', str(self.out / 'results.json')])
+        self.assertEqual(rc, 1)
+        self.assertIn('lost   q1 (holdout)', out.getvalue())
+        self.assertIn('Holdout: 1/1 -> 0/1', out.getvalue())
+        self.assertIn('WORSE: a holdout case the baseline passed is now lost', out.getvalue())
 
 
 if __name__ == '__main__':

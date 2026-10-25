@@ -2,12 +2,15 @@
   "ticket": "EX-1",
   "note": "Invented tickets, committed to document the format. Real fixtures sit beside this one and are gitignored. Every expectation here is one a real fixture would carry; the content is fake.",
   "intake": "intake.md",
+  "split": "optimization",
+  "tags": ["contradiction", "evidence"],
   "expectations": [
     {
       "id": "contradiction-retention",
       "why": "EX-2 says records are purged after 30 days; EX-1 says they are kept indefinitely. A spec that does not notice has left the implementer to pick one silently.",
       "near": ["EX-2", "30 days"],
-      "within_lines": 4
+      "within_lines": 4,
+      "tags": ["contradiction"]
     },
     {
       "id": "vendor-choice-not-self-decided",
@@ -17,7 +20,8 @@
     {
       "id": "no-invented-stack",
       "why": "The fixture has no application source. A spec naming a framework or a table has invented it.",
-      "regex": "No precedent found|Not established"
+      "regex": "No precedent found|Not established",
+      "tags": ["evidence"]
     },
     {
       "id": "draft-only",

@@ -371,6 +371,14 @@ it. The Harness Map artifact was republished from the new tree. The daily
 routine that refreshes it still reads `setup_scripts`: its prompt can be
 changed only from its own conversation.
 
+### 2026-10-25, later: tags and a holdout split in the evals (ADR 0117)
+
+From LangChain's "Better Harness" recipe, the two things the evals lacked:
+review-eval cases carry `tags` and `split`, `--all/--tag/--split` select,
+a lost holdout case is WORSE; spec-eval fixtures and expectations carry
+`split`/`tags`, `--tag` judges a subset. The item-by-item comparison and the
+lost list already existed. Existing cases have no fields: add them by hand.
+
 ## 5. Open items and ideas (not started)
 
 - **A live session across a runner crash** is not restored (Symphony does

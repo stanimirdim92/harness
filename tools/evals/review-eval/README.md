@@ -40,6 +40,33 @@ the SARIF exists or the report says `Nothing to fix`.
 than one commit. The run ends with BETTER, SAME, NOT BETTER or WORSE, as in
 spec-eval. Run each side twice before you trust a small difference.
 
+## Tags and the holdout split
+
+Every case carries two more fields (ADR 0117):
+
+- `tags`: the behaviors it exercises, for example `tenant-scope`, `retry`,
+  `migration`. `--tag T` runs only the cases carrying one of the given tags,
+  which is how a change to one reviewer rule gets a cheap, relevant run.
+- `split`: `optimization` or `holdout`. Optimization cases are the ones you
+  read while changing a reviewer; holdout cases you never read, so a gain on
+  them is a gain on what the change did not see. Make every third or fourth
+  new case a holdout, from the same source as the rest.
+
+```bash
+python3 run.py --new feed-order --repo $P --fix <sha> --tag ordering --tag feed
+python3 run.py --new quiet-2    --repo $P --clean <sha> --holdout
+python3 run.py --all --repo $P --output ./before            # every case
+python3 run.py --all --tag tenant-scope --repo $P --output ./tenant
+python3 run.py --all --split holdout --repo $P --output ./holdout
+```
+
+The run prints `Holdout: bugs a/b, clean c/d` and `By tag: …` under the
+totals. With `--baseline`, a holdout case the baseline passed and this run
+lost is **WORSE**, whatever the optimization cases gained: the change fitted
+the cases it saw. Every lost case is listed by name, holdout ones marked.
+Cases built before ADR 0117 have no fields and count as optimization with
+no tags; add the fields to `case.json` by hand.
+
 ## When to run it, and what it costs
 
 A change to a reviewer persona, `/review`, the reviewer triggers, the risk
@@ -47,7 +74,7 @@ tiers, or a reviewer's model needs a rescore (ADR 0111). CI checks that the
 commit says how it went, in a trailer:
 
 ```text
-Review-eval: bugs 5/8 -> 6/8, clean 3/3 -> 3/3 (BETTER); ./after/results.json
+Review-eval: bugs 5/8 -> 6/8, clean 3/3 -> 3/3, holdout 3/3 -> 3/3 (BETTER); ./after/results.json
 Review-eval: not run - wording only, no change to what is reported
 ```
 
