@@ -357,6 +357,20 @@ commit that touches `review.md` or a reviewer persona needs a
 `Review-eval:` trailer (`check-rescore.py`); two of today's commits were
 reworded locally before the push to carry one.
 
+### 2026-10-25: the harness is its own repository
+
+`stanimirdim92/harness`, with the history of `dotfiles/` filtered out of
+`setup_scripts` (411 commits), then flattened: `claude/`, `codex/`, `docs/`
+and `tools/` sit at the root and every path lost the `dotfiles/` prefix
+(ADR 0071 amended). `setup_scripts` keeps only the server setup and points
+here. The first CI run failed on `install-config.py --lint` (machine state in
+`codex/config.toml`, removed again); the second on `check-rescore.py`,
+because the flatten commit moved the reviewer files without a `Review-eval:`
+trailer. History is not rewritten; the range of the next push starts after
+it. The Harness Map artifact was republished from the new tree. The daily
+routine that refreshes it still reads `setup_scripts`: its prompt can be
+changed only from its own conversation.
+
 ## 5. Open items and ideas (not started)
 
 - **A live session across a runner crash** is not restored (Symphony does
