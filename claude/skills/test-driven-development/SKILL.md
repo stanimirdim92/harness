@@ -110,7 +110,7 @@ export async function createTask(input: { title: string }): Promise<Task> {
 }
 ```
 
-**Test fails?** Fix code, not test.
+**Test fails?** Inside the TDD loop, fix the code, not the test you just wrote. When an existing test and the code disagree, decide which side is right before you change either. If you cannot tell, leave the test failing and ask the owner. Never change an assertion only because it now matches the code.
 
 **Other tests fail?** Fix those your change broke; report unrelated ones.
 
@@ -188,6 +188,8 @@ Does it cross a boundary (API, database, file system)?
 Is it a critical user flow that must work end-to-end?
   → E2E test — limit these to critical paths
 ```
+
+When the project or its framework guidance sets the test level, follow it. For example, a Laravel project writes feature tests first and unit tests only for logic that does not use the framework. Do the same for naming, assertion style and test data: the project and framework guidance (e.g. a Laravel project's `testing-best-practices` skill) wins over the generic advice here.
 
 **The Beyonce Rule:** If you liked it, you should have put a test on it. Infrastructure changes, refactoring, and migrations are not responsible for catching your bugs — your tests are. If a change breaks your code and you didn't have a test for it, that's on you.
 
