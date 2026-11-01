@@ -205,6 +205,7 @@
     "typescript-lsp@claude-plugins-official": true,
     "playwright@claude-plugins-official": true,
     "qdrant-skills@knowledge-work-plugins": true,
+    "brightdata-plugin@knowledge-work-plugins": true,
     "llm-application-dev@claude-code-workflows": true
   },
   "extraKnownMarketplaces": {
