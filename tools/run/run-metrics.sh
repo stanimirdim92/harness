@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Reports actual run metrics from a Claude Code transcript: tool-call batching,
-# token usage, the main-session/subagent split, and the main-session tool
-# results large enough to be whole files read inline. Read-only.
+# token usage, the main-session/subagent split, tokens per agent, and the
+# main-session tool results large enough to be whole files read inline.
+# Read-only.
 #
 # Every number here is measured, never estimated — see
 # claude/references/agent-run-metrics.md.
@@ -168,6 +169,45 @@ jq -rs --arg since "$SINCE" --arg until "$UNTIL" '
     "  cache read     : \($u|map(.cache_read_input_tokens//0)|add // 0)",
     "  cache creation : \($u|map(.cache_creation_input_tokens//0)|add // 0)"
 ' "${FILES[@]}"
+
+# Per agent: one row per transcript. Each reply re-reads the whole context, so
+# a large first reply is a fixed cost paid on every call (tool definitions,
+# preloaded skills, instruction files), and replies x context is the volume.
+# Role and description come from the <agent>.meta.json beside each subagent.
+echo
+echo "PER AGENT (replies, first and largest context, cache read/write, output)"
+for f in "${FILES[@]}"; do
+  if [ "$f" = "$FILE" ]; then role=main; desc=""
+  else
+    meta="${f%.jsonl}.meta.json"
+    role=$(jq -r '.agentType // "?"' "$meta" 2>/dev/null || echo "?")
+    desc=$(jq -r '.description // ""' "$meta" 2>/dev/null || true)
+  fi
+  jq -cs --arg since "$SINCE" --arg until "$UNTIL" --arg role "$role" --arg desc "$desc" '
+    def inwin: (($since == "") or (.timestamp >= $since))
+           and (($until == "") or (.timestamp <= $until));
+    def ctx: (.input_tokens // 0) + (.cache_read_input_tokens // 0) + (.cache_creation_input_tokens // 0);
+    [ .[] | select(.message.usage) | select(inwin) ] | to_entries
+    | map(.value + {k: (.value.message.id // .value.requestId // "rec\(.key)")})
+    | group_by(.k) | map(max_by(.message.usage.output_tokens // 0)) | sort_by(.timestamp)
+    | select(length > 0)
+    | {role: $role, desc: $desc, model: (.[0].message.model // "?"), n: length,
+       first: (.[0].message.usage | ctx), max: (map(.message.usage | ctx) | max),
+       cr: (map(.message.usage.cache_read_input_tokens // 0) | add),
+       cw: (map(.message.usage.cache_creation_input_tokens // 0) | add),
+       out: (map(.message.usage.output_tokens // 0) | add)}
+  ' "$f"
+done | jq -rs '
+  def human: if . >= 1000000 then "\((. / 10000 | round) / 100)M"
+             elif . >= 1000 then "\(. / 1000 | round)k" else tostring end;
+  def rpad($w): tostring | (" " * ($w - length)) + .;
+  def lpad($w): tostring | . + (" " * ($w - length));
+  if length == 0 then "  (no replies)"
+  else
+    "  \("role" | lpad(28)) \("model" | lpad(18)) \("replies" | rpad(7)) \("first" | rpad(6)) \("max" | rpad(6)) \("cache rd" | rpad(8)) \("cache wr" | rpad(8)) \("out" | rpad(6))  task",
+    ( (map(select(.role == "main")) + (map(select(.role != "main")) | sort_by(-.cr)))[]
+      | "  \(.role | .[0:28] | lpad(28)) \(.model | sub("^claude-"; "") | .[0:18] | lpad(18)) \(.n | rpad(7)) \(.first | human | rpad(6)) \(.max | human | rpad(6)) \(.cr | human | rpad(8)) \(.cw | human | rpad(8)) \(.out | human | rpad(6))  \(.desc | .[0:40])" )
+  end'
 
 echo
 echo "TOP SOLO-CALL TOOLS (issued alone in their request - batching candidates)"

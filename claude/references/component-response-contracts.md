@@ -184,7 +184,7 @@ reasons; nothing is reimplemented or restated in Python.
 
 ## 3. Claude agent report contracts
 
-Seven personas live in `../../claude/agents/`. Each is invoked with a bounded
+Nine personas live in `../../claude/agents/`. Each is invoked with a bounded
 task packet and returns one report in a fixed shape; `docs/agents.md` names who
 dispatches each one and when.
 
@@ -193,6 +193,8 @@ dispatches each one and when.
 | `repo-recon` | `## Recon: [area]` markdown template | — |
 | `executor` | bullet-list handoff (consumed by `require-handoff-report.sh`, §1) | — |
 | `test-engineer` | bullet-list evidence-per-`REQ-###`, or `## Test Coverage Analysis` template | — |
+| `figma-executor` | the `executor` report: same body, plus the Figma tools (ADR 0118) | — |
+| `figma-test-engineer` | the `test-engineer` report: same body, plus the Figma tools (ADR 0118) | — |
 | `code-reviewer` | `## Review Summary` template, `APPROVE`\|`REQUEST CHANGES` | `CODE-N` |
 | `blind-reviewer` | `## Blind Review` template | `BLIND-N` |
 | `security-auditor` | `SEC-N` findings list | `SEC-N` |
@@ -278,7 +280,7 @@ another agent.
 scenario, recommendation. No fenced template — findings are reported inline in
 this shape.
 
-### Shared conventions across all seven
+### Shared conventions across all nine
 
 Confidence (`high`/`medium`/`low`) travels separately from the disposition — a
 low-confidence finding keeps its true disposition, marked low-confidence,
@@ -337,19 +339,17 @@ Seven commands live in `../../claude/commands/`; six own the pipeline
 `/test` runs on every production change; only the exempt kinds in
 `verification-triggers.md` skip it (ADR 0104). Jira intake (`jira-ticket` skill) comes
 before `/spec`; `/explain` sits outside the gates. Each ends in exactly one named terminal
-state and, except `/ship`, writes an artifact to a fixed path. Every gate
-report after `/spec` ends with the handoff line of `stage-handoff.md`; the
-runners (`tools/run/pipeline.py`, `tools/run/ticket.py`) route from it alone.
+state and, except `/ship`, writes an artifact to a fixed path.
 
-| Command | Artifact | Terminal states | `HANDOFF: result=` |
-|---|---|---|---|
-| `/spec` | `docs/specs/[TICKET]-SPEC.md` (a multi-capability initiative adds a `## Capability Map` section, not files) | Draft \| Needs reapproval \| Approved | none; the runner reads the header and the `OPEN QUESTION` blocks |
-| `/plan` | `docs/tasks/[TICKET]-plan.md` / `-todo.md`, or a bounded `SPEC CONFLICT` | Draft \| Needs replan \| Approved, Ready for `/build` | COMPLETE \| BLOCKED |
-| `/build` | scoped local commits | **BUILD COMPLETE** \| **BUILD BLOCKED** | COMPLETE \| BLOCKED |
-| `/test` | test-only commits | **VERIFY PASS** \| **VERIFY FAIL** \| **VERIFY BLOCKED** | PASS \| FAIL \| BLOCKED |
-| `/review` | the review SARIF under `<git-common-dir>/review/` | count line, or **REVIEW BLOCKED** | CLEAN \| FINDINGS \| BLOCKED |
-| `/ship` | — (a decision only) | **GO** \| **NO-GO** \| **SHIP BLOCKED** | GO \| NO-GO \| BLOCKED |
-| `/explain` | one HTML page under `<git-common-dir>/explain/` | — (not a gate) | none |
+| Command | Artifact | Terminal states |
+|---|---|---|
+| `/spec` | `docs/specs/[TICKET]-SPEC.md` (a multi-capability initiative adds a `## Capability Map` section, not files) | Draft \| Needs reapproval \| Approved |
+| `/plan` | `docs/tasks/[TICKET]-plan.md` / `-todo.md`, or a bounded `SPEC CONFLICT` | Draft \| Needs replan \| Approved, Ready for `/build` |
+| `/build` | scoped local commits | **BUILD COMPLETE** \| **BUILD BLOCKED** |
+| `/test` | test-only commits | **VERIFY PASS** \| **VERIFY FAIL** \| **VERIFY BLOCKED** |
+| `/review` | the review SARIF under `<git-common-dir>/review/` | count line, or **REVIEW BLOCKED** |
+| `/ship` | — (a decision only) | **GO** \| **NO-GO** \| **SHIP BLOCKED** |
+| `/explain` | one HTML page under `<git-common-dir>/explain/` | — (not a gate) |
 
 ### `/build` → BUILD COMPLETE / BUILD BLOCKED
 
@@ -521,10 +521,6 @@ protected-branch mutation, or history rewriting.** `/ship` sets an open
 item's disposition only from a recorded owner decision, and quotes it. After
 the verdict it asks one multi-select question: send selected ADVISORY
 findings to `/build`, post the summary to Jira. Nothing runs unselected.
-Unattended (`tools/run/ticket.py`) nobody can be asked: the report lists the
-ADVISORY fixes, the open items go to the owner as numbered options with
-`route=owner decide=<n>` on the handoff line, and `/ship` runs again with the
-answer; GO and NO-GO are final and `ticket.py` posts them to Slack and Jira.
 
 ## 6. Operator tools
 

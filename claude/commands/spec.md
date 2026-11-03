@@ -42,8 +42,7 @@ conflict, or a feature the design drops. When an intake Blocker or an
 The brief holds the questions only, in the skill's question shape, on about
 one page. Number them Q1, Q2, … and end with the `decisions:` line from
 §Approval state. Draft requirements only after the owner answers. All other
-spec content, checks and gates stay as written. Unattended runs skip the brief
-and follow §Unattended.
+spec content, checks and gates stay as written.
 
 ## Repository evidence
 
@@ -70,7 +69,7 @@ checks in `../references/spec-quality-gates.md`. A draft may expose questions
 for discussion, but must not be presented as ready for approval while unresolved.
 
 In this conversation, decide some questions by default. Use the risk and
-recommendation rules in §Unattended.
+recommendation rules in §Deciding by default.
 
 - Low risk: decide it with the recommended option.
 - Low or Medium, and the ticket text or repository precedent already settles
@@ -81,7 +80,7 @@ recommendation rules in §Unattended.
   `OPEN QUESTION` blocks.
 - List each default in the report, one line each, under
   `Defaults taken (override by id)`, before the approval request. An override
-  rewrites that `DEC-###` as §Unattended's last paragraph describes.
+  rewrites that `DEC-###` as §Deciding by default's last paragraph describes.
 
 ## Approval state
 
@@ -129,10 +128,7 @@ context stops every planning request from re-reading this stage's conversation
 (ADR 0084). Preserve the durable handoff described by the skill so `/plan`
 works without the conversation transcript.
 
-## Unattended (ADR 0115)
-
-`/spec <TICKET> unattended` runs with nobody in the conversation.
-`tools/run/ticket.py` starts it and carries the questions to the owner.
+## Deciding by default
 
 - Write each choice that needs an `OPEN QUESTION` in the skill's format. Mark
   the option you recommend `(recommended)`. Add a line `Risk: High`,
@@ -142,10 +138,6 @@ works without the conversation transcript.
   (`../references/repository-precedent.md`). Next, the option that keeps
   existing behavior and data and can be undone. Last, the smaller change.
   Name the reason after `(recommended)`.
-- Low or Medium: decide it with the recommended option. Record a `DEC-###`
-  under Material Decisions with the alternative that lost and the line
-  `Decided by: default (unattended, ADR 0115)`. Remove the block.
-- High: keep the block. The owner answers it.
 - The owner already answered it for this ticket, in an earlier or archived
   spec (`Decided by: owner`, or an Approved spec): reuse that answer as a
   `DEC-###` with `Decided by: owner, <date>, <source>`. That answer is the
@@ -156,11 +148,7 @@ works without the conversation transcript.
   back the wording they replaced.
 - A question only the owner can answer, such as domain history, is an
   `OPEN QUESTION` too, with its risk.
-- Do not ask in the chat, and never set Approved.
 
-A later `/spec <TICKET> decisions: …` from `ticket.py` records each answer as
-a `DEC-###` decided by the owner. When it names a default the owner changes
-("the owner decides instead of the default: …"), rewrite that `DEC-###` with
-the owner's choice, the default as the alternative that lost, and
-`Decided by: owner`. `ticket.py` sets Approved only when the owner's own
-reply names the ticket. That reply is the explicit human approval.
+When the owner changes a default ("the owner decides instead of the default:
+…"), rewrite that `DEC-###` with the owner's choice, the default as the
+alternative that lost, and `Decided by: owner`.

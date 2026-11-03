@@ -120,8 +120,8 @@ echo "==> Structurizr MCP server (user scope, all projects)"
 add_server structurizr --transport http https://mcp.structurizr.com/mcp --scope user
 
 echo "==> Chrome DevTools MCP server (user scope, all projects)"
-# Real-browser checks for test-engineer, the only persona whose `tools:` grants
-# mcp__chrome-devtools__* (docs/adr/0070). Executors never get it. Local stdio
+# Real-browser checks for test-engineer and its figma- copy, the only personas
+# whose `tools:` grant mcp__chrome-devtools__* (docs/adr/0070). Executors never get it. Local stdio
 # server, no auth. --isolated gives each run a throwaway Chrome profile, so no
 # cookies or saved logins reach the agent. Pinned: `@latest` would run whatever
 # npm serves that day with full access to the machine (supply-chain.md).

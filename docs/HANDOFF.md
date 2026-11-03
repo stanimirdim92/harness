@@ -1,5 +1,8 @@
 # Handoff — the ticket runner, 2026-10-19 to 2026-10-20
 
+> 2026-11-03: the runners this file describes are removed (ADR 0119). Read it
+> as history.
+
 The state at the end of one long session, so the next one can start cold.
 Replace this file at the next handoff; git keeps the old ones. The previous
 handoff (2026-10-07 to 10-18) is in git history; its still-open items are

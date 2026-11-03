@@ -28,7 +28,7 @@ transcript="$(jq -r '.agent_transcript_path // .transcript_path // empty' <<<"$i
 key="$(jq -r '.agent_id // .session_id // empty' <<<"$input" 2>/dev/null)"
 
 case "$agent" in
-  executor|test-engineer) ;;
+  executor|test-engineer|figma-executor|figma-test-engineer) ;;
   *) exit 0 ;;
 esac
 [ -n "$key" ] || key="$(printf '%s' "$transcript" | cksum | cut -d' ' -f1)"

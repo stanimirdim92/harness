@@ -103,7 +103,7 @@ Shape the questions before asking them:
   design / drop the AC".
 - Mark exactly one option `(recommended)`, High-risk questions included. Name
   the reason after it. Rank and tier options as `../../commands/spec.md`
-  §Unattended says.
+  §Deciding by default says.
 - `../../commands/spec.md` says which questions a run decides by default and
   when a decision brief comes before the draft.
 

@@ -36,7 +36,7 @@ SETTINGS = CLAUDE / 'settings.json'
 # Personas that may write. They keep Bash; the hooks are what bound them, and
 # 0058 keeps verifier isolation structural and makes concurrent executor
 # isolation an explicit dispatch choice; sequential executors reuse the ticket.
-WRITERS = {'executor', 'test-engineer'}
+WRITERS = {'executor', 'test-engineer', 'figma-executor', 'figma-test-engineer'}
 WRITER_HOOKS = ('block-agent-push.sh', 'require-commit-trailers.sh', 'require-handoff-report.sh')
 
 # Models are tiered by role (0056), and pinned rather than floating for the
@@ -51,7 +51,14 @@ SESSION_MODELS = (OPUS, 'opus[1m]')
 
 REVIEWERS = {'code-reviewer', 'blind-reviewer', 'security-auditor',
              'distributed-systems-reviewer'}
-SONNET_PERSONAS = {'repo-recon', 'executor', 'test-engineer'}
+SONNET_PERSONAS = {'repo-recon', 'executor', 'test-engineer', 'figma-executor', 'figma-test-engineer'}
+
+# A subagent has no tool search, so every MCP tool its `tools:` grants loads in
+# full on every call: Figma's are about 37k tokens. Only a figma-* copy grants
+# them, and /build and /test pick it when the task links a Figma design. Each
+# copy is its base persona plus the Figma tools, nothing else (adr/0118).
+FIGMA_VARIANTS = {'figma-executor': 'executor', 'figma-test-engineer': 'test-engineer'}
+FIGMA_TOOLS = 'mcp__figma__*'
 REVIEWER_EFFORT = 'high'
 CREDENTIAL_FILES = {'~/.ssh', '~/.aws', '~/.config/gh', '~/.git-credentials'}
 PUBLISH_ASK = {'Bash(git push:*)', 'Bash(gh pr create:*)', 'Bash(gh pr merge:*)', 'Bash(gh release:*)'}
@@ -138,20 +145,42 @@ def check_agent(name, text):
     if name in READ_ONLY and not scalar(block, 'maxTurns'):
         problems.append(f'{name}: no maxTurns -- read-only personas are capped (adr/0055)')
 
+    base = FIGMA_VARIANTS.get(name, name)
+    if name in FIGMA_VARIANTS.values() and any(t.startswith('mcp__figma') for t in tools or []):
+        problems.append(f'{name}: grants Figma tools -- they load in full on every call; only figma-{name} grants them (adr/0118)')
+
     if name in WRITERS:
         for hook in WRITER_HOOKS:
             if hook not in block:
                 problems.append(f'{name}: frontmatter does not reference {hook} -- the gate is not attached (adr/0055)')
-        if name == 'test-engineer' and scalar(block, 'isolation') != 'worktree':
+        if base == 'test-engineer' and scalar(block, 'isolation') != 'worktree':
             problems.append(f'{name}: no `isolation: worktree` -- verifier checkout isolation is required (adr/0058)')
         browser = any(t.startswith('mcp__chrome-devtools') for t in tools or [])
-        if name == 'test-engineer' and not browser:
+        if base == 'test-engineer' and not browser:
             problems.append(f'{name}: no mcp__chrome-devtools__* -- real-browser checks route here (adr/0070)')
-        if name == 'executor' and browser:
+        if base == 'executor' and browser:
             problems.append(f'{name}: grants browser tools -- browser checks belong to test-engineer (adr/0070)')
-        if name == 'executor' and scalar(block, 'isolation') is not None:
+        if base == 'executor' and scalar(block, 'isolation') is not None:
             problems.append(f'{name}: isolation belongs to concurrent dispatch; sequential executors inherit the ticket checkout (adr/0058)')
 
+    return problems
+
+
+def check_variant(name, text, base_text):
+    """Violations for a figma-* copy against its base persona: the same body
+    and the same frontmatter except name, description and the Figma tools."""
+    problems = []
+    block, base_block = frontmatter(text), frontmatter(base_text)
+    if block is None or base_block is None:
+        return [f'{name}: frontmatter missing in the variant or its base']
+    tools, base_tools = tool_list(block) or [], tool_list(base_block) or []
+    if tools != base_tools + [FIGMA_TOOLS]:
+        problems.append(f'{name}: tools must be the base persona\'s tools plus {FIGMA_TOOLS} (adr/0118)')
+    rest = lambda b: [l for l in b.splitlines() if not re.match(r'(name|description|tools):', l)]
+    if rest(block) != rest(base_block):
+        problems.append(f'{name}: frontmatter differs from {FIGMA_VARIANTS[name]} beyond name, description and tools (adr/0118)')
+    if text.split('\n---\n', 1)[1] != base_text.split('\n---\n', 1)[1]:
+        problems.append(f'{name}: body differs from {FIGMA_VARIANTS[name]}.md -- edit both, or copy the base body (adr/0118)')
     return problems
 
 
@@ -219,6 +248,9 @@ def main():
 
     for path in sorted(AGENTS.glob('*.md')):
         found = check_agent(path.stem, path.read_text())
+        if path.stem in FIGMA_VARIANTS:
+            found += check_variant(path.stem, path.read_text(),
+                                   (AGENTS / f'{FIGMA_VARIANTS[path.stem]}.md').read_text())
         checked += 1
         print(f'  {"FAIL" if found else "ok  "} {path.relative_to(ROOT)}')
         problems += found

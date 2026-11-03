@@ -88,6 +88,7 @@ Harness:
 - — Overnight agent fixes: part of the batched-pipeline proposal, not built.
   MY_NOTE: I need suggestions and examples to understand this.
   > Done: ADR 0108. `/build <TICKET> review fixes` and `tools/run/batch-fix.py`.
+  > Changed: ADR 0119 removed `batch-fix.py`. `/build <TICKET> review fixes` stays.
 
 ## 3. Security review that can block
 

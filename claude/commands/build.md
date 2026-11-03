@@ -96,6 +96,11 @@ Use **one executor per workstream, not one per task**.
 - among dependency-ready tasks, dispatch those with no checkpoint dependency
   before checkpoint-gated ones.
 
+A task whose spec or task packet links a Figma design gets `figma-executor`
+in place of `executor`, fresh or resumed. Every other task gets `executor`.
+The two share one body and one set of gates. Only the Figma copy loads the
+Figma tools, about 37k tokens on every call (ADR 0118).
+
 A resume after the cache expired rewrites the whole context at full price. A
 large context also slows and degrades the executor. (LD-507: one executor grew
 from 79k to 344k tokens and was resumed after 62 minutes idle.)
@@ -364,11 +369,6 @@ Both reports include:
 
 Never estimate unavailable token/cost/time data.
 
-End the report with the handoff line of `../references/stage-handoff.md`:
-`HANDOFF: result=COMPLETE|BLOCKED route=… ids=… decide=…`. `route` is
-`none` for a complete build, `/test` when tasks are handed on, `/spec`,
-`/plan` or `owner` for a blocker. The runner reads only this line.
-
 Do not dispatch independent verifiers or reviewers here. The next stage is
 `/review`; `/review` decides whether the separate `/test` gate is required for
 this candidate.
@@ -376,8 +376,7 @@ this candidate.
 ## Review fixes
 
 `/build <TICKET> review fixes` fixes what the last `/review` found, instead of
-planned tasks (ADR 0108). It is how a finding goes back to `/build`, by hand
-or overnight (`tools/run/batch-fix.py`).
+planned tasks (ADR 0108). It is how a finding goes back to `/build`.
 The plan checks in §1 still apply; task resume does not.
 
 1. Read the newest review SARIF for the ticket
@@ -394,8 +393,8 @@ The plan checks in §1 still apply; task resume does not.
    carries, for each finding: id, `file:line`, claim, failure scenario and
    recommendation. A class finding lists every instance. It also carries the
    workstream's previous handoff report and the candidate diff (`git diff
-   <candidate base>...HEAD`). When this session has no handoff report (an
-   overnight run), pass the ticket's commit log instead.
+   <candidate base>...HEAD`). When this session has no handoff report, pass
+   the ticket's commit log instead.
 4. The executor fixes test-first: a test that fails on the finding, then the
    fix (Prove-It). If the code is already right, it changes nothing and
    reports the finding as disputed, with `file:line` evidence; the next
@@ -408,16 +407,15 @@ The plan checks in §1 still apply; task resume does not.
 ## Verify fixes
 
 `/build <TICKET> verify fixes` fixes the production defects the last `/test`
-proved, instead of planned tasks. `tools/run/pipeline.py` sends it after a
-**VERIFY FAIL** routed to `/build`, with the VERIFY report supplied verbatim;
-by hand, paste that report. The plan checks in §1 still apply; task resume
+proved, instead of planned tasks. Use it after a **VERIFY FAIL** routed to
+`/build`, with the VERIFY report pasted verbatim. The plan checks in §1 still apply; task resume
 does not.
 
 1. The scope is each `REQ-###` the VERIFY FAIL names, with its reproduction:
    expected versus actual, the failing test, or the patch artifact the
    verifier preserved. Nothing else: no plan task, no refactor, no review
    finding. A defect whose fix needs a behavior the spec does not settle is
-   not fixed here: report **BUILD BLOCKED** with `route=/spec` and the REQ id.
+   not fixed here: report **BUILD BLOCKED**, naming `/spec` and the REQ id.
 2. Group the defects that touch the same files into one workstream. Dispatch
    a fresh executor per workstream; never resume a build executor. Its packet
    carries, per defect: the REQ id, the reproduction, expected versus actual
@@ -429,8 +427,7 @@ does not.
    trailer naming the REQ ids (`Task: REQ-017`) and the `Refs:` trailer. The
    plan and todo do not change.
 4. Report **BUILD COMPLETE** with one line per defect: fixed (commit) or
-   blocked (why), and end with `HANDOFF: result=COMPLETE route=none
-   ids=<REQ ids> decide=0`. The next stage is `/test` again, on the new
+   blocked (why). The next stage is `/test` again, on the new
    candidate, at the depth of the failed run or higher.
 
 ## 4. Work outside `/build`

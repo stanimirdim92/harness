@@ -75,21 +75,9 @@ Give each one a recommended default, so one approval answers them all.
 Record each answer as a `TD-###` in the same edit that records approval.
 An answer that changes task scope, a dependency or a verification command is
 a material change (`../references/plan-quality-gates.md` §1). A stop condition
-the owner does not pre-authorize stays a stop. Under `tools/run/ticket.py`
-(unattended, ADR 0115) each pre-authorization takes its recommended default,
-recorded as a `TD-###` with "decided by default (unattended, ADR 0115)" and
-listed under `Pre-authorizations taken` in the report; the owner overrides
-one with a `TICKET NOTE` in the ticket's thread.
+the owner does not pre-authorize stays a stop.
 
-Only explicit human approval permits Approved and Ready for /build. One
-exception: `tools/run/ticket.py` approves a plan for a spec the owner approved
-when `check-plan.py` passes and the plan has no `SPEC CONFLICT` and no
-`OPEN QUESTION` (ADR 0115). Any other plan waits for a person. End the
-report with the handoff line of `../references/stage-handoff.md`:
-`HANDOFF: result=COMPLETE route=none ids=- decide=0` for a clean plan,
-`result=BLOCKED route=/spec ids=<REQ ids> decide=<n>` for a `SPEC
-CONFLICT`, `result=BLOCKED route=owner` for a plan that waits for a
-person. The runner reads only this line. After
+Only explicit human approval permits Approved and Ready for /build. After
 approval, commit the plan and todo in one scoped commit. Stage only those two
 files. End the message with the `Refs: <TICKET>` trailer
 (`git-workflow-and-versioning` §Ticket trailers). Then stop and recommend

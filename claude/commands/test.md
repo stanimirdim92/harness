@@ -21,7 +21,7 @@ Resolve the target per `../references/target-selection.md`, and announce it ("Us
 Read the selected spec/plan and authoritative task packets from disk or the
 plan's designated tracker. Require BUILD's complete message from one of the
 valid sources in `../references/target-selection.md` §Gate handoffs. A fresh
-session is valid when the user or `pipeline.py` supplies that message. Check every
+session is valid when the user supplies that message. Check every
 identity claim against git and available run evidence, not just its completion
 label.
 
@@ -82,7 +82,8 @@ When a required browser capability is unavailable, return `VERIFY BLOCKED` for
 that check; component tests cannot replace browser evidence.
 
 When an in-scope claim is "matches the Figma design", also select
-`figma-design-to-code`. The verifier follows its Verification section: the
+`figma-design-to-code`, and dispatch `figma-test-engineer` in place of
+`test-engineer`. Only it holds the Figma tools (ADR 0118). The verifier follows its Verification section: the
 Figma screenshot of each linked node is the target, the rendered screen is
 captured through Chrome DevTools, and every visible asset and its geometry is
 compared. A mismatch is a `VERIFY FAIL` with both screenshots named; a
@@ -163,12 +164,7 @@ Do not turn `/test` into a second implementation path.
 
 ## 4. Result
 
-Return exactly one result, and end the report with the handoff line of
-`../references/stage-handoff.md`: `HANDOFF: result=PASS|FAIL|BLOCKED
-route=… ids=… decide=…`. `route` is `none` on PASS, `/build` on FAIL (a
-spec question in the same report goes in `ids` and `decide`), `/spec` when
-the only finding is a spec decision, `owner` when BLOCKED needs a person.
-The runner reads only this line.
+Return exactly one result.
 
 ### VERIFY PASS
 

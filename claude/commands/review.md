@@ -61,9 +61,8 @@ Evaluate the candidate against
   every changed condition (`../references/risk-tiers.md`). Record
   **Independent verification: STALE (depth)**.
 - If required verification is missing or stale, return **REVIEW BLOCKED** with
-  `/test` as the next step: `HANDOFF: result=BLOCKED route=/test ids=-
-  decide=0`. Under `tools/run/pipeline.py` the verifier then runs with this
-  report, at the depth it names, and the review repeats.
+  `/test` as the next step, at the depth it names. The review repeats after
+  that verification.
 
 Do not re-run `/test` inline and do not duplicate the exemption list here.
 
@@ -176,20 +175,11 @@ REQUIRED or ADVISORY, as defined in
 `../references/component-response-contracts.md` §Dispositions. Report it
 unchanged; change one only with a stated reason.
 
-End the report with the handoff line of `../references/stage-handoff.md`:
-`HANDOFF: result=CLEAN|FINDINGS|BLOCKED route=… ids=… decide=…`. `route`
-is `none` when clean (`CLEAN`: no BLOCKER and no REQUIRED remains, whatever
-the ADVISORY count), `/build` while BLOCKER or REQUIRED findings remain
-(their ids in `ids`), `/test` when browser checks remain and no BLOCKER or
-REQUIRED does (below), `owner` when a person must decide. The runner reads
-only this line.
-
 A finding that asks for a check in a browser goes to the verifier, not to the
 owner. List it with the page, the steps and what to look for, so `/test` can
 run it before `/ship`. The finding keeps its disposition until that evidence
-exists; `route=/test` carries it, and under `tools/run/pipeline.py` the
-verifier runs with this report and the review repeats on the same
-candidate, once. Only when the verifier cannot run the check (no browser tool, no
+exists. The next step is `/test` with this report, and the review repeats on
+the same candidate, once. Only when the verifier cannot run the check (no browser tool, no
 running app) does it go to the owner, as before.
 
 `blind-reviewer` also returns two things no other reviewer produces, and both

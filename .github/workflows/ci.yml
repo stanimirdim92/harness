@@ -198,18 +198,6 @@ jobs:
       - name: JUnit baseline diff
         run: python3 tools/tests/test-junit-diff.py
 
-      # The overnight fixer: round cap, moved candidate, nothing open (adr/0108).
-      - name: Batch fix runner
-        run: python3 tools/tests/test-batch-fix.py
-
-      # The stage runner: fresh session per stage, verbatim handoffs, stops (adr/0114).
-      - name: Pipeline runner
-        run: python3 tools/tests/test-pipeline.py
-
-      # The ticket runner: High-risk questions wait, the owner's reply approves, a clean plan goes on (adr/0115).
-      - name: Ticket runner
-        run: python3 tools/tests/test-ticket.py
-
       # The sessions dashboard: the copied resume command and the HTTP guard.
       - name: Agent sessions dashboard
         run: python3 tools/tests/test-agent-sessions-mcp.py

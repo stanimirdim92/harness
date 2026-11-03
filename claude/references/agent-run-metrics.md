@@ -40,6 +40,15 @@ orchestrator took into context where a bounded check or a `repo-recon`
 dispatch should have kept them out. It is measured from the result text in
 the transcript, never from the file on disk.
 
+The PER AGENT section gives one row per transcript: role and task (from the
+subagent's `.meta.json`), model, replies, first and largest context, cache
+read and write, and output. Every reply re-reads the whole context. So the
+first context is a fixed cost paid on every reply: tool definitions, preloaded
+skills and instruction files. Cache read is the volume, replies times context.
+Subagents have no tool search, so every tool the persona's `tools:` grants
+loads in full. On LD-521, reviewers started at about 23k tokens, executors at
+about 81k and verifiers at about 87k.
+
 **Counting tool batching correctly.** Parallel tool calls are written as
 separate assistant records that share one `requestId`. Counting calls per record
 reports a mean of 1.0 and zero batching no matter what actually happened — group

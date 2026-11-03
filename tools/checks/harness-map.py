@@ -13,7 +13,7 @@ authoritative. Every fact on the page now comes from a file that owns it:
     references    claude/references/**.md first heading
     skills        claude/skills/*/SKILL.md + Codex openai.yaml policy
     self-tests    .github/workflows/ci.yml steps and their comments
-    runners       tools/run/*.py docstrings and HARNESS_* reads
+    run tools     tools/run/* header comments
     records       docs/adr/*.md
 
 The output is deterministic: no timestamps, no commit ids, sorted inputs.
@@ -73,39 +73,6 @@ STAGE_OUTPUT = {
 }
 INTAKE_SKILL = 'jira-ticket'
 RUN = ROOT / 'tools/run'
-# The owner's switches on an unattended run (ticket.py): what to write, where, and what it does. Each
-# needle must still be in ticket.py, or the page fails to build.
-SWITCHES = [
-    ('TICKET ANSWERS: 1A ok', 'Slack, the question thread',
-     'answers the open questions; ok, go or the ticket id approves the spec', 'TICKET ANSWERS:'),
-    ('D1: what you want instead', 'the same reply, last',
-     'changes a default the runner took; /spec rewrites that DEC as yours', 'changes a default'),
-    ('TICKET ANSWERS: B1=2', 'the same thread', 'answers a numbered decision a stage asked you (B1, B2 …)', 'TICKET ANSWERS: {key}='),
-    ('a question with ?', 'the same thread', 'gets an answer from the spec, in the thread', "'?' in str(r.get('text'"),
-    ('TICKET STOP', 'the run thread', 'nothing new starts after the current stage', 'TICKET STOP'),
-    ('TICKET NOTE: …', 'the run thread', "goes into the next stage's prompt", 'TICKET NOTE:'),
-    ('status Done, Rejected, Blocked …', 'Jira', 'stops before the next stage (HARNESS_JIRA_STOP)', 'HARNESS_JIRA_STOP'),
-    ('label harness-run', 'Jira', 'on: --watch starts a run; off: that run stops before its next stage',
-     'label {label} removed'),
-]
-# What each HARNESS_* variable means. Every HARNESS_* read in tools/run must be here, and
-# every name here must still be read, or the page fails to build. Defaults are read from the code.
-ENV = {
-    'HARNESS_SLACK_CHANNEL': 'the Slack channel questions and results go to; with HARNESS_SLACK_OWNER, Slack is on',
-    'HARNESS_SLACK_OWNER': 'whose thread replies count (email)',
-    'HARNESS_SLACK_MENTION': 'your Slack user id: top-level messages @-mention you; also identifies your replies',
-    'HARNESS_SLACK_MODEL': 'the model for Slack and Jira reads and posts',
-    'HARNESS_ALLOWED_TOOLS': 'replaces the read-only Jira, Confluence and Figma tools a stage may use',
-    'HARNESS_RETRIES': 'attempts per stage on a passing failure (rate limit, network, crash, stall)',
-    'HARNESS_STALL_MIN': 'minutes without an event before a stage is killed and retried; 0 never',
-    'HARNESS_HEARTBEAT_S': 'seconds between the sign-of-life lines while a stage runs (time, events, last tool); 0 none',
-    'HARNESS_JIRA_STOP': 'statuses that stop the run before its next stage, besides any Done status; 0 turns the check off',
-    'HARNESS_JIRA_WRITE': '0 keeps Jira read-only: no status moves, no comments',
-    'HARNESS_JIRA_START': 'where a run moves the ticket when it starts',
-    'HARNESS_JIRA_REVIEW': 'where a GO moves it; the first its workflow offers',
-    'HARNESS_LABEL': 'the Jira label a run obeys: gone, the run stops (--watch sets it for its children)',
-    'HARNESS_INBOX': 'internal: the file ticket.py writes between pipeline.py stages with your STOP or NOTE',
-}
 
 
 def stage_name(name):
@@ -623,31 +590,6 @@ def runners():
     return rows
 
 
-def switches():
-    source = read(RUN / 'ticket.py')
-    missing = [needle for *_, needle in SWITCHES if needle not in source]
-    if missing:
-        raise SystemExit('harness-map: owner switches no longer found in ticket.py:\n  ' + '\n  '.join(missing))
-    return SWITCHES
-
-
-def env_vars():
-    """[(name, default, meaning, scripts)] for every HARNESS_* variable the runners read."""
-    sources = {p.name: read(p) for p in RUN.glob('*.py')}
-    joined = '\n'.join(sources.values())
-    names = sorted(set(re.findall(r'HARNESS_[A-Z_]+', joined)))
-    unknown = [n for n in names if n not in ENV] + [n for n in ENV if n not in names]
-    if unknown:
-        raise SystemExit('harness-map: HARNESS_* variables not described in ENV, or no longer read: ' + ', '.join(unknown))
-    consts = dict(re.findall(r"^([A-Z_]+) = '([^']*)'", joined, re.M))
-    rows = []
-    for name in names:
-        m = re.search(rf"environ\.get\('{name}',\s*(?:'([^']*)'|([A-Z_]+))\)", joined)
-        default = (m.group(1) if m.group(1) is not None else consts.get(m.group(2), m.group(2))) if m else ''
-        rows.append((name, default, ENV[name], sorted(n for n, t in sources.items() if name in t)))
-    return rows
-
-
 def adrs():
     rows = []
     for path in sorted((ROOT / 'docs/adr').glob('[0-9][0-9][0-9][0-9]-*.md')):
@@ -971,9 +913,9 @@ def render():
     ids = id_table()
     conv = conventions()
     loops()
-    runner_rows, switch_rows, env_rows = runners(), switches(), env_vars()
+    runner_rows = runners()
     sections = [('pipeline', 'Pipeline', len([n for n in PIPELINE if n in cmds])),
-                ('runners', 'Runners', len(runner_rows)),
+                ('runners', 'Run tools', len(runner_rows)),
                 ('personas', 'Personas', len(persona_rows)), ('guards', 'Guards', len(hook_rows)),
                 ('conventions', 'Conventions', len(ids) + len(conv)),
                 ('session', 'Session setup', len(rules)), ('skills', 'Skills', len(skill_rows)),
@@ -1034,32 +976,16 @@ def render():
         out.append(f'<p class="note">Outside the pipeline: <code>/{e(name)}</code> — {e(cmds[name]["description"])}.</p>')
     out.append('</section>')
 
-    # Runners
-    out.append(f'<section id="runners"><div class="sec-head"><h2>Runners</h2>'
-               f'<p class="summary">{len(runner_rows)} scripts in <code>tools/run</code> drive the pipeline '
-               'without you at the keyboard. <code>ticket.py</code> takes one ticket from Jira to <code>/ship</code> and '
-               'stops for you only where the risk needs it (ADR 0115); it commits and never pushes. '
-               'A stage that hits a rate limit, a dropped connection or a stall is retried on the same session; '
-               'one run per ticket, and a run goes on from where the last one stopped.</p></div>'
+    # Run tools
+    out.append(f'<section id="runners"><div class="sec-head"><h2>Run tools</h2>'
+               f'<p class="summary">{len(runner_rows)} script(s) in <code>tools/run</code> that you run by hand '
+               'during ticket work. The pipeline works without them.</p></div>'
                '<div class="panel tablewrap"><table><thead><tr><th>Script</th><th>Exit codes</th><th>Tested by</th>'
                '</tr></thead><tbody>')
     for name, what, exits, tested in runner_rows:
         out.append(f'<tr><td><code>{e(name)}</code><span class="sub">{e(what)}</span></td><td>{e(exits)}</td>'
-                   f'<td class="tested">{"<br>".join(e(t) for t in tested) or "—"}</td></tr>')
-    out.append('</tbody></table></div>'
-               '<div class="panel tablewrap"><div class="panel-title">Your switches on a run</div><table><thead><tr>'
-               '<th>You write</th><th>Where</th><th>Effect</th></tr></thead><tbody>')
-    for what, where, effect, _ in switch_rows:
-        out.append(f'<tr><td class="cmdcell">{e(what)}</td><td>{e(where)}</td><td>{e(effect)}</td></tr>')
-    out.append('</tbody></table></div><div class="panel tablewrap"><div class="panel-title">Environment · HARNESS_*</div>'
-               '<table><thead><tr><th>Variable</th><th>Default</th><th>Means</th></tr></thead><tbody>')
-    for name, default, meaning, used in env_rows:
-        out.append(f'<tr><td class="cmdcell">{e(name.replace("HARNESS_", ""))}<span class="sub">{e(", ".join(used))}</span></td>'
-                   f'<td class="cmdcell">{e(default) if default else "—"}</td><td>{e(meaning)}</td></tr>')
-    out.append('</tbody></table></div>'
-               '<p class="note">The values themselves (channel, owner, Slack id) live in your shell profile, not in this '
-               'repository. Slack and Jira are reached through <code>claude -p</code> and your connectors, so the runners '
-               'keep no token.</p></section>')
+               f'<td class="tested">{"<br>".join(e(t) for t in tested) or "—"}</td></tr>')
+    out.append('</tbody></table></div></section>')
 
     # Personas
     ordered = sorted(persona_rows, key=lambda p: (not p['writer'], p['name']))

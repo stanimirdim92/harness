@@ -34,8 +34,8 @@ class ContractsDoc(unittest.TestCase):
     def test_the_counts_in_the_prose_match(self):
         self.assertEqual(len(list((CLAUDE / 'hooks').glob('*.sh'))), 10)
         self.assertIn('Ten files live in `../hooks/`', DOC)
-        self.assertEqual(len(list((CLAUDE / 'agents').glob('*.md'))), 7)
-        self.assertIn('Seven personas live in', DOC)
+        self.assertEqual(len(list((CLAUDE / 'agents').glob('*.md'))), 9)
+        self.assertIn('Nine personas live in', DOC)
         self.assertEqual(len(list((CLAUDE / 'commands').glob('*.md'))), 7)
         self.assertIn('Seven commands live in', DOC)
 

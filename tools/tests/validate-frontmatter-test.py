@@ -238,5 +238,46 @@ class DenyCases(unittest.TestCase):
         self.assertTrue(any('block-destructive-bash.sh' in p for p in problems))
 
 
+FIGMA_EXECUTOR = (EXECUTOR.replace('name: executor', 'name: figma-executor')
+                  .replace('Implements one planned task end-to-end.', 'executor for a task that links a Figma design.')
+                  .replace('Glob, Skill', 'Glob, Skill, mcp__figma__*'))
+
+
+class FigmaVariants(unittest.TestCase):
+    """ADR 0118: Figma tools load in full in every subagent call, so only the
+    figma-* copies grant them, and each copy must stay its base persona."""
+
+    def test_base_persona_must_not_grant_figma(self):
+        body = EXECUTOR.replace('Glob, Skill', 'Glob, Skill, mcp__figma__*')
+        problems = vf.check_agent('executor', agent('executor', body))
+        self.assertTrue(any('figma-executor' in p for p in problems))
+
+    def test_variant_shape_passes(self):
+        self.assertEqual(vf.check_agent('figma-executor', agent('figma-executor', FIGMA_EXECUTOR)), [])
+        self.assertEqual(vf.check_variant('figma-executor', agent('figma-executor', FIGMA_EXECUTOR),
+                                          agent('executor', EXECUTOR)), [])
+
+    def test_variant_must_grant_figma(self):
+        body = FIGMA_EXECUTOR.replace(', mcp__figma__*', '')
+        problems = vf.check_variant('figma-executor', agent('figma-executor', body), agent('executor', EXECUTOR))
+        self.assertTrue(any('mcp__figma__*' in p for p in problems))
+
+    def test_variant_body_drift(self):
+        variant = agent('figma-executor', FIGMA_EXECUTOR).replace('Body text.', 'Edited body.')
+        problems = vf.check_variant('figma-executor', variant, agent('executor', EXECUTOR))
+        self.assertTrue(any('body differs' in p for p in problems))
+
+    def test_variant_frontmatter_drift(self):
+        body = FIGMA_EXECUTOR.replace('require-commit-trailers.sh', 'nothing.sh')
+        problems = vf.check_variant('figma-executor', agent('figma-executor', body), agent('executor', EXECUTOR))
+        self.assertTrue(any('frontmatter differs' in p for p in problems))
+
+    def test_verifier_variant_keeps_verifier_rules(self):
+        body = (FIGMA_EXECUTOR.replace('name: figma-executor', 'name: figma-test-engineer')
+                .replace('mcp__figma__*', 'mcp__chrome-devtools__*, mcp__figma__*'))
+        problems = vf.check_agent('figma-test-engineer', agent('figma-test-engineer', body))
+        self.assertTrue(any('isolation: worktree' in p for p in problems))
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=1)

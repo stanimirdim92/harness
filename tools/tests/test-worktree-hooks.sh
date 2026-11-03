@@ -129,6 +129,8 @@ check_quiet  worktree_with_own_commits   "$TMP/wt-LD-1"
 # ------------------------------------------- require-worktree-for-writers
 check writer_on_main_blocked          deny  "$(block_rc "$TMP/main-checkout" executor)"
 check tester_on_main_blocked          deny  "$(block_rc "$TMP/main-checkout" test-engineer)"
+check figma_writer_on_main_blocked    deny  "$(block_rc "$TMP/main-checkout" figma-executor)"
+check figma_tester_on_main_blocked    deny  "$(block_rc "$TMP/main-checkout" figma-test-engineer)"
 check writer_via_task_blocked         deny  "$(block_rc_task "$TMP/main-checkout" executor)"
 check writer_in_worktree_allowed      allow "$(block_rc "$TMP/wt-LD-1" executor)"
 check tester_in_worktree_allowed      allow "$(block_rc "$TMP/wt-LD-1" test-engineer)"

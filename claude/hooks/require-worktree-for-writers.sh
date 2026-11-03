@@ -58,7 +58,7 @@ agent="${parsed%%$'\n'*}"
 rest="${parsed#*$'\n'}"
 cwd="${rest%$'\n'*}"
 case "$agent" in
-  executor|test-engineer) ;;
+  executor|test-engineer|figma-executor|figma-test-engineer) ;;
   *) exit 0 ;;
 esac
 

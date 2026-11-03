@@ -26,10 +26,7 @@ the user can't see.
 when either:
 
 - the complete message appears in the current conversation;
-- in a new conversation, the user manually supplies the complete message; or
-- `tools/run/pipeline.py`, started by the user, supplies the complete message
-  verbatim in this session's prompt, from the previous stage's result
-  (docs/adr/0114).
+- in a new conversation, the user manually supplies the complete message.
 
 Do not substitute a saved report, memory, agent summary, or a model's claim that
 the earlier stage completed. Reconcile the supplied message against git before

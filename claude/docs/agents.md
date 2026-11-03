@@ -10,6 +10,7 @@ and gates. Personas never dispatch other personas.
 | `repo-recon` | read-only repository survey | `/spec` and `/plan`, before specifying or planning |
 | `executor` | implementation | `/build`, one resumable instance per workstream |
 | `test-engineer` | independent verification | `/test` on every production change |
+| `figma-executor`, `figma-test-engineer` | the same two personas plus the Figma tools | `/build` and `/test` when the task links a Figma design (ADR 0118) |
 | `code-reviewer` | general code review against the goal and criteria | every `/review` |
 | `blind-reviewer` | review of the diff alone, with no goal or criteria | every `/review` |
 | `security-auditor` | security trust-boundary review | every `/review` round (ADR 0102) |
@@ -35,14 +36,6 @@ Goes back:
 
 /explain: after /build or /review, outside the gates
 ```
-
-Every gate report ends with one machine-readable line,
-`HANDOFF: result=… route=… ids=… decide=…` (`../references/stage-handoff.md`).
-Unattended, `tools/run/ticket.py` drives intake, `/spec`, `/plan`, then
-`tools/run/pipeline.py` for `/build` → `/test` → `/review` with fix rounds,
-then `/ship`; both route from that line alone and never read the prose
-(ADR 0114, 0115). A `route=owner decide=n` becomes numbered options in the
-ticket's Slack thread; `tools/run/README.md` has the rest.
 
 ### Intake
 

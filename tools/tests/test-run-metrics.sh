@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Fixture tests for the LARGE TOOL RESULTS section of tools/run/run-metrics.sh,
-# for --row, the observation-log row it prints, and for FAILURE SIGNALS.
+# Fixture tests for the LARGE TOOL RESULTS and PER AGENT sections of
+# tools/run/run-metrics.sh, for --row, the observation-log row it prints, and
+# for FAILURE SIGNALS.
 # Builds a JSONL transcript by hand — main-session Read/Bash/Grep results of
 # known sizes plus a subagent (isSidechain) result that must not count — runs
 # the script on it, and checks the printed figures:
@@ -185,6 +186,36 @@ check subagent_files   'subagents  : 1 transcript(s)' "$OUT"
 check subagent_batch   'largest batch  : 2' "$OUT"
 check subagent_tokens  'output         : 10' "$OUT"   # one usage per reply, not per record
 check subagent_main    'tool results   : 1  (Agent 1)' "$OUT"
+
+# PER AGENT: one row per transcript; role and task from <agent>.meta.json,
+# first and largest context per reply, a reply split over records counted once.
+reply() { # ts, sidechain, msg id, input, cache read, cache write, output
+  jq -nc --arg ts "$1" --argjson sc "$2" --arg id "$3" \
+    --argjson i "$4" --argjson cr "$5" --argjson cw "$6" --argjson o "$7" \
+    '{type:"assistant",timestamp:$ts,isSidechain:$sc,requestId:$id,
+      message:{id:$id,model:"claude-sonnet-5-5",role:"assistant",content:[{type:"text",text:"x"}],
+               usage:{input_tokens:$i,cache_read_input_tokens:$cr,cache_creation_input_tokens:$cw,output_tokens:$o}}}'
+}
+P="$TMP/per.jsonl"
+mkdir -p "$TMP/per/subagents"
+reply 2026-09-19T09:00:00Z false p1 2 0 20000 100 > "$P"
+{
+  reply 2026-09-19T09:01:00Z true v1 2 0 80000 50
+  reply 2026-09-19T09:01:00Z true v1 2 0 80000 50          # same reply, second record
+  reply 2026-09-19T09:02:00Z true v2 2 80000 120000 70
+  reply 2026-09-19T09:30:00Z true v3 2 200000 1000 30
+} > "$TMP/per/subagents/agent-v.jsonl"
+jq -nc '{agentType:"test-engineer",description:"VERIFY LD-9 at Deep"}' > "$TMP/per/subagents/agent-v.meta.json"
+reply 2026-09-19T09:03:00Z true w1 2 0 5000 9 > "$TMP/per/subagents/agent-w.jsonl"   # no meta file
+OUT="$(run "$P")"
+check per_header   'PER AGENT (replies, first and largest context' "$OUT"
+check per_main     '  main                         sonnet-5-5               1    20k    20k        0      20k    100' "$OUT"
+check per_role     '  test-engineer                sonnet-5-5               3    80k   201k     280k     201k    150  VERIFY LD-9 at Deep' "$OUT"
+check per_no_meta  '  ?                            sonnet-5-5               1     5k     5k        0       5k      9' "$OUT"
+OUT="$(run --until 2026-09-19T09:10:00Z "$P")"
+check per_window   '  test-engineer                sonnet-5-5               2    80k   200k      80k     200k    120  VERIFY LD-9 at Deep' "$OUT"
+OUT="$(run "$EMPTY")"
+check per_empty    '  main                         ?                        1      1      1        0        0      1' "$OUT"
 
 # Each content block of one reply is its own record and repeats the reply's
 # usage; the totals count it once.

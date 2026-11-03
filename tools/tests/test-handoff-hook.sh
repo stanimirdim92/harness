@@ -89,6 +89,8 @@ check missing_tree        block executor      "$(transcript c5 "$MISSING_TREE")"
 check missing_outcomes    block executor      "$(transcript c6 "$MISSING_OUTCOMES")"    false
 check claim_only          block executor      "$(transcript c7 "$CLAIM_ONLY")"          false
 check claim_only_tester   block test-engineer "$(transcript c8 "$CLAIM_ONLY")"          false
+check claim_only_figma    block figma-executor "$(transcript c8f "$CLAIM_ONLY")"        false
+check claim_only_figma_tester block figma-test-engineer "$(transcript c8g "$CLAIM_ONLY")" false
 check other_hooks_loop    allow executor      "$(transcript c9 "$CLAIM_ONLY")"          true   # active, but no block of ours
 check announced_next_step block executor "$(transcript c13 "$COMPLETE
 Next, I'll update the README section.")" false
