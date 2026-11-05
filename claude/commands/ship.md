@@ -209,7 +209,11 @@ Record `PASS`, `FAIL`, or `BLOCKED` with evidence for:
 - **Infrastructure** — required env/config present; migrations/deploy ordering
   safe; flags have defaults/owners; monitoring exists for meaningful new risk.
 - **Documentation** — README/changelog/ADR/runbook updated when the change
-  actually requires them.
+  actually requires them. If the project has a C4/Structurizr workspace
+  (`*.dsl`), it is updated when the change adds, removes or renames a
+  module, container, external system, or cross-boundary relationship
+  (queue, webhook, provider API). The updated DSL must pass Structurizr
+  `validate`. A stale workspace is `FAIL`; update it with `c4-architecture`.
 - **Feature flag** — for new user-facing or risky behavior, the flag that
   hides it and how to turn it off; or why it ships without one (ADR 0101).
   A change that touches an "Always a person" path or migrates data and ships
