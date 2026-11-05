@@ -20,6 +20,8 @@ file only when its content warrants a separate home.
 | `TESTING.md` | Test layers, fixtures, environment, external boundaries, and known limitations | Running the test command alone does not explain how to verify changes |
 | `SECURITY.md` | Project trust boundaries, authentication/authorization, secret handling, and control locations | The project has controls worth explaining; preserve any existing vulnerability-reporting policy |
 | `.ai/repo-map.md` | Compact navigation to important entry points and owning directories | A newcomer needs a map beyond the architecture overview; avoid a full file inventory |
+| `ONBOARDING.md` | From clone to a first change: prerequisites, setup, run, one test, structure, common issues | New people join often, or setup takes more than the README shows |
+| `docs/api.md`, `docs/data.md` | HTTP endpoints (method, path, auth, handler) and the schema from migrations | The project has an API or database that people use without reading its code |
 | `docs/adr/` | Accepted decisions and seriously considered alternatives | A durable architectural choice needs its reasoning preserved |
 
 Small projects can keep several roles in their README. Explicit requests for a
