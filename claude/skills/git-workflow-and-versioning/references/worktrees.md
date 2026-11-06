@@ -143,6 +143,9 @@ git branch --show-current
 
 Confirm there is no uncommitted or untracked work that must be preserved.
 
+If the project keeps per-checkout resources, such as test databases, release
+them with the project's cleanup command before you remove the checkout.
+
 Then return to another directory before removing it:
 
 ```bash

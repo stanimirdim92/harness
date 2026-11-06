@@ -206,7 +206,9 @@ Ticket-scoped work defaults to one isolated worktree per ticket.
   templates — go in a project-root `.worktreeinclude` using gitignore syntax.
   Claude Code and Codex both copy matching **ignored** files into every managed
   worktree; tracked files are never duplicated. A `WorktreeCreate` hook replaces
-  this, so copy inside the hook script instead.
+  this, so copy inside the hook script instead. Copies are a cache, not proof
+  of readiness. Dependency directories must belong to the checkout, never
+  shared symlinks.
 - A worktree is a fresh checkout: dependencies are not installed and no build
   or test command works until they are. Specification and planning work needs
   none of them; anything that builds, tests, or lints does.
