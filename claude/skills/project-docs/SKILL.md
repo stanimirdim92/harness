@@ -25,10 +25,19 @@ existing locations and names; do not create a parallel documentation hierarchy.
   fill a template; explain any requested document that cannot be grounded.
 - Refresh: reconcile existing docs with current source, retaining relevant
   human decisions, known constraints, and intentional exceptions.
+- On request, or when the project clearly needs them: `ONBOARDING.md`, and
+  `docs/api.md` and `docs/data.md` for a project with an HTTP API or a database.
+  They are not part of the full set.
+- Before you restructure, rename, merge or replace existing documents, show
+  the planned change per file and wait for an answer. Revising content in place
+  needs no preview.
 
 Ask only when scope, contradictory requirements, or an unresolved architectural
 decision materially changes the result. Document uncertainty when it can remain
-an explicit gap without preventing useful documentation.
+an explicit gap without preventing useful documentation. When existing docs
+contradict the source in several major areas, stop and ask which is right
+before rewriting them. A partly wrong document stated with confidence is worse
+than none: write the gap instead.
 
 ## Gather evidence
 
@@ -41,6 +50,12 @@ Distinguish current implementation, prescribed rules, and proposed future work.
 If source violates an intentional rule, record the discrepancy without silently
 changing the rule. If two authoritative sources disagree, name both and the
 unresolved choice.
+
+For `docs/api.md`, read routes from the framework's route definitions (for
+example Laravel `routes/*.php`, Express routers, FastAPI decorators) and record
+method, path, auth and the handler's location. For `docs/data.md`, read the
+schema from migrations or the schema definition, not from a live database.
+Mark anything the source does not settle as unknown.
 
 Find exact commands in project scripts/configuration. Label commands discovered
 in source separately from commands executed successfully. Documentation generation
@@ -55,6 +70,14 @@ and link to it elsewhere. Summarize rules rather than copying whole rule files;
 use existing ADRs for accepted decisions and never invent decision history.
 Keep proposed changes clearly separate from the current architecture.
 
+`ONBOARDING.md` takes a newcomer from clone to a first change: prerequisites,
+clone and install, environment variables (names only), run locally, run one
+test, top-level structure, making a change, common issues. Leave out a section
+the source does not support; never invent common issues.
+
+A `## Manual Notes` section belongs to people: keep it word for word on every
+refresh. Put any generation note in visible text, not in an HTML comment.
+
 Revise only affected content in existing documents. Add concise navigation to
 the existing README or instruction entrypoint when useful, preserving its rules.
 Do not introduce new mandatory startup reads or rewrite project instructions.
@@ -65,6 +88,9 @@ Before reporting completion:
 - resolve referenced files/directories; label proposed paths as proposed;
 - trace architectural and behavioral claims to inspected source;
 - reconcile summaries, diagrams, commands, and companion docs with each other;
+- check that every link between the documents resolves, and that each new
+  document is reachable from the README, the instruction entrypoint or another
+  document;
 - inspect the complete documentation diff and preserve unrelated work;
 - report files created/updated, checks actually performed, and remaining gaps.
 
@@ -73,3 +99,4 @@ Examples:
 - `project-docs` — document this project with the smallest useful set.
 - `project-docs full set` — generate the seven documents above from this repo.
 - `project-docs refresh ARCHITECTURE.md TESTING.md` — reconcile just those docs.
+- `project-docs onboarding` — write `ONBOARDING.md` for a newcomer.

@@ -85,7 +85,7 @@ To document another project, open a session in that project and use
 `/project-docs` in Claude or `$project-docs` in Codex. The default selects a small
 useful set; add `full set` for architecture, design, conventions, commands,
 testing, security, and a repository map. Use `refresh ARCHITECTURE.md TESTING.md`
-to update selected files. The skill reads the project's source and existing
+to update selected files, and `onboarding` for an `ONBOARDING.md`. The skill reads the project's source and existing
 rules; it does not copy Leadbuster's architecture into other projects.
 
 Synced:
