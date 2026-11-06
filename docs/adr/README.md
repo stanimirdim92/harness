@@ -100,7 +100,7 @@ that explanation here, just the index.
 | [0090](0090-pre-existing-findings-do-not-block.md) | Pre-existing findings do not block | Accepted |
 | [0091](0091-review-md-guides-every-reviewer.md) | A project REVIEW.md guides every reviewer | Amended by [0094](0094-review-md-from-the-base-branch.md) (read from the base branch) |
 | [0092](0092-every-blocker-gets-an-independent-check.md) | Every BLOCKER gets an independent check | Accepted |
-| [0093](0093-review-eval-and-noise-count.md) | A review eval from shipped bugs, and a count of review noise | Accepted |
+| [0093](0093-review-eval-and-noise-count.md) | A review eval from shipped bugs, and a count of review noise | Accepted; the SARIF file moved to docs/reviews by [0120](0120-review-sarif-committed-under-docs.md) |
 | [0094](0094-review-md-from-the-base-branch.md) | REVIEW.md is read from the base branch | Accepted |
 | [0095](0095-ship-checks-the-current-base.md) | /ship checks the candidate on the current base | Accepted |
 | [0096](0096-paths-that-always-need-a-person.md) | Paths that always need a person | Amended by [0102](0102-security-review-on-every-round.md) (security runs always) |
@@ -127,6 +127,7 @@ that explanation here, just the index.
 | [0117](0117-evals-carry-tags-and-a-holdout-split.md) | Evals carry tags and a holdout split | Accepted |
 | [0118](0118-figma-tools-only-in-figma-copies.md) | Figma tools only in figma- copies of executor and test-engineer | Accepted |
 | [0119](0119-headless-runners-removed.md) | Headless runners removed | Accepted |
+| [0120](0120-review-sarif-committed-under-docs.md) | Review SARIF committed under docs/reviews | Accepted |
 
 Adding a new decision: create the next-numbered `NNNN-kebab-title.md`
 (4-digit, zero-padded — MADR-style, matches the files already here) and

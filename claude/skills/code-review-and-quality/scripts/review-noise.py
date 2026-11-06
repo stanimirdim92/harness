@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Count how review findings ended, per reviewer, from the review SARIF files.
 
-/review writes one SARIF file per round to $(git rev-parse --git-common-dir)/review/,
+/review writes and commits one SARIF file per round to docs/reviews/ (ADR 0120),
 and /ship writes each finding's resolution into it (ADR 0093). A finding that
 ends `fixed` was worth raising. One that ends `refuted` was noise: the code was
 already right. `answered` is a question the approved spec already answers, or
@@ -40,10 +40,10 @@ NAME = re.compile(r'^(?P<ticket>.+)-(?P<sha>[0-9a-f]{7,40})\.sarif$')
 
 
 def review_dir():
-    out = subprocess.run(['git', 'rev-parse', '--git-common-dir'], capture_output=True, text=True)
+    out = subprocess.run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True)
     if out.returncode:
         raise SystemExit('review-noise: not in a git repository; pass --dir')
-    return Path(out.stdout.strip()).resolve() / 'review'
+    return Path(out.stdout.strip()) / 'docs' / 'reviews'
 
 
 def tally(files):

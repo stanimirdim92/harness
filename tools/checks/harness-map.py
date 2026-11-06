@@ -830,7 +830,7 @@ CONVENTIONS = [
     ('Paths', '`docs/specs/[TICKET]-SPEC.md`', 'The one spec per ticket; any other spelling fails CI', '/spec', 'references/templates/plan.md', 'docs/specs/[TICKET]-SPEC.md'),
     ('Paths', '`docs/tasks/[TICKET]-plan.md`, `-todo.md`', 'The plan and its task packets', '/plan', 'references/templates/plan.md', 'docs/tasks/[TICKET]-'),
     ('Paths', '`.git/explain/<TICKET>-<sha>.html`', 'An /explain review page, outside the working tree', '/explain', 'commands/explain.md', 'git-common-dir)/explain/'),
-    ('Paths', '`.git/review/<TICKET>-<sha>.sarif`', 'The review findings as SARIF 2.1.0; disposition decides the level (error / warning / note)', '/review', 'commands/review.md', 'git-common-dir)/review/'),
+    ('Paths', '`docs/reviews/<TICKET>-<sha>.sarif`', 'The review findings as SARIF 2.1.0; disposition decides the level (error / warning / note)', '/review', 'commands/review.md', 'docs/reviews/<TICKET>-'),
 ]
 # Where a convention comes from, when it is an outside standard rather than
 # the harness's own; keyed by the marker shown in CONVENTIONS.
@@ -844,7 +844,7 @@ ORIGIN = {
     '`<type>[scope]: <description>`': 'Conventional Commits 1.0',
     'One instruction per sentence, 20 words or fewer': 'ASD-STE100 (its rules, not its dictionary)',
     '`file:line`': 'GNU error-message format',
-    '`.git/review/<TICKET>-<sha>.sarif`': 'SARIF 2.1.0 (OASIS)',
+    '`docs/reviews/<TICKET>-<sha>.sarif`': 'SARIF 2.1.0 (OASIS)',
     'killed / survived': 'Mutation testing',
 }
 # Seen in the target projects' history, not defined by any harness file.

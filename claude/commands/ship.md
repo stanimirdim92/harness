@@ -47,8 +47,8 @@ in the approved spec, or the owner's answer to the question below. Quote the
 other `Open` item to the owner in one question before the verdict: one numbered
 line per item, with what it means for the release. Until the owner answers,
 the item stays `Open` and the result stays **SHIP BLOCKED**. A commit that
-changes only `docs/tasks/<TICKET>-open.md` after review leaves the reviewed
-code unchanged. Report it as "Ledger-only commit after review: <sha>". Any
+changes only `docs/tasks/<TICKET>-open.md` or `docs/reviews/<TICKET>-*.sarif`
+after review leaves the reviewed code unchanged. Report it as "Ledger-only commit after review: <sha>". Any
 other change is still **SHIP BLOCKED**.
 
 Do not independently re-run the trigger matrix or substitute new inline testing
@@ -157,7 +157,8 @@ ADVISORY findings the author declined are `declined`. Never write `refuted`
 for an `answered` finding: `refuted` means the claim is false, and
 `answered` means the spec or the owner already settled it. `review-noise.py`
 counts these to show which reviewers raise findings that end as fixes and
-which raise noise (ADR 0093). It counts `answered` apart, as neither.
+which raise noise (ADR 0093). It counts `answered` apart, as neither. Commit
+the file, with any ledger change, as a ledger-only commit (ADR 0120).
 
 Then check whether this ticket's findings repeat a class from earlier tickets
 (ADR 0105):

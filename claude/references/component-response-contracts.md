@@ -347,7 +347,7 @@ state and, except `/ship`, writes an artifact to a fixed path.
 | `/plan` | `docs/tasks/[TICKET]-plan.md` / `-todo.md`, or a bounded `SPEC CONFLICT` | Draft \| Needs replan \| Approved, Ready for `/build` |
 | `/build` | scoped local commits | **BUILD COMPLETE** \| **BUILD BLOCKED** |
 | `/test` | test-only commits | **VERIFY PASS** \| **VERIFY FAIL** \| **VERIFY BLOCKED** |
-| `/review` | the review SARIF under `<git-common-dir>/review/` | count line, or **REVIEW BLOCKED** |
+| `/review` | the review SARIF `docs/reviews/[TICKET]-<sha>.sarif`, committed | count line, or **REVIEW BLOCKED** |
 | `/ship` | — (a decision only) | **GO** \| **NO-GO** \| **SHIP BLOCKED** |
 | `/explain` | one HTML page under `<git-common-dir>/explain/` | — (not a gate) |
 

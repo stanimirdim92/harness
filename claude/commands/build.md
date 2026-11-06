@@ -380,11 +380,12 @@ planned tasks (ADR 0108). It is how a finding goes back to `/build`.
 The plan checks in §1 still apply; task resume does not.
 
 1. Read the newest review SARIF for the ticket
-   (`$(git rev-parse --git-common-dir)/review/<TICKET>-<sha>.sarif`). Its sha
-   must be HEAD: a candidate that changed after the review is reviewed again
-   first, never fixed blind. Count the ticket's review files. With three,
-   the next review would be round 4: stop and report that the approach needs
-   the user (ADR 0089).
+   (`docs/reviews/<TICKET>-<sha>.sarif`). After its sha, HEAD may add only
+   commits that touch `docs/reviews/` or `docs/tasks/<TICKET>-open.md`
+   (`git diff --name-only <sha> HEAD`). Any other change means the candidate
+   changed after the review: review it again first, never fix it blind.
+   Count the ticket's review files. With three, the next review would be
+   round 4: stop and report that the approach needs the user (ADR 0089).
 2. The scope is every finding still `open` that is BLOCKER or REQUIRED and not
    pre-existing (`baselineState` is not `unchanged`), plus any ADVISORY the user
    named. Nothing else: no refactor, no plan task, no other finding.

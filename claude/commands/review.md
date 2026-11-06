@@ -36,7 +36,7 @@ the pipeline REVIEW gate.
 Count the review round: one more than the ticket's earlier review files.
 
 ```bash
-ls "$(git rev-parse --git-common-dir)/review/<TICKET>-"*.sarif 2>/dev/null | wc -l
+ls docs/reviews/<TICKET>-*.sarif 2>/dev/null | wc -l
 ```
 
 Round 1 reviews the whole candidate. A later round reviews a fix (§3 Later
@@ -152,7 +152,8 @@ when the matched risk is both high-impact and materially ambiguous.
 
 From round 2 the candidate fixes earlier findings. Review the fix, not the
 whole change again. The last reviewed commit is the short sha in the newest
-review file name.
+review file name. Leave `docs/reviews/` out of every diff a reviewer gets
+(`git diff <sha>..HEAD -- . ':!docs/reviews'`).
 
 - Give `code-reviewer` the diff since that commit and the earlier findings with
   their resolutions. It does not raise a resolved finding again unless the new
@@ -312,14 +313,10 @@ Also write every finding to a SARIF 2.1.0 file, so code-scanning tools can
 read the review (`../references/component-response-contracts.md` §Review SARIF):
 
 ```bash
-out="$(git rev-parse --git-common-dir)/review/<TICKET>-$(git rev-parse --short HEAD).sarif"
+out="docs/reviews/<TICKET>-$(git rev-parse --short HEAD).sarif"
 ```
 
-In a worktree, the Write tool may refuse that path. Write the file to the
-scratchpad first. Print the target with `git rev-parse --path-format=absolute
---git-common-dir`. Then run `mkdir -p` and a plain Bash `cp` with both paths
-written out literally, with no variables or `$(...)`. Each id stays its own
-SARIF result. Record a group's aliases in each member's `properties.aliases`.
+Each id stays its own SARIF result. Record a group's aliases in each member's `properties.aliases`.
 
 Give every finding a `class` (§Review SARIF). List the names already in use
 first, and reuse one when it fits:
@@ -328,8 +325,9 @@ first, and reuse one when it fits:
 python3 ~/.claude/skills/code-review-and-quality/scripts/review-noise.py --classes
 ```
 
-It sits outside the working tree and is never committed. Give its path in the
-report. The markdown report stays the gate artifact; the SARIF file is a copy
+Commit the file alone: `review: <TICKET> round <n> findings`. The sha in its
+name is the reviewed commit, the one before this commit (ADR 0120). Give its
+path in the report. The markdown report stays the gate artifact; the SARIF file is a copy
 of its findings for tools.
 
 Then stop. The next stage is `/ship`.

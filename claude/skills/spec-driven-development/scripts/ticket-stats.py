@@ -418,7 +418,7 @@ def main(argv=None):
         print(f'ticket-stats: no docs/specs/{args.ticket}-SPEC.md', file=sys.stderr)
         return 1
     common = Path(common.strip())
-    s = stats(args.ticket, args.review_dir or common / 'review')
+    s = stats(args.ticket, args.review_dir or Path('docs/reviews'))
     s['spend'] = spend(args.ticket, common.parent, args.projects_dir, args.idle_cap, extra_min=args.extra)
     if args.json:
         print(json.dumps(s, indent=2))

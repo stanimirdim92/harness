@@ -240,7 +240,7 @@ def produce(case, repo, budget):
         if result.returncode != 0:
             raise RuntimeError(f'claude exited {result.returncode}: {result.stderr[-600:]}')
         meta = json.loads(result.stdout)
-        sarifs = sorted((project / '.git' / 'review').glob('*.sarif'))
+        sarifs = sorted((project / 'docs' / 'reviews').glob('*.sarif'))
         findings, source = review_findings(meta, [s.read_text() for s in sarifs])
         return findings, meta, source
 
