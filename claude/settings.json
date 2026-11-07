@@ -134,6 +134,7 @@
     "enableAllProjectMcpServers": true
   },
   "model": "opus[1m]",
+  "outputStyle": "Concise",
   "hooks": {
     "PreToolUse": [
       {
@@ -200,7 +201,6 @@
   "enabledPlugins": {
     "episodic-memory@superpowers-marketplace": true,
     "typescript-lsp@claude-plugins-official": true,
-    "playwright@claude-plugins-official": true,
     "qdrant-skills@knowledge-work-plugins": true,
     "llm-application-dev@claude-code-workflows": true
   },

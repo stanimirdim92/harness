@@ -118,7 +118,7 @@ echo "==> Chrome DevTools MCP server (user scope, all projects)"
 # npm serves that day with full access to the machine (supply-chain.md).
 # Needs Node 20+ and a local Chrome. Bump the pin deliberately, here and in
 # codex/config.toml together.
-add_server chrome-devtools --scope user -- npx -y chrome-devtools-mcp@1.10.1 --isolated
+add_server chrome-devtools --scope user -- npx -y chrome-devtools-mcp@latest --isolated
 
 echo
 echo "Done. Run 'claude mcp list' and confirm each server shows Connected."
