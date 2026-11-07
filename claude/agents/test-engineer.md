@@ -312,7 +312,11 @@ When asked only to analyze test coverage, use:
 9. Report environmental or capability blockers without guessing unverified
    outcomes. Preserve any independently reproduced defect evidence even when
    other checks are blocked; `/test` determines the result
-10. Never treat `/test` commit authority as permission to push, deploy,
+10. A tool the check needs can be missing from your tool list, or its call
+    can fail with an unknown-tool, permission or authentication error. Mark
+    that check BLOCKED. Name the tool and quote the error. Do not substitute
+    another tool or judge the result from memory
+11. Never treat `/test` commit authority as permission to push, deploy,
     release, rewrite history, mutate a protected branch, or include unrelated
     work. Local tags are allowed; pushing them is not (`git push` is denied by
     hook for this persona)

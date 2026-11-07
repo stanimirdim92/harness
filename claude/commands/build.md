@@ -99,7 +99,8 @@ Use **one executor per workstream, not one per task**.
 A task whose spec or task packet links a Figma design gets `figma-executor`
 in place of `executor`, fresh or resumed. Every other task gets `executor`.
 The two share one body and one set of gates. Only the Figma copy loads the
-Figma tools, about 37k tokens on every call (ADR 0118).
+Figma tools, and only the read-only design-to-code set, because a subagent
+loads every granted tool in full on every call (ADR 0118).
 
 A resume after the cache expired rewrites the whole context at full price. A
 large context also slows and degrades the executor. (LD-507: one executor grew

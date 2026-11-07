@@ -125,6 +125,11 @@ records, such as a missing Figma edit seat. Cite it and report it.
 
 Do not blind-retry an unchanged failure.
 
+A tool the task needs can be missing from your tool list, or its call can fail
+with an unknown-tool, permission or authentication error. Stop that step and
+report it as a blocker. Name the tool and quote the error. Do not substitute
+another tool, and do not work from memory of what the tool would return.
+
 ## Report
 
 Keep the handoff factual and concise:

@@ -54,11 +54,17 @@ REVIEWERS = {'code-reviewer', 'blind-reviewer', 'security-auditor',
 SONNET_PERSONAS = {'repo-recon', 'executor', 'test-engineer', 'figma-executor', 'figma-test-engineer'}
 
 # A subagent has no tool search, so every MCP tool its `tools:` grants loads in
-# full on every call: Figma's are about 37k tokens. Only a figma-* copy grants
-# them, and /build and /test pick it when the task links a Figma design. Each
-# copy is its base persona plus the Figma tools, nothing else (adr/0118).
+# full on every call: all 40 Figma tools are about 37k tokens. Only a figma-*
+# copy grants them, and /build and /test pick it when the task links a Figma
+# design. Each copy is its base persona plus FIGMA_TOOLS, nothing else
+# (adr/0118). FIGMA_TOOLS is the read-only design-to-code set, not the
+# wildcard: no copy writes to Figma, so the write, Code Connect, shader and
+# Weave tools would only cost tokens.
 FIGMA_VARIANTS = {'figma-executor': 'executor', 'figma-test-engineer': 'test-engineer'}
-FIGMA_TOOLS = 'mcp__claude_ai_Figma__*'
+FIGMA_TOOLS = ['mcp__claude_ai_Figma__' + t for t in (
+    'create_session', 'get_design_context', 'get_metadata', 'get_screenshot',
+    'get_variable_defs', 'download_assets', 'get_code_connect_map',
+    'search_design_system', 'get_libraries', 'whoami')]
 REVIEWER_EFFORT = 'high'
 CREDENTIAL_FILES = {'~/.ssh', '~/.aws', '~/.config/gh', '~/.git-credentials'}
 PUBLISH_ASK = {'Bash(git push:*)', 'Bash(gh pr create:*)', 'Bash(gh pr merge:*)', 'Bash(gh release:*)'}
@@ -174,8 +180,8 @@ def check_variant(name, text, base_text):
     if block is None or base_block is None:
         return [f'{name}: frontmatter missing in the variant or its base']
     tools, base_tools = tool_list(block) or [], tool_list(base_block) or []
-    if tools != base_tools + [FIGMA_TOOLS]:
-        problems.append(f'{name}: tools must be the base persona\'s tools plus {FIGMA_TOOLS} (adr/0118)')
+    if tools != base_tools + FIGMA_TOOLS:
+        problems.append(f'{name}: tools must be the base persona\'s tools plus {", ".join(FIGMA_TOOLS)} (adr/0118)')
     rest = lambda b: [l for l in b.splitlines() if not re.match(r'(name|description|tools):', l)]
     if rest(block) != rest(base_block):
         problems.append(f'{name}: frontmatter differs from {FIGMA_VARIANTS[name]} beyond name, description and tools (adr/0118)')

@@ -83,7 +83,8 @@ ticket, so enumerate across the hierarchy. Pin each one by file key and node id,
 not by frame name. Skip cover and thumbnail nodes: they hold no requirements,
 and one `get_metadata` call on a cover returned 80k characters. No Figma tool in the session means the reference is
 unavailable for the recorded reason — report that, never as design that does not
-exist.
+exist. The same holds when a needed Figma tool is missing or its call fails:
+name the tool and quote the error.
 
 Record required references as read, partially read, or unavailable, with any
 remaining requirement-bearing content identified. Continue available reads
