@@ -198,7 +198,6 @@
     "command": "$HOME/.claude/subagent-statusline.sh"
   },
   "enabledPlugins": {
-    "phpstorm-plugin@phpstorm-marketplace": true,
     "episodic-memory@superpowers-marketplace": true,
     "typescript-lsp@claude-plugins-official": true,
     "playwright@claude-plugins-official": true,
@@ -206,18 +205,6 @@
     "llm-application-dev@claude-code-workflows": true
   },
   "extraKnownMarketplaces": {
-    "phpstorm-marketplace": {
-      "source": {
-        "source": "github",
-        "repo": "jetbrains/phpstorm-claude-marketplace"
-      }
-    },
-    "superpowers-marketplace": {
-      "source": {
-        "source": "github",
-        "repo": "obra/superpowers-marketplace"
-      }
-    },
     "knowledge-work-plugins": {
       "source": {
         "source": "github",
