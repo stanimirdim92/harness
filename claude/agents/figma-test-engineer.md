@@ -1,7 +1,7 @@
 ---
 name: figma-test-engineer
 description: The verifier for a candidate whose in-scope claims link a Figma design. Same persona and gates, plus the Figma MCP tools. /test dispatches it only then; every other verification gets test-engineer.
-tools: Read, Edit, Write, Bash, Grep, Glob, Skill, mcp__chrome-devtools__*, mcp__figma__*
+tools: Read, Edit, Write, Bash, Grep, Glob, Skill, mcp__chrome-devtools__*, mcp__claude_ai_Figma__*
 model: claude-sonnet-5-5
 isolation: worktree
 hooks:

@@ -346,7 +346,7 @@ def fetch_intake(ticket, jira, repo, budget, as_of=None):
     prompt = (f'Use the jira-ticket skill on {jira or ticket}.{cutoff} Do not save the intake file: '
               'this run freezes the intake itself. Reply with only its complete intake '
               'summary, exactly as the skill formats it, and nothing else.')
-    result = subprocess.run(['claude', '-p', prompt, '--allowedTools', 'Skill', 'Read', 'mcp__jira',
+    result = subprocess.run(['claude', '-p', prompt, '--allowedTools', 'Skill', 'Read', 'mcp__claude_ai_Atlassian_MCP',
                              '--max-budget-usd', str(budget), '--output-format', 'json'],
                             cwd=repo, capture_output=True, text=True, timeout=900)
     if result.returncode != 0:

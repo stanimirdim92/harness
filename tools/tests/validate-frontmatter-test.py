@@ -240,7 +240,7 @@ class DenyCases(unittest.TestCase):
 
 FIGMA_EXECUTOR = (EXECUTOR.replace('name: executor', 'name: figma-executor')
                   .replace('Implements one planned task end-to-end.', 'executor for a task that links a Figma design.')
-                  .replace('Glob, Skill', 'Glob, Skill, mcp__figma__*'))
+                  .replace('Glob, Skill', 'Glob, Skill, mcp__claude_ai_Figma__*'))
 
 
 class FigmaVariants(unittest.TestCase):
@@ -248,7 +248,7 @@ class FigmaVariants(unittest.TestCase):
     figma-* copies grant them, and each copy must stay its base persona."""
 
     def test_base_persona_must_not_grant_figma(self):
-        body = EXECUTOR.replace('Glob, Skill', 'Glob, Skill, mcp__figma__*')
+        body = EXECUTOR.replace('Glob, Skill', 'Glob, Skill, mcp__claude_ai_Figma__*')
         problems = vf.check_agent('executor', agent('executor', body))
         self.assertTrue(any('figma-executor' in p for p in problems))
 
@@ -258,9 +258,9 @@ class FigmaVariants(unittest.TestCase):
                                           agent('executor', EXECUTOR)), [])
 
     def test_variant_must_grant_figma(self):
-        body = FIGMA_EXECUTOR.replace(', mcp__figma__*', '')
+        body = FIGMA_EXECUTOR.replace(', mcp__claude_ai_Figma__*', '')
         problems = vf.check_variant('figma-executor', agent('figma-executor', body), agent('executor', EXECUTOR))
-        self.assertTrue(any('mcp__figma__*' in p for p in problems))
+        self.assertTrue(any('mcp__claude_ai_Figma__*' in p for p in problems))
 
     def test_variant_body_drift(self):
         variant = agent('figma-executor', FIGMA_EXECUTOR).replace('Body text.', 'Edited body.')
@@ -274,7 +274,7 @@ class FigmaVariants(unittest.TestCase):
 
     def test_verifier_variant_keeps_verifier_rules(self):
         body = (FIGMA_EXECUTOR.replace('name: figma-executor', 'name: figma-test-engineer')
-                .replace('mcp__figma__*', 'mcp__chrome-devtools__*, mcp__figma__*'))
+                .replace('mcp__claude_ai_Figma__*', 'mcp__chrome-devtools__*, mcp__claude_ai_Figma__*'))
         problems = vf.check_agent('figma-test-engineer', agent('figma-test-engineer', body))
         self.assertTrue(any('isolation: worktree' in p for p in problems))
 

@@ -73,26 +73,17 @@ add_server apify --transport http https://mcp.apify.com/ \
 # If a future task genuinely needs MCP filesystem access, add it per-project
 # with an explicit narrow root and a pinned version, not user-wide.
 
-echo "==> Atlassian (Jira/Confluence) MCP server (user scope, all projects)"
-# Official Atlassian remote MCP server (Cloud-only) — also covers
-# Confluence, Jira Service Management, Bitbucket, and Compass under the
-# same endpoint. OAuth 2.1, so no token env var here: after this runs,
-# start a Claude Code session and run `/mcp` to authenticate interactively.
-add_server jira --transport http https://mcp.atlassian.com/v1/mcp/authv2 \
-  --scope user
+# Atlassian (Jira/Confluence) is not added here: it comes from the claude.ai
+# "Atlassian MCP" connector (Settings → Connectors on claude.ai), which Claude
+# Code loads as `mcp__claude_ai_Atlassian_MCP__*`.
 
-echo "==> Figma MCP server (user scope, all projects)"
-# Official remote Figma MCP server. OAuth 2.1 like Atlassian above, so no token
-# env var here: after this runs, start a Claude Code session and run `/mcp` to
-# authenticate interactively. Without this server the design-reference rule in
-# `skills/jira-ticket` §2 has nothing to open, and design-backed specs fall back
-# to whatever the user pastes into the conversation.
+echo "==> Figma design-to-code skill"
+# The Figma MCP server is not added here: it comes from the claude.ai "Figma"
+# connector (Settings → Connectors on claude.ai), which Claude Code loads as
+# `mcp__claude_ai_Figma__*`. Without it the design-reference rule in
+# `skills/jira-ticket` §2 has nothing to open, and design-backed specs fall
+# back to whatever the user pastes into the conversation.
 #
-# The Claude desktop app bundles its own inline `design` plugin carrying a
-# figma server, but that one is namespaced `plugin:design:figma` and only
-# exists in desktop sessions; this user-scope entry is what makes Figma
-# reachable from a plain CLI session.
-add_server figma --transport http https://mcp.figma.com/mcp --scope user
 # Figma's design-to-code skill is the workflow for these tools. It is fetched
 # at a pinned commit and hash-checked, not committed: upstream has no licence.
 "$(dirname "${BASH_SOURCE[0]}")/../../tools/setup/fetch-figma-skill.sh" || \

@@ -72,9 +72,7 @@
       "Bash(node .yarn/releases/yarn-4.9.4.cjs install)",
       "Bash(xargs -I{} echo {})",
       "Bash(php *)",
-      "Bash(php artisan:*)",
-      "mcp__claude_ai_Atlassian_Rovo__getAccessibleAtlassianResources",
-      "mcp__claude_ai_Atlassian_Rovo__getJiraIssue"
+      "Bash(php artisan:*)"
     ],
     "deny": [
       "Bash(rm -rf *)",

@@ -33,7 +33,7 @@ url = "http://127.0.0.1:64443/stream"
 # Pinned: npx -y runs whatever version is current when Codex starts.
 [mcp_servers.atlassian]
 command = "npx"
-args = ["-y", "mcp-remote@0.14.3", "https://mcp.atlassian.com/v1/mcp/authv2"]
+args = ["-y", "mcp-remote@0.14.3", "https://mcp.atlassian.com/v2/mcp"]
 
 [mcp_servers.chrome-devtools]
 command = "npx"

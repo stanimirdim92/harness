@@ -1,7 +1,7 @@
 ---
 name: figma-executor
 description: The executor for a task whose packet links a Figma design. Same persona and gates, plus the Figma MCP tools. /build dispatches it only then; every other task gets executor.
-tools: Read, Edit, Write, Bash, Grep, Glob, Skill, mcp__figma__*
+tools: Read, Edit, Write, Bash, Grep, Glob, Skill, mcp__claude_ai_Figma__*
 skills:
   - executor-development-discipline
   - test-driven-development

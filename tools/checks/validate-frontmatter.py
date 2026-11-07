@@ -58,7 +58,7 @@ SONNET_PERSONAS = {'repo-recon', 'executor', 'test-engineer', 'figma-executor', 
 # them, and /build and /test pick it when the task links a Figma design. Each
 # copy is its base persona plus the Figma tools, nothing else (adr/0118).
 FIGMA_VARIANTS = {'figma-executor': 'executor', 'figma-test-engineer': 'test-engineer'}
-FIGMA_TOOLS = 'mcp__figma__*'
+FIGMA_TOOLS = 'mcp__claude_ai_Figma__*'
 REVIEWER_EFFORT = 'high'
 CREDENTIAL_FILES = {'~/.ssh', '~/.aws', '~/.config/gh', '~/.git-credentials'}
 PUBLISH_ASK = {'Bash(git push:*)', 'Bash(gh pr create:*)', 'Bash(gh pr merge:*)', 'Bash(gh release:*)'}
@@ -146,7 +146,7 @@ def check_agent(name, text):
         problems.append(f'{name}: no maxTurns -- read-only personas are capped (adr/0055)')
 
     base = FIGMA_VARIANTS.get(name, name)
-    if name in FIGMA_VARIANTS.values() and any(t.startswith('mcp__figma') for t in tools or []):
+    if name in FIGMA_VARIANTS.values() and any(t.startswith('mcp__claude_ai_Figma') for t in tools or []):
         problems.append(f'{name}: grants Figma tools -- they load in full on every call; only figma-{name} grants them (adr/0118)')
 
     if name in WRITERS:
