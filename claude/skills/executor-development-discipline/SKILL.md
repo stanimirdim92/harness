@@ -114,8 +114,36 @@ Commit a logical increment only when its intended behavior works, its required
 focused verification is green, and the tree is in a valid state. Use meaningful
 messages that explain the change and follow the repository's commit convention,
 and end each message with the `Refs: <TICKET>` trailer, plus `Task: T###` when
-the commit belongs to a plan task (`git-workflow-and-versioning` §Ticket trailers).
+the commit belongs to a plan task (§Ticket trailers below).
 A review fix or other unplanned commit has no `Task:`.
+
+Inspect recent commits (`git log -10 --oneline`) before the first message. If
+there is no clear convention, use Conventional Commits:
+`<type>[scope]: <description>`, with `feat!:` or a `BREAKING CHANGE:` footer
+for a breaking change.
+
+### Ticket trailers
+
+When the work belongs to a ticket, end the message with git trailers, whatever
+the subject convention is:
+
+```text
+Rank the most-relevant feed by score
+
+Refs: LD-442
+Task: T002
+```
+
+- `Refs:` — the ticket key. One trailer per ticket, or comma-separated keys.
+- `Task:` — the plan task id (`T###`), when the commit implements a planned
+  task. Omit it for review fixes and other unplanned commits.
+
+Trailers go in the last paragraph, `Key: value`, with no blank line between
+them. Git parses them (`git log --format='%(trailers:key=Refs,valueonly)'`),
+so tools find a ticket's commits exactly. If the repository already uses a
+ticket trailer under another key, use that key alongside `Refs:`. For
+`executor` and `test-engineer`, the `require-commit-trailers.sh` hook denies a
+commit whose new message has no `Refs:` trailer.
 
 Invocation through `/build` authorizes these scoped local commits for the
 approved task unless the user explicitly requests an uncommitted result;

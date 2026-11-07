@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Fixture tests for skills/git-workflow-and-versioning/scripts/base-check.sh
+# Fixture tests for skills/code-review-and-quality/scripts/base-check.sh
 # (ADR 0095): base current, base moved and clean, two changes that pass alone
 # but fail together, a merge conflict, usage errors, the candidate untouched, and
 # two concurrent checks of one candidate that must not share a scratch checkout.
 set -uo pipefail
-SCRIPT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../claude/skills/git-workflow-and-versioning/scripts" && pwd)/base-check.sh"
+SCRIPT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../claude/skills/code-review-and-quality/scripts" && pwd)/base-check.sh"
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 PASS=0; FAIL=0
 g() { git -C "$R" -c user.email=t@t -c user.name=t "$@" >/dev/null 2>&1; }

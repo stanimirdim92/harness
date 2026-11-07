@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # PreToolUse hook (matcher: Bash), scoped to the writing personas via their
 # frontmatter `hooks:` — executor and test-engineer. Denies a `git commit`
-# whose message has no `Refs:` trailer (git-workflow-and-versioning §Ticket
+# whose message has no `Refs:` trailer (executor-development-discipline §Ticket
 # trailers, ADR 0073). Plan coverage (`recall.py --trailer-only`) finds a
 # ticket's commits by that trailer; a commit without it is invisible to it.
 #
@@ -67,6 +67,6 @@ else
 fi
 
 if ! grep -Eq "(^|[[:space:]\"'])Refs:[[:space:]]*[A-Z][A-Z0-9]+-[0-9]+" <<<"$message"; then
-  deny "End the commit message with git trailers: a blank line, then \`Refs: <TICKET>\` (for example \`Refs: LD-442\`) and, for a planned task, \`Task: T###\` on the next line (git-workflow-and-versioning §Ticket trailers). Plan coverage finds a ticket's commits by \`Refs:\`."
+  deny "End the commit message with git trailers: a blank line, then \`Refs: <TICKET>\` (for example \`Refs: LD-442\`) and, for a planned task, \`Task: T###\` on the next line (executor-development-discipline §Ticket trailers). Plan coverage finds a ticket's commits by \`Refs:\`."
 fi
 exit 0

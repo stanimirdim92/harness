@@ -240,7 +240,7 @@ except for the one-run mutation in §6.
 
 - Verify every test-only change with the repository's own commands.
 - Commit a **passing** test-only change separately with a clear `test:` commit
-  message that ends with the `Refs: <TICKET>` trailer (`git-workflow-and-versioning`
+  message that ends with the `Refs: <TICKET>` trailer (`executor-development-discipline`
   §Ticket trailers); the commit hook denies a message without it. `/test`
   invocation authorizes only that scoped local commit.
 - If a test proves a production defect, preserve the failing reproduction as an

@@ -80,7 +80,7 @@ the owner does not pre-authorize stays a stop.
 Only explicit human approval permits Approved and Ready for /build. After
 approval, commit the plan and todo in one scoped commit. Stage only those two
 files. End the message with the `Refs: <TICKET>` trailer
-(`git-workflow-and-versioning` §Ticket trailers). Then stop and recommend
+(`executor-development-discipline` §Ticket trailers). Then stop and recommend
 `/clear` before `/build`, which resumes from the
 plan and task packets (ADR 0084). `/plan` authorizes planning only; it does not implement or invoke
 `/build`, `/test`, `/review`, or `/ship`.

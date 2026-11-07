@@ -105,7 +105,7 @@ base into a scratch worktree, runs the plan's integrated verification commands
 there, and removes it.
 
 ```bash
-~/.claude/skills/git-workflow-and-versioning/scripts/base-check.sh \
+~/.claude/skills/code-review-and-quality/scripts/base-check.sh \
     --base origin/<base branch> [--setup "<worktree setup command>"] -- "<integrated command>" ...
 ```
 

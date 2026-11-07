@@ -89,21 +89,6 @@ echo "==> Figma design-to-code skill"
 "$(dirname "${BASH_SOURCE[0]}")/../../tools/setup/fetch-figma-skill.sh" || \
   echo "    note: figma-design-to-code skill not installed; rerun tools/setup/fetch-figma-skill.sh"
 
-echo "==> Context7 docs MCP server (user scope, all projects)"
-# Works without a key at low rate limits; set CONTEXT7_API_KEY for a higher
-# limit (free key at https://context7.com/dashboard). The branch decides only
-# whether an auth header exists at all — a header carrying an unexpanded
-# `${CONTEXT7_API_KEY}` is a malformed credential, not the same thing as
-# sending none. The header value itself stays a placeholder either way.
-if [ -n "${CONTEXT7_API_KEY:-}" ]; then
-  add_server context7 --transport http https://mcp.context7.com/mcp \
-    --header 'Authorization: Bearer ${CONTEXT7_API_KEY}' \
-    --scope user
-else
-  echo "    note: \$CONTEXT7_API_KEY unset — adding unauthenticated (low rate limit)."
-  add_server context7 --transport http https://mcp.context7.com/mcp --scope user
-fi
-
 echo "==> Structurizr MCP server (user scope, all projects)"
 # Official hosted instance — DSL validate/parse/inspect plus Mermaid and
 # PlantUML export tools. No auth needed for these; server workspace CRUD
