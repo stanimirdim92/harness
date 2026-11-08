@@ -198,8 +198,8 @@
   "enabledPlugins": {
     "episodic-memory@superpowers-marketplace": true,
     "typescript-lsp@claude-plugins-official": true,
-    "qdrant-skills@knowledge-work-plugins": true,
-    "llm-application-dev@claude-code-workflows": true
+    "qdrant-skills@knowledge-work-plugins": false,
+    "llm-application-dev@claude-code-workflows": false
   },
   "extraKnownMarketplaces": {
     "knowledge-work-plugins": {

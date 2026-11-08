@@ -39,26 +39,13 @@ add_server() {
   claude mcp add "$name" "$@"
 }
 
-# Warns (does not fail) about a variable the stored config references but the
-# current shell doesn't set — the config is still written correctly; the server
-# just won't authenticate until the variable is exported where Claude Code runs.
-warn_unset() {
-  if [ -z "${!1:-}" ]; then
-    echo "    note: \$$1 is not set in this shell — export it where Claude Code starts, or the server won't authenticate."
-  fi
-}
-
-echo "==> GitHub MCP server (user scope, all projects)"
-warn_unset GITHUB_TOKEN
-add_server github --transport http https://api.githubcopilot.com/mcp/ \
-  --header 'Authorization: Bearer ${GITHUB_TOKEN}' \
-  --scope user
-
-echo "==> Apify MCP server (user scope, all projects)"
-warn_unset APIFY_TOKEN
-add_server apify --transport http https://mcp.apify.com/ \
-  --header 'Authorization: Bearer ${APIFY_TOKEN}' \
-  --scope user
+# GitHub: no MCP server. The `gh` CLI covers GitHub work.
+#
+# Apify: not user-wide. Only the leadbuster project uses it, so add it there
+# at local scope, from that project's root:
+#
+#   claude mcp add apify --transport http https://mcp.apify.com/ \
+#     --header 'Authorization: Bearer ${APIFY_TOKEN}' --scope local
 
 # Deliberately NOT configured: @modelcontextprotocol/server-filesystem.
 # It was previously added at user scope rooted at "$HOME", which reached
