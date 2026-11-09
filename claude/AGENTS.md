@@ -148,110 +148,54 @@ as a hypothesis, and only when the user asks.
   user decisions, architectural decisions, changed files, verification evidence,
   blockers, and remaining work.
 - For ticket work, write remaining work, open questions and known failures to
-  `docs/tasks/<TICKET>-open.md` (`references/plan-quality-gates.md` §6), not
-  only to the chat or a compaction summary.
+  `docs/tasks/<TICKET>-open.md`
+  (`~/.claude/references/plan-quality-gates.md` §6), not only to the chat or a
+  compaction summary.
 
 ## Writing for humans
 
-Write prose a person reads in a simplified technical English, based on
-ASD-STE100. This applies to reports, gate results, handoffs, updates, and the
-prose in specs, plans, and ADRs. It does not apply to code, commit messages,
-identifiers, or quoted evidence.
+Write prose a person reads in simplified technical English (ASD-STE100):
+reports, gate results, handoffs, updates, and the prose in specs, plans and
+ADRs. Code, commit messages, identifiers and quoted evidence are exempt.
 
-- Write one instruction per sentence. Keep it to 20 words or fewer.
-- Keep a descriptive sentence to 25 words or fewer.
-- Use the active voice and simple tenses.
-- Use one word for one thing. Do not change the term to vary the style.
-- Do not stack more than three nouns ("queue retry policy", not
-  "queue job retry backoff policy").
-- Put steps, conditions, and parallel items in a vertical list.
-- Write one topic per paragraph. Start with the result, then give the reason.
+- One instruction per sentence, 20 words or fewer. A descriptive sentence has
+  25 words or fewer.
+- Use the active voice, simple tenses, and one word for one thing.
+- Stack no more than three nouns ("queue retry policy").
+- Put steps, conditions and parallel items in a vertical list.
+- One topic per paragraph. Give the result first, then the reason.
 
-Use the rule about 80% of the time. Break it when a longer sentence is
-clearer, for example to keep a condition next to its consequence.
-`tools/checks/check-writing.py FILE` measures the sentence lengths.
+Follow these about 80% of the time. Break one when that is clearer, for
+example to keep a condition next to its consequence. In the harness repo,
+`tools/checks/check-writing.py FILE` measures sentence length.
 - *Catches: reports the reader must parse twice before they can act.*
 
 ## Worktrees
 
-Ticket-scoped work defaults to one isolated worktree per ticket.
-
-- Start it with `claude --worktree <ticket>` or, in the Codex CLI,
-  `codex-worktree <ticket>` from the project. The Codex launcher uses
-  `.codex/worktrees/<ticket>` in the main checkout and a `codex/<ticket>` branch;
-  different tickets run as independent sessions in separate terminals. In the
-  desktop app, choose Worktree in a new chat and attach a branch before writers.
-  Claude's `worktree.baseRef` is `head` here, so the worktree branches from the
-  local `HEAD` you start from. **Pull first:** starting from a stale `main`
-  gives a ticket branch stale by the same amount, and the worktree is created
-  successfully either way.
-- Sequential executors inherit the ticket checkout. Explicitly request
-  `isolation: worktree` for each concurrent writer; preserve independent
-  reviewer contexts and the test-engineer's isolated checkout. `head` makes
-  those child worktrees inherit the session's ticket commits (docs/adr/0058).
-- Two hooks protect the session boundary (docs/adr/0057, 0058). Session start
-  warns about a stale default branch or a fresh ticket without its own commits.
-  Separately, an optional project `bin/worktree-doctor.sh --infrastructure`
-  reports outdated runner infrastructure even mid-ticket. Writing dispatch is
-  denied on the main checkout's default branch, detached HEAD, unverifiable
-  input/Git state, or failed infrastructure readiness. Valid read-only personas
-  remain unrestricted. Reconcile the reported infrastructure changes without
-  merging unrelated ticket work.
-- Claude Code places managed worktrees in `.claude/worktrees/`, which belongs in
-  the project's `.gitignore`. Prefer that location: `.worktreeinclude`,
-  subagent `isolation: worktree`, and the cleanup sweep only apply there.
-  The Codex CLI launcher separately manages `.codex/worktrees/`, excludes it
-  locally, copies `.worktreeinclude` files, and retains checkouts after exit.
-- Gitignored files a worktree needs — `.env`, local config, credentials
-  templates — go in a project-root `.worktreeinclude` using gitignore syntax.
-  Claude Code and Codex both copy matching **ignored** files into every managed
-  worktree; tracked files are never duplicated. A `WorktreeCreate` hook replaces
-  this, so copy inside the hook script instead. Copies are a cache, not proof
-  of readiness. Dependency directories must belong to the checkout, never
-  shared symlinks.
-- A worktree is a fresh checkout: dependencies are not installed and no build
-  or test command works until they are. Specification and planning work needs
-  none of them; anything that builds, tests, or lints does.
-- Use `git worktree add` directly only to check out an existing branch or to
-  place a worktree outside the repository; the Codex launcher owns creation
-  inside its dedicated directory. Remove with `git worktree remove`,
-  never `rm -rf` — that strands metadata, recoverable with `git worktree prune`.
-- A branch lives in exactly one worktree. Free it with `git worktree remove`
-  before checking it out elsewhere.
-- In a worktree session, Claude Code refuses commands it cannot prove stay
-  inside the worktree. Each refusal costs a retry. Avoid the refused forms:
-  - Resolve `$HOME` once (`echo $HOME`). Then write literal absolute paths,
-    such as `python3 /home/<user>/.claude/skills/...`. Never pass `"$HOME/..."`
-    as an argument. Harness examples write `~/.claude/...`; replace `~` too.
-  - Write and change files with Write or Edit, not a heredoc or a script.
-  - Run each git command on its own, not inside `;`, `&&` or a heredoc.
-    Write a long commit message to a file with Write, then run
-    `git commit -F <file>`.
-- Concurrency is bounded by the conditions in `commands/build.md`, not by a
-  fixed count. Worktrees isolate git and files only; a database, queue, cache,
-  or fixed port is still shared, and concurrent writers need their own instance
-  of every mutable resource their checks touch.
+- Ticket-scoped work defaults to one isolated worktree per ticket. Pull first:
+  the worktree branches from the local `HEAD`.
+- In a worktree session, read `~/.claude/references/worktrees.md` before you
+  run git or shell commands. It lists the command forms Claude Code refuses
+  there.
+- Setup, `.worktreeinclude`, hooks, cleanup and concurrency rules are in the
+  same file.
 
 ## Agent orchestration
 
 - Delegate bounded outcomes with acceptance criteria and verification.
 - Commands/user orchestrate; personas do not dispatch personas.
-- Reuse one implementation executor across related tasks in a workstream
-  while it was idle under about 15 minutes and holds under about 350k tokens.
-  Otherwise start a fresh one with the task packet, the previous handoff
-  report and the commits so far. Review fixes always get a fresh executor
-  (`commands/build.md` §2).
-- Parallel writers require separate worktrees/branches and isolated runtimes;
-  fan out whenever those hold, queue when any is unproven. Speed never comes
-  from skipping or weakening verification.
 - Give subagents small task packets: outcome, criteria, relevant rules,
   precedents, contracts, and verification. Prefer file pointers over copied docs.
+- Parallel writers need separate worktrees and isolated runtimes. Speed never
+  comes from skipping or weakening verification.
 - Do not widen tools/permissions or seek secrets to bypass an orchestration
   boundary.
 - Completion claims require executed evidence.
 
-Operational policy lives in `commands/build.md`, `commands/review.md`,
-`references/verification-triggers.md`, and `docs/agents.md`.
+Executor reuse and other operational policy live in
+`~/.claude/commands/build.md` §2, `~/.claude/commands/review.md`,
+`~/.claude/references/verification-triggers.md`, and
+`~/.claude/docs/agents.md`.
 
 ## Models
 
