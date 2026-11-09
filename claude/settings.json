@@ -4,7 +4,7 @@
     "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
     "OTEL_METRICS_EXPORTER": "otlp",
     "OTEL_LOGS_EXPORTER": "otlp",
-    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "500000",
+    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "200000",
     "ENABLE_TOOL_SEARCH": "true",
     "CLAUDE_CODE_AUTO_CONNECT_IDE": "true",
     "CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH": "1",
@@ -131,7 +131,7 @@
     "enableAllProjectMcpServers": true
   },
   "model": "opus[1m]",
-  "outputStyle": "Concise",
+  "enableAllProjectMcpServers": false,
   "hooks": {
     "PreToolUse": [
       {
@@ -181,6 +181,15 @@
             "command": "$HOME/.claude/hooks/format-edited-file.sh"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/filter-test-output.sh"
+          }
+        ]
       }
     ]
   },
@@ -198,6 +207,8 @@
   "enabledPlugins": {
     "episodic-memory@superpowers-marketplace": true,
     "typescript-lsp@claude-plugins-official": true,
+    "php-lsp@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
     "qdrant-skills@knowledge-work-plugins": false,
     "llm-application-dev@claude-code-workflows": false
   },
@@ -215,16 +226,18 @@
       }
     }
   },
+  "outputStyle": "Concise",
   "effortLevel": "medium",
   "modelSettings": {
     "claude-sonnet-5-5": {
       "effortLevel": "high"
     },
-    "claude-fable-5-1": {
-      "effortLevel": "high"
+    "claude-fable-5-2": {
+      "effortLevel": "medium"
     }
   },
-  "advisorModel": "claude-fable-5-1",
+  "advisorModel": "claude-fable-5-2",
+  "awaySummaryEnabled": true,
   "autoMemoryEnabled": true,
   "theme": "dark-ansi",
   "editorMode": "normal",
@@ -232,7 +245,6 @@
   "teammateMode": "auto",
   "remoteControlAtStartup": true,
   "inputNeededNotifEnabled": true,
-  "awaySummaryEnabled": true,
   "agentPushNotifEnabled": true,
-  "enableAllProjectMcpServers": false
+  "autoCompactWindow": 200000
 }

@@ -16,6 +16,7 @@ push.
 | `test-handoff-hook.sh` | The hook that stops a writer agent from finishing without its handoff report |
 | `test-worktree-hooks.sh` | The stale-base warning and the rule that writers work in a worktree |
 | `test-isolated-test-runner.sh` | The rule that a project's tests run in isolation |
+| `test-filter-test-output.sh` | The hook that shortens the output of a long, passing test run |
 | `validate-frontmatter-test.py`, `validate-artifact-paths-test.py`, `check-references-test.py`, `check-writing-test.py` | The checks in `../checks/` |
 | `test-link-dotfiles.sh`, `test-fetch-figma-skill.sh` | The scripts in `../setup/` |
 | `test-run-metrics.sh` | `../run/run-metrics.sh` |

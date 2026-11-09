@@ -72,6 +72,10 @@ jobs:
       - name: Hooks — project formatter
         run: bash tools/tests/test-format-hook.sh
 
+      # The test-output filter shortens passing runs only (adr/0123).
+      - name: Hooks — test output filter
+        run: bash tools/tests/test-filter-test-output.sh
+
       # Enforcement: the two worktree-base guards (adr/0057). Real git
       # fixtures -- bare origin, main checkout, linked worktree, feature
       # branch -- because both hooks decide from git state.
