@@ -79,6 +79,16 @@ MUTATING_TOOLS = {'Write', 'Edit', 'NotebookEdit', 'Bash'}
 # pinned to 1 in settings, but an explicit grant is a second way in.
 DISPATCH_TOOLS = {'Agent', 'Task', 'SendMessage'}
 
+# Claude Code silently ignores a frontmatter key it does not know, so a typo
+# (`maxturns`, `isolaton`) quietly drops a gate. This is the documented field
+# set (https://code.claude.com/docs/en/sub-agents, adr/0125).
+KNOWN_FIELDS = {
+    'name', 'description', 'tools', 'disallowedTools', 'model', 'permissionMode',
+    'maxTurns', 'autoCompactWindow', 'skills', 'mcpServers', 'hooks', 'memory',
+    'background', 'omitClaudeMd', 'effort', 'isolation', 'color', 'initialPrompt',
+    'experimental',
+}
+
 REQUIRED_SETTINGS = {
     'CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH': '1',
     'CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS': '0',
@@ -118,6 +128,10 @@ def check_agent(name, text):
     block = frontmatter(text)
     if block is None:
         return [f'{name}: no YAML frontmatter']
+
+    for key in re.findall(r'^([^\s#][^:]*):', block, re.MULTILINE):
+        if key not in KNOWN_FIELDS:
+            problems.append(f'{name}: unknown frontmatter field {key!r} -- Claude Code ignores it silently (adr/0125)')
 
     if scalar(block, 'name') != name:
         problems.append(f'{name}: frontmatter name is {scalar(block, "name")!r}, expected {name!r}')

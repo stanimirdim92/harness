@@ -73,6 +73,32 @@ class RepoProject(unittest.TestCase):
         self.assertIsNone(run.written_spec(self.project, run.specs_snapshot(self.project), 'LD-3'))
 
 
+class DecisionBrief(unittest.TestCase):
+    def test_a_brief_is_answered_once_without_the_reference(self):
+        calls = []
+
+        def fake(project, prompt, budget, resume=None):
+            calls.append((prompt, budget, resume))
+            if resume:
+                (project / 'docs/specs').mkdir(parents=True, exist_ok=True)
+                (project / 'docs/specs/LD-9-SPEC.md').write_text('drafted\n')
+                return {'result': 'done', 'total_cost_usd': 2}
+            return {'result': 'Q1 brief', 'session_id': 's1', 'total_cost_usd': 3}
+
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / 'intake.md').write_text('intake\n')
+            original, run.run_claude = run.run_claude, fake
+            try:
+                spec, meta = run.produce({'ticket': 'LD-9', 'intake': 'intake.md'}, Path(tmp), 15)
+            finally:
+                run.run_claude = original
+        self.assertEqual(spec, 'drafted\n')
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(calls[1], (run.BRIEF_REPLY, 12, 's1'))
+        self.assertEqual(meta['decision_brief'], 'Q1 brief')
+        self.assertEqual(meta['total_cost_usd'], 5)
+
+
 class EmptyProject(unittest.TestCase):
     def test_empty_project_still_builds(self):
         with tempfile.TemporaryDirectory() as tmp:

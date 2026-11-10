@@ -104,6 +104,11 @@ class DenyCases(unittest.TestCase):
         problems = vf.check_agent('repo-recon', agent('repo-recon', body))
         self.assertTrue(any('no explicit `tools:`' in p for p in problems))
 
+    def test_misspelled_field_is_flagged(self):
+        body = RECON.replace('maxTurns:', 'maxturns:')
+        problems = vf.check_agent('repo-recon', agent('repo-recon', body))
+        self.assertTrue(any("unknown frontmatter field 'maxturns'" in p for p in problems))
+
     def test_reviewer_granted_bash(self):
         body = RECON.replace('tools: Read, Grep, Glob', 'tools: Read, Grep, Glob, Bash')
         problems = vf.check_agent('repo-recon', agent('repo-recon', body))

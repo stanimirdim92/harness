@@ -157,6 +157,10 @@
           {
             "type": "command",
             "command": "$HOME/.claude/hooks/require-worktree-for-writers.sh"
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/require-pinned-model.sh"
           }
         ]
       }

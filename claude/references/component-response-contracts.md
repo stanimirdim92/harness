@@ -14,7 +14,7 @@ sources — review it whenever a file listed below changes shape.
 
 ## 1. Claude hooks
 
-Ten files live in `../hooks/`: nine hooks and one sourced library. Each hook is a
+Twelve files live in `../hooks/`: eleven hooks and one sourced library. Each hook is a
 `PreToolUse`, `PostToolUse`, `SubagentStop`, or `SessionStart` script that reads one JSON object on stdin and prints one JSON
 decision object on stdout, always exiting 0 — the decision, not the exit code,
 is what the host runtime acts on (per
@@ -26,9 +26,11 @@ is what the host runtime acts on (per
 | `block-destructive-bash.sh` | `PreToolUse` (`Bash`) | global | `permissionDecision: "deny"` |
 | `require-commit-trailers.sh` | `PreToolUse` (`Bash`) | `executor`, `test-engineer` only | `permissionDecision: "deny"` on a new commit message without `Refs:` (ADR 0073) |
 | `format-edited-file.sh` | `PostToolUse` (`Edit`\|`Write`\|`MultiEdit`) | global | no decision: runs the project's own formatter on the one file, prints one line on failure (ADR 0107) |
+| `filter-test-output.sh` | `PostToolUse` (`Bash`) | global, test runners only | `updatedToolOutput` with a shortened passing run, or silent (ADR 0123) |
 | `warn-force-push.sh` | `PreToolUse` (`Bash`) | global | `permissionDecision: "ask"` |
 | `require-isolated-test-runner.sh` | `PreToolUse` (`Bash`) | global, evidence-gated | `permissionDecision: "deny"` or silent allow |
 | `require-worktree-for-writers.sh` | `PreToolUse` (`Agent`\|`Task`) | dispatch of `executor`/`test-engineer` only | `permissionDecision: "deny"` or silent allow |
+| `require-pinned-model.sh` | `PreToolUse` (`Agent`\|`Task`) | dispatch with a per-call `model` to a persona in `claude/agents/` | `permissionDecision: "deny"` or silent allow (ADR 0125) |
 | `require-handoff-report.sh` | `SubagentStop` | `executor`, `test-engineer` only | `decision: "block"` or silent allow |
 | `warn-stale-base.sh` | `SessionStart` (`startup`\|`resume`) | global | `systemMessage` + `additionalContext`, or silent |
 | `worktree-readiness.sh` | not a hook — a sourced shell function | shared library | `0`/`1` return + one line on stdout |
@@ -36,7 +38,7 @@ is what the host runtime acts on (per
 ### `PreToolUse` deny/ask — `{hookSpecificOutput: {hookEventName, permissionDecision, permissionDecisionReason}}`
 
 `block-agent-push.sh`, `block-destructive-bash.sh`, `require-isolated-test-runner.sh`,
-and `require-worktree-for-writers.sh` all deny with:
+`require-worktree-for-writers.sh`, and `require-pinned-model.sh` all deny with:
 
 ```json
 {

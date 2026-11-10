@@ -185,13 +185,33 @@ push 'yarn test'                                allow
 mkdir "$TMP/no-jq"
 ln -s "$(command -v cat)" "$TMP/no-jq/cat"
 BASH_BIN="$(command -v bash)"
-for hook in "$BLOCK" "$WARN" "$PUSH" "$HOOKS/require-commit-trailers.sh" "$HOOKS/require-isolated-test-runner.sh"; do
+for hook in "$BLOCK" "$WARN" "$PUSH" "$HOOKS/require-commit-trailers.sh" "$HOOKS/require-isolated-test-runner.sh" "$HOOKS/require-pinned-model.sh"; do
   out="$(jq -n --arg d "$TMP/on-feature" '{tool_input:{command:"git status"},cwd:$d}' \
     | PATH="$TMP/no-jq" "$BASH_BIN" "$hook" 2>/dev/null)"
   got="$(jq -r '.hookSpecificOutput.permissionDecision // "allow"' <<<"$out" 2>/dev/null)"
   [ -n "$got" ] || got="allow"
   if [ "$got" = "deny" ]; then PASS=$((PASS+1)); else FAIL=$((FAIL+1)); FAILED+=("[no-jq] $(basename "$hook") — expected deny, got $got"); fi
 done
+
+# ------------------------------------------------------------ pinned model
+MODEL="$HOOKS/require-pinned-model.sh"
+model() { # subagent_type, model ("" = none), expected
+  local got
+  got="$(jq -n --arg a "$1" --arg m "$2" '{tool_input:({subagent_type:$a} + (if $m == "" then {} else {model:$m} end))}' \
+    | bash "$MODEL" 2>/dev/null | jq -r '.hookSpecificOutput.permissionDecision // "allow"' 2>/dev/null)"
+  [ -n "$got" ] || got="allow"
+  if [ "$got" = "$3" ]; then PASS=$((PASS+1)); else FAIL=$((FAIL+1)); FAILED+=("[pinned-model] $1 model=$2 — expected $3, got $got"); fi
+}
+model code-reviewer ""       allow   # no override: the pin applies
+model code-reviewer sonnet   deny    # downgrade from opus
+model code-reviewer opus     deny    # same tier would drop the [1m] pin
+model code-reviewer fable    allow   # upward
+model executor      haiku    deny
+model executor      sonnet   deny    # alias floats past the version pin
+model executor      opus     allow
+model Explore       haiku    allow   # built-in agent: no persona file
+model general-purpose sonnet allow
+model executor      'x"y'    deny    # malformed input fails closed
 
 # ------------------------------------------------------------------ report
 echo "hooks: $PASS passed, $FAIL failed"

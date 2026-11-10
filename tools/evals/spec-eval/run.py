@@ -188,21 +188,39 @@ def produce(fixture, fixture_dir, budget, repo=None, at=None):
                   "jira-ticket skill against offline Jira snapshots. There is no live Jira connection in "
                   "this session, so treat this as the user-supplied intake and do not attempt to refetch it.\n\n"
                   f"--- BEGIN SUPPLIED INTAKE ---\n{intake}\n--- END SUPPLIED INTAKE ---")
-        result = subprocess.run(
-            ['claude', '-p', prompt, '--setting-sources', 'project,local',
-             '--add-dir', str(HARNESS), '--permission-mode', 'acceptEdits',
-             '--allowedTools', 'Read', 'Glob', 'Grep', 'Write', 'Edit', 'Task', 'Agent', 'TodoWrite', 'Skill',
-             # /spec runs its shape check before presenting (commands/spec.md).
-             'Bash(python3 *check-spec.py*)',
-             '--max-budget-usd', str(budget), '--output-format', 'json'],
-            cwd=project, capture_output=True, text=True, timeout=1800)
-        if result.returncode != 0:
-            raise RuntimeError(f'claude exited {result.returncode}: {result.stderr[-600:]}')
-        meta = json.loads(result.stdout)
+        meta = run_claude(project, prompt, budget)
         spec = written_spec(project, before, fixture['ticket'])
+        if spec is None and meta.get('session_id'):
+            # /spec stops at a decision brief (commands/spec.md) and no owner can
+            # answer here. Answer once without leaking the reference's decisions.
+            first = meta
+            meta = run_claude(project, BRIEF_REPLY, max(budget - first.get('total_cost_usd', 0), 1),
+                              resume=first['session_id'])
+            meta['decision_brief'] = first.get('result', '')
+            meta['total_cost_usd'] = first.get('total_cost_usd', 0) + meta.get('total_cost_usd', 0)
+            spec = written_spec(project, before, fixture['ticket'])
         if spec is None:
             raise RuntimeError('no spec written; model said: ' + meta.get('result', '')[:400])
         return spec, meta
+
+
+BRIEF_REPLY = ('decisions: the owner takes your recommended option for every question in the brief. '
+               'Record each as a decision sourced to this reply, then draft the spec now. Do not ask again.')
+
+
+def run_claude(project, prompt, budget, resume: str | None = None):
+    result = subprocess.run(
+        ['claude', '-p', prompt, *(['--resume', resume] if resume else []),
+         '--setting-sources', 'project,local',
+         '--add-dir', str(HARNESS), '--permission-mode', 'acceptEdits',
+         '--allowedTools', 'Read', 'Glob', 'Grep', 'Write', 'Edit', 'Task', 'Agent', 'TodoWrite', 'Skill',
+         # /spec runs its shape check before presenting (commands/spec.md).
+         'Bash(python3 *check-spec.py*)',
+         '--max-budget-usd', str(budget), '--output-format', 'json'],
+        cwd=project, capture_output=True, text=True, timeout=1800)
+    if result.returncode != 0:
+        raise RuntimeError(f'claude exited {result.returncode}: {result.stderr[-600:]}')
+    return json.loads(result.stdout)
 
 
 # ---------------------------------------------------------------- new fixture

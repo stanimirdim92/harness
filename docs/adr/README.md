@@ -50,7 +50,7 @@ that explanation here, just the index.
 | [0040](0040-openspec-conventions-adopted.md) | Four conventions adopted from Fission-AI/openspec; nothing vendored | Accepted |
 | [0041](0041-recon-delegated-to-repo-recon-subagent.md) | Repository recon delegated to a `repo-recon` subagent | Partially superseded by [0051](0051-repository-recon-made-evidence-triggered.md) (agent isolation retained; dispatch is no longer mandatory) |
 | [0042](0042-third-executor-as-conditional-exception.md) | A third concurrent executor as a conditional exception, not a raised cap | Superseded by [0054](0054-executor-concurrency-condition-gated-not-capped.md) |
-| [0043](0043-automatic-memory-and-compaction-window-restored.md) | Automatic memory and the 500k compaction window restored, reversing 0037 | Accepted |
+| [0043](0043-automatic-memory-and-compaction-window-restored.md) | Automatic memory and the 500k compaction window restored, reversing 0037 | Partially superseded by [0124](0124-compaction-window-200k-orchestrator-stays-1m.md) (window back to 200k; automatic memory stands) |
 | [0044](0044-config-security-hardening-pass.md) | Config security hardening: enforcement made to match the stated guarantees | Partially superseded by [0049](0049-durable-spec-pin-and-hook-bypasses.md) (alias-awareness was one normalisation gap of several) |
 | [0045](0045-spec-approval-state-change-impact-and-requirement-traceability.md) | Spec approval state, change-impact semantics, and requirement traceability | Accepted |
 | [0046](0046-plan-technical-approach-spec-pinning-and-plan-gates.md) | Plan gains a technical approach, a spec pin, and its own approval state | Partially superseded by [0049](0049-durable-spec-pin-and-hook-bypasses.md) (the `hash-object` pin was not durable) |
@@ -70,7 +70,7 @@ that explanation here, just the index.
 | [0060](0060-codex-routine-roles-terra-xhigh.md) | Codex routine roles use Terra at xhigh | Accepted |
 | [0061](0061-codex-cli-ticket-worktree-launcher.md) | Independent Codex CLI sessions in ticket worktrees | Accepted |
 | [0062](0062-codex-rules-curated-file-separate-from-approvals.md) | Codex rules: a curated synced file, separate from the approvals file | Accepted |
-| [0063](0063-sonnet-5-5-pins-and-fable-advisor.md) | Sonnet 5.5 replaces Sonnet 5; the advisor moves to Fable 5.1 | Accepted |
+| [0063](0063-sonnet-5-5-pins-and-fable-advisor.md) | Sonnet 5.5 replaces Sonnet 5; the advisor moves to Fable 5.1 | Partially superseded by [0126](0126-repo-recon-effort-medium.md) (repo-recon effort is medium) |
 | [0064](0064-caveman-skill-dropped.md) | Caveman skill dropped | Accepted |
 | [0065](0065-one-spec-per-ticket-capability-map-as-section.md) | One spec per ticket; the capability map is a section of it | Accepted |
 | [0066](0066-opus-5-5-effort-and-early-stop-continuations.md) | Opus 5.5: medium session effort, and bounded continuations for early stops | Accepted |
@@ -128,6 +128,9 @@ that explanation here, just the index.
 | [0118](0118-figma-tools-only-in-figma-copies.md) | Figma tools only in figma- copies of executor and test-engineer | Accepted |
 | [0119](0119-headless-runners-removed.md) | Headless runners removed | Accepted |
 | [0120](0120-review-sarif-committed-under-docs.md) | Review SARIF committed under docs/reviews | Accepted |
+| [0124](0124-compaction-window-200k-orchestrator-stays-1m.md) | Compaction window back to 200k; the orchestrator stays on opus[1m] | Accepted |
+| [0125](0125-subagent-doc-alignment-pins-fields-cache.md) | Subagent model pins enforced, frontmatter fields checked, executor cache 1h | Accepted |
+| [0126](0126-repo-recon-effort-medium.md) | repo-recon runs at effort medium | Accepted |
 
 Adding a new decision: create the next-numbered `NNNN-kebab-title.md`
 (4-digit, zero-padded — MADR-style, matches the files already here) and

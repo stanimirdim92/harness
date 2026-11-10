@@ -6,6 +6,8 @@ skills:
   - executor-development-discipline
   - test-driven-development
 model: claude-sonnet-5-5
+experimental:
+  cacheTtl: 1h
 hooks:
   PreToolUse:
     - matcher: Bash
