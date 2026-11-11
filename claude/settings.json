@@ -4,7 +4,7 @@
     "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
     "OTEL_METRICS_EXPORTER": "otlp",
     "OTEL_LOGS_EXPORTER": "otlp",
-    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "200000",
+    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "400000",
     "ENABLE_TOOL_SEARCH": "true",
     "CLAUDE_CODE_AUTO_CONNECT_IDE": "true",
     "CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH": "1",
@@ -252,6 +252,6 @@
   "remoteControlAtStartup": true,
   "inputNeededNotifEnabled": true,
   "agentPushNotifEnabled": true,
-  "autoCompactWindow": 200000,
-  "bashOutputMaxChars": 10000
+  "autoCompactWindow": 400000,
+  "bashOutputMaxChars": 30000
 }

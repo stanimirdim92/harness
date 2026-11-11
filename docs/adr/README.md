@@ -128,11 +128,12 @@ that explanation here, just the index.
 | [0118](0118-figma-tools-only-in-figma-copies.md) | Figma tools only in figma- copies of executor and test-engineer | Accepted |
 | [0119](0119-headless-runners-removed.md) | Headless runners removed | Accepted |
 | [0120](0120-review-sarif-committed-under-docs.md) | Review SARIF committed under docs/reviews | Accepted |
-| [0124](0124-compaction-window-200k-orchestrator-stays-1m.md) | Compaction window back to 200k; the orchestrator stays on opus[1m] | Accepted |
+| [0124](0124-compaction-window-200k-orchestrator-stays-1m.md) | Compaction window back to 200k; the orchestrator stays on opus[1m] | Partially superseded by [0129](0129-compaction-window-400k.md) (window raised to 400k; opus[1m] stands) |
 | [0125](0125-subagent-doc-alignment-pins-fields-cache.md) | Subagent model pins enforced, frontmatter fields checked, executor cache 1h | Accepted |
 | [0126](0126-repo-recon-effort-medium.md) | repo-recon runs at effort medium | Accepted |
 | [0127](0127-repo-recon-writes-its-report-file.md) | repo-recon writes its report to a file | Accepted |
 | [0128](0128-explore-runs-on-haiku.md) | Explore runs on Haiku | Accepted |
+| [0129](0129-compaction-window-400k.md) | Compaction window raised to 400k | Accepted |
 
 Adding a new decision: create the next-numbered `NNNN-kebab-title.md`
 (4-digit, zero-padded — MADR-style, matches the files already here) and
