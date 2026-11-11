@@ -609,7 +609,7 @@ only `allow` rules. I did not test how Claude prefix rules treat wrappers.
 ### Fix now
 
 These changes fix existing rules, so they add no new gate. Add the fixture
-before each change. If the freeze also covers rule changes, move them into H1.
+before each change.
 
 1. `block-destructive-bash.sh:57`: accept any flags before the recursive or
    force flag. Fixes cases 6 and 7.
@@ -681,9 +681,8 @@ Keep H3 as part of W1.
 - Ask on `-EncodedCommand`, because it hides the payload (248).
 - Still open from W1: the PowerShell tool name in your Claude Code version.
   Also open: whether Codex on Windows fires the same hook events.
-- Freeze: H3 extends the existing destructive-command gate to a new shell. It
-  asks and never denies, so it can ship with W1. This is my judgment; confirm
-  it.
+- H3 extends the existing destructive-command gate to a new shell. It asks
+  and never denies, so it can ship with W1.
 
 ### The three quick wins (re-judged)
 
@@ -698,8 +697,7 @@ Keep H3 as part of W1.
 2. **`curl | sh`: keep as ask, in Phase 4.**
    - Hermes keeps it in DANGEROUS (313). Its docs call it unrecoverable, but
      the code does not.
-   - It is a new gate, so it waits for the freeze to end.
-   - Port the whole group: 5 shells with paths, process substitution (314),
+    - Port the whole group: 5 shells with paths, process substitution (314),
      `eval`, `source` or `.` of `$(curl)` (316), decode pipes (332-338) and
      `iwr | iex` (259-260).
    - Add the negatives: case 39 and `echo bash is fast`.

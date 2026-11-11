@@ -144,6 +144,10 @@ as a hypothesis, and only when the user asks.
   credentials out of updates.
 - Keep raw tool output and resolved investigation out of active context once the
   conclusion is recorded.
+- Locate code with `rg -n` before you read it. Read the found range with
+  `sed -n 'A,Bp' FILE` or Read with offset/limit. Use `cat` only on files
+  under about 200 lines. Read instruction, rule, reference and template files
+  whole: a skipped section is a skipped gate.
 - Before compaction/session boundaries, preserve only goal/success criteria,
   user decisions, architectural decisions, changed files, verification evidence,
   blockers, and remaining work.

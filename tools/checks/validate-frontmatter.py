@@ -47,11 +47,14 @@ WRITER_HOOKS = ('block-agent-push.sh', 'require-commit-trailers.sh', 'require-ha
 # context session alias is also allowed; persona version pins remain strict.
 OPUS = 'opus[1m]'
 SONNET = 'claude-sonnet-5-5'
+HAIKU = 'claude-haiku-5-5'
 SESSION_MODELS = (OPUS, 'opus[1m]')
 
 REVIEWERS = {'code-reviewer', 'blind-reviewer', 'security-auditor',
              'distributed-systems-reviewer'}
 SONNET_PERSONAS = {'repo-recon', 'executor', 'test-engineer', 'figma-executor', 'figma-test-engineer'}
+# Overrides the built-in Explore, which otherwise inherits the session model.
+HAIKU_PERSONAS = {'Explore'}
 
 # A subagent has no tool search, so every MCP tool its `tools:` grants loads in
 # full on every call: all 40 Figma tools are about 37k tokens. Only a figma-*
@@ -72,8 +75,9 @@ SESSION_EFFORT = 'medium'
 
 # Personas that must never mutate anything. 0055: "reviewers read-only by tool
 # grant". Bash counts as a write tool here -- a reviewer with a shell can commit.
-READ_ONLY = REVIEWERS | {'repo-recon'}
+READ_ONLY = REVIEWERS | {'repo-recon', 'Explore'}
 MUTATING_TOOLS = {'Write', 'Edit', 'NotebookEdit', 'Bash'}
+RECON_WRITE_HOOK = 'limit-recon-write.sh'
 
 # Tools that would let a persona dispatch or talk to another one. Depth is
 # pinned to 1 in settings, but an explicit grant is a second way in.
@@ -141,7 +145,7 @@ def check_agent(name, text):
     if not model:
         problems.append(f'{name}: no model')
     else:
-        expected = SONNET if name in SONNET_PERSONAS else OPUS
+        expected = HAIKU if name in HAIKU_PERSONAS else SONNET if name in SONNET_PERSONAS else OPUS
         if model != expected:
             problems.append(f'{name}: model is {model!r}, expected {expected!r} (adr/0056)')
 
@@ -154,6 +158,9 @@ def check_agent(name, text):
             problems.append(f'{name}: grants {", ".join(granted_dispatch)} -- personas never dispatch personas (adr/0055)')
         if name in READ_ONLY:
             mutating = sorted(MUTATING_TOOLS.intersection(tools))
+            # repo-recon writes its own report file; the hook limits Write to it.
+            if name == 'repo-recon' and mutating == ['Write'] and RECON_WRITE_HOOK in block:
+                mutating = []
             if mutating:
                 problems.append(f'{name}: read-only persona grants {", ".join(mutating)}')
 

@@ -17,8 +17,6 @@ from the harness apply to every item:
 - Deterministic before probabilistic (AGENTS.md §5). A script beats a model call.
 - Changes to skills, rules and memory go through a reviewed commit. The agent
   never rewrites its own harness unasked.
-- The harness-v1 freeze excludes new **gates** until the observation log has
-  enough runs (`docs/observation-log.md`). Items that add a gate wait in Phase 4.
 
 What Hermes does that this harness already has:
 
@@ -118,8 +116,7 @@ holds in every mode, and secret scrubbing before data leaves the machine.
   - A `PreToolUse` hook on `Write` and `Edit` into the auto-memory folder and
     `~/.codex/memories/`. Deny invisible Unicode and a secret-shaped string.
     Do not deny a duplicate line; Hermes treats it as a no-op.
-  - Start in warn mode, because a new deny hook is a gate under the freeze.
-    Switch to deny after the freeze. Details: `hermes-research/memory.md`.
+  - Details: `hermes-research/memory.md`.
   - This is Hermes's memory write scan. Memory is loaded into every session, so
     an injected line there persists.
   - Verify: fixtures in `test-hooks.sh`.
@@ -188,11 +185,10 @@ and an error instead of silent truncation when a batch is too large.
     1200 s) and calibrate from the observation log.
   - Measurement only.
   - Verify: a fixture in `test-run-metrics.sh`.
-- **A2 — Reviewer result shape check.** Size M. ADR needed. Phase 4 (a gate).
+- **A2 — Reviewer result shape check.** Size M. ADR needed. Phase 4.
   - Extend the handoff hook to reviewers. A review must end with findings in
     the `component-response-contracts.md` shape (id, disposition, file, claim),
     and the hook allows one correction turn, as Hermes's `output_schema` does.
-  - Wait for the freeze: it is a new gate.
 - **C1 — Compaction rule wording.** Size S. No ADR.
   - Add to the global compaction rule: the latest request first, the user's
     own instructions and constraints word for word, and where the full record
@@ -297,7 +293,7 @@ a query sanitizer for hyphenated terms.
 | 1 — small, no gates | T1, M2, M3, S1, S2, A1 | Deterministic reports; they find the next fault early |
 | 2 — Windows, if wanted | W1 | Needs your decision on native Windows vs WSL2 |
 | 3 — larger | H1, H2, S3, T3 | H1 removes `jq` and the bash/Python split; S3 is the reviewed learning loop |
-| 4 — after the freeze | A2, F2 if needed, the read-size gate in `IDEAS.md` | New gates wait for observation data |
+| 4 — new gates | A2, F2 if needed, the read-size gate in `IDEAS.md` | Each adds a gate and needs an ADR |
 
 ## Decisions (answered 2026-10-17)
 

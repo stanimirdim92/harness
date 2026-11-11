@@ -527,7 +527,7 @@ This session shows that message. `/build` depends on that resume (ADR 0068).
 rule. **Verify:** compact one long session by hand, check the five points, and
 log the result.
 
-### 8.6 Park in `docs/IDEAS.md` (gates, so after the freeze)
+### 8.6 Park in `docs/IDEAS.md` (gates)
 
 - **Tail-only next-step check.** Hermes checks only short replies, and only their last 160 chars (`agent_runtime_helpers.py:3381-3399`). Our hook matches the phrase anywhere in the report, and also matches "I'm going to" (`require-handoff-report.sh:68-73`). So a long report can trip it. Revisit when the observation log records a false positive (`docs/observation-log.md:238-239`).
 - **One truth check.** Confirm that the reported commit exists, like the kanban phantom-card check (`kanban_db.py:2547-2602`).

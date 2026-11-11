@@ -366,8 +366,6 @@ tests instead.
 - **Secrets:** `permissions.deny` has `Edit(~/.ssh/**)` (`claude/settings.json`). The sandbox is off, so a
   shell command can still read a credential file (ADR 0085). A secret can reach
   the context that way, and then a memory write.
-- **Freeze:** `docs/IDEAS.md:39-40` calls a new deny hook "a new gate".
-  The harness-v1 freeze excludes new gates.
 
 ### M1: episodic memory
 
@@ -457,14 +455,8 @@ Where it runs:
   `Write|Edit` hook. M2 finds it on the next run. `memory-shield` also checks
   shell calls, at the cost of a command parser.
 
-Phases, because of the freeze:
-1. **Phase A, now:** M2, plus H2 in warn mode for the Deny rows. The write goes
-   through, and the hook returns a warning. No gate. `warn-stale-base.sh` warns
-   this way at SessionStart. Check which `PreToolUse` output field the model sees.
-2. **Phase B, after the freeze:** the two classes switch from warn to deny. One ADR
-   records both phases and the switch condition.
-
-If you treat a safety deny hook as outside the freeze, skip Phase A. That choice is yours.
+Order:
+1. M2, plus H2 in deny mode for the Deny rows. One ADR records both.
 
 Verify:
 - Before you build, log one `PreToolUse` payload for an auto-memory write. It

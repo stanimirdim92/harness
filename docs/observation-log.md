@@ -46,8 +46,7 @@ a gate that should have fired and did not).
 ## Run metrics
 
 One row per pipeline run, failure or not. These are what calibrate the
-uncalibrated numbers — `maxTurns` 100 above all — and what the freeze is
-waiting on.
+uncalibrated numbers — `maxTurns` 100 above all.
 
 | Date | Ticket | Stages run | Recon dispatched? | Max turns used | Fan-out (concurrent/queued) | Tokens | Cost | Large reads (>350) |
 |---|---|---|---|---|---|---|---|---|

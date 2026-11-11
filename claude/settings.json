@@ -119,7 +119,9 @@
       "Bash(*ANTHROPIC_API_KEY*)",
       "Bash(*OPENAI_API_KEY*)",
       "Bash(env)",
-      "Bash(printenv*)"
+      "Bash(printenv*)",
+      "ShareOnboardingGuide",
+      "Artifact"
     ],
     "ask": [
       "Bash(git push:*)",
@@ -250,5 +252,6 @@
   "remoteControlAtStartup": true,
   "inputNeededNotifEnabled": true,
   "agentPushNotifEnabled": true,
-  "autoCompactWindow": 200000
+  "autoCompactWindow": 200000,
+  "bashOutputMaxChars": 10000
 }

@@ -407,7 +407,7 @@ Codex read. Then run it once on this machine.
    | Incident log: 4 or more refs, and 0.5 or more per 1,000 prose chars | `tools/skill_linter.py:46-47, 142-148` | 0 |
 
    For the incident rule, count PR and issue refs as Hermes does. Add ticket keys from a list of project prefixes.
-5. For broken support links, extend `check-references.py` to bare `references/` and `assets/` targets. I pick this over a new rule because it is the same rule class. The 25 links resolve today, so CI stays green. It widens an existing gate, so confirm that the freeze allows it.
+5. For broken support links, extend `check-references.py` to bare `references/` and `assets/` targets. I pick this over a new rule because it is the same rule class. The 25 links resolve today, so CI stays green. It widens an existing gate.
 6. Drop three rules from the plan:
    - **The 60-char rule.** Hermes needs it because its own index cuts at 60 (`agent/skill_utils.py:827`). Hermes applies it on create only. 9 of our 19 skills would fail. Our clients' index limits were not checked.
    - **The folder allowlist in CI.** Hermes applies it only to new support files (`tools/skill_manager_tool.py:355-372`). `vercel-composition-patterns` ships `rules/`.

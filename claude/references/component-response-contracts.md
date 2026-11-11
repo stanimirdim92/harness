@@ -208,6 +208,9 @@ The `## Recon: [area]` template in `../agents/repo-recon.md` §Report: Rules
 and precedent, Verification, Touch points (for `/plan`), Claimed reuse,
 Constraints, Unknowns. Reads widely; only pointers, verification, constraints
 and unknowns leave its context — its own reads never enter the caller's.
+It writes that report to `docs/specs/[TICKET]-recon-[area].md` (Write is
+limited to that path by `limit-recon-write.sh`). Its reply is short: the path,
+hit counts per section, and key Unknowns.
 
 ### `executor`
 

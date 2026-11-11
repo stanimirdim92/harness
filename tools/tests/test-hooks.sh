@@ -209,9 +209,30 @@ model code-reviewer fable    allow   # upward
 model executor      haiku    deny
 model executor      sonnet   deny    # alias floats past the version pin
 model executor      opus     allow
-model Explore       haiku    allow   # built-in agent: no persona file
+model Explore       haiku    deny    # persona file pins haiku: same tier
+model Plan          haiku    allow   # built-in agent: no persona file
 model general-purpose sonnet allow
 model executor      'x"y'    deny    # malformed input fails closed
+
+# ------------------------------------------------------------ recon write
+RECON="$HOOKS/limit-recon-write.sh"
+rw() { # file_path, expected
+  local got; got="$(jq -n --arg p "$1" '{tool_input:{file_path:$p}}' | bash "$RECON" 2>/dev/null \
+    | jq -r '.hookSpecificOutput.permissionDecision // "allow"' 2>/dev/null || echo ERROR)"
+  [ -z "$got" ] && got="allow"
+  if [ "$got" = "$2" ]; then PASS=$((PASS+1)); else FAIL=$((FAIL+1)); FAILED+=("[recon-write] $1 — expected $2, got $got"); fi
+}
+rw /var/www/app/docs/specs/LD-520-recon-socials.md      allow
+rw docs/specs/LD-520-recon-socials.md                   allow
+rw /var/www/app/docs/specs/NOTICKET-recon-socials.md    allow
+rw /var/www/app/docs/specs/LD-520-SPEC.md               deny
+rw /var/www/app/docs/specs/sub/LD-520-recon-x.md        deny
+rw /var/www/app/docs/specs/../../.env-recon-x.md        deny
+rw /var/www/app/src/Foo-recon-x.md                      deny
+rw /var/www/app/docs/specs/LD-520-recon-x.php           deny
+rw ""                                                   deny
+rw /app/docs/specs/a-recon-b/docs/specs/LD-520-SPEC.md  deny
+rw /app/docs/specs/x-recon-y.md/LD-1-SPEC.md             deny
 
 # ------------------------------------------------------------------ report
 echo "hooks: $PASS passed, $FAIL failed"

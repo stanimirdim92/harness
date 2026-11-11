@@ -48,7 +48,7 @@ that explanation here, just the index.
 | [0038](0038-verify-pass-test-only-candidate-identity.md) | VERIFY PASS test-only commits may advance the BUILD candidate | Accepted |
 | [0039](0039-runtime-catalog-narrowed-by-observed-use.md) | Runtime plugins narrowed; standalone engineering skills retained | Partially superseded by [0043](0043-automatic-memory-and-compaction-window-restored.md) (automatic memory no longer disabled); TDD skill re-enabled by [0083](0083-tdd-skill-back-in-the-executor.md) |
 | [0040](0040-openspec-conventions-adopted.md) | Four conventions adopted from Fission-AI/openspec; nothing vendored | Accepted |
-| [0041](0041-recon-delegated-to-repo-recon-subagent.md) | Repository recon delegated to a `repo-recon` subagent | Partially superseded by [0051](0051-repository-recon-made-evidence-triggered.md) (agent isolation retained; dispatch is no longer mandatory) |
+| [0041](0041-recon-delegated-to-repo-recon-subagent.md) | Repository recon delegated to a `repo-recon` subagent | Partially superseded by [0051](0051-repository-recon-made-evidence-triggered.md) (agent isolation retained; dispatch is no longer mandatory); recon gains a limited Write by [0127](0127-repo-recon-writes-its-report-file.md) |
 | [0042](0042-third-executor-as-conditional-exception.md) | A third concurrent executor as a conditional exception, not a raised cap | Superseded by [0054](0054-executor-concurrency-condition-gated-not-capped.md) |
 | [0043](0043-automatic-memory-and-compaction-window-restored.md) | Automatic memory and the 500k compaction window restored, reversing 0037 | Partially superseded by [0124](0124-compaction-window-200k-orchestrator-stays-1m.md) (window back to 200k; automatic memory stands) |
 | [0044](0044-config-security-hardening-pass.md) | Config security hardening: enforcement made to match the stated guarantees | Partially superseded by [0049](0049-durable-spec-pin-and-hook-bypasses.md) (alias-awareness was one normalisation gap of several) |
@@ -62,8 +62,8 @@ that explanation here, just the index.
 | [0052](0052-spec-guidance-consolidated-around-human-approval.md) | Spec guidance consolidated around human approval | Accepted |
 | [0053](0053-plan-guidance-consolidated-around-behavioral-tasks.md) | Plan guidance consolidated around behavioral tasks | Accepted |
 | [0054](0054-executor-concurrency-condition-gated-not-capped.md) | Executor concurrency gated by conditions, not a fixed cap | Partially superseded by [0055](0055-multi-agent-enforcement-and-parallel-when-safe.md) (sequential default replaced by parallel-when-safe; conditions unchanged) |
-| [0055](0055-multi-agent-enforcement-and-parallel-when-safe.md) | Multi-agent rules enforced by the harness; parallel-when-safe replaces sequential-by-default | Accepted; reviewer turn cap raised to 100 by [0080](0080-reviewer-turn-cap-raised-to-100.md) |
-| [0056](0056-role-tiered-models-blind-review-recon-width-writer-isolation.md) | Models tiered by role; blind reviewer; recon width; writer isolation structural | Partially superseded by [0058](0058-sequential-ticket-checkout-and-infrastructure-readiness.md) (executor isolation) and [0059](0059-codex-native-roles-and-hook-adapters.md) (session alias; Codex role tiers added); effort split per role by [0066](0066-opus-5-5-effort-and-early-stop-continuations.md) |
+| [0055](0055-multi-agent-enforcement-and-parallel-when-safe.md) | Multi-agent rules enforced by the harness; parallel-when-safe replaces sequential-by-default | Accepted; reviewer turn cap raised to 100 by [0080](0080-reviewer-turn-cap-raised-to-100.md); recon read-only narrowed by [0127](0127-repo-recon-writes-its-report-file.md) |
+| [0056](0056-role-tiered-models-blind-review-recon-width-writer-isolation.md) | Models tiered by role; blind reviewer; recon width; writer isolation structural | Partially superseded by [0058](0058-sequential-ticket-checkout-and-infrastructure-readiness.md) (executor isolation) and [0059](0059-codex-native-roles-and-hook-adapters.md) (session alias; Codex role tiers added); effort split per role by [0066](0066-opus-5-5-effort-and-early-stop-continuations.md); Haiku tier for Explore added by [0128](0128-explore-runs-on-haiku.md) |
 | [0057](0057-worktree-base-guards-at-the-session-level.md) | The cost of `worktree.baseRef: head` is paid at the session level, and guarded there | Partially superseded by [0058](0058-sequential-ticket-checkout-and-infrastructure-readiness.md) (writer failures deny; infrastructure readiness added) |
 | [0058](0058-sequential-ticket-checkout-and-infrastructure-readiness.md) | Sequential ticket checkout reuse and project infrastructure readiness | Codex enforcement extended by [0059](0059-codex-native-roles-and-hook-adapters.md); checkout policy retained |
 | [0059](0059-codex-native-roles-and-hook-adapters.md) | Shared AGENTS source, native Codex roles, and hook adapters | Partially superseded by [0060](0060-codex-routine-roles-terra-xhigh.md) (routine roles use Terra/xhigh) |
@@ -131,6 +131,8 @@ that explanation here, just the index.
 | [0124](0124-compaction-window-200k-orchestrator-stays-1m.md) | Compaction window back to 200k; the orchestrator stays on opus[1m] | Accepted |
 | [0125](0125-subagent-doc-alignment-pins-fields-cache.md) | Subagent model pins enforced, frontmatter fields checked, executor cache 1h | Accepted |
 | [0126](0126-repo-recon-effort-medium.md) | repo-recon runs at effort medium | Accepted |
+| [0127](0127-repo-recon-writes-its-report-file.md) | repo-recon writes its report to a file | Accepted |
+| [0128](0128-explore-runs-on-haiku.md) | Explore runs on Haiku | Accepted |
 
 Adding a new decision: create the next-numbered `NNNN-kebab-title.md`
 (4-digit, zero-padded — MADR-style, matches the files already here) and

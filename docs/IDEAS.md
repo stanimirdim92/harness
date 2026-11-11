@@ -36,8 +36,7 @@ doing, not just what it is.
   observation period's `run-metrics.sh` "LARGE TOOL RESULTS" section shows the
   main session repeatedly taking whole-file results over the threshold in areas
   a bounded check or recon should have covered, or 0051's own revisit clause
-  fires (bounded checks expanding into inline surveys). Not before: it is a new
-  gate, and the harness-v1 freeze excludes gates. Related, same freeze: run
+  fires (bounded checks expanding into inline surveys). Related: run
   `repo-recon` on a cheaper model for pure inventory questions — the cost lever
   shunt actually pulls (Gemini 2.5 Flash worker); ours is isolated context at
   the same per-token price. Source: Spotify Engineering, "Portal by Spotify cut
@@ -46,6 +45,49 @@ doing, not just what it is.
   monorepo; worker-side tokens and the follow-up targeted read an edit needs
   are not counted, and the committed fixtures (largest 602 lines) cannot
   reproduce the table.
+
+- **Unattended-run prompt addition (Opus 5.5)** — **S**. It is worth doing for
+  runs with nobody to answer, such as headless `claude -p` evals and scheduled
+  agents. In those runs an early stop wastes the run. The Opus 5.5 guide says
+  the model "is responsive to instructions that name the specific kinds of
+  early stop you want it to avoid". Source:
+  `platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5-5`,
+  section "Unattended agentic runs". Conditions from the guide:
+  - Add it at the end of the system prompt from the first request. A later
+    addition changes `system` and invalidates earlier thinking blocks.
+  - Leave it out of human-in-the-loop sessions, so not the interactive main
+    session.
+  - Keep a confirmation step for risky or irreversible actions.
+  - Expect more tool calls and output tokens per task.
+
+  The guide's text, verbatim:
+
+  > A standing instruction from the user, the person you are working for. It
+  > is about how your turns end. A message with no tool call in it ends your
+  > turn, and the work stops there until you are asked to continue. The user
+  > has seen you end turns in four ways while work they asked for was still
+  > owed, and does not want any of them. One: a long summary of what was done
+  > that closes by announcing the next step and has no tool call, so the next
+  > thing never starts. Two: an offer to carry on with something unless the
+  > user would prefer otherwise, which stops to wait for an answer the user
+  > was not going to give. Three: a list of decisions for the user when, by
+  > your own account, none of them blocks the rest of the work. Four: deciding
+  > that this is a good place to report, because the turn has been long or a
+  > milestone is done. Status notes are welcome, and so are your
+  > recommendations on open decisions, but put them in the same message as
+  > your next tool call and carry on with whatever does not depend on the
+  > user's answer. If you notice yourself inviting the user to redirect you or
+  > offering to wait, delete it and do the next thing. The stops the user does
+  > want are the ones where nothing can move without them, or where the thing
+  > blocking you is deliberately protected from you. This does not override
+  > the need for confirmation on risky or destructive actions.
+
+  Related, same page, section "Time signals for multiagent harnesses": a
+  harness line such as `elapsed 340s / 1200s` after each message makes the
+  model pace its work. Without a budget, the guide suggests one sentence:
+  "Time matters here: do not spend time that can be avoided, and the earlier a
+  correct result is obtained, the better." The budget is advisory, so keep a
+  hard timeout.
 
 ## Considered and rejected
 

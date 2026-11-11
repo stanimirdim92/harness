@@ -114,6 +114,17 @@ class DenyCases(unittest.TestCase):
         problems = vf.check_agent('repo-recon', agent('repo-recon', body))
         self.assertTrue(any('read-only persona grants Bash' in p for p in problems))
 
+    def test_recon_write_needs_its_hook(self):
+        body = RECON.replace('tools: Read, Grep, Glob', 'tools: Read, Grep, Glob, Write')
+        problems = vf.check_agent('repo-recon', agent('repo-recon', body))
+        self.assertTrue(any('read-only persona grants Write' in p for p in problems))
+
+    def test_recon_write_with_hook_passes(self):
+        body = RECON.replace('tools: Read, Grep, Glob', 'tools: Read, Grep, Glob, Write') + (
+            'hooks:\n  PreToolUse:\n    - matcher: Write\n      hooks:\n'
+            '        - type: command\n          command: "$HOME/.claude/hooks/limit-recon-write.sh"\n')
+        self.assertEqual(vf.check_agent('repo-recon', agent('repo-recon', body)), [])
+
     def test_reviewer_granted_edit(self):
         body = REVIEWER.replace('tools: Read, Grep, Glob', 'tools: Read, Grep, Glob, Edit, Write')
         problems = vf.check_agent('blind-reviewer', agent('blind-reviewer', body))

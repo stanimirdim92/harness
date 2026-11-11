@@ -36,6 +36,12 @@ Use the first adequate option:
    modules; changes schema, contract, lifecycle, or concurrency behavior; lacks
    a source-supported command or precedent; or a prior report is stale or marked
    **Not surveyed** where evidence is now needed.
+   The packet names the area, the caller (`/spec` or `/plan`), the
+   questions and the report path `docs/specs/[TICKET]-recon-[area].md`. It
+   never sets the report format or a length limit:
+   `../agents/repo-recon.md` §Report owns both. Recon writes the full report
+   to that file and replies with a short summary. Read only the report
+   sections you need, with `rg -n` and a line range.
 
 ### Dispatching more than one recon
 
