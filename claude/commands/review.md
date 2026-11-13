@@ -225,8 +225,9 @@ it (ADR 0092). At Deep, REQUIRED findings get the same check
 (`../references/risk-tiers.md`). Dispatch a fresh reviewer that did not raise it: `code-reviewer`
 for a `BLIND-#` finding, `blind-reviewer` for a `CODE-#` finding, and a fresh
 instance of the same specialist for a `SEC-#` or `DIST-#` finding. The packet
-holds the diff and that one finding (id, `file:line`, claim, failure scenario),
-nothing from the other reviewers. For `blind-reviewer`, remove any `REQ-###`
+holds the diff, the base-branch `REVIEW.md` files this review used, and that
+one finding (id, `file:line`, claim, failure scenario). It holds nothing from
+the other reviewers. For `blind-reviewer`, remove any `REQ-###`
 or goal wording from the finding first. Ask for one verdict with `file:line`
 evidence:
 

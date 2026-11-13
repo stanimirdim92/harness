@@ -1,7 +1,7 @@
 ---
 name: repo-recon
 description: Read-only repository reconnaissance. Discovers a project's instruction sources, conventions, architectural chain, test setup, and closest precedents for one feature area, and reports pointers rather than file contents. Use before specifying or planning work in an unfamiliar area.
-tools: Read, Grep, Glob, Write
+tools: Read, Grep, Glob, Write, LSP
 model: claude-sonnet-5-5
 effort: medium
 maxTurns: 100
@@ -44,7 +44,9 @@ instead of surveying the whole repository.
 ## Survey
 
 Batch independent Glob/Grep/Read calls; serialize only when a result reveals the
-next path. Discover rather than assume:
+next path. To find callers and definitions, use LSP (find references, go to
+definition) when a language server is enabled; fall back to Grep. Discover
+rather than assume:
 
 - applicable instruction sources and area-specific rules;
 - owning-module conventions, architectural chain, boundaries, and registration;
@@ -106,6 +108,8 @@ the search that found it, so `/plan` can record and rerun it. List every hit.]
   - `path:line: [item]`
 - Tests and docs that name the area:
   - `path:line`
+- Existing code the change would reverse or remove (`/plan` reads its history):
+  - `path:line: [what it does]`
 
 ### Claimed reuse
 - `path:line: [candidate]: requested [behavior] / actual [behavior]; mismatch: [... or None]`

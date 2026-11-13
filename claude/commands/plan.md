@@ -27,6 +27,10 @@ Start from the committed spec's repository pointers: `/plan` runs in a fresh
 context and does not see `/spec`'s recon report (ADR 0084). Follow
 `../references/repository-precedent.md` §1 for missing or stale evidence.
 
+Before a task reverses or removes existing code, read why it was added:
+`git log --format='%h %s' -- <path>` and the commit message that added it. Record
+the reason in the task. A deliberate fix needs a stated reason to undo it.
+
 If the spec contradicts itself, repository evidence contradicts its behavior,
 or planning requires new, weaker, or stronger behavior, save the bounded
 `SPEC CONFLICT` from the plan template and stop. Do not choose an interpretation

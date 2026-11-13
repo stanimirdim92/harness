@@ -91,8 +91,8 @@ doing, not just what it is.
 
 - **Unattended pipeline as a workflow** — **L**. The owner's end goal is a
   ticket in and a reviewed candidate out, with nobody waiting between stages.
-  ADRs 0109, 0114 and 0115 built this as Python runners; 0119 removed them on
-  2026-11-03, because they needed unattended modes in `/spec`, `/plan` and
+  ADRs 0109, 0114 and 0115 built this as Python runners. ADR 0119 removed
+  them on 2026-11-03. They needed unattended modes in `/spec`, `/plan` and
   `/ship`, and a `HANDOFF:` line only the runners read.
 
   **Shape.**
@@ -152,6 +152,17 @@ doing, not just what it is.
 
   **Ready when** the next 3–5 tickets go `/build` → `/test` → `/review`
   interactively with no owner answer mid-run.
+
+- **Executor stop hook that runs the typecheck** — **S**. From the Claude
+  Code best-practices page (2026-11-13). `require-handoff-report.sh` checks
+  the report's shape, not its truth. A SubagentStop hook on the executor would
+  run the project's declared typecheck (PHPStan, `tsc --noEmit`). On failure it
+  sends the executor back. It finds the typecheck the way
+  `format-edited-file.sh` finds the formatter.
+  - Cost: typecheck time on every executor stop.
+  - Probe first: on 3–5 real tickets, count the executor handoffs whose
+    typecheck fails although the report says it passed. Build it only if
+    that happens.
 
 ## Considered and rejected
 

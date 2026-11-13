@@ -16,8 +16,8 @@ and gates. Personas never dispatch other personas.
 | `security-auditor` | security trust-boundary review | every `/review` round (ADR 0102) |
 | `distributed-systems-reviewer` | distributed failure-semantics review | triggered `/review` only |
 
-`repo-recon` and the four reviewers are read-only by tool grant (Read/Grep/Glob
-— no Bash), not just by instruction: they cannot run commands or modify the
+`repo-recon` and the four reviewers are read-only by tool grant (Read/Grep/Glob,
+plus read-only LSP for `repo-recon` — no Bash), not just by instruction: they cannot run commands or modify the
 candidate. The one exception: `repo-recon` has Write, and
 `limit-recon-write.sh` limits it to its own report file,
 `docs/specs/[TICKET]-recon-[area].md`. The diff and verification evidence arrive in the packet; anything a

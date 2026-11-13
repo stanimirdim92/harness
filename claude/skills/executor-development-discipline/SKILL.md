@@ -28,7 +28,9 @@ similar call whose semantics do not fit this task.
 
 Before you add a function, method, helper, constant or config value, search
 the repository for one that already does the job. Search by name, by the
-behavior, and by any literal value. Then:
+behavior, and by any literal value. Use LSP find-references when a language
+server is enabled. When you change user-facing text, search for reworded
+variants of it too, not only the exact string. Then:
 
 - reuse what fits, or extend it when the change is small and in scope;
 - use the form that sibling code uses for the same job;

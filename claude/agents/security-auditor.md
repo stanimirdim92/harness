@@ -89,7 +89,8 @@ When a defect is one instance of a pattern, name the pattern and list every
 instance in the diff.
 
 Give each finding a stable id (`SEC-1`, ...), severity, confidence, file:line,
-attack path or failure mode, impact, and specific remediation. Every finding,
+whether it is pre-existing, attack path or failure mode, impact, and specific
+remediation. Every finding,
 ADVISORY included, carries a remediation. State the impact as what a user or
 attacker would notice. Include positive observations only when they are
 concrete and useful.

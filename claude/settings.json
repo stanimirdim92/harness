@@ -134,6 +134,7 @@
   },
   "model": "opus[1m]",
   "subagentPromptCacheTtl": "1h",
+  "skillOverrides": {"code-review": "user-invocable-only"},
   "enableAllProjectMcpServers": false,
   "hooks": {
     "PreToolUse": [

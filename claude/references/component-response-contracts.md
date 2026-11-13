@@ -14,7 +14,7 @@ sources — review it whenever a file listed below changes shape.
 
 ## 1. Claude hooks
 
-Twelve files live in `../hooks/`: eleven hooks and one sourced library. Each hook is a
+Thirteen files live in `../hooks/`: twelve hooks and one sourced library. Each hook is a
 `PreToolUse`, `PostToolUse`, `SubagentStop`, or `SessionStart` script that reads one JSON object on stdin and prints one JSON
 decision object on stdout, always exiting 0 — the decision, not the exit code,
 is what the host runtime acts on (per
@@ -31,6 +31,7 @@ is what the host runtime acts on (per
 | `require-isolated-test-runner.sh` | `PreToolUse` (`Bash`) | global, evidence-gated | `permissionDecision: "deny"` or silent allow |
 | `require-worktree-for-writers.sh` | `PreToolUse` (`Agent`\|`Task`) | dispatch of `executor`/`test-engineer` only | `permissionDecision: "deny"` or silent allow |
 | `require-pinned-model.sh` | `PreToolUse` (`Agent`\|`Task`) | dispatch with a per-call `model` to a persona in `claude/agents/` | `permissionDecision: "deny"` or silent allow (ADR 0125) |
+| `limit-recon-write.sh` | `PreToolUse` (`Write`) | `repo-recon` only (via its frontmatter `hooks:`) | `permissionDecision: "deny"` for any path but its own report, or silent allow (ADR 0127) |
 | `require-handoff-report.sh` | `SubagentStop` | `executor`, `test-engineer` only | `decision: "block"` or silent allow |
 | `warn-stale-base.sh` | `SessionStart` (`startup`\|`resume`) | global | `systemMessage` + `additionalContext`, or silent |
 | `worktree-readiness.sh` | not a hook — a sourced shell function | shared library | `0`/`1` return + one line on stdout |
@@ -38,7 +39,8 @@ is what the host runtime acts on (per
 ### `PreToolUse` deny/ask — `{hookSpecificOutput: {hookEventName, permissionDecision, permissionDecisionReason}}`
 
 `block-agent-push.sh`, `block-destructive-bash.sh`, `require-isolated-test-runner.sh`,
-`require-worktree-for-writers.sh`, and `require-pinned-model.sh` all deny with:
+`require-worktree-for-writers.sh`, `require-pinned-model.sh`, and
+`limit-recon-write.sh` all deny with:
 
 ```json
 {
@@ -186,7 +188,7 @@ reasons; nothing is reimplemented or restated in Python.
 
 ## 3. Claude agent report contracts
 
-Nine personas live in `../../claude/agents/`. Each is invoked with a bounded
+Ten personas live in `../../claude/agents/`. Each is invoked with a bounded
 task packet and returns one report in a fixed shape; `docs/agents.md` names who
 dispatches each one and when.
 
@@ -201,6 +203,7 @@ dispatches each one and when.
 | `blind-reviewer` | `## Blind Review` template | `BLIND-N` |
 | `security-auditor` | `SEC-N` findings list | `SEC-N` |
 | `distributed-systems-reviewer` | `DIST-N` findings list | `DIST-N` |
+| `Explore` | file locations, no fixed template | — |
 
 ### `repo-recon`
 
@@ -285,7 +288,12 @@ another agent.
 scenario, recommendation, in the fenced report template of
 `agents/distributed-systems-reviewer.md`.
 
-### Shared conventions across all nine
+### `Explore`
+
+A read-only search persona on Haiku (ADR 0128). It returns the locations it
+found, not file contents, and no findings. It reviews nothing.
+
+### Shared conventions across all ten
 
 Confidence (`high`/`medium`/`low`) travels separately from the disposition — a
 low-confidence finding keeps its true disposition, marked low-confidence,
