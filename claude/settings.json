@@ -129,6 +129,12 @@
   "model": "opus[1m]",
   "subagentPromptCacheTtl": "1h",
   "skillOverrides": {"code-review": "user-invocable-only"},
+  "autoMode": {
+    "allow": [
+      "$defaults",
+      "Worktree Hook Path Repair: in a git worktree under a repository's `.claude/worktrees/`, setting `core.hooksPath` with `git config --worktree` to a hooks directory inside that same repository or worktree, so the repository's own commit hooks run, is not Logging/Audit Tampering. Setting it to an empty, missing or outside path, or committing with `--no-verify`, still is."
+    ]
+  },
   "enableAllProjectMcpServers": false,
   "hooks": {
     "PreToolUse": [
@@ -205,7 +211,8 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "$HOME/.claude/statusline.sh"
+    "command": "$HOME/.claude/statusline.sh",
+    "refreshInterval": 10
   },
   "subagentStatusLine": {
     "type": "command",
@@ -249,6 +256,7 @@
   "theme": "dark-ansi",
   "editorMode": "normal",
   "preferredNotifChannel": "auto",
+  "switchModelsOnFlag": false,
   "teammateMode": "auto",
   "remoteControlAtStartup": true,
   "inputNeededNotifEnabled": true,

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Custom row body for each subagent shown in the agent panel.
-# Input: base hook fields + `columns` + `tasks[]` (see docs.claude.com/en/statusline#subagent-status-lines)
+# Input: base hook fields + `columns` + `tasks[]` (see https://code.claude.com/docs/en/statusline)
 # Output: one JSON line per row to override: {"id": "<task id>", "content": "<row body>"}
 input=$(cat)
 NOW_MS=$(date +%s%3N)

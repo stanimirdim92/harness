@@ -51,6 +51,17 @@ ask() {
   exit 0
 }
 
+# settings.json asks on `gh pr create`, `gh pr merge` and `gh release`, but a
+# prefix rule misses `gh -R owner/repo pr merge` and `GH_REPO=x gh pr create`.
+# gh accepts the flag anywhere and attached (`gh pr -R o/r merge`, `gh -Ro/r`),
+# so strip every --repo/-R option, then match anywhere in the command.
+gh_command="$(sed -E \
+  -e "s/(^|[[:space:]])(-R|--repo)(=|[[:space:]]+)?(\"[^\"]*\"|'[^']*'|[^[:space:]-][^[:space:]]*)//g" \
+  <<<"$raw_command")"
+if echo "$gh_command" | grep -Eq '\bgh[[:space:]]+(pr[[:space:]]+(create|merge)|release[[:space:]]+(create|delete|delete-asset|edit|upload))\b'; then
+  ask "gh publishes a pull request, merge or release — confirm before it leaves the machine."
+fi
+
 ! echo "$command" | grep -Eq 'git[[:space:]]+push\b' && exit 0
 
 # --mirror can delete every remote ref that isn't present locally, whatever

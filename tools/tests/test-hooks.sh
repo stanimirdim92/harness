@@ -142,6 +142,21 @@ warn 'git push'                                 allow
 warn 'git ps'                                   allow
 warn 'git status'                               allow
 warn 'yarn install'                             allow
+# gh publishing commands ask even with --repo or an env prefix
+warn 'gh pr create --fill'                      ask
+warn 'gh -R owner/repo pr merge 12'             ask
+warn 'gh --repo=owner/repo pr create'           ask
+warn "gh --repo 'owner/repo' release create v1" ask
+warn 'GH_REPO=owner/repo gh pr create'          ask
+warn 'cd x && gh -R o/r release upload v1 a'    ask
+warn 'gh pr -R o/r merge 12'                    ask
+warn 'gh pr --repo=o/r create'                  ask
+warn 'gh release -R o/r create v1'              ask
+warn 'gh -Ro/r pr merge 12'                     ask
+warn "gh pr --repo \"o/r\" merge 12"            ask
+warn 'gh -R owner/repo pr view 12'              allow
+warn 'gh release list'                          allow
+warn 'gh pr list'                               allow
 
 # ----------------------------------- warn: local session asks on any push
 unset CLAUDE_CODE_REMOTE

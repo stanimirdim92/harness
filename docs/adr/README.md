@@ -51,7 +51,7 @@ that explanation here, just the index.
 | [0041](0041-recon-delegated-to-repo-recon-subagent.md) | Repository recon delegated to a `repo-recon` subagent | Partially superseded by [0051](0051-repository-recon-made-evidence-triggered.md) (agent isolation retained; dispatch is no longer mandatory); recon gains a limited Write by [0127](0127-repo-recon-writes-its-report-file.md) |
 | [0042](0042-third-executor-as-conditional-exception.md) | A third concurrent executor as a conditional exception, not a raised cap | Superseded by [0054](0054-executor-concurrency-condition-gated-not-capped.md) |
 | [0043](0043-automatic-memory-and-compaction-window-restored.md) | Automatic memory and the 500k compaction window restored, reversing 0037 | Partially superseded by [0124](0124-compaction-window-200k-orchestrator-stays-1m.md) (window back to 200k; automatic memory stands) |
-| [0044](0044-config-security-hardening-pass.md) | Config security hardening: enforcement made to match the stated guarantees | Partially superseded by [0049](0049-durable-spec-pin-and-hook-bypasses.md) (alias-awareness was one normalisation gap of several) |
+| [0044](0044-config-security-hardening-pass.md) | Config security hardening: enforcement made to match the stated guarantees | Partially superseded by [0049](0049-durable-spec-pin-and-hook-bypasses.md) (alias-awareness was one normalisation gap of several) and [0086](0086-public-repo-and-permission-hardening.md) (project MCP servers off) |
 | [0045](0045-spec-approval-state-change-impact-and-requirement-traceability.md) | Spec approval state, change-impact semantics, and requirement traceability | Accepted |
 | [0046](0046-plan-technical-approach-spec-pinning-and-plan-gates.md) | Plan gains a technical approach, a spec pin, and its own approval state | Partially superseded by [0049](0049-durable-spec-pin-and-hook-bypasses.md) (the `hash-object` pin was not durable) |
 | [0047](0047-skill-trim-by-deduplication.md) | Skills trimmed by de-duplication, not by cutting policy | Partially superseded by [0048](0048-repository-precedent-placement-corrected.md) (its reported per-run saving was a regression; placement corrected) |
@@ -70,10 +70,10 @@ that explanation here, just the index.
 | [0060](0060-codex-routine-roles-terra-xhigh.md) | Codex routine roles use Terra at xhigh | Accepted |
 | [0061](0061-codex-cli-ticket-worktree-launcher.md) | Independent Codex CLI sessions in ticket worktrees | Accepted |
 | [0062](0062-codex-rules-curated-file-separate-from-approvals.md) | Codex rules: a curated synced file, separate from the approvals file | Accepted |
-| [0063](0063-sonnet-5-5-pins-and-fable-advisor.md) | Sonnet 5.5 replaces Sonnet 5; the advisor moves to Fable 5.1 | Partially superseded by [0126](0126-repo-recon-effort-medium.md) (repo-recon effort is medium) |
+| [0063](0063-sonnet-5-5-pins-and-fable-advisor.md) | Sonnet 5.5 replaces Sonnet 5; the advisor moves to Fable 5.1 | Partially superseded by [0126](0126-repo-recon-effort-medium.md) (repo-recon effort is medium); revised: Fable 5.2 |
 | [0064](0064-caveman-skill-dropped.md) | Caveman skill dropped | Accepted |
 | [0065](0065-one-spec-per-ticket-capability-map-as-section.md) | One spec per ticket; the capability map is a section of it | Accepted |
-| [0066](0066-opus-5-5-effort-and-early-stop-continuations.md) | Opus 5.5: medium session effort, and bounded continuations for early stops | Accepted |
+| [0066](0066-opus-5-5-effort-and-early-stop-continuations.md) | Opus 5.5: medium session effort, and bounded continuations for early stops | Accepted; revised: top-level `effortLevel` is inert for Opus 5.5 |
 | [0067](0067-change-surface-in-plans-and-plan-recall.md) | Change surface in plans, touch points in recon, and a plan-recall eval | Accepted |
 | [0068](0068-sandbox-resumable-build-and-failure-signals.md) | OS sandbox, resumable `/build`, and failure signals from transcripts | Sandbox decision superseded by [0085](0085-sandbox-off-credential-read-denials.md) |
 | [0069](0069-plain-writing-explain-page-and-generated-map.md) | Plain writing, an `/explain` review page, a generated harness map, and ticket-scoped plan recall | Accepted |
@@ -129,8 +129,8 @@ that explanation here, just the index.
 | [0119](0119-headless-runners-removed.md) | Headless runners removed | Accepted |
 | [0120](0120-review-sarif-committed-under-docs.md) | Review SARIF committed under docs/reviews | Accepted |
 | [0124](0124-compaction-window-200k-orchestrator-stays-1m.md) | Compaction window back to 200k; the orchestrator stays on opus[1m] | Partially superseded by [0129](0129-compaction-window-400k.md) (window raised to 400k; opus[1m] stands) |
-| [0125](0125-subagent-doc-alignment-pins-fields-cache.md) | Subagent model pins enforced, frontmatter fields checked, executor cache 1h | Accepted |
-| [0126](0126-repo-recon-effort-medium.md) | repo-recon runs at effort medium | Accepted |
+| [0125](0125-subagent-doc-alignment-pins-fields-cache.md) | Subagent model pins enforced, frontmatter fields checked, executor cache 1h | Revised: 1h cache for every subagent |
+| [0126](0126-repo-recon-effort-medium.md) | repo-recon runs at effort medium | Revised: recon back on `high` |
 | [0127](0127-repo-recon-writes-its-report-file.md) | repo-recon writes its report to a file | Accepted |
 | [0128](0128-explore-runs-on-haiku.md) | Explore runs on Haiku | Accepted |
 | [0129](0129-compaction-window-400k.md) | Compaction window raised to 400k | Accepted |

@@ -39,8 +39,6 @@ add_server() {
   claude mcp add "$name" "$@"
 }
 
-# GitHub: no MCP server. The `gh` CLI covers GitHub work.
-#
 # Apify: not user-wide. Only the leadbuster project uses it, so add it there
 # at local scope, from that project's root:
 #
@@ -63,6 +61,18 @@ add_server() {
 # Atlassian (Jira/Confluence) is not added here: it comes from the claude.ai
 # "Atlassian MCP" connector (Settings → Connectors on claude.ai), which Claude
 # Code loads as `mcp__claude_ai_Atlassian_MCP__*`.
+
+echo "==> GitHub CLI (gh)"
+# GitHub has no MCP server here: the `gh` CLI covers GitHub work, and
+# settings.json asks before `gh pr create`, `gh pr merge` and `gh release`.
+# Installing it needs root, so this only checks it and prints the next step.
+if ! command -v gh >/dev/null 2>&1; then
+  echo "    missing: install gh (https://cli.github.com), then run: gh auth login"
+elif ! gh auth status >/dev/null 2>&1; then
+  echo "    not logged in: run: gh auth login"
+else
+  echo "    ok: $(gh --version | head -1)"
+fi
 
 echo "==> Figma design-to-code skill"
 # The Figma MCP server is not added here: it comes from the claude.ai "Figma"

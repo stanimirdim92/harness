@@ -150,6 +150,11 @@ doing, not just what it is.
   not stop early, and `subagentPromptCacheTtl: "1h"` (set 2026-11-13), so
   long verifier waits keep their cache.
 
+  **Logging.** Add `StopFailure` and `PermissionDenied` hooks that append one
+  line each to the run log. A run that ends on an API error or a refused tool
+  call then leaves a cause, not a silent gap. Both events exist in the hooks
+  docs (2026-11-13).
+
   **Ready when** the next 3–5 tickets go `/build` → `/test` → `/review`
   interactively with no owner answer mid-run.
 
@@ -178,6 +183,33 @@ doing, not just what it is.
     ignore the proxy. Tests against the host MySQL need `excludedCommands`,
     and those commands run without limits.
   - Probe: run leadbuster's full suite and one `/build` in the sandbox.
+  - Scope: the sandbox covers Bash, PowerShell and Monitor only. Hooks, MCP
+    servers and the file tools run outside it, so keep the `Read` denials.
+  - Linked worktrees work: writes to the shared `.git` are allowed, while
+    its hooks and config stay denied.
+  - With it on, add `Bash(dangerouslyDisableSandbox:true)` as an `ask` rule,
+    so an unsandboxed retry always asks. Consider `denyRead` on `~/` with
+    explicit allows for the paths tools need.
+
+- **Executor advisor consult line** — **S**. From the settings docs
+  (2026-11-13). Executors may consult the advisor, but no prompt line says
+  when. Add one line: consult before the first edit of a task and before
+  the handoff. Probe on 3 tickets: count the executor findings that review
+  later reports, with and without the line.
+
+- **`CLAUDE_CODE_SUBPROCESS_ENV_SCRUB`** — **S**. It strips credentials from
+  the environment of commands that Claude Code runs. A command such as `env`
+  then cannot print a token. It may require the sandbox, so probe it together
+  with the sandbox entry above. Check first that tests and `gh` still get
+  the variables they need.
+
+- **Root-owned managed settings for the guards** — **M**. Hooks in a
+  root-owned `/etc/claude-code/managed-settings.json` that call root-owned
+  copies of the guard scripts. An agent then cannot edit or remove a guard,
+  even with write access to `~/.claude`. Needs `sudo` for every guard change.
+  Never set `allowManagedHooksOnly`, `allowManagedPermissionRulesOnly` or
+  `strictPluginOnlyCustomization`: they would switch off the user-level
+  hooks, rules and plugins this harness depends on.
 
 ## Considered and rejected
 

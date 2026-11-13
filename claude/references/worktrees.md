@@ -14,6 +14,10 @@ Ticket-scoped work defaults to one isolated worktree per ticket.
   local `HEAD` you start from. **Pull first:** starting from a stale `main`
   gives a ticket branch stale by the same amount, and the worktree is created
   successfully either way.
+- `claude --worktree <name>` with an existing name reopens that worktree. It
+  keeps the old branch tip and ignores the `HEAD` you start from. Remove the
+  old worktree first when you want a fresh base. The session-start hook warns
+  only when the reopened branch has no commits of its own.
 - Sequential executors inherit the ticket checkout. Explicitly request
   `isolation: worktree` for each concurrent writer; preserve independent
   reviewer contexts and the test-engineer's isolated checkout. `head` makes

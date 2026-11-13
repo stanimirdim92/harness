@@ -6,6 +6,11 @@ DIR=$(echo "$input" | jq -r '.workspace.current_dir')
 COST=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
 PCT=$(echo "$input" | jq -r '.context_window.used_percentage // 0' | cut -d. -f1)
 DURATION_MS=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
+# Present only inside a linked worktree; the shape is undocumented, so accept a
+# string or an object with a name.
+WORKTREE=$(echo "$input" | jq -r '.workspace.git_worktree // empty | if type == "object" then (.name // .path // empty) else . end')
+# Present after the first API request: warm cache and hit ratio (0-1).
+CACHE=$(echo "$input" | jq -r '.prompt_cache // empty | "\(if .warm then "warm" else "cold" end) \((.hit_ratio // 0) * 100 | floor)%"')
 
 CYAN='\033[36m'; GREEN='\033[32m'; YELLOW='\033[33m'; RED='\033[31m'; RESET='\033[0m'
 
@@ -22,7 +27,9 @@ MINS=$((DURATION_MS / 60000)); SECS=$(((DURATION_MS % 60000) / 1000))
 
 BRANCH=""
 git rev-parse --git-dir > /dev/null 2>&1 && BRANCH=" | 🌿 $(git branch --show-current 2>/dev/null)"
+[ -n "$WORKTREE" ] && BRANCH="$BRANCH | 🌳 ${WORKTREE##*/}"
+[ -n "$CACHE" ] && CACHE=" | 🗄️ $CACHE"
 
 echo -e "${CYAN}[$MODEL]${RESET} 📁 ${DIR##*/}$BRANCH"
 COST_FMT=$(LC_NUMERIC=C printf '$%.2f' "$COST")
-echo -e "${BAR_COLOR}${BAR}${RESET} ${PCT}% | ${YELLOW}${COST_FMT}${RESET} | ⏱️ ${MINS}m ${SECS}s"
+echo -e "${BAR_COLOR}${BAR}${RESET} ${PCT}% | ${YELLOW}${COST_FMT}${RESET} | ⏱️ ${MINS}m ${SECS}s${CACHE}"

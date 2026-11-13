@@ -28,3 +28,7 @@ executor and recon runs), not by assumption.
 **Rejected — floating aliases (`sonnet`, `fable`).** Same reason 0002 pinned:
 delegation should target a deliberately chosen version, not whatever an alias
 resolves to after the next release.
+
+**Revised (2026-11-13).** The advisor and its `modelSettings` entry now pin
+`claude-fable-5-2` (commit `b78366c`). The decision is unchanged: a pinned Fable
+version, never the `fable` alias.

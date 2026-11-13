@@ -3,6 +3,7 @@ name: test-engineer
 description: Independent verifier for /test — checks a built candidate against its acceptance criteria and may add test-only changes. Direct use only when the user explicitly asks for test design, coverage analysis, or a Prove-It test.
 tools: Read, Edit, Write, Bash, Grep, Glob, Skill, LSP, mcp__chrome-devtools__*
 model: claude-sonnet-5-5
+effort: high
 isolation: worktree
 hooks:
   PreToolUse:

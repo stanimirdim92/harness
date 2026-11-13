@@ -120,3 +120,7 @@ exist.
 README, which isn't vendored here. The vendored license names the author but no
 repository, so the link now points at that license rather than at an invented
 URL.
+
+**Superseded in part (2026-11-13).** ADR 0086 sets `enableAllProjectMcpServers`
+to false, and `tools/checks/validate-frontmatter.py` rejects `true`. The
+*Kept as-is* decision above no longer holds.

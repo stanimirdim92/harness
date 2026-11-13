@@ -42,3 +42,9 @@ there. The handoff hook and the batch continuation cover the unattended paths.
 **Rejected — time budgets for parallel `/build`.** Claude Code offers no clean
 way to append elapsed time to each turn; revisit once parallel builds have run
 metrics.
+
+**Revised (2026-11-13).** The model-config docs say a top-level `effortLevel`
+"doesn't count for Opus 5.5". Opus 5.5 already defaults to `medium`, so the
+behaviour is right; the key only documents the intent. A `claude-opus-5-5`
+entry in `modelSettings` would pin it, but it was not added: it is unverified
+that the reviewers' frontmatter `effort: high` still wins over that entry.

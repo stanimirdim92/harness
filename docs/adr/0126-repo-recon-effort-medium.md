@@ -19,3 +19,9 @@ also lower the executor and test-engineer, which write code.
 
 **Revisit if.** Recon reports miss precedents that a later stage has to find
 itself.
+
+**Revised (2026-11-14) — recon back on `high`.** The owner set
+`claude/agents/repo-recon.md` to `effort: high`. Recon now lists code a change
+would reverse and reads its git history (commit `bc7826b`), which is judgment,
+not only search. It runs once per `/spec` or `/plan`, and a missed precedent
+flows into every later stage. This replaces the `medium` decision above.

@@ -83,12 +83,7 @@ verification:
 - docs → verify referenced commands, paths, and examples
 - *Catches: declaring success without running anything.*
 
-For multi-step tasks, state a brief plan:
-```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
-```
+For multi-step tasks, state a brief plan: each step with its verify check.
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
@@ -171,8 +166,7 @@ ADRs. Code, commit messages, identifiers and quoted evidence are exempt.
 - One topic per paragraph. Give the result first, then the reason.
 
 Follow these about 80% of the time. Break one when that is clearer, for
-example to keep a condition next to its consequence. In the harness repo,
-`tools/checks/check-writing.py FILE` measures sentence length.
+example to keep a condition next to its consequence.
 - *Catches: reports the reader must parse twice before they can act.*
 
 ## Worktrees
@@ -182,8 +176,6 @@ example to keep a condition next to its consequence. In the harness repo,
 - In a worktree session, read `~/.claude/references/worktrees.md` before you
   run git or shell commands. It lists the command forms Claude Code refuses
   there.
-- Setup, `.worktreeinclude`, hooks, cleanup and concurrency rules are in the
-  same file.
 
 ## Agent orchestration
 
@@ -202,11 +194,6 @@ example to keep a condition next to its consequence. In the harness repo,
   ends while an agent runs leaves no report, and in a headless session it
   kills the agent (ADR 0132).
 
-Executor reuse and other operational policy live in
-`~/.claude/commands/build.md` §2, `~/.claude/commands/review.md`,
-`~/.claude/references/verification-triggers.md`, and
-`~/.claude/docs/agents.md`.
-
 ## Models
 
 Agent definitions own default models. Override upward only for materially
@@ -217,8 +204,5 @@ high-risk or ambiguous work where a wrong decision is expensive to undo.
 ADR numbers in the global instructions, commands, agents and skills ("ADR
 0116", `docs/adr/0058`) point to the harness repository's records. They are
 provenance for its maintainer. Do not look them up in the current project's
-`docs/adr/`, which numbers its own decisions.
-
-- `docs/IDEAS.md` — unresolved possibilities only.
-- `docs/adr/*.md` — accepted architectural decisions and rejected alternatives.
-- `docs/MEMORY.md` — current durable project facts and conclusions, not logs.
+`docs/adr/`, which numbers its own decisions. Record types are defined in
+`~/.claude/references/documentation-practices.md`.

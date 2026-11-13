@@ -70,8 +70,8 @@ SETTINGS_OK = """{
   },
   "worktree": {"baseRef": "head"},
   "hooks": {"PreToolUse": [{"matcher": "Bash", "hooks": [
-    {"type": "command", "command": "$HOME/.claude/hooks/block-destructive-bash.sh"},
-    {"type": "command", "command": "$HOME/.claude/hooks/warn-force-push.sh"}
+    {"type": "command", "command": "$HOME/.claude/hooks/block-destructive-bash.sh", "onFailure": "block"},
+    {"type": "command", "command": "$HOME/.claude/hooks/warn-force-push.sh", "onFailure": "block"}
   ]}]}
 }"""
 
@@ -166,6 +166,18 @@ class DenyCases(unittest.TestCase):
     def test_name_mismatch(self):
         problems = vf.check_agent('test-engineer', agent('test-engineer', EXECUTOR))
         self.assertTrue(any('expected' in p and 'name' in p for p in problems))
+
+    def test_settings_matcher_list_is_flagged(self):
+        problems = vf.check_settings(SETTINGS_OK.replace('"matcher": "Bash"', '"matcher": ["Bash"]'))
+        self.assertTrue(any('not a string' in p for p in problems), problems)
+
+    def test_settings_matcher_wrong_case_is_flagged(self):
+        problems = vf.check_settings(SETTINGS_OK.replace('"matcher": "Bash"', '"matcher": "bash|Agent"'))
+        self.assertTrue(any("unknown 'bash'" in p for p in problems), problems)
+
+    def test_settings_guard_without_onfailure_is_flagged(self):
+        problems = vf.check_settings(SETTINGS_OK.replace('warn-force-push.sh", "onFailure": "block"', 'warn-force-push.sh"'))
+        self.assertTrue(any('lacks onFailure' in p for p in problems), problems)
 
     def test_settings_spawn_depth_unset(self):
         problems = vf.check_settings(SETTINGS_OK.replace('"CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH": "1",\n    ', ''))

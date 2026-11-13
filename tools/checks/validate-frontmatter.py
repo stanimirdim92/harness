@@ -137,6 +137,9 @@ def check_agent(name, text):
         if key not in KNOWN_FIELDS:
             problems.append(f'{name}: unknown frontmatter field {key!r} -- Claude Code ignores it silently (adr/0125)')
 
+    for event, matcher in re.findall(r'^  (\w+):\n    - matcher: (.+)$', block, re.MULTILINE):
+        problems += [f'{name}: {p}' for p in matcher_problems(event, matcher.strip().strip('"'))]
+
     if scalar(block, 'name') != name:
         problems.append(f'{name}: frontmatter name is {scalar(block, "name")!r}, expected {name!r}')
     if not scalar(block, 'description'):
@@ -259,7 +262,48 @@ def check_settings(text):
     for hook in ('block-destructive-bash.sh', 'warn-force-push.sh'):
         if hook not in hooks:
             problems.append(f'settings.json: global PreToolUse does not run {hook}')
+    problems += [f'settings.json: {p}' for p in hook_problems(data.get('hooks', {}))]
 
+    return problems
+
+
+# A matcher that is a list, or names a tool that does not exist (tool names are
+# case-sensitive), makes the hook match nothing -- the guard is silently off.
+# A list under PreToolUse stops every hook in the file from loading.
+TOOL_EVENTS = {'PreToolUse', 'PostToolUse', 'PostToolUseFailure', 'PermissionRequest', 'PermissionDenied'}
+KNOWN_TOOLS = {'Bash', 'Edit', 'Write', 'MultiEdit', 'Read', 'Grep', 'Glob', 'Agent', 'Task',
+               'WebFetch', 'WebSearch', 'NotebookEdit', 'LSP', 'Skill', 'Monitor', 'PowerShell'}
+SESSION_SOURCES = {'startup', 'resume', 'clear', 'compact'}
+
+
+def matcher_problems(event, matcher):
+    if not isinstance(matcher, str):
+        return [f'{event} matcher {matcher!r} is not a string -- the hook matches nothing']
+    if event == 'SessionStart':
+        known = SESSION_SOURCES
+    elif event in TOOL_EVENTS:
+        known = KNOWN_TOOLS
+    else:
+        return []
+    return [f'{event} matcher names unknown {token!r} -- the hook never fires (names are case-sensitive)'
+            for token in matcher.split('|') if token and token != '*'
+            and token not in known and not token.startswith('mcp__')]
+
+
+def hook_problems(hooks):
+    """Matcher shape for every hook group, and onFailure: block on every
+    PreToolUse guard, so a guard that cannot run blocks instead of allowing
+    (adr/0087)."""
+    problems = []
+    for event, groups in hooks.items():
+        for group in groups:
+            if 'matcher' in group:
+                problems += matcher_problems(event, group['matcher'])
+            if event != 'PreToolUse':
+                continue
+            for hook in group.get('hooks', []):
+                if hook.get('type') == 'command' and hook.get('onFailure') != 'block':
+                    problems.append(f'PreToolUse hook {hook.get("command", "?")} lacks onFailure: block -- a crashed guard would allow (adr/0087)')
     return problems
 
 

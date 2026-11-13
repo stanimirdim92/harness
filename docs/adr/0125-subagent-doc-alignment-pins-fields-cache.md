@@ -38,3 +38,11 @@ cache after five minutes.
 
 **Revisit if.** Run metrics in `docs/observation-log.md` show executor resumes
 mostly within five minutes. Then the 1h TTL only adds write cost.
+
+**Revised (2026-11-13) — 1h cache for every subagent.** The owner widened the
+1h TTL (commit `bb27d33`). `settings.json` sets `subagentPromptCacheTtl: "1h"`,
+and `test-engineer` and `figma-test-engineer` also set `cacheTtl: 1h`.
+Verifier runs last 20–25 minutes, and full-suite waits pass five minutes, so a
+5m cache expired mid-run. This replaces the executor-only decision and the
+*1h cache on every persona* rejection above. The Revisit condition still
+applies. The status line now shows the main session's cache state and hit ratio.
