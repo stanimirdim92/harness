@@ -79,6 +79,12 @@ condition is also a `TD-###` (the Pre-authorizations block of `/plan`); its sour
 approval. Id rules live in
 `../../references/plan-quality-gates.md` §3.
 
+When the change would trigger `distributed-systems-reviewer`
+(`../../references/reviewer-triggers.md`), fill the template's Failure Modes
+table. List each step that can fail or run twice, what happens then, the
+design answer, and the task whose test proves it. A row with no design
+answer is an open question for the owner, not a gap to leave (ADR 0134).
+
 ### Behavioral Tasks and Dependencies
 
 - Slice by independently verifiable behavior, not architectural layer or file

@@ -282,8 +282,8 @@ another agent.
 ### `distributed-systems-reviewer`
 
 `DIST-N`, disposition (§Dispositions), confidence, file:line, failure
-scenario, recommendation. No fenced template — findings are reported inline in
-this shape.
+scenario, recommendation, in the fenced report template of
+`agents/distributed-systems-reviewer.md`.
 
 ### Shared conventions across all nine
 
@@ -301,9 +301,9 @@ written as a check (page, steps, what to look for); `/review` routes it to
 A defect present at the candidate base that the
 diff does not introduce or reach is marked `pre-existing` (§Dispositions).
 When the packet holds the project's `REVIEW.md`, its definition of Important
-(BLOCKER or REQUIRED), its nit cap (ADVISORY), its do-not-report list and its
-always-check rules apply (ADR 0091, 0094). A `maxTurns` cap ending a run early is reported
-as a partial result with everything unexamined named explicitly; a truncated
+(BLOCKER or REQUIRED), its do-not-report list and its always-check rules apply
+(ADR 0091, 0094). Report every ADVISORY finding; no nit cap applies (ADR 0130).
+A `maxTurns` cap ending a run early is reported as a partial result with everything unexamined named explicitly; a truncated
 report is never presented as clean or complete. No persona issues GO/NO-GO,
 and no persona invokes another agent or slash command — only a command or the
 user orchestrates (`AGENTS.md` §Agent orchestration).
@@ -492,7 +492,7 @@ report is lost.
 [One sentence: what these numbers mean for this ticket.]
 
 ### Shipped-bug record
-- [observation-log row] · eval: `review-eval/run.py --new [name] --repo [project] --fix [sha]` (or: not an escaped bug)
+- [observation-log row] · eval: `python3 tools/evals/review-eval/run.py --new [name] --repo [project] --fix [sha]` (or: not an escaped bug)
 
 ### Requirement evidence
 - REQ-001: [implementing change] / [verification evidence]

@@ -72,11 +72,10 @@ Source: `../commands/spec.md`, `../commands/plan.md`.
 - optional project infrastructure readiness must pass before writing, including
   mid-ticket runner drift;
 - executor implements, tests, verifies, and makes scoped local commits;
-- parallel dispatch is the default: one executor per workstream that
-  satisfies independence, dependency-readiness, worktree isolation, runtime
-  isolation of every mutable resource its checks touch, and rate-limit
-  headroom, with no fixed cap; a workstream failing or unable to prove any
-  condition queues and runs sequentially, and `/build` reports what it chose;
+- workstreams run sequentially by default (ADR 0136); parallel dispatch
+  needs the user's request for the run, a fixed contract and no file overlap
+  in the plan, and `/build`'s isolation conditions; `/build` reports what it
+  chose;
 - `/build` reports `BUILD COMPLETE` and verification evidence.
 
 Source: `../commands/build.md`.
@@ -102,16 +101,17 @@ Source: `../commands/test.md`.
 
 ### `/review`
 
-`/review` requires the current `BUILD COMPLETE` candidate, supplied as the
-complete message in this conversation or manually by the user in a new one,
-then decides whether
-independent verification is required, then dispatches:
+`/review` runs after `/test`. It requires the current `BUILD COMPLETE`
+candidate and `/test`'s result for it, supplied as the complete message in
+this conversation or manually by the user in a new one, then dispatches:
 
 - `code-reviewer` and `blind-reviewer` always, on the same diff; the blind
   packet carries the diff and nothing else;
-- specialists only when `../references/reviewer-triggers.md` matches.
+- `security-auditor` on every round (ADR 0102);
+- `distributed-systems-reviewer` only when `../references/reviewer-triggers.md`
+  matches.
 
-At most two reviewers run concurrently. Reviewer findings remain separate and
+All reviewers run at once. Reviewer findings remain separate and
 are mapped to canonical `BLOCKER` / `REQUIRED` / `ADVISORY` dispositions.
 
 A valid `VERIFY PASS` may advance the BUILD candidate only through declared,

@@ -20,13 +20,11 @@ Write a failing test before writing the code that makes it pass. For bug fixes, 
 
 **When NOT to use:** Pure configuration changes, documentation updates, or static content changes that have no behavioral impact — validate those with the repository's appropriate check instead of a manufactured failing test.
 
-## The Iron Law
+## The Rule
 
-```
-NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST
-```
+Write a failing test before any behavioral production code.
 
-Scope: the Iron Law applies to every change with behavioral impact — exactly
+Scope: the rule applies to every change with behavioral impact — exactly
 the "Always" list above. The non-behavioral changes in "When NOT to use" are
 outside it, not exceptions to it.
 
@@ -325,40 +323,15 @@ describe('TaskService', () => {
 | No test isolation | Tests pass individually but fail together | Each test sets up and tears down its own state |
 | Mocking everything | Tests pass but production breaks | Prefer real implementations > fakes > stubs > mocks. Mock only at boundaries where real deps are slow or non-deterministic |
 
-## When to Use Subagents for Testing
+## Writing the Reproduction Test Independently
 
-For complex bug fixes, spawn a subagent to write the reproduction test:
-
-```
-Main agent: "Spawn a subagent to write a test that reproduces this bug:
-[bug description]. The test should fail with the current code."
-
-Subagent: Writes the reproduction test
-
-Main agent: Verifies the test fails, then implements the fix,
-then verifies the test passes.
-```
-
-This separation ensures the test is written without knowledge of the fix, making it more robust.
-
-Inside `/build` the executor cannot spawn agents (`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH`
-is 1). Get the same separation by order instead: write and run the reproduction
-test from the bug report before you read the code you suspect.
+Write and run the reproduction test from the bug report before you read the
+code you suspect. The test then encodes the reported behavior, not the fix you
+have in mind.
 
 ## See Also
 
 For JavaScript/TypeScript testing patterns illustrating these principles — Jest, React Testing Library, Supertest, Playwright — see `../../references/testing-patterns.md`. The principles transfer to any ecosystem; the syntax and tools there are JS/TS-specific.
-
-## Common Rationalizations
-
-| Rationalization | Reality |
-|---|---|
-| "I'll write tests after the code works" | You won't. And tests written after the fact test implementation, not behavior. |
-| "This is too simple to test" | Simple code gets complicated. The test documents the expected behavior. |
-| "Tests slow me down" | Tests slow you down now. They speed you up every time you change the code later. |
-| "I tested it manually" | Manual testing doesn't persist. Tomorrow's change might break it with no way to know. |
-| "The code is self-explanatory" | Tests ARE the specification. They document what the code should do, not what it does. |
-| "It's just a prototype" | Prototypes become production code. Tests from day one prevent the "test debt" crisis. |
 
 ## Red Flags
 

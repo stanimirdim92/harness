@@ -305,23 +305,6 @@ Three list/mutation habits that are cheap at design time and expensive to retrof
 - **Filter and sort via explicit parameters**, not by returning everything and letting the caller filter.
 - **Support partial update** where it fits: accept only the fields that change rather than requiring the caller to resubmit the whole object.
 
-## Common Rationalizations
-
-| Rationalization | Reality |
-|---|---|
-| "We'll document the interface later" | The types/signatures ARE the documentation. Define them first. |
-| "We don't need pagination for now" | You will the moment a consumer has 100+ items. Add it from the start. |
-| "Full-object update is simpler than partial" | It forces every caller to resend everything and clobbers concurrent edits. Support partial update. |
-| "We'll version it when we need to" | Breaking changes without a version break consumers silently. Design for extension from the start. |
-| "Nobody uses that undocumented behavior" | Hyrum's Law: if it's observable, something depends on it. Treat every public behavior as a commitment. |
-| "We can just maintain two versions" | Multiple live versions multiply maintenance and create diamond-dependency problems. Prefer the One-Version Rule. |
-| "Internal interfaces don't need contracts" | Internal consumers are still consumers. Contracts prevent coupling and enable parallel work. |
-| "The model will figure out the arguments" | The model has only your schema and descriptions. Vague descriptions produce malformed calls; be explicit. |
-| "Be liberal — just accept whatever comes in" | Liberal in *format*, strict in *safety*. Accepting unvalidated or ambiguous input turns malformation into a contract and opens holes. Normalize to one strict internal form. |
-| "Accepting the idempotency key is enough" | The key is the contract; claiming it atomically against the result is the implementation. A key you accept but don't honour tells the client retrying is safe when it isn't. |
-| "Our queue guarantees exactly-once delivery" | None does across a consumer crash — the broker's ack and your side effect aren't in one transaction. Design for at-least-once with idempotent processing. |
-| "Duplicate requests are rare" | They're *correlated*. Retries spike exactly when a dependency is degraded — when duplicates are most likely and most costly. |
-
 ## Red Flags
 
 - An operation that returns different shapes depending on conditions
@@ -333,6 +316,7 @@ Three list/mutation habits that are cheap at design time and expensive to retrof
 - Verbs in REST URLs (`/createTask`, `/getUsers`), or mixed casing in one surface
 - Bare-string identifiers that are easily swapped (no branded/newtype distinction)
 - A read-then-write for an idempotency key — that's a race, not a guard
+- A consumer that assumes exactly-once delivery: no queue gives it across a consumer crash, so design for at-least-once with idempotent processing
 - An idempotency key derived from a UUID, timestamp, or anything regenerated per attempt
 - The same key accepted with a different body, silently replaying the first response
 - Key retention shorter than the longest path that can re-deliver the request

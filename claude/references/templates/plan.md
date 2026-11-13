@@ -58,6 +58,18 @@ valid answer.]
 ### Proposed Flow
 [The ordered data/control flow after the change.]
 
+### Failure Modes
+[Include when the change would trigger `distributed-systems-reviewer`
+(`reviewer-triggers.md`): queues, jobs, retries, locks, idempotency, ordering,
+or a multi-step write across a process or network boundary. Delete otherwise.
+One row per step that can fail or run twice. Every row names its design
+answer and the task whose test proves it (ADR 0134).]
+
+| Step | Fails how | Effect without a design answer | Design answer | Proved by |
+|---|---|---|---|---|
+| [mark row `pending`, then push to Redis] | [Redis down after the mark] | [row stays `pending`, nothing queued] | [push first, then mark] | T001 test |
+| [two clicks at once] | [both claim the row] | [pushed twice] | [per-advertiser lock] | T001 test |
+
 ### Root-Cause Trace
 [Bugfix plans only (spec `Change kind: Bugfix`); delete otherwise. A logical
 trace from the reproduction to the faulty line, every hop a `file:line`
@@ -192,7 +204,8 @@ would break a single coherent behavioral slice.
 
 ## Parallelization Metadata
 **Conditional** — dependency-ready workstreams with no shared mutable state.
-Informational for `/build`, not an instruction to run in parallel.
+Name the contract between the workstreams and each one's planned files.
+`/build` runs them in parallel only when the user asks (ADR 0136).
 
 ## Risks and Mitigations
 [Every mitigation names the task or checkpoint that performs it. A mitigation

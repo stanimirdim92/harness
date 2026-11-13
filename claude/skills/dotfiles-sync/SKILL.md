@@ -36,7 +36,7 @@ description: How to add, edit, or relink files in this dotfiles repo (stanimirdi
    relative link to the shared body). Stage-style entry points that must
    only run when the user starts them also get an `agents/openai.yaml`
    with `allow_implicit_invocation: false`. Update README.md's adapter
-   count ("all N local skills … and all M commands"), then run
+   count ("all N committed skills under `claude/skills` and all M commands"), then run
    `python3 codex/install-skills.py --check`.
 5. Re-run `./tools/setup/link_dotfiles.sh`. It prints the plan for every
    destination and asks before changing anything; `--dry-run` shows the plan
@@ -69,7 +69,7 @@ description: How to add, edit, or relink files in this dotfiles repo (stanimirdi
 9. If a skill is pulled in from elsewhere rather than written from
    scratch, keep its license file on disk (e.g. `ADDYOSMANI_AGENT_SKILLS_LICENSE`)
    for as long as any of that source's content remains — removing the
-   skill and removing its license are one action, not two. This repo
-   doesn't currently keep a separate provenance log (source URL, commit,
-   refresh command) for vendored skills; if that's ever wanted again,
-   write a fresh one rather than assuming an old one still applies.
+   skill and removing its license are one action, not two. Where a
+   vendored skill records its source and pinned commit (a `Source:` line in
+   its SKILL.md, or `GENERATION.md`), update that record when you refresh
+   the skill.

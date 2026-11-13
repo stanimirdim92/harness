@@ -1,14 +1,10 @@
 ---
-description: Conduct independent review and decide whether a separate VERIFY gate is required
+description: Conduct independent review of a candidate that /test has verified
 argument-hint: "[commit range, PR, diff, task, or feature]"
 ---
 
-`/review` is the independent **REVIEW** gate after `/build`.
-
-It owns two orchestration decisions:
-
-1. whether `/test` is required for this candidate;
-2. which review personas run.
+`/review` is the independent **REVIEW** gate after `/test` (ADR 0132). It
+decides which review personas run.
 
 It reports findings. `/ship` owns the release verdict.
 
@@ -47,15 +43,17 @@ ticket's old review files only when the user starts a new approach.
 
 ## 2. Independent-verification gate
 
-Evaluate the candidate against
-`../references/verification-triggers.md`.
+Require `/test`'s result for this exact candidate.
 
-- If a **VERIFY PASS** already exists for this exact candidate, record
-  **Independent verification: PASS**. This also covers explicitly requested
-  `/test` runs whose test-only commits advanced the BUILD candidate.
-- Otherwise, if the candidate is exempt, record **Independent verification:
-  NOT REQUIRED** with the exemption and use `/build`'s verification evidence.
-- Otherwise, require a **VERIFY PASS** for this exact candidate.
+- **VERIFY PASS:** record **Independent verification: PASS**. This also
+  covers the test-only commits it declared.
+- **VERIFY NOT REQUIRED:** check the exemption against
+  `../references/verification-triggers.md`. When it holds, record
+  **Independent verification: NOT REQUIRED** and use `/build`'s verification
+  evidence. When it does not, return **REVIEW BLOCKED** with `/test` as the
+  next step.
+- No result for this candidate: return **REVIEW BLOCKED** with `/test` as the
+  next step.
 - A **VERIFY PASS** run at a lower depth than the tier §3 sets for this
   candidate is stale: Deep needs the full suite and a mutation probe on
   every changed condition (`../references/risk-tiers.md`). Record
@@ -111,8 +109,9 @@ Set the risk tier and depth from `../references/risk-tiers.md` (ADR 0106),
 including any `## Review depth` floor in the base branch's `REVIEW.md`.
 Record **Risk: <Low | Medium | High> — <the line that matched> · Depth:
 <Quick | Standard | Deep>** and apply that depth's column to dispatch, the
-independent check, the ADVISORY cap and the `/test` packet. Do not lower the
-tier for a small diff or a trusted author.
+independent check and the `/test` packet. Reviewers report every ADVISORY
+finding, and the report keeps all of them (ADR 0130). Do not lower the tier
+for a small diff or a trusted author.
 
 Dispatch `code-reviewer` with:
 
@@ -140,7 +139,8 @@ Dispatch `security-auditor` on every round, with the same packet as
 `distributed-systems-reviewer` is also required. Give each specialist the
 project's `REVIEW.md` too.
 
-Run at most **2 reviewers concurrently**. Reviewers form judgments
+Dispatch every reviewer at once (ADR 0133), and wait for every report before
+you continue (`AGENTS.md` §Agent orchestration). Reviewers form judgments
 independently; do not pass one reviewer's findings to another — least of all
 `code-reviewer`'s to `blind-reviewer`.
 
@@ -181,7 +181,7 @@ owner. List it with the page, the steps and what to look for, so `/test` can
 run it before `/ship`. The finding keeps its disposition until that evidence
 exists. The next step is `/test` with this report, and the review repeats on
 the same candidate, once. Only when the verifier cannot run the check (no browser tool, no
-running app) does it go to the owner, as before.
+running app) does it go to the owner.
 
 `blind-reviewer` also returns two things no other reviewer produces, and both
 are yours to resolve because you are the only participant holding the diff
@@ -236,7 +236,7 @@ evidence:
   as low, and attach the refuting evidence.
 - **UNSURE** — leave the finding as it is.
 
-Keep the two-concurrent limit. In a later round, verify only new BLOCKERs.
+In a later round, verify only new BLOCKERs.
 
 ### Stale instructions
 
@@ -333,5 +333,4 @@ of its findings for tools.
 Then stop. The next stage is `/ship`.
 
 Any candidate change after REVIEW invalidates the review. A production fix
-returns to `/build`; `/review` then re-evaluates whether `/test` is required for
-the new candidate before reviewing it again.
+returns to `/build`, then `/test`, then `/review`.

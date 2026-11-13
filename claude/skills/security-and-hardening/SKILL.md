@@ -303,9 +303,7 @@ When you defer a fix, document the reason and set a review date.
 Do not assume npm or treat the nearest manifest as the install root. The
 installation-boundary rules, the frozen/immutable install matrix per manager, the
 install-script gate, the per-version native policies, and the review checklist
-are all in `../../references/supply-chain.md` — work from it rather than the
-summary that used to sit here, which restated it well enough to go stale
-silently.
+are all in `../../references/supply-chain.md` — work from it.
 
 The framing that reference assumes, and the reason it is not optional: audits
 match known advisories, so they neither catch a newly malicious or typosquatted
@@ -421,22 +419,6 @@ This skill deliberately does not duplicate the full review checklist. The
 synced references above are authoritative, so updates to security categories
 and review coverage do not leave an embedded copy silently stale.
 
-## Common Rationalizations
-
-| Rationalization | Reality |
-|---|---|
-| "This is an internal tool, security doesn't matter" | Internal tools get compromised. Attackers target the weakest link. |
-| "We'll add security later" | Security retrofitting is 10x harder than building it in. Add it now. |
-| "No one would try to exploit this" | Automated scanners will find it. Security by obscurity is not security. |
-| "The framework handles security" | Frameworks provide tools, not guarantees. You still need to use them correctly. |
-| "It's just a prototype" | Prototypes become production. Security habits from day one. |
-| "Threat modeling is overkill here" | Five minutes of "how would I attack this?" prevents the design flaws no control can patch later. |
-| "It's just LLM output, it's only text" | That "text" can be a SQL statement, a script tag, or a shell command. Treat it like any untrusted input. |
-| "The audit passed, so the dependency is safe" | Audits match known advisories. They do not detect a newly malicious package or make unreviewed install scripts safe to execute. |
-| "Collect it now, we might need it later" | Data you don't hold can't be breached, subpoenaed, or mis-deleted. "Might need it" is breach scope, not a purpose. |
-| "We'll handle deletion requests manually" | Manual erasure misses backups, caches, and analytics copies. If the schema can't find a user's data, you can't honor the request — design for it. |
-| "Compliance is legal's problem, not ours" | Export, deletion, retention, and consent are schema and code. Legal can't bolt them on after you've smeared PII across ten systems. |
-
 ## Red Flags
 
 - User input passed directly to database queries, shell commands, or HTML rendering
@@ -446,6 +428,7 @@ and review coverage do not leave an embedded copy silently stale.
 - No rate limiting on authentication endpoints
 - Stack traces or internal errors exposed to users
 - Dependencies with known critical vulnerabilities, competing lockfiles at one installation boundary, non-reproducible installs, or blanket-approved scripts
+- A dependency treated as safe because the audit passed: audits match known advisories and miss a new malicious package or install script
 - Server fetches user-supplied URLs without an allowlist (SSRF)
 - LLM/model output passed into a query, the DOM, a shell, or `eval`
 - Secrets, PII, or the full system prompt placed inside an LLM context window

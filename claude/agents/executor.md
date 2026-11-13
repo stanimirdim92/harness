@@ -6,6 +6,7 @@ skills:
   - executor-development-discipline
   - test-driven-development
 model: claude-sonnet-5-5
+effort: high
 experimental:
   cacheTtl: 1h
 hooks:
@@ -123,7 +124,7 @@ the recorded answer and cite the TD in the report. Any other stop condition
 stays a stop.
 
 Do not re-check a blocker the plan or `docs/tasks/<TICKET>-open.md` already
-records, such as a missing Figma edit seat. Cite it and report it.
+records. Cite it and report it.
 
 Do not blind-retry an unchanged failure.
 

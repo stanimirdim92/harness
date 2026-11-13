@@ -6,8 +6,8 @@ calling it done: frontend in a real browser, backend through real requests,
 jobs and commands (ADR 0104). Tests passing is not the same as the change
 working.
 
-`/review` is the decision point. Require `/test` for every candidate that
-changes production behavior: code, templates, styles, queries, migrations,
+`/test` runs after every `/build` and is the decision point (ADR 0132). It
+fully verifies every candidate that changes production behavior: code, templates, styles, queries, migrations,
 routes, jobs, commands, or configuration the running application reads. This
 covers frontend and backend alike.
 
@@ -28,7 +28,9 @@ These always require `/test`, even when a file looks exempt:
   (`always-person.py`, ADR 0096);
 - the user explicitly asks for independent verification.
 
-When uncertain whether a candidate is exempt, require `/test`.
+For an exempt candidate, `/test` returns **VERIFY NOT REQUIRED** with the
+exemption, and `/review` uses `/build`'s verification evidence. When
+uncertain whether a candidate is exempt, verify it.
 
 This file is the single source of truth for the independent-verification gate.
 Do not duplicate this list in `/review`, `/test`, or agent definitions.

@@ -9,10 +9,13 @@ argument-hint: "[task number(s), ticket, commit range, or feature description]"
 `/test` is a second context that runs the change for real: the screen in a
 browser, the endpoint over HTTP, the job on a queue, the command in a shell.
 "The tests pass" and "it should work" are not evidence that it works
-(ADR 0104). `../references/verification-triggers.md` says when it is required:
-every production change, frontend and backend.
+(ADR 0104). It runs after every `/build`, and `/review` runs after it
+(ADR 0132).
 
-If `/test` is invoked for an exempt change anyway, run it; do not refuse.
+First check the candidate against `../references/verification-triggers.md`.
+When it is exempt, return **VERIFY NOT REQUIRED** with the exemption and
+`/build`'s evidence, and dispatch nobody. When the user asks for full
+verification of an exempt change, run it.
 
 ## 1. Resolve scope
 
@@ -89,6 +92,9 @@ captured through Chrome DevTools, and every visible asset and its geometry is
 compared. A mismatch is a `VERIFY FAIL` with both screenshots named; a
 missing Figma connection is `VERIFY BLOCKED`, never a visual judgement from
 memory.
+
+Wait for the verifier's report before you end your turn (`AGENTS.md` §Agent
+orchestration).
 
 Include relevant invariant and decision pointers. BUILD's results are prior
 evidence, not the verifier's conclusion; the agent independently selects and
@@ -191,6 +197,11 @@ a gap to report, not one to omit. Preserve evidence provenance in the summary:
 inherited results and code reasoning must not become claims that the verifier
 executed a check. Include their source/version and any remaining proof gap.
 
+### VERIFY NOT REQUIRED
+
+Every changed file is exempt under `../references/verification-triggers.md`.
+Name the exemption for each file, and cite `/build`'s verification evidence.
+
 ### VERIFY FAIL
 
 Report the failing behavior/criterion with its `REQ-###`, reproduction evidence,
@@ -207,3 +218,5 @@ Report the blocker, checks completed, and the smallest action needed to unblock.
 
 A production-code fix invalidates the previous VERIFY result and must go back
 through `/build`.
+
+After VERIFY PASS or VERIFY NOT REQUIRED, the next stage is `/review`.

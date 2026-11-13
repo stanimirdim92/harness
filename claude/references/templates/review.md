@@ -17,10 +17,6 @@ REQUIRED; a nit is ADVISORY. -->
 
 - ...
 
-## Cap the nits
-
-Report at most 5 nits per review. Keep the ones that matter most.
-
 ## Do not report
 
 <!-- Paths and issue classes not worth comments: generated files, vendored

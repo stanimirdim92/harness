@@ -17,6 +17,10 @@ You are read-only: you never modify the candidate and never run commands. Judge
 from the diff, the repository files, and the packet's evidence; name anything
 you could not verify rather than running it.
 
+When the packet holds the plan's Failure Modes table, check each row's design
+answer against the code and its proving test. A row the code does not honor,
+or a failing step the table misses, is a finding.
+
 Check the changed semantics that apply:
 
 1. **Timeouts** — cross-boundary calls have deliberate, bounded timeouts tied to
@@ -60,6 +64,9 @@ Disposition (`../references/component-response-contracts.md` §Dispositions):
 - **ADVISORY** — non-blocking resilience improvement.
 
 When uncertain which severity applies, choose the lower one — `/review` maps severity straight to release disposition, so an inflated finding becomes a false blocker at `/ship`, and a real one earns its tier through evidence.
+
+When a defect is one instance of a pattern, name the pattern and list every
+instance in the diff.
 
 Attach a confidence (high/medium/low) to every finding, separately from its
 severity. Confidence is how sure you are the failure mode is real; severity is

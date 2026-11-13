@@ -23,7 +23,8 @@ Ask only when ambiguity materially changes:
 - architecture with multiple materially different options
 
 Before implementing:
-- For non-trivial work, plan before editing.
+- Plan before editing when the change spans several modules, changes a
+  contract, or has more than one reasonable design.
 - Skip formal planning for obvious, localized changes.
 - If a simpler approach exists, say so. Push back when warranted.
 - If multiple interpretations materially affect the outcome, surface them.
@@ -195,6 +196,9 @@ example to keep a condition next to its consequence. In the harness repo,
 - Do not widen tools/permissions or seek secrets to bypass an orchestration
   boundary.
 - Completion claims require executed evidence.
+- Wait for every agent you dispatched before you end your turn. A turn that
+  ends while an agent runs leaves no report, and in a headless session it
+  kills the agent (ADR 0132).
 
 Executor reuse and other operational policy live in
 `~/.claude/commands/build.md` §2, `~/.claude/commands/review.md`,
@@ -207,6 +211,11 @@ Agent definitions own default models. Override upward only for materially
 high-risk or ambiguous work where a wrong decision is expensive to undo.
 
 ## Durable project records
+
+ADR numbers in the global instructions, commands, agents and skills ("ADR
+0116", `docs/adr/0058`) point to the harness repository's records. They are
+provenance for its maintainer. Do not look them up in the current project's
+`docs/adr/`, which numbers its own decisions.
 
 - `docs/IDEAS.md` — unresolved possibilities only.
 - `docs/adr/*.md` — accepted architectural decisions and rejected alternatives.

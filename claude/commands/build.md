@@ -62,8 +62,7 @@ executor for it, leave its `Status` as the plan set it, and do not count it as
 unimplemented: when every task `/build` owns is implemented and the
 checkpoints pass, report **BUILD COMPLETE** and list those tasks under
 **Handed on**, each with its stage (`/test`) or person. A checkpoint that
-depends on such a task runs without it and says so. (Before this rule a plan
-with a `/test` task could never leave `/build`.)
+depends on such a task runs without it and says so.
 
 For each selected task resolve:
 
@@ -88,7 +87,7 @@ Use **one executor per workstream, not one per task**.
 - first selected task in a workstream -> fresh named `executor`;
 - later tasks in that workstream -> resume the same executor only when both
   hold: it was idle under about 15 minutes, and its context is under about
-  350k tokens (owner decision, 2026-10-24; ADR 0116);
+  350k tokens (ADR 0116);
 - otherwise -> a fresh executor. Its packet carries the task packet, the
   previous handoff report, and the workstream's commits so far, so nothing the
   old executor knew is lost;
@@ -103,8 +102,7 @@ Figma tools, and only the read-only design-to-code set, because a subagent
 loads every granted tool in full on every call (ADR 0118).
 
 A resume after the cache expired rewrites the whole context at full price. A
-large context also slows and degrades the executor. (LD-507: one executor grew
-from 79k to 344k tokens and was resumed after 62 minutes idle.)
+large context also slows and degrades the executor.
 
 ### Checkout and infrastructure readiness
 
@@ -113,8 +111,8 @@ argument. The executor definition deliberately has no unconditional isolation.
 For concurrent writers, explicitly set `isolation: worktree` on each dispatch
 and verify its returned checkout path before accepting implementation evidence.
 If the runtime cannot provide separate checkouts, queue the workstreams.
-The test-engineer's isolated checkout and independent review contexts are
-unchanged (docs/adr/0058).
+The test-engineer keeps its own isolated checkout, and reviewers keep
+independent contexts (docs/adr/0058).
 
 Before dispatch, establish the assigned Git checkout and branch. Refuse the main
 checkout's default branch, detached HEAD, or unverifiable Git state. When the
@@ -188,7 +186,8 @@ Send only what is needed to start correctly:
 - pre-authorization `TD-###` ids and external-tool blockers the plan records;
 - workstream verification command when applicable;
 - useful pointers to project/module rules, one or two precedents, and any shared
-  contract/invariant.
+  contract/invariant;
+- the path of the project's `REVIEW.md` from the base branch, when there is one.
 
 Prefer pointers over pasted documents. Do not dump the full spec, plan, project
 rules, investigation transcript, or another agent's output. The previous
@@ -230,12 +229,16 @@ The executor invokes only additional skills selected by `/build`.
 
 ### Parallelism
 
-**Parallel when safe, sequential otherwise.** Dispatch every workstream that
-satisfies ALL of the conditions below concurrently, one executor each, with no
-fixed cap. A workstream failing any condition — or unable to prove it from
-repository evidence — is queued and runs sequentially. The conditions are the
-quality guard: a fan-out that satisfies them costs tokens, never correctness;
-one that does not is never worth the time it saves.
+**Sequential by default** (ADR 0136). Run workstreams one after another, in
+dependency order, so each executor builds on the code already merged. Run
+workstreams in parallel only when the user asks for it in this run. Then
+dispatch concurrently, one executor each, only the workstreams that satisfy
+ALL of the conditions below; the rest queue and run sequentially. A condition
+that cannot be proved from repository evidence is unmet.
+
+- the user asked for parallel workstreams in this run;
+- the plan's Workstreams section fixes the contract between them, and their
+  planned files do not overlap;
 
 - the workstreams are genuinely independent (no unfinished dependency between
   them, no shared mutable state);
@@ -315,8 +318,7 @@ BUILD does not prove browser-dependent acceptance criteria: actual rendering,
 browser APIs, navigation, console, or network behavior. Executors have no
 browser tools. List each such criterion in the completion message as
 `Needs real-browser check: <REQ id> — <criterion>`. Do not count component
-tests as evidence for it. `/review` then requires `/test`
-(`../references/verification-triggers.md`), and test-engineer runs the check.
+tests as evidence for it. `/test` runs next, and test-engineer runs the check.
 
 Rerun every selected task's `Change-surface search` on the integrated tree. A
 hit no task changed and no task lists as unchanged goes back to the owning
@@ -371,8 +373,7 @@ Both reports include:
 Never estimate unavailable token/cost/time data.
 
 Do not dispatch independent verifiers or reviewers here. The next stage is
-`/review`; `/review` decides whether the separate `/test` gate is required for
-this candidate.
+`/test`. It verifies the candidate, or records that it is exempt.
 
 ## Review fixes
 

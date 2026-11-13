@@ -186,7 +186,7 @@ Each step is independently deployable and reversible: if step 4 misbehaves, roll
 
 **Rules:**
 - **Additive first, destructive last and alone.** Adds (new nullable column, new table, new index) are safe in any deploy; drops and renames get their own deploy *after* no code references the old shape.
-- **Every migration has a tested down path.** A migration you can't reverse is a deploy you can't roll back. Write and run the `down` before merging. For destructive contract steps, record that the data cannot be restored and require a backup/verification step.
+- **Every reversible migration has a tested down path.** A migration you can't reverse is a deploy you can't roll back. Write and run the `down` before merging. Follow the project's migration policy for steps that cannot be reversed mechanically. For destructive contract steps, record that the data cannot be restored and require a backup/verification step.
 - **Backfill in batches, off the hot path.** A single `UPDATE` over millions of rows locks the table; chunk it and throttle.
 - **Build large indexes without blocking writes** (e.g. Postgres `CREATE INDEX CONCURRENTLY`).
 - **Decouple from code by feature flag** when the cutover is risky, exactly as in the Feature Flag Migration pattern above.
@@ -203,20 +203,6 @@ Zombie code is code that nobody owns but everybody depends on. It's not actively
 
 **Response:** Either assign an owner and maintain it properly, or deprecate it with a concrete migration plan. Zombie code cannot stay in limbo — it either gets investment or removal.
 
-## Common Rationalizations
-
-| Rationalization | Reality |
-|---|---|
-| "It still works, why remove it?" | Working code that nobody maintains accumulates security debt and complexity. Maintenance cost grows silently. |
-| "Someone might need it later" | If it's needed later, it can be rebuilt. Keeping unused code "just in case" costs more than rebuilding. |
-| "The migration is too expensive" | Compare migration cost to ongoing maintenance cost over 2-3 years. Migration is usually cheaper long-term. |
-| "We'll deprecate it after we finish the new system" | Deprecation planning starts at design time. By the time the new system is done, you'll have new priorities. Plan now. |
-| "Users will migrate on their own" | They won't. Provide tooling, documentation, and incentives — or do the migration yourself (the Churn Rule). |
-| "We can maintain both systems indefinitely" | Two systems doing the same thing is double the maintenance, testing, documentation, and onboarding cost. |
-| "Just rename the column, it's one line" | During the rollout, old and new code run together — one will query a column that no longer exists. Expand/contract, never rename in place. |
-| "I'll add the column and drop the old one in the same migration" | That couples a safe add to a destructive drop. Drops get their own deploy, after no code references the old shape. |
-| "We'll write the rollback if we need it" | A migration with no down path is a deploy you can't reverse. Write and run the `down` before merging. |
-
 ## Red Flags
 
 - Deprecated systems with no replacement available
@@ -228,7 +214,7 @@ Zombie code is code that nobody owns but everybody depends on. It's not actively
 - Removing code without verifying zero active consumers
 - A schema change and the code that depends on it shipped in the same deploy
 - A column renamed or dropped in place rather than via expand/contract
-- A migration merged with no tested down path, or a backfill that locks the table
+- A reversible migration merged with no tested down path, or a backfill that locks the table
 
 ## Verification
 
@@ -245,5 +231,5 @@ After a database schema migration:
 
 - [ ] The change ships in additive phases (expand → backfill → contract), not a single in-place edit
 - [ ] Old and new code are both valid against the schema at every deploy step
-- [ ] Each migration has a tested down path; backfills run in throttled batches
+- [ ] Each reversible migration has a tested down path; backfills run in throttled batches
 - [ ] Destructive steps (drop/rename) ship in their own deploy after no code references the old shape

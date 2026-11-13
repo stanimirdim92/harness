@@ -81,7 +81,7 @@ Figma file, frame, or node, open it with the available Figma tools rather than
 recording the link alone. Design commonly lives on a sibling, parent, or linked
 ticket, so enumerate across the hierarchy. Pin each one by file key and node id,
 not by frame name. Skip cover and thumbnail nodes: they hold no requirements,
-and one `get_metadata` call on a cover returned 80k characters. No Figma tool in the session means the reference is
+and `get_metadata` on a cover can return tens of thousands of characters. No Figma tool in the session means the reference is
 unavailable for the recorded reason — report that, never as design that does not
 exist. The same holds when a needed Figma tool is missing or its call fails:
 name the tool and quote the error.

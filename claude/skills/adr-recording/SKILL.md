@@ -152,16 +152,6 @@ block re-proposal.>
 actually change this call. Omit the block entirely when none exists.>
 ```
 
-## Common Rationalizations
-
-| Rationalization | Reality |
-|---|---|
-| "It's obvious why we did this" | Obvious now, forgotten in three months — that's exactly the failure mode this skill exists to prevent. |
-| "I'll just edit the old ADR to reflect the new decision" | That deletes the historical record. Write a new file that supersedes it; leave the old one alone. |
-| "One file is fine, no index needed yet" | The index costs one row and stops the second decision from needing to be discovered by directory listing. Write it from decision #1. |
-| "The rejected alternative wasn't that serious" | If it was considered enough to write a sentence about, it's worth a `Rejected` block — otherwise it comes back next quarter with no memory it lost. |
-| "This project doesn't have a docs/ folder" | Create `docs/adr/` anyway — it's the decision record, not a doc dump; don't skip it because the surrounding structure is thin. |
-
 ## Red Flags
 
 - A decision file with no `Rejected` block at all, when alternatives were

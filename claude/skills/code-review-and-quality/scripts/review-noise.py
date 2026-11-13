@@ -13,8 +13,9 @@ chose not to take.
 Each finding also carries a `class`, a short slug for the kind of defect
 (`missing-tenant-scope`, `n-plus-one`). A class that keeps coming back across
 tickets should be fixed at the source, not found again on the next ticket
-(ADR 0105): a lint rule when a tool can catch it, a REVIEW.md "Always check"
-line when it is a project convention, a CLAUDE.md line when it is how code
+(ADR 0105): a lint rule when a tool can catch it, a shared test the suite
+runs when a test can (ADR 0135), a REVIEW.md "Always check" line when it is a
+project convention, a CLAUDE.md line when it is how code
 gets written. A class that keeps ending `refuted` belongs under REVIEW.md
 "Do not report".
 
@@ -108,6 +109,7 @@ def repeats(t, min_tickets=3):
 
 ACTIONS = {
     'fix': 'real each time: fix at the source. A lint rule if a tool can catch it; '
+           'else a shared test the suite runs if a test can catch it; '
            'else a REVIEW.md "Always check" line if it is a project convention; '
            'else a CLAUDE.md line if it is how the code gets written.',
     'silence': 'mostly refuted: add it to REVIEW.md "Do not report", or narrow the reviewer prompt.',

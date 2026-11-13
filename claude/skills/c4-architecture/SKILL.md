@@ -6,12 +6,8 @@ argument-hint: "[target directory or repo, defaults to repo root] [--components]
 
 # C4 Architecture Documentation
 
-Inspired by Seth Hobson's `c4-architecture` plugin
-(github.com/wshobson/agents, `claude-code-workflows` marketplace — the
-same marketplace as the installed `llm-application-dev` plugin),
-rewritten around the official
-[Structurizr MCP server](https://docs.structurizr.com/ai/mcp) rather than
-hand-written Markdown per level. Structurizr is the reference implementation
+This skill writes Structurizr DSL and validates it through the official
+[Structurizr MCP server](https://docs.structurizr.com/ai/mcp). Structurizr is the reference implementation
 of C4: it understands the model's structural rules (components live inside
 containers, containers live inside software systems, a person is never an
 external system) and enforces them on the DSL you write, instead of Claude

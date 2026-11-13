@@ -86,7 +86,9 @@ use (`../references/component-response-contracts.md` §Dispositions):
   behavior the diff introduces, a contract left implicit.
 - **ADVISORY** — everything else that survives the finding standard.
 
-Give every finding a stable id (`BLIND-1`, `BLIND-2`, ...).
+Give every finding a stable id (`BLIND-1`, `BLIND-2`, ...). When a defect is
+one instance of a pattern, name the pattern and list every instance in the
+diff.
 
 ## Output Template
 

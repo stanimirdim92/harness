@@ -89,6 +89,70 @@ doing, not just what it is.
   correct result is obtained, the better." The budget is advisory, so keep a
   hard timeout.
 
+- **Unattended pipeline as a workflow** — **L**. The owner's end goal is a
+  ticket in and a reviewed candidate out, with nobody waiting between stages.
+  ADRs 0109, 0114 and 0115 built this as Python runners; 0119 removed them on
+  2026-11-03, because they needed unattended modes in `/spec`, `/plan` and
+  `/ship`, and a `HANDOFF:` line only the runners read.
+
+  **Shape.**
+  - `/spec`, `/plan` and `/ship` stay interactive; they hold the owner's
+    judgment.
+  - A `workflows/pipeline.js` (`/pipeline <TICKET>`) runs `/build` → `/test`
+    → `/review` in fixed steps. Each stage's result line is the handoff:
+    `BUILD COMPLETE`, `VERIFY PASS` / `VERIFY NOT REQUIRED`, the review count
+    line and the review SARIF file.
+  - Review fixes loop as `/build <TICKET> review fixes` → `/test` →
+    `/review`, up to round 3 (ADR 0089).
+  - It never pushes or ships.
+
+  **Start conditions.**
+  - An approved, committed plan, with a pre-authorization (`TD-###`) for each
+    foreseeable stop (ADR 0116).
+  - For distributed changes, the plan's Failure Modes table (ADR 0134), so
+    design flaws are settled before code exists.
+  - The project's readiness check passes in the ticket worktree: dependencies,
+    frontend build, commit hooks and per-checkout databases.
+
+  **Stop and notify the owner on:**
+  - a blocker or decision with no pre-authorization;
+  - VERIFY FAIL twice;
+  - review round 3;
+  - a pre-existing BLOCKER or REQUIRED finding (an owner decision);
+  - any stage that ends without its result line.
+
+  **What the LD-536 experiment (2026-11-13) showed an unattended run must
+  survive.** Two arms ran the same ticket from the same base in `claude -p`
+  sessions:
+  - A headless `/test` ended its turn while the verifier ran in the
+    background. The session exit killed the verifier, and the next `/review`
+    blocked: $22 for no result. Fixed by the wait rule in `AGENTS.md`
+    §Agent orchestration (ADR 0132).
+  - The repo's shared `core.hooksPath` called a script that the base commit
+    lacked, so every commit failed. The auto-mode classifier refused to
+    switch hooks off; copying the current hook files in was the way through.
+  - A fresh worktree had no frontend build, so 23 unrelated tests failed with
+    `ViteManifestNotFoundException`. The readiness check must build it
+    (`bin/worktree-setup.sh --build`).
+  - The old command order (`/build` → `/review` decides → `/test`) made a run
+    block and loop. Now `/test` follows `/build` and decides the exemption
+    (ADR 0132).
+  - Pre-existing defects surface at review: a 1-hour admin-role cache, and an
+    unauthenticated log viewer (a BLOCKER). The run must stop on them, not
+    fix them inside the ticket.
+  - Parallel workstreams cost 1.6× for no quality gain (ADR 0136), so the
+    pipeline runs them sequentially unless the owner asks.
+  - Cost per stage, sequential arm: `/build` $3.23, `/test` $6.63, `/review`
+    $22.88. Review is the costly stage. Shared tests for repeated classes
+    (ADR 0135) and the plan's Failure Modes table cut fix rounds.
+
+  **Prompting.** Needs the unattended-run prompt addition above, so runs do
+  not stop early, and `subagentPromptCacheTtl: "1h"` (set 2026-11-13), so
+  long verifier waits keep their cache.
+
+  **Ready when** the next 3–5 tickets go `/build` → `/test` → `/review`
+  interactively with no owner answer mid-run.
+
 ## Considered and rejected
 
 | Idea | Reason rejected |

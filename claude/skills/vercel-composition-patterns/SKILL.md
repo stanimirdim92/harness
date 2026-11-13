@@ -12,8 +12,8 @@ metadata:
 ## Local workflow integration
 
 Source: [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills/tree/063bee94c3f4df8453406c830b0a7df0f2860278/skills/composition-patterns),
-pinned at `063bee94c3f4`. License: `../VERCEL_AGENT_SKILLS_LICENSE`. The only local
-change is the description, folded onto one line.
+pinned at `063bee94c3f4`. License: `../VERCEL_AGENT_SKILLS_LICENSE`. Local changes:
+the description, folded onto one line, and this section.
 
 `/build` selects this skill for tasks that add or reshape a React component's
 API. Project rules and existing component precedent win where they differ:

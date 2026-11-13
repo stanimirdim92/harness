@@ -24,6 +24,26 @@ method/job and relevant callees, including arguments or mode flags that alter
 its behavior. Reuse current evidence; report mismatches rather than copying a
 similar call whose semantics do not fit this task.
 
+## Search Before You Add
+
+Before you add a function, method, helper, constant or config value, search
+the repository for one that already does the job. Search by name, by the
+behavior, and by any literal value. Then:
+
+- reuse what fits, or extend it when the change is small and in scope;
+- use the form that sibling code uses for the same job;
+- write logic once when two places in your change need it;
+- read a value from its config key; do not copy the number.
+
+Add a new one only when nothing fits, and report what you searched.
+
+## Comments
+
+Write a comment only for a reason the code cannot show, and check that the
+reason is true of the code as written. Leave out ticket, review and finding
+ids, history ("previously", "now", "changed to"), and text that restates the
+code.
+
 ## Discover the Local Test Path
 
 Before the first edit, identify the repository-defined focused and broader
@@ -155,12 +175,27 @@ Apply the staged-diff and commit-content checks in `../../AGENTS.md` §3.
 Report directly required neighboring changes as scope expansion through the
 executor's output contract.
 
+## Check Your Diff Before Handoff
+
+Before the commit that completes the task, read your whole task diff and check
+it against:
+
+- the "Important" and "Always check" lists of the project's `REVIEW.md`, when
+  the packet has one;
+- the project and module rules the packet names;
+- §Search Before You Add and §Comments.
+
+Fix what you find, then run the focused verification again.
+
 ## Completion Evidence
 
 Before reporting a task complete, provide evidence for:
 
 - behavioral slices implemented;
 - tests added or changed;
+- each new function, method, constant or config value, with the existing code
+  you searched for it;
+- the diff check: the lists you checked against, and what you fixed;
 - required focused and workstream verification;
 - commits created — the commit that completes the task also changes that
   task's `Status:` line in the todo from `Pending` to `Done` (nothing else in

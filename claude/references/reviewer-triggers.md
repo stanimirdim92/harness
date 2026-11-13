@@ -32,7 +32,9 @@ Give `code-reviewer` and every triggered specialist:
 - the integrated diff;
 - a one-line goal;
 - relevant acceptance criteria;
-- build/verify evidence needed to understand what was checked.
+- build/verify evidence needed to understand what was checked;
+- for `distributed-systems-reviewer`, the plan's Failure Modes table when it
+  has one.
 
 Give `blind-reviewer` **the integrated diff and nothing else** — no goal, no
 acceptance criteria, no build evidence, no ticket id in the packet text. It is

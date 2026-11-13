@@ -68,7 +68,7 @@ STAGE_OUTPUT = {
     'plan': 'docs/tasks/[TICKET]-plan.md + -todo.md',
     'build': 'local commits, task Status: Done',
     'review': 'findings: BLOCKER / REQUIRED / ADVISORY',
-    'test': 'VERIFY PASS / FAIL / BLOCKED',
+    'test': 'VERIFY PASS / NOT REQUIRED / FAIL / BLOCKED',
     'ship': 'GO / NO-GO with a rollback plan',
 }
 INTAKE_SKILL = 'jira-ticket'
@@ -781,7 +781,7 @@ def pipeline_flow(cmds, writers):
            + ''.join(out) + '</svg>')
     return ('<figure class="panel flow">' + '<div class="flow-scroll">' + svg + '</div>'
             '<figcaption>Every arrow names what it carries. Nothing reaches the next stage past an orange diamond '
-            'until you decide. /test runs on every production change, and /review needs its VERIFY PASS. '
+            'until you decide. /test runs after every /build and decides whether the change needs verifying; /review needs its result. '
             'The grey arrows on the right go back to an earlier stage. ' + e(ROUND_CAP_NOTE) +
             '</figcaption></figure>')
 
@@ -814,7 +814,7 @@ CONVENTIONS = [
     ('Status words', 'New / Modify / Remove / Rename / Bugfix', 'Spec `Change kind`', '/spec', 'references/templates/spec.md', 'Change kind:'),
     ('Status words', 'Pending / Done', 'Task status in the todo; flipped to Done in the commit that finishes it', 'executor', 'references/templates/task.md', '**Status:** Pending'),
     ('Status words', 'BUILD COMPLETE / BUILD BLOCKED', 'The /build result', '/build', 'commands/build.md', 'BUILD COMPLETE'),
-    ('Status words', 'VERIFY PASS / FAIL / BLOCKED', 'The /test result', '/test', 'commands/test.md', 'VERIFY BLOCKED'),
+    ('Status words', 'VERIFY PASS / NOT REQUIRED / FAIL / BLOCKED', 'The /test result', '/test', 'commands/test.md', 'VERIFY BLOCKED'),
     ('Status words', 'BLOCKER / REQUIRED / ADVISORY', 'How serious a review finding is: the reviewer sets it, /ship decides on it', 'reviewers', 'references/component-response-contracts.md', '#### Dispositions'),
     ('Status words', 'killed / survived', 'A mutation probe: a surviving mutant is a missing test', 'test-engineer', 'agents/test-engineer.md', 'has survived'),
     ('Status words', 'Weakened tests: none found / Not verified', 'The /review result of the weakened-test guard', '/review', 'commands/review.md', 'Weakened tests: none found'),

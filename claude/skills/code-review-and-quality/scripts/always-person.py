@@ -9,7 +9,7 @@ branch (never from the change itself, ADR 0094), including any REVIEW.md in a
 directory the change touches, whose globs are relative to that directory, and
 prints the changed files that match.
 
-/review then runs every specialist and requires /test; /ship tells the user
+/test then always verifies, /review runs every specialist, and /ship tells the user
 plainly to read those files.
 
 Usage:

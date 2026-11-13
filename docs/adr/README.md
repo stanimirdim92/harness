@@ -11,7 +11,7 @@ that explanation here, just the index.
 | [0001](0001-superpowers-overlap.md) | Superpowers overlap | Superseded by [0021](0021-reconcile-superpowers-overlap-with-current-sdlc.md) and [0039](0039-runtime-catalog-narrowed-by-observed-use.md) |
 | [0002](0002-model-split-sonnet-orchestrator-tiered-subagents.md) | Model split: Sonnet orchestrator, tiered subagents | Accepted |
 | [0003](0003-executor-concurrency-sequential-only.md) | Executor concurrency: sequential only, no parallel writers | Superseded by [0031](0031-parallel-executors-via-worktree-isolation.md) (2 concurrent with worktree isolation) |
-| [0004](0004-reviewer-batch-cap-no-high-risk-exception.md) | Reviewer batch cap: no high-risk exception | Accepted |
+| [0004](0004-reviewer-batch-cap-no-high-risk-exception.md) | Reviewer batch cap: no high-risk exception | Superseded by [0133](0133-reviewers-run-at-once.md) |
 | [0005](0005-reviewer-trigger-matrix-single-source.md) | Reviewer trigger matrix: one file, not two copies | Accepted |
 | [0006](0006-review-thin-wrapper-over-code-reviewer.md) | `/review`: thin wrapper over `code-reviewer`, not a second rubric | Accepted |
 | [0007](0007-agents-doc-trimmed-to-match-built.md) | docs/agents.md: trimmed to match what's actually built | Accepted |
@@ -42,7 +42,7 @@ that explanation here, just the index.
 | [0032](0032-unblock-triage-persona-removed.md) | `unblock-triage` persona removed; blocked-item triage belongs to each gate | Accepted |
 | [0033](0033-canonical-disposition-and-scoped-commit-authority.md) | Canonical release disposition, scoped commit authority, gate-state integrity | Clarified by [0038](0038-verify-pass-test-only-candidate-identity.md); local tags allowed and push hook-denied by [0055](0055-multi-agent-enforcement-and-parallel-when-safe.md); reviewers label with the dispositions directly per [0082](0082-reviewers-label-with-dispositions.md) |
 | [0034](0034-spec-driven-development-narrowed-to-define.md) | `spec-driven-development` narrowed to the DEFINE stage | Accepted |
-| [0035](0035-independent-verify-made-risk-triggered.md) | Independent VERIFY made risk-triggered; `/review` owns the decision | Clarified by [0038](0038-verify-pass-test-only-candidate-identity.md); risk triggers superseded by [0104](0104-test-runs-every-production-change.md) |
+| [0035](0035-independent-verify-made-risk-triggered.md) | Independent VERIFY made risk-triggered; `/review` owns the decision | Clarified by [0038](0038-verify-pass-test-only-candidate-identity.md); risk triggers superseded by [0104](0104-test-runs-every-production-change.md); decision point moved to `/test` by [0132](0132-test-before-review.md) |
 | [0036](0036-specialist-reviewers-to-sonnet-and-narrowed-triggers.md) | Specialist reviewers to Sonnet/medium with narrowed triggers | Partially superseded by [0056](0056-role-tiered-models-blind-review-recon-width-writer-isolation.md) (tier reversed to Opus/xhigh; narrowed triggers and reference loading stand) |
 | [0037](0037-fixed-session-context-reduced.md) | Fixed session context reduced: compact prompts and settings | Partially superseded by [0043](0043-automatic-memory-and-compaction-window-restored.md) (both settings changes reversed; the prompt compression stands) |
 | [0038](0038-verify-pass-test-only-candidate-identity.md) | VERIFY PASS test-only commits may advance the BUILD candidate | Accepted |
@@ -61,8 +61,8 @@ that explanation here, just the index.
 | [0051](0051-repository-recon-made-evidence-triggered.md) | Repository recon made evidence-triggered | Accepted |
 | [0052](0052-spec-guidance-consolidated-around-human-approval.md) | Spec guidance consolidated around human approval | Accepted |
 | [0053](0053-plan-guidance-consolidated-around-behavioral-tasks.md) | Plan guidance consolidated around behavioral tasks | Accepted |
-| [0054](0054-executor-concurrency-condition-gated-not-capped.md) | Executor concurrency gated by conditions, not a fixed cap | Partially superseded by [0055](0055-multi-agent-enforcement-and-parallel-when-safe.md) (sequential default replaced by parallel-when-safe; conditions unchanged) |
-| [0055](0055-multi-agent-enforcement-and-parallel-when-safe.md) | Multi-agent rules enforced by the harness; parallel-when-safe replaces sequential-by-default | Accepted; reviewer turn cap raised to 100 by [0080](0080-reviewer-turn-cap-raised-to-100.md); recon read-only narrowed by [0127](0127-repo-recon-writes-its-report-file.md) |
+| [0054](0054-executor-concurrency-condition-gated-not-capped.md) | Executor concurrency gated by conditions, not a fixed cap | Partially superseded by [0055](0055-multi-agent-enforcement-and-parallel-when-safe.md) (sequential default replaced by parallel-when-safe; conditions unchanged); default back to sequential by [0136](0136-sequential-workstreams-by-default.md) |
+| [0055](0055-multi-agent-enforcement-and-parallel-when-safe.md) | Multi-agent rules enforced by the harness; parallel-when-safe replaces sequential-by-default | Accepted; reviewer turn cap raised to 100 by [0080](0080-reviewer-turn-cap-raised-to-100.md); recon read-only narrowed by [0127](0127-repo-recon-writes-its-report-file.md); parallel default reversed by [0136](0136-sequential-workstreams-by-default.md) |
 | [0056](0056-role-tiered-models-blind-review-recon-width-writer-isolation.md) | Models tiered by role; blind reviewer; recon width; writer isolation structural | Partially superseded by [0058](0058-sequential-ticket-checkout-and-infrastructure-readiness.md) (executor isolation) and [0059](0059-codex-native-roles-and-hook-adapters.md) (session alias; Codex role tiers added); effort split per role by [0066](0066-opus-5-5-effort-and-early-stop-continuations.md); Haiku tier for Explore added by [0128](0128-explore-runs-on-haiku.md) |
 | [0057](0057-worktree-base-guards-at-the-session-level.md) | The cost of `worktree.baseRef: head` is paid at the session level, and guarded there | Partially superseded by [0058](0058-sequential-ticket-checkout-and-infrastructure-readiness.md) (writer failures deny; infrastructure readiness added) |
 | [0058](0058-sequential-ticket-checkout-and-infrastructure-readiness.md) | Sequential ticket checkout reuse and project infrastructure readiness | Codex enforcement extended by [0059](0059-codex-native-roles-and-hook-adapters.md); checkout policy retained |
@@ -98,7 +98,7 @@ that explanation here, just the index.
 | [0088](0088-ticket-ledger-check.md) | A ticket ledger check after planning | Accepted |
 | [0089](0089-review-converges-in-three-rounds.md) | Review converges in three rounds | Accepted |
 | [0090](0090-pre-existing-findings-do-not-block.md) | Pre-existing findings do not block | Accepted |
-| [0091](0091-review-md-guides-every-reviewer.md) | A project REVIEW.md guides every reviewer | Amended by [0094](0094-review-md-from-the-base-branch.md) (read from the base branch) |
+| [0091](0091-review-md-guides-every-reviewer.md) | A project REVIEW.md guides every reviewer | Amended by [0094](0094-review-md-from-the-base-branch.md) (read from the base branch); nit cap removed by [0130](0130-no-advisory-cap.md) |
 | [0092](0092-every-blocker-gets-an-independent-check.md) | Every BLOCKER gets an independent check | Accepted |
 | [0093](0093-review-eval-and-noise-count.md) | A review eval from shipped bugs, and a count of review noise | Accepted; the SARIF file moved to docs/reviews by [0120](0120-review-sarif-committed-under-docs.md) |
 | [0094](0094-review-md-from-the-base-branch.md) | REVIEW.md is read from the base branch | Accepted |
@@ -111,8 +111,8 @@ that explanation here, just the index.
 | [0101](0101-ship-asks-about-a-feature-flag.md) | /ship asks how new behavior is turned off | Accepted |
 | [0102](0102-security-review-on-every-round.md) | Security review runs on every round | Accepted |
 | [0103](0103-reviewers-answer-every-review-md-rule.md) | Reviewers answer every REVIEW.md rule | Accepted |
-| [0104](0104-test-runs-every-production-change.md) | `/test` runs every production change, and runs it for real | Accepted |
-| [0105](0105-repeated-findings-fixed-at-the-source.md) | Repeated findings are fixed at the source | Accepted |
+| [0104](0104-test-runs-every-production-change.md) | `/test` runs every production change, and runs it for real | Amended by [0132](0132-test-before-review.md) (`/test` decides the exemption) |
+| [0105](0105-repeated-findings-fixed-at-the-source.md) | Repeated findings are fixed at the source | Amended by [0135](0135-shared-tests-catch-repeated-classes.md) (shared tests second in the order) |
 | [0106](0106-risk-tiers-and-review-depth.md) | Risk tiers set review depth | Accepted |
 | [0107](0107-project-formatter-hook-and-no-style-findings.md) | The project's formatter formats; reviewers drop style | Accepted |
 | [0108](0108-overnight-review-fixes.md) | Review findings are fixed overnight | Accepted; the overnight runner removed by [0119](0119-headless-runners-removed.md) |
@@ -134,6 +134,13 @@ that explanation here, just the index.
 | [0127](0127-repo-recon-writes-its-report-file.md) | repo-recon writes its report to a file | Accepted |
 | [0128](0128-explore-runs-on-haiku.md) | Explore runs on Haiku | Accepted |
 | [0129](0129-compaction-window-400k.md) | Compaction window raised to 400k | Accepted |
+| [0130](0130-no-advisory-cap.md) | No cap on ADVISORY findings | Accepted |
+| [0131](0131-executor-searches-before-adding.md) | The executor searches before it adds, and checks its own diff | Accepted |
+| [0132](0132-test-before-review.md) | `/test` runs after every `/build`, before `/review` | Accepted |
+| [0133](0133-reviewers-run-at-once.md) | Reviewers run at once | Accepted |
+| [0134](0134-failure-modes-in-the-plan.md) | The plan lists failure modes for distributed changes | Accepted |
+| [0135](0135-shared-tests-catch-repeated-classes.md) | Shared tests catch repeated finding classes before review | Accepted |
+| [0136](0136-sequential-workstreams-by-default.md) | Workstreams run sequentially by default | Accepted |
 
 Adding a new decision: create the next-numbered `NNNN-kebab-title.md`
 (4-digit, zero-padded — MADR-style, matches the files already here) and

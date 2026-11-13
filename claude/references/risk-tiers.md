@@ -40,7 +40,6 @@ ask for a deeper review; nobody can ask for a shallower one than the tier.
 |---|---|---|---|
 | Reviewers | the three always-on reviewers, plus specialists by trigger | the same | the same, and a specialist whose trigger might match is dispatched |
 | Independent check (ADR 0092) | BLOCKER findings | BLOCKER findings | BLOCKER and REQUIRED findings |
-| ADVISORY findings | at most 3 per reviewer | the REVIEW.md nit cap | the REVIEW.md nit cap |
 | `/test` | per `verification-triggers.md` | per `verification-triggers.md` | required, with a mutation probe on every changed condition and the full suite |
 | `/ship` asks the owner to | read the summary | read the diff | read every changed file, and get a second person where the team has one |
 

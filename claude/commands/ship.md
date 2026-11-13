@@ -77,7 +77,7 @@ the base branch once already. After GO, print under "Shipped-bug record" the
 row for the harness's `observation-log.md` "Shipped bugs" table (found, the
 ticket that shipped it, the bug, this fix's commit, the layer, why it
 missed). Also print the eval command for the fix:
-`review-eval/run.py --new <short-name> --repo <project> --fix <fix sha>`.
+`python3 tools/evals/review-eval/run.py --new <short-name> --repo <project> --fix <fix sha>`.
 The owner adds both to the harness repository; `/ship` does not write them.
 
 ### Risk
@@ -172,17 +172,21 @@ For each listed class that this ticket also raised, propose one change under
 
 1. a rule in the project's own linter or static analyser, when it can catch
    the class (name the rule and the config file);
-2. a REVIEW.md "Always check" line, when it is a project convention a
+2. a shared test the project's suite runs, when a test can catch the class:
+   a dataset every new endpoint's test uses (bad ids, overflow, wrong types),
+   or an architecture test (name the file and the first use). `/build` runs
+   it, so the class is caught before review (ADR 0135);
+3. a REVIEW.md "Always check" line, when it is a project convention a
    reviewer must check;
-3. a CLAUDE.md line, when it is how code gets written in this project;
-4. a REVIEW.md "Do not report" line, when the class is mostly refuted.
+4. a CLAUDE.md line, when it is how code gets written in this project;
+5. a REVIEW.md "Do not report" line, when the class is mostly refuted.
 
 The owner accepts or declines it. Never edit REVIEW.md, CLAUDE.md or the lint
 config from `/ship`; an accepted change is its own ticket or commit. A
 proposal never blocks GO.
 
 A production fix returns to `/build`, then the new candidate goes through
-`/review` again; REVIEW will decide whether `/test` is required.
+`/test` and `/review` again.
 
 ## 3. Requirement evidence
 
@@ -273,7 +277,7 @@ Return:
 [One sentence: what these numbers mean for this ticket.]
 
 ### Shipped-bug record
-- [observation-log row] · eval: `review-eval/run.py --new [name] --repo [project] --fix [sha]` (or: not an escaped bug)
+- [observation-log row] · eval: `python3 tools/evals/review-eval/run.py --new [name] --repo [project] --fix [sha]` (or: not an escaped bug)
 
 ### Requirement evidence
 - REQ-001: [implementing change] / [verification evidence]
