@@ -10,8 +10,10 @@ hooks:
       hooks:
         - type: command
           command: "$HOME/.claude/hooks/block-agent-push.sh"
+          onFailure: block
         - type: command
           command: "$HOME/.claude/hooks/require-commit-trailers.sh"
+          onFailure: block
   Stop:
     - hooks:
         - type: command

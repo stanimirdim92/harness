@@ -30,3 +30,12 @@ without `jq` hit it too.
 - A machine without `jq` cannot run any shell command until `jq` is
   installed. The deny reason says so.
 - `warn-force-push.sh` now denies where it would have asked.
+
+**Amendment (2026-11-13).** Every `PreToolUse` guard also sets
+`onFailure: "block"`, in `claude/settings.json` and in the agent
+frontmatter. The runtime then blocks the action when a guard cannot start,
+crashes, times out or prints invalid JSON. The `jq` check above covers only
+one of those failures. A guard that works is unaffected: it still exits 0
+with its JSON decision. The setting has no effect on `SubagentStop`, so
+`require-handoff-report.sh` keeps its fail-open design. Source: the Claude
+Code hooks and security docs; checked in the installed 2.1.323 binary.

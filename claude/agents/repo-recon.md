@@ -11,6 +11,7 @@ hooks:
       hooks:
         - type: command
           command: "$HOME/.claude/hooks/limit-recon-write.sh"
+          onFailure: block
 ---
 
 # Repository Recon

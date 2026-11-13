@@ -94,7 +94,7 @@ that explanation here, just the index.
 | [0084](0084-each-stage-starts-in-a-fresh-context.md) | Each pipeline stage starts in a fresh context | Accepted |
 | [0085](0085-sandbox-off-credential-read-denials.md) | The OS sandbox is off; credential files keep Read denials | Accepted |
 | [0086](0086-public-repo-and-permission-hardening.md) | Public-repo and permission hardening after the 2026-10-09 review | Accepted |
-| [0087](0087-guards-fail-closed-without-jq.md) | Command guards fail closed without jq | Accepted |
+| [0087](0087-guards-fail-closed-without-jq.md) | Command guards fail closed without jq | Accepted; amended 2026-11-13 (`onFailure: "block"` on every guard) |
 | [0088](0088-ticket-ledger-check.md) | A ticket ledger check after planning | Accepted |
 | [0089](0089-review-converges-in-three-rounds.md) | Review converges in three rounds | Accepted |
 | [0090](0090-pre-existing-findings-do-not-block.md) | Pre-existing findings do not block | Accepted |

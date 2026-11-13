@@ -137,15 +137,18 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/block-destructive-bash.sh"
+            "command": "$HOME/.claude/hooks/block-destructive-bash.sh",
+            "onFailure": "block"
           },
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/warn-force-push.sh"
+            "command": "$HOME/.claude/hooks/warn-force-push.sh",
+            "onFailure": "block"
           },
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/require-isolated-test-runner.sh"
+            "command": "$HOME/.claude/hooks/require-isolated-test-runner.sh",
+            "onFailure": "block"
           }
         ]
       },
@@ -154,11 +157,13 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/require-worktree-for-writers.sh"
+            "command": "$HOME/.claude/hooks/require-worktree-for-writers.sh",
+            "onFailure": "block"
           },
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/require-pinned-model.sh"
+            "command": "$HOME/.claude/hooks/require-pinned-model.sh",
+            "onFailure": "block"
           }
         ]
       }
