@@ -164,6 +164,21 @@ doing, not just what it is.
     typecheck fails although the report says it passed. Build it only if
     that happens.
 
+- **Turn the OS sandbox back on (revisit ADR 0085)** — **M**. From the
+  Claude Code sandboxing docs (2026-11-13). The docs trace ADR 0085's error,
+  `bwrap: loopback: Failed RTM_NEWADDR`, to Ubuntu's AppArmor limit on user
+  namespaces. This machine has `kernel.apparmor_restrict_unprivileged_userns
+  = 1` and no `/etc/apparmor.d/bwrap` profile.
+  - Fix: add the docs' `bwrap` AppArmor profile with `userns` (needs sudo).
+    Then set `sandbox.enabled`, `allowUnsandboxedCommands: false`,
+    `failIfUnavailable: true` and `sandbox.credentials` deny entries.
+  - Why: a Bash deny rule matches text only. `/usr/bin/curl` or `sh -c` gets
+    past it. The sandbox enforces file and network limits for every command.
+  - Cost: a sandboxed command has a private `localhost`, and database drivers
+    ignore the proxy. Tests against the host MySQL need `excludedCommands`,
+    and those commands run without limits.
+  - Probe: run leadbuster's full suite and one `/build` in the sandbox.
+
 ## Considered and rejected
 
 | Idea | Reason rejected |
