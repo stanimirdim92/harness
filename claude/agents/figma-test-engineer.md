@@ -1,7 +1,7 @@
 ---
 name: figma-test-engineer
 description: The verifier for a candidate whose in-scope claims link a Figma design. Same persona and gates, plus the Figma MCP tools. /test dispatches it only then; every other verification gets test-engineer.
-tools: Read, Edit, Write, Bash, Grep, Glob, Skill, mcp__chrome-devtools__*, mcp__claude_ai_Figma__create_session, mcp__claude_ai_Figma__get_design_context, mcp__claude_ai_Figma__get_metadata, mcp__claude_ai_Figma__get_screenshot, mcp__claude_ai_Figma__get_variable_defs, mcp__claude_ai_Figma__download_assets, mcp__claude_ai_Figma__get_code_connect_map, mcp__claude_ai_Figma__search_design_system, mcp__claude_ai_Figma__get_libraries, mcp__claude_ai_Figma__whoami
+tools: Read, Edit, Write, Bash, Grep, Glob, Skill, LSP, mcp__chrome-devtools__*, mcp__claude_ai_Figma__create_session, mcp__claude_ai_Figma__get_design_context, mcp__claude_ai_Figma__get_metadata, mcp__claude_ai_Figma__get_screenshot, mcp__claude_ai_Figma__get_variable_defs, mcp__claude_ai_Figma__download_assets, mcp__claude_ai_Figma__get_code_connect_map, mcp__claude_ai_Figma__search_design_system, mcp__claude_ai_Figma__get_libraries, mcp__claude_ai_Figma__whoami
 model: claude-sonnet-5-5
 isolation: worktree
 hooks:
