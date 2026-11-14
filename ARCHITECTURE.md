@@ -14,7 +14,6 @@ and the full synced-file inventory live in [README.md](README.md).
 | [claude/skills](claude/skills) | Reusable methodology, including project documentation |
 | [claude/agents](claude/agents) | Persona responsibilities, Claude tool/model declarations, and report contracts |
 | [claude/references](claude/references) | Shared gate definitions, templates, and supporting guidance |
-| [claude/docs/agents.md](claude/docs/agents.md) | Human-readable orchestration overview, linked to the owning commands |
 | [codex/skills](codex/skills) | Thin Codex entry points into shared commands and skills |
 | [codex/references/workflow-runtime.md](codex/references/workflow-runtime.md) | Codex invocation, explicit skill loading, and persona dispatch adaptation |
 | [docs/adr](docs/adr) | This repository's accepted architectural decisions and rejected alternatives |
@@ -57,11 +56,11 @@ README's exclusions. Editing a linked runtime file edits its repository source.
 
 ## Workflow and project boundaries
 
-The pipeline is `spec -> plan -> build -> review -> ship`, with independent
-`test` verification when requested or required by review. Commands own the gates;
-personas perform bounded work and do not dispatch other personas. The details,
-including executor reuse and concurrency, live in
-[the orchestration guide](claude/docs/agents.md) and its command sources.
+The pipeline is `spec -> plan -> build -> test -> review -> ship`; `test` runs
+on every production change. Commands own the gates; personas perform bounded
+work and do not dispatch other personas. The details, including executor reuse
+and concurrency, live in the command sources under `claude/commands/`, and
+[the harness map](docs/harness-map.html) shows the whole chain.
 
 Ticket specs, plans, task packets, and project documentation belong to the target
 project. Global skills supply their workflow and shape without becoming a copy of

@@ -333,4 +333,4 @@ When asked only to analyze test coverage, use:
 
 - **Invoke directly when:** the user asks for test design, coverage analysis, or a Prove-It test for a specific bug.
 - **Invoke via:** `/test` — the independent VERIFY gate, which runs after every `/build` (`../references/verification-triggers.md`). It dispatches this persona with a bounded task packet (acceptance criteria, implemented behavior, risk areas, tests/commands `/build` already ran) rather than investigating inline; this persona reports coverage findings, verification evidence, and blockers back, `/test` issues VERIFY PASS/FAIL/BLOCKED from that report.
-- **Do not invoke from another persona.** Recommendations to add tests belong in your report; the user or a slash command decides when to act on them. See [docs/agents.md](../docs/agents.md).
+- **Do not invoke from another persona.** Recommendations to add tests belong in your report; the user or a slash command decides when to act on them. See [AGENTS.md](../AGENTS.md) §Agent orchestration.

@@ -191,8 +191,8 @@ reasons; nothing is reimplemented or restated in Python.
 ## 3. Claude agent report contracts
 
 Ten personas live in `../../claude/agents/`. Each is invoked with a bounded
-task packet and returns one report in a fixed shape; `docs/agents.md` names who
-dispatches each one and when.
+task packet and returns one report in a fixed shape; each persona's
+`description` and the command files name who dispatches it and when.
 
 | Persona | Report shape | Finding ids |
 |---|---|---|
@@ -350,7 +350,7 @@ instead, but the response shape each role produces is identical either way.
 ## 5. Command stage-gate contracts
 
 Seven commands live in `../../claude/commands/`; six own the pipeline
-(`docs/agents.md`): `/spec -> /plan -> /build -> /test -> /review -> /ship`.
+(`docs/harness-map.html` §Pipeline): `/spec -> /plan -> /build -> /test -> /review -> /ship`.
 `/test` runs on every production change; only the exempt kinds in
 `verification-triggers.md` skip it (ADR 0104). Jira intake (`jira-ticket` skill) comes
 before `/spec`; `/explain` sits outside the gates. Each ends in exactly one named terminal

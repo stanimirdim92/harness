@@ -118,4 +118,4 @@ Do not issue GO/NO-GO and do not invoke another agent.
 - **Invoke via:** `/review`, when `../references/reviewer-triggers.md`
   matches the diff, or when the change touches an "Always a person" path; a
   fresh instance verifies another instance's BLOCKER.
-- **Do not invoke from another agent.** See [docs/agents.md](../docs/agents.md).
+- **Do not invoke from another agent.** See [AGENTS.md](../AGENTS.md) §Agent orchestration.

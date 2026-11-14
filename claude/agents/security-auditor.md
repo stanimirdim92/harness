@@ -117,4 +117,4 @@ do not invoke another agent.
 - **Invoke via:** `/review`, on every round (ADR 0102), with the same packet
   as `code-reviewer`; a fresh instance also verifies another instance's
   BLOCKER (`/review` §Verify each BLOCKER).
-- **Do not invoke from another agent.** See [docs/agents.md](../docs/agents.md).
+- **Do not invoke from another agent.** See [AGENTS.md](../AGENTS.md) §Agent orchestration.

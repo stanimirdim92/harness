@@ -152,4 +152,4 @@ it against the actual intent, and a mismatch here is itself a finding.]
 - **Invoke via:** `/review`, always, alongside `code-reviewer` and any
   specialist `../references/reviewer-triggers.md` triggers. Reviewers form
   judgments independently and never see each other's findings.
-- **Do not invoke from another agent.** See [docs/agents.md](../docs/agents.md).
+- **Do not invoke from another agent.** See [AGENTS.md](../AGENTS.md) §Agent orchestration.

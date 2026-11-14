@@ -56,7 +56,6 @@ GUARDED = [
     'agents/executor.md', 'agents/test-engineer.md', 'agents/code-reviewer.md',
     'agents/security-auditor.md', 'agents/distributed-systems-reviewer.md',
     'agents/repo-recon.md',
-    'docs/agents.md',
 ]
 
 # Any path-like token whose basename looks like a pipeline artifact, in any

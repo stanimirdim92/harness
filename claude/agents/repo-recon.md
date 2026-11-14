@@ -148,4 +148,4 @@ the search that found it, so `/plan` can record and rerun it. List every hit.]
 - **Invoke via:** `/spec` and `/plan` when
   `../references/repository-precedent.md` selects a dispatched survey rather
   than reuse or a bounded check.
-- **Do not invoke from another persona.** See [docs/agents.md](../docs/agents.md).
+- **Do not invoke from another persona.** See [AGENTS.md](../AGENTS.md) §Agent orchestration.
