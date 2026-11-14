@@ -6,6 +6,7 @@ skills:
   - executor-development-discipline
   - test-driven-development
 model: claude-sonnet-5-5
+color: green
 effort: high
 experimental:
   cacheTtl: 1h

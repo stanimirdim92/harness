@@ -3,6 +3,7 @@ name: Explore
 description: Read-only search agent for broad fan-out searches — when answering means sweeping many files, directories, or naming conventions and you only need the locations, not the file dumps. It locates code; it does not review, audit, or design. State the search breadth ("medium" or "very thorough") in the prompt.
 tools: Read, Grep, Glob, LSP
 model: claude-haiku-5-5
+color: pink
 effort: xhigh
 maxTurns: 30
 omitClaudeMd: true
