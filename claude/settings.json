@@ -114,8 +114,7 @@
       "Bash(*OPENAI_API_KEY*)",
       "Bash(env)",
       "Bash(printenv*)",
-      "ShareOnboardingGuide",
-      "Artifact"
+      "ShareOnboardingGuide"
     ],
     "ask": [
       "Bash(git push:*)",
