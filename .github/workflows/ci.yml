@@ -81,6 +81,10 @@ jobs:
       # branch -- because both hooks decide from git state.
       - name: Hooks — worktree base guards
         run: bash tools/tests/test-worktree-hooks.sh
+      - name: Post-compaction ticket pointer hook
+        run: bash tools/tests/test-reinject-ticket-files.sh
+      - name: Failure-logging hook
+        run: bash tools/tests/test-log-failure-event.sh
 
       # Enforcement: the isolated test-runner gate, evidence-gated on the
       # project shipping bin/worktree-test.sh and more than one live worktree.

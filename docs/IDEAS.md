@@ -150,10 +150,9 @@ doing, not just what it is.
   not stop early, and `subagentPromptCacheTtl: "1h"` (set 2026-11-13), so
   long verifier waits keep their cache.
 
-  **Logging.** Add `StopFailure` and `PermissionDenied` hooks that append one
-  line each to the run log. A run that ends on an API error or a refused tool
-  call then leaves a cause, not a silent gap. Both events exist in the hooks
-  docs (2026-11-13).
+  **Logging (built 2026-11-14).** `log-failure-event.sh` appends each
+  `StopFailure` and `PermissionDenied` event to `~/.claude/logs/failures.jsonl`.
+  The pipeline reads that file to report why a run stopped.
 
   **Ready when** the next 3–5 tickets go `/build` → `/test` → `/review`
   interactively with no owner answer mid-run.
@@ -190,6 +189,9 @@ doing, not just what it is.
   - With it on, add `Bash(dangerouslyDisableSandbox:true)` as an `ask` rule,
     so an unsandboxed retry always asks. Consider `denyRead` on `~/` with
     explicit allows for the paths tools need.
+  - Since v2.1.324, `sandbox.autoAllowBashIfSandboxed` defaults to `false`.
+    A sandboxed command still asks unless an allow rule or this key says
+    otherwise, so the sandbox no longer cuts prompts by itself.
 
 - **Executor advisor consult line** — **S**. From the settings docs
   (2026-11-13). Executors may consult the advisor, but no prompt line says
@@ -197,11 +199,22 @@ doing, not just what it is.
   the handoff. Probe on 3 tickets: count the executor findings that review
   later reports, with and without the line.
 
-- **`CLAUDE_CODE_SUBPROCESS_ENV_SCRUB`** — **S**. It strips credentials from
-  the environment of commands that Claude Code runs. A command such as `env`
-  then cannot print a token. It may require the sandbox, so probe it together
-  with the sandbox entry above. Check first that tests and `gh` still get
-  the variables they need.
+- **`CLAUDE_CODE_SUBPROCESS_ENV_SCRUB`** — **S**. Meant to strip credentials
+  from the environment of commands that Claude Code runs, so `env` cannot
+  print a token. The settings reference (2026-11-14) states other effects:
+  `1` turns off the sandbox's auto-allow and ignores
+  `allowNestedUserNamespaces: true`. The credential effect is unconfirmed.
+  Probe it with the sandbox entry above: run `env` with and without it, and
+  check that tests and `gh` still get the variables they need.
+
+- **Smaller skill listing** — **S**. From the settings reference
+  (2026-11-14). `skillListingBudgetFraction` (default 0.01 of the context)
+  and `skillListingMaxDescChars` (default 1536) size the skill list that
+  every session loads. Lowering them saves tokens on every turn, but a cut
+  description can stop a skill from triggering.
+  - Probe: measure the listing's tokens, then lower both values. Check on
+    3–5 sessions that `/spec`, `/plan` and the skills they select still
+    load when they should.
 
 - **Root-owned managed settings for the guards** — **M**. Hooks in a
   root-owned `/etc/claude-code/managed-settings.json` that call root-owned

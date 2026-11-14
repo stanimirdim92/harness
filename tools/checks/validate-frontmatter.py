@@ -251,6 +251,8 @@ def check_settings(text):
         problems.append('settings.json: Bash(echo:*) is allowed -- `echo $TOKEN` would run unasked (adr/0086)')
     if data.get('enableAllProjectMcpServers') is True:
         problems.append('settings.json: enableAllProjectMcpServers is true -- a cloned repo\'s .mcp.json runs unasked (adr/0086)')
+    if 'enableAllProjectMcpServers' in (data.get('permissions') or {}):
+        problems.append('settings.json: permissions.enableAllProjectMcpServers is ignored -- the key is read only at the top level (adr/0086)')
 
     if data.get('effortLevel') != SESSION_EFFORT:
         problems.append(f'settings.json: effortLevel is {data.get("effortLevel")!r}, expected {SESSION_EFFORT!r} -- Opus 5.5 at medium matches Opus 5 at high (adr/0066)')

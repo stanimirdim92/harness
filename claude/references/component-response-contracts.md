@@ -34,6 +34,8 @@ is what the host runtime acts on (per
 | `limit-recon-write.sh` | `PreToolUse` (`Write`) | `repo-recon` only (via its frontmatter `hooks:`) | `permissionDecision: "deny"` for any path but its own report, or silent allow (ADR 0127) |
 | `require-handoff-report.sh` | `SubagentStop` | `executor`, `test-engineer` only | `decision: "block"` or silent allow |
 | `warn-stale-base.sh` | `SessionStart` (`startup`\|`resume`) | global | `systemMessage` + `additionalContext`, or silent |
+| `reinject-ticket-files.sh` | `SessionStart` (`compact`) | global | plain stdout naming the ticket's `docs/tasks/<TICKET>-{open,todo,plan}.md`, or silent |
+| `log-failure-event.sh` | `StopFailure`, `PermissionDenied` | global | silent; appends one JSON line to `~/.claude/logs/failures.jsonl` (never `tool_input`) |
 | `worktree-readiness.sh` | not a hook — a sourced shell function | shared library | `0`/`1` return + one line on stdout |
 
 ### `PreToolUse` deny/ask — `{hookSpecificOutput: {hookEventName, permissionDecision, permissionDecisionReason}}`

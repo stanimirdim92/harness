@@ -123,8 +123,7 @@
       "Bash(gh pr merge:*)",
       "Bash(gh release:*)"
     ],
-    "defaultMode": "auto",
-    "enableAllProjectMcpServers": true
+    "defaultMode": "auto"
   },
   "model": "opus[1m]",
   "subagentPromptCacheTtl": "1h",
@@ -181,6 +180,35 @@
           {
             "type": "command",
             "command": "$HOME/.claude/hooks/warn-stale-base.sh --report"
+          }
+        ]
+      },
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/reinject-ticket-files.sh"
+          }
+        ]
+      }
+    ],
+    "StopFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/log-failure-event.sh"
+          }
+        ]
+      }
+    ],
+    "PermissionDenied": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/log-failure-event.sh"
           }
         ]
       }

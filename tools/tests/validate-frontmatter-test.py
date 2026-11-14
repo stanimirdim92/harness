@@ -6,6 +6,7 @@ produce. The allow cases carry the weight: a check that flags the real
 executor -- which legitimately holds Bash, Write and Edit -- gets deleted the
 first time it blocks a green build.
 """
+import json
 import importlib.util
 import unittest
 from pathlib import Path
@@ -204,6 +205,12 @@ class DenyCases(unittest.TestCase):
     def test_project_mcp_servers_not_auto_trusted(self):
         problems = vf.check_settings(SETTINGS_OK.replace('"enableAllProjectMcpServers": false', '"enableAllProjectMcpServers": true'))
         self.assertTrue(any('enableAllProjectMcpServers' in p for p in problems))
+
+    def test_mcp_key_inside_permissions_is_flagged(self):
+        data = json.loads(SETTINGS_OK)
+        data['permissions']['enableAllProjectMcpServers'] = True
+        problems = vf.check_settings(json.dumps(data))
+        self.assertTrue(any('permissions.enableAllProjectMcpServers' in p for p in problems))
 
     def test_credential_read_denial_removed(self):
         problems = vf.check_settings(SETTINGS_OK.replace('"Read(~/.ssh/**)", ', ''))

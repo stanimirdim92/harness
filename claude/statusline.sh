@@ -85,7 +85,7 @@ link() { # OSC 8 hyperlink: url, text
 L1="${B}${MAG}◆ ${MODEL}${R}"
 [ -n "$EFFORT" ] && L1+=" ${MAG}${EFFORT}${R}"
 [ "$THINKING" = "true" ] && L1+=" ${D}think${R}"
-[ "$FAST" = "true" ] && L1+=" ${YEL}⚡fast${R}"
+[ "$FAST" = "true" ] && L1+=" ${YEL}» fast${R}"
 [ -n "$STYLE" ] && [ "$STYLE" != "default" ] && L1+=" ${D}${STYLE}${R}"
 [ -n "$VIM" ] && L1+=" ${BLU}${VIM}${R}"
 [ -n "$AGENT" ] && L1+=" ${CYN}@${AGENT}${R}"
@@ -93,13 +93,13 @@ L1="${B}${MAG}◆ ${MODEL}${R}"
 
 PLACE="${REPO:-${DIR##*/}}"
 [ -n "$REPO" ] && [ "${DIR##*/}" != "${REPO##*/}" ] && PLACE+="${D}/${DIR##*/}${R}"
-L1+="${SEP}${BLU}📁 ${PLACE}${R}"
+L1+="${SEP}${BLU}⌂ ${PLACE}${R}"
 [ -n "$PROJECT" ] && [ "$PROJECT" != "$DIR" ] && L1+=" ${D}from ${PROJECT##*/}${R}"
 [ "${ADDED:-0}" -gt 0 ] && L1+=" ${D}+${ADDED} dir${R}"
 
 g() { git --no-optional-locks -C "$DIR" "$@" 2>/dev/null; }
 BRANCH=$(g branch --show-current)
-[ -n "$BRANCH" ] && L1+="${SEP}${GRN}🌿 ${BRANCH}${R}"
+[ -n "$BRANCH" ] && L1+="${SEP}${GRN}⎇ ${BRANCH}${R}"
 # Worktree: its name, the base it came from, commits ahead/behind that base,
 # and uncommitted files. Outside a linked worktree, show how many exist.
 if [ -n "$GIT_WT" ]; then
@@ -109,7 +109,7 @@ if [ -n "$GIT_WT" ]; then
   for c in main master; do
     [ -z "$BASE" ] && g rev-parse --verify -q "$c" >/dev/null && BASE="$c"
   done
-  L1+=" ${CYN}🌳 ${GIT_WT}${R}"
+  L1+=" ${CYN}⊞ ${GIT_WT}${R}"
   if [ -n "$BASE" ] && AB=$(g rev-list --left-right --count "HEAD...$BASE"); then
     read -r AHEAD BEHIND <<<"$AB"
     L1+=" ${D}← ${BASE}${R}"
@@ -120,7 +120,7 @@ if [ -n "$GIT_WT" ]; then
   [ "${DIRTY:-0}" -gt 0 ] && L1+=" ${YEL}●${DIRTY}${R}"
 elif [ -n "$BRANCH" ]; then
   WTS=$(g worktree list --porcelain | grep -c '^worktree ')
-  [ "${WTS:-0}" -gt 1 ] && L1+=" ${D}🌳 $((WTS - 1)) worktree$([ "$WTS" -gt 2 ] && echo s)${R}"
+  [ "${WTS:-0}" -gt 1 ] && L1+=" ${D}⊞ $((WTS - 1)) worktree$([ "$WTS" -gt 2 ] && echo s)${R}"
 fi
 if [ -n "$PR_NUM" ]; then
   case "$PR_STATE" in
@@ -131,7 +131,7 @@ if [ -n "$PR_NUM" ]; then
   L1+=" ${PC}${PL}${PR_STATE:+ ${PR_STATE//_/ }}${R}"
 fi
 if [ "${ADD:-0}" -gt 0 ] || [ "${DEL:-0}" -gt 0 ]; then
-  L1+="${SEP}${GRN}+${ADD}${R} ${RED}-${DEL}${R}"
+  L1+="${SEP}± ${GRN}+${ADD}${R} ${RED}-${DEL}${R}"
 fi
 
 # ── Row 2: context, cost, time ───────────────────────────────────────────
@@ -146,23 +146,23 @@ done
 L2="${BAR}${R} $(level "$PCT")${B}${PCT}%${R}"
 [ "${TIN:-0}" -gt 0 ] && [ "${WIN:-0}" -gt 0 ] && L2+=" ${D}$(tok "$TIN") of $(tok "$WIN") tokens${R}"
 COST_FMT=$(LC_NUMERIC=C printf '$%.2f' "$COST")
-L2+="${SEP}${YEL}💰 ${COST_FMT}${R}"
-L2+="${SEP}⏱️  $(dur $(( DUR / 1000 )))"
+L2+="${SEP}${YEL}${COST_FMT}${R}"
+L2+="${SEP}◷ $(dur $(( DUR / 1000 )))"
 [ "${DUR:-0}" -gt 0 ] && [ "${API:-0}" -gt 0 ] && L2+=" ${D}($(( API * 100 / DUR ))% waiting on the model)${R}"
 
 # ── Row 3: limits and cache (only once the first response is in) ────────
 L3=""
 add3() { [ -n "$L3" ] && L3+="$SEP"; L3+="$1"; }
 if [ -n "$H5" ] || [ -n "$D7" ]; then
-  S="⏳ usage"
+  S="◔ usage"
   [ -n "$H5" ] && S+=" 5h $(level "$H5")${H5}%${R}" && [ -n "$H5_AT" ] && S+=" ${D}(resets $(dur $(( H5_AT - NOW ))))${R}"
   [ -n "$H5" ] && [ -n "$D7" ] && S+=" ·"
   [ -n "$D7" ] && S+=" week $(level "$D7")${D7}%${R}" && [ -n "$D7_AT" ] && S+=" ${D}(resets $(dur $(( D7_AT - NOW ))))${R}"
   add3 "$S"
 fi
-[ -n "$SPEND" ] && add3 "💳 $(level "$SPEND")${SPEND}%${R}${SPEND_USD:+ ${D}${SPEND_USD}${R}}"
+[ -n "$SPEND" ] && add3 "¤ spend $(level "$SPEND")${SPEND}%${R}${SPEND_USD:+ ${D}${SPEND_USD}${R}}"
 if [ -n "$C_ON" ]; then
-  if [ "$C_WARM" = "true" ]; then S="🗄️  cache ${CYN}warm${R}"; else S="🗄️  cache ${BLU}cold${R}"; fi
+  if [ "$C_WARM" = "true" ]; then S="◈ cache ${CYN}warm${R}"; else S="◈ cache ${BLU}cold${R}"; fi
   [ "$C_WARM" = "true" ] && [ -n "$C_EXP" ] && S+=" ${D}($(dur $(( C_EXP - NOW ))) left)${R}"
   [ -n "$C_HIT" ] && S+=" · $( [ "$C_HIT" -ge 80 ] && printf '%s' "$GRN" || printf '%s' "$YEL")${C_HIT}%${R} hits"
   [ "${C_MISS:-0}" -gt 0 ] && S+=" · ${YEL}${C_MISS} miss$([ "$C_MISS" -gt 1 ] && echo es)${R}${C_CAUSE:+ ${D}(${C_CAUSE//_/ })${R}}"
