@@ -214,10 +214,6 @@
     "command": "$HOME/.claude/statusline.sh",
     "refreshInterval": 10
   },
-  "subagentStatusLine": {
-    "type": "command",
-    "command": "$HOME/.claude/subagent-statusline.sh"
-  },
   "enabledPlugins": {
     "episodic-memory@superpowers-marketplace": true,
     "typescript-lsp@claude-plugins-official": true,

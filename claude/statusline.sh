@@ -39,8 +39,6 @@ eval "$(jq -r '
   @sh "PCT=\(.context_window.used_percentage // 0 | floor | n)",
   @sh "WIN=\(.context_window.context_window_size // 0 | n)",
   @sh "TIN=\(.context_window.total_input_tokens // 0 | n)",
-  @sh "TOUT=\(.context_window.total_output_tokens // 0 | n)",
-  @sh "BIG=\(.exceeds_200k_tokens | n)",
   @sh "H5=\(.rate_limits.five_hour.used_percentage | if . == null then "" else floor | tostring end)",
   @sh "H5_AT=\(.rate_limits.five_hour.resets_at | n)",
   @sh "D7=\(.rate_limits.seven_day.used_percentage | if . == null then "" else floor | tostring end)",
@@ -49,7 +47,6 @@ eval "$(jq -r '
   @sh "SPEND_USD=\(if .rate_limits.spend_limit.used_usd then "$\(.rate_limits.spend_limit.used_usd)/$\(.rate_limits.spend_limit.limit_usd)" else "" end)",
   @sh "C_ON=\(if .prompt_cache then "1" else "" end)",
   @sh "C_WARM=\(.prompt_cache.warm | n)",
-  @sh "C_TTL=\(.prompt_cache.ttl | n)",
   @sh "C_EXP=\(.prompt_cache.expires_at | n)",
   @sh "C_HIT=\(.prompt_cache.hit_ratio | if . == null then "" else . * 100 | floor | tostring end)",
   @sh "C_MISS=\(.prompt_cache.misses // 0 | n)",
@@ -68,11 +65,11 @@ level() { # percent -> colour
   elif [ "${1:-0}" -ge 70 ]; then printf '%s' "$YEL"
   else printf '%s' "$GRN"; fi
 }
-dur() { # seconds -> 3d4h, 2h13m, 5m10s
+dur() { # seconds -> 3d4h, 2h13m, 5m
   local s=${1:-0}; [ "$s" -lt 0 ] && s=0
   if [ "$s" -ge 86400 ]; then printf '%dd%dh' $((s/86400)) $((s%86400/3600))
   elif [ "$s" -ge 3600 ]; then printf '%dh%02dm' $((s/3600)) $((s%3600/60))
-  else printf '%dm%02ds' $((s/60)) $((s%60)); fi
+  else printf '%dm' $((s/60)); fi
 }
 tok() { # 142000 -> 142k, 1000000 -> 1M
   local t=${1:-0}
@@ -147,30 +144,28 @@ for i in $(seq 1 20); do
   else BAR+="${GRY}░"; fi
 done
 L2="${BAR}${R} $(level "$PCT")${B}${PCT}%${R}"
-[ "${WIN:-0}" -gt 0 ] && L2+=" ${D}of $(tok "$WIN")${R}"
-[ "${TIN:-0}" -gt 0 ] && L2+=" ${D}in $(tok "$TIN") out $(tok "$TOUT")${R}"
-[ "$BIG" = "true" ] && L2+=" ${RED}>200k${R}"
+[ "${TIN:-0}" -gt 0 ] && [ "${WIN:-0}" -gt 0 ] && L2+=" ${D}$(tok "$TIN") of $(tok "$WIN") tokens${R}"
 COST_FMT=$(LC_NUMERIC=C printf '$%.2f' "$COST")
 L2+="${SEP}${YEL}💰 ${COST_FMT}${R}"
 L2+="${SEP}⏱️  $(dur $(( DUR / 1000 )))"
-[ "${DUR:-0}" -gt 0 ] && [ "${API:-0}" -gt 0 ] && L2+=" ${D}api $(( API * 100 / DUR ))%${R}"
+[ "${DUR:-0}" -gt 0 ] && [ "${API:-0}" -gt 0 ] && L2+=" ${D}($(( API * 100 / DUR ))% waiting on the model)${R}"
 
 # ── Row 3: limits and cache (only once the first response is in) ────────
 L3=""
 add3() { [ -n "$L3" ] && L3+="$SEP"; L3+="$1"; }
 if [ -n "$H5" ] || [ -n "$D7" ]; then
-  S="⏳"
-  [ -n "$H5" ] && S+=" 5h $(level "$H5")${H5}%${R}" && [ -n "$H5_AT" ] && S+=" ${D}↻$(dur $(( H5_AT - NOW )))${R}"
-  [ -n "$D7" ] && S+=" 7d $(level "$D7")${D7}%${R}" && [ -n "$D7_AT" ] && S+=" ${D}↻$(dur $(( D7_AT - NOW )))${R}"
+  S="⏳ usage"
+  [ -n "$H5" ] && S+=" 5h $(level "$H5")${H5}%${R}" && [ -n "$H5_AT" ] && S+=" ${D}(resets $(dur $(( H5_AT - NOW ))))${R}"
+  [ -n "$H5" ] && [ -n "$D7" ] && S+=" ·"
+  [ -n "$D7" ] && S+=" week $(level "$D7")${D7}%${R}" && [ -n "$D7_AT" ] && S+=" ${D}(resets $(dur $(( D7_AT - NOW ))))${R}"
   add3 "$S"
 fi
 [ -n "$SPEND" ] && add3 "💳 $(level "$SPEND")${SPEND}%${R}${SPEND_USD:+ ${D}${SPEND_USD}${R}}"
 if [ -n "$C_ON" ]; then
-  if [ "$C_WARM" = "true" ]; then S="${CYN}🗄️  warm${R}"; else S="${BLU}🗄️  cold${R}"; fi
-  [ -n "$C_TTL" ] && S+=" ${D}${C_TTL}${R}"
-  [ "$C_WARM" = "true" ] && [ -n "$C_EXP" ] && S+=" ${D}⌛$(dur $(( C_EXP - NOW )))${R}"
-  [ -n "$C_HIT" ] && S+=" hit $( [ "$C_HIT" -ge 80 ] && printf '%s' "$GRN" || printf '%s' "$YEL")${C_HIT}%${R}"
-  [ "${C_MISS:-0}" -gt 0 ] && S+=" ${YEL}miss ${C_MISS}${R}${C_CAUSE:+ ${D}(${C_CAUSE})${R}}"
+  if [ "$C_WARM" = "true" ]; then S="🗄️  cache ${CYN}warm${R}"; else S="🗄️  cache ${BLU}cold${R}"; fi
+  [ "$C_WARM" = "true" ] && [ -n "$C_EXP" ] && S+=" ${D}($(dur $(( C_EXP - NOW ))) left)${R}"
+  [ -n "$C_HIT" ] && S+=" · $( [ "$C_HIT" -ge 80 ] && printf '%s' "$GRN" || printf '%s' "$YEL")${C_HIT}%${R} hits"
+  [ "${C_MISS:-0}" -gt 0 ] && S+=" · ${YEL}${C_MISS} miss$([ "$C_MISS" -gt 1 ] && echo es)${R}${C_CAUSE:+ ${D}(${C_CAUSE//_/ })${R}}"
   add3 "$S"
 fi
 [ -n "$VERSION" ] && add3 "${D}v${VERSION}${R}"
