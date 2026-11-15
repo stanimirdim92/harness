@@ -141,6 +141,7 @@ that explanation here, just the index.
 | [0134](0134-failure-modes-in-the-plan.md) | The plan lists failure modes for distributed changes | Accepted |
 | [0135](0135-shared-tests-catch-repeated-classes.md) | Shared tests catch repeated finding classes before review | Accepted |
 | [0136](0136-sequential-workstreams-by-default.md) | Workstreams run sequentially by default | Accepted |
+| [0137](0137-scripted-mutation-probes.md) | Mutation probes are scripted, one mutant per run | Accepted |
 
 Adding a new decision: create the next-numbered `NNNN-kebab-title.md`
 (4-digit, zero-padded — MADR-style, matches the files already here) and

@@ -236,6 +236,19 @@ A mutant that fails a test is killed. A mutant that stays green has survived:
 a test case is missing. Write that case as a test-only change, then run the
 mutant once more to show the new test kills it.
 
+Script the probes; do not edit by hand. Write the mutants as a list (file,
+original text, mutated text) and give the list to one script. The script runs
+the four steps above for each mutant in turn and records killed or survived.
+Apply one mutant per run, never several at once: a killed mutant turns the run
+red and hides any survivor beside it. To save time, split the list across
+disposable checkouts of the candidate commit, when the project gives each
+checkout its own test database. Never run two mutants in one checkout at once.
+
+A mutant is killed only when a test fails on the mutated behavior. A run that
+fails before its tests start (setup, database guard, timeout) is not a kill:
+re-run it or report it. Do not use a mutation tool's score (`pest --mutate`,
+Infection, Stryker) as evidence; see ADR 0137.
+
 Probe the conditions whose failure would break an acceptance criterion. One
 probe per condition is enough; do not mutate every line. At Deep depth
 (the packet's Risk · Depth line), probe every condition the candidate adds or
