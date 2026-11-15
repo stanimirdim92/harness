@@ -246,8 +246,10 @@ checkout its own test database. Never run two mutants in one checkout at once.
 
 A mutant is killed only when a test fails on the mutated behavior. A run that
 fails before its tests start (setup, database guard, timeout) is not a kill:
-re-run it or report it. Do not use a mutation tool's score (`pest --mutate`,
-Infection, Stryker) as evidence; see ADR 0137.
+re-run it or report it. A mutation tool's result counts only from a serial
+run, one mutant per child process, such as a project runner's `--mutate`
+mode. Never use its parallel mode (ADR 0137). A tool mutates whole classes,
+so prefer the scripted probes when only a few conditions changed.
 
 Probe the conditions whose failure would break an acceptance criterion. One
 probe per condition is enough; do not mutate every line. At Deep depth
