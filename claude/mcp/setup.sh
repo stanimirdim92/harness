@@ -96,10 +96,10 @@ echo "==> Chrome DevTools MCP server (user scope, all projects)"
 # Real-browser checks for test-engineer and its figma- copy, the only personas
 # whose `tools:` grant mcp__chrome-devtools__* (docs/adr/0070). Executors never get it. Local stdio
 # server, no auth. --isolated gives each run a throwaway Chrome profile, so no
-# cookies or saved logins reach the agent. Pinned: `@latest` would run whatever
-# npm serves that day with full access to the machine (supply-chain.md).
-# Needs Node 20+ and a local Chrome. Bump the pin deliberately, here and in
-# codex/config.toml together.
+# cookies or saved logins reach the agent. Deliberately `@latest`, here and in
+# codex/config.toml: the owner prefers current releases over a pin, and accepts
+# that each run takes whatever npm serves that day (docs/adr/0070 revision).
+# Needs Node 20+ and a local Chrome.
 add_server chrome-devtools --scope user -- npx -y chrome-devtools-mcp@latest --isolated
 
 echo

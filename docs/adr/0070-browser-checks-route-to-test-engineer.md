@@ -34,3 +34,9 @@ the user's full access, outside the Bash sandbox.
 **Codex parity.** Codex roles see every configured MCP server, so the Codex
 executor relies on the shared executor skill's instruction, not on a tool
 grant.
+
+**Revised (2026-11-15).** The server runs `chrome-devtools-mcp@latest` in
+`mcp/setup.sh` and `codex/config.toml`, not a pinned version. The owner chose
+current releases over a pin. The cost: each run takes whatever npm serves that
+day, with the owner's full access, outside the Bash sandbox. `--isolated` still
+keeps cookies and saved logins away from the agent.
