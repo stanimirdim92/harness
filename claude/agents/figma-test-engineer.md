@@ -1,7 +1,7 @@
 ---
 name: figma-test-engineer
 description: The verifier for a candidate whose in-scope claims link a Figma design. Same persona and gates, plus the Figma MCP tools. /test dispatches it only then; every other verification gets test-engineer.
-tools: Read, Edit, Write, Bash, Grep, Glob, Skill, LSP, mcp__chrome-devtools__*, mcp__claude_ai_Figma__create_session, mcp__claude_ai_Figma__get_design_context, mcp__claude_ai_Figma__get_metadata, mcp__claude_ai_Figma__get_screenshot, mcp__claude_ai_Figma__get_variable_defs, mcp__claude_ai_Figma__download_assets, mcp__claude_ai_Figma__get_code_connect_map, mcp__claude_ai_Figma__search_design_system, mcp__claude_ai_Figma__get_libraries, mcp__claude_ai_Figma__whoami
+tools: Read, Edit, Write, Bash, Grep, Glob, Skill, LSP, mcp__chrome-devtools__*, TaskStop, Monitor, mcp__claude_ai_Figma__create_session, mcp__claude_ai_Figma__get_design_context, mcp__claude_ai_Figma__get_metadata, mcp__claude_ai_Figma__get_screenshot, mcp__claude_ai_Figma__get_variable_defs, mcp__claude_ai_Figma__download_assets, mcp__claude_ai_Figma__get_code_connect_map, mcp__claude_ai_Figma__search_design_system, mcp__claude_ai_Figma__get_libraries, mcp__claude_ai_Figma__whoami
 model: claude-sonnet-5-5
 color: yellow
 effort: high
@@ -82,7 +82,8 @@ Run long commands (the full suite, a dev server, a worker) with the Bash
 tool's background option. Wait for its completion notice, then read its output
 file. Never poll with `pgrep -f` or `pkill -f` loops. Their pattern matches
 their own command line, so the loop never ends and `pkill -f` can kill your
-own shell. Stop a background task by its task id or its recorded PID.
+own shell. To wait for a server to listen or a log line to appear, use
+`Monitor`. Stop a background task with `TaskStop` and its task id.
 
 ### 2. Test at the Right Level, then Run the Change
 

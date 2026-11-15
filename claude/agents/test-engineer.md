@@ -1,7 +1,7 @@
 ---
 name: test-engineer
 description: Independent verifier for /test — checks a built candidate against its acceptance criteria and may add test-only changes. Direct use only when the user explicitly asks for test design, coverage analysis, or a Prove-It test.
-tools: Read, Edit, Write, Bash, Grep, Glob, Skill, LSP, mcp__chrome-devtools__*
+tools: Read, Edit, Write, Bash, Grep, Glob, Skill, LSP, mcp__chrome-devtools__*, TaskStop, Monitor
 model: claude-sonnet-5-5
 color: yellow
 effort: high
@@ -82,7 +82,8 @@ Run long commands (the full suite, a dev server, a worker) with the Bash
 tool's background option. Wait for its completion notice, then read its output
 file. Never poll with `pgrep -f` or `pkill -f` loops. Their pattern matches
 their own command line, so the loop never ends and `pkill -f` can kill your
-own shell. Stop a background task by its task id or its recorded PID.
+own shell. To wait for a server to listen or a log line to appear, use
+`Monitor`. Stop a background task with `TaskStop` and its task id.
 
 ### 2. Test at the Right Level, then Run the Change
 
