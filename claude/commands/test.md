@@ -82,7 +82,10 @@ Include `required_skills`. Select `browser-testing-with-devtools` whenever the
 candidate changes anything a browser renders or calls: templates, components,
 styles, frontend code, or an endpoint a page uses. The verifier invokes each selected skill before testing.
 When a required browser capability is unavailable, return `VERIFY BLOCKED` for
-that check; component tests cannot replace browser evidence.
+that check; component tests cannot replace browser evidence. A dev host that
+does not serve the candidate is not a missing capability: the verifier serves
+the candidate on `127.0.0.1` itself (`test-engineer` §2). Never hand a browser
+check to the person.
 
 When an in-scope claim is "matches the Figma design", also select
 `figma-design-to-code`, and dispatch `figma-test-engineer` in place of
