@@ -224,6 +224,22 @@ doing, not just what it is.
   `strictPluginOnlyCustomization`: they would switch off the user-level
   hooks, rules and plugins this harness depends on.
 
+- **Freeze approved acceptance criteria** — **S**. From
+  "Effective harnesses for long-running agents" (Anthropic, 2025-11-26):
+  the feature list is JSON because "the model is less likely to
+  inappropriately change or overwrite JSON files compared to Markdown
+  files", and agents may only flip its `passes` field. The risk is an agent
+  rewording or dropping a criterion so the work looks done. Here the spec
+  criteria are Markdown; `check-spec`, `check-plan` and `check-ledger`
+  check structure, but nothing blocks edits to approved criterion text.
+  - Shape: a check that fails when approved criterion text changes after
+    approval; verifiers change status only. No JSON migration. JSONL fits
+    append-only logs, not in-place status.
+  - Keep ADRs, plans and progress notes in Markdown: the articles keep
+    that kind of content as prose too.
+  - **Revisit when** probes on real tickets show an agent edited approved
+    criterion text. Unmeasured so far.
+
 ## Considered and rejected
 
 | Idea | Reason rejected |
