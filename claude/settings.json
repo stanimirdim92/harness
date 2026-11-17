@@ -247,6 +247,7 @@
     "php-lsp@claude-plugins-official": true,
     "pyright-lsp@claude-plugins-official": true,
     "qdrant-skills@knowledge-work-plugins": false,
+    "brightdata-plugin@knowledge-work-plugins": true,
     "llm-application-dev@claude-code-workflows": false
   },
   "extraKnownMarketplaces": {
