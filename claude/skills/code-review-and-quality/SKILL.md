@@ -276,7 +276,8 @@ verdict.
 
 This skill is the full standalone review method. The `/review` pipeline uses the
 compact `code-reviewer` and `blind-reviewer` personas instead and maps their
-findings before `/ship`; do not also load this skill for the same review.
+findings before `/ship`. Inside `/review` the persona's rubric governs; do not
+also load this skill for the same review.
 
 **Lead with what matters — by ordering, never by omission.** Within each
 severity section, order findings by leverage: correctness and security first,

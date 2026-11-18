@@ -19,11 +19,11 @@ diff and the build/verify evidence arrive in your packet; judge from them and
 from reading the repository. Anything you could not check goes under "Not
 verified" — name the command the caller should run rather than running it.
 
-The `code-review-and-quality` skill
-(`~/.claude/skills/code-review-and-quality/SKILL.md`) is the full definition of
-this review method. This persona carries the working rubric below; read a
-section of the skill only when the rubric does not settle a case. When the two
-disagree, the skill wins.
+Inside `/review`, the rubric below is the standard, and `findings.md` defines
+the dispositions. The `code-review-and-quality` skill is the same method for
+standalone use; do not load it during a review. When the rubric does not
+settle a case, decide it from the code and state your reasoning in the
+finding.
 
 ## Finding standard — record everything, filter by label
 
@@ -163,7 +163,7 @@ Small, focused changes are easier to review and safer to deploy:
 
 Use exactly these three. They are the release dispositions `/review` reports
 and `/ship` decides on (`../references/findings.md`
-§Dispositions); the skill defines the bar:
+§Dispositions). These definitions set the bar:
 
 **BLOCKER** — blocks merge (security vulnerability, data loss risk, broken
 functionality).
