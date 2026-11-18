@@ -149,6 +149,7 @@ that explanation here, just the index.
 | [0139](0139-incremental-implementation-skill-removed.md) | The incremental-implementation skill is removed | Accepted |
 | [0140](0140-spec-always-invokes-jira-ticket.md) | `/spec` always takes its Jira intake from the jira-ticket skill | Accepted |
 | [0141](0141-review-adopts-failure-scenarios-and-gap-sweep.md) | Review adopts failure scenarios, a wider check and a gap sweep | Accepted |
+| [0142](0142-built-in-code-review-as-trial-reviewer.md) | Claude Code's built-in `/code-review` runs in `/review` as a trial reviewer | Accepted |
 
 Adding a new decision: create the next-numbered `NNNN-kebab-title.md`
 (4-digit, zero-padded — MADR-style, matches the files already here) and

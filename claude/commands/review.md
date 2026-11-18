@@ -140,13 +140,51 @@ Dispatch `security-auditor` on every round, with the same packet as
 project's `REVIEW.md` too.
 
 Dispatch every reviewer at once (ADR 0133), and wait for every report before
-you continue (`AGENTS.md` §Agent orchestration). Reviewers form judgments
+you continue (`AGENTS.md` §Agent orchestration). The built-in review below runs
+in this session while they work. Reviewers form judgments
 independently; do not pass one reviewer's findings to another — least of all
 `code-reviewer`'s to `blind-reviewer`.
 
 Use each persona's configured model and effort. The reviewers already sit at
 the highest tier their definitions declare; raise a specialist beyond it only
 when the matched risk is both high-impact and materially ambiguous.
+
+### Built-in code review (trial)
+
+In round 1, also run Claude Code's built-in `/code-review` as one more
+reviewer (ADR 0142). It runs in this session, through the Skill tool, and
+starts its own finder and verifier agents. It is a trial: its job is to show
+whether it finds what the personas miss.
+
+- **When.** Invoke it right after you dispatch the personas, before you read
+  any of their reports, so it judges on its own. Skip it in later rounds; it
+  cannot review a fix diff alone. In Codex, or when the skill is not available,
+  record **Built-in code review: not available** and continue.
+- **Arguments.** The effort level from the depth, then the candidate branch:
+  Quick → `medium`, Standard → `high`, Deep → `xhigh`. Never pass `--fix`,
+  `--comment` or `max`.
+- **Scope.** It picks its own diff. Record the range it says it reviewed. Drop
+  any finding on a file outside the candidate diff, and say so. It may return
+  its findings through the ReportFindings tool instead of text; take them from
+  that call.
+- **Its last step.** It may offer to run `/verify` afterwards. Do not:
+  `/test` already verified this candidate.
+- **Ids and dispositions.** Number its findings `CR-#`. Give each one a
+  disposition from `../references/findings.md` §Dispositions:
+  - a correctness finding whose failure scenario is incorrect behavior, data
+    loss, a security exposure or a broken contract: BLOCKER; any other
+    correctness finding: REQUIRED;
+  - a conventions finding that quotes a broken CLAUDE.md rule: REQUIRED;
+  - reuse, simplification, efficiency and altitude findings: ADVISORY.
+
+  Its verdict sets the confidence: CONFIRMED high, PLAUSIBLE medium, none low.
+- **After that,** treat `CR-#` findings like any other reviewer's. Group
+  duplicates, run the independent check (the checker is `code-reviewer`), and
+  include them in the gap sweep's list. In the SARIF, its run's driver name is
+  `code-review`.
+- **Report the trial.** Under its own heading, list the level, the range it
+  reviewed, and **Built-in overlap: <n> found only by it, <m> also found by a
+  persona, <k> persona findings it missed**, with the ids.
 
 ### Later rounds
 
@@ -306,6 +344,8 @@ Report, starting with one count line before anything else (ADR 0099):
 - the independent-check verdict of every checked finding, with its evidence;
 - the gap sweep: the `GAP-#` findings, **Gap sweep: none found**, or
   **Gap sweep: not run** with the depth that skipped it;
+- the built-in code review trial: its level, its range and the
+  **Built-in overlap** line, or **Built-in code review: not available**;
 - all findings with canonical disposition, each tagged with the `REQ-###` it
   bears on when it bears on one, in the form below;
 - **requirement evidence**: one line per `REQ-###` in the spec — the change that
