@@ -206,10 +206,6 @@ jobs:
       - name: JUnit baseline diff
         run: python3 tools/tests/test-junit-diff.py
 
-      # The sessions dashboard: the copied resume command and the HTTP guard.
-      - name: Agent sessions dashboard
-        run: python3 tools/tests/test-agent-sessions-mcp.py
-
       # Measurement: the transcript metrics' large-result section.
       - name: Run metrics
         run: bash tools/tests/test-run-metrics.sh

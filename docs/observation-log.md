@@ -231,7 +231,7 @@ the next reviewer change is scored against the bugs that really shipped:
 python3 tools/evals/review-eval/run.py --new <short-name> --repo <project> --fix <fix sha>
 ```
 
-Layers, from the life-of-a-change notes: 1 verification before review ·
+Layers: 1 verification before review ·
 2 AI review · 3 security review · 4 automated checks · 5 human approval ·
 6 base check and flags · 7 detection and rollback.
 
