@@ -4,13 +4,16 @@
 A bugfix commit in the project's history holds its own answer key. Blame on
 the lines it changed finds the commit that introduced the bug. The eval runs
 a standalone `/review` on that commit, on the code as it was before it, and
-checks whether a BLOCKER or REQUIRED finding points at those lines.
+checks whether a BLOCKER or REQUIRED finding points at those lines and names
+the defect. A case's `defect` terms say what the finding must be about: a
+finding near the lines that is about something else is LOCATED, not CAUGHT.
+A case with no `defect` terms can never score CAUGHT; add them with --defect.
 
 A clean case is a commit nobody had to fix. There the eval counts the
 blocking findings: each one is noise (ADR 0093).
 
 Usage:
-    run.py --new fix-feed-order --repo ~/app --fix <sha>       # case from a bugfix
+    run.py --new fix-feed-order --repo ~/app --fix <sha> --defect 'order|sort'  # case from a bugfix
     run.py --new quiet-ui --repo ~/app --clean <sha>           # case from a clean commit
     run.py --fixture fix-feed-order --fixture quiet-ui --repo ~/app --output ./before
     run.py --fixture ... --repo ~/app --output ./after --baseline ./before/results.json
@@ -122,17 +125,22 @@ def selected(names, every=False, tags=(), split=None):
 # ---------------------------------------------------------------- judging
 
 def sarif_findings(text):
-    """[(path, line or None, disposition)] from a review SARIF file."""
+    """[(path, line or None, disposition, text)] from a review SARIF file. The
+    text is the message plus every string property, so a defect term can match
+    the claim, the failure scenario or the class."""
     found = []
     for run in json.loads(text).get('runs', []):
         for result in run.get('results', []):
-            disp = result.get('properties', {}).get('disposition') or \
+            props = result.get('properties', {})
+            disp = props.get('disposition') or \
                 {'error': 'BLOCKER', 'warning': 'REQUIRED', 'note': 'ADVISORY'}.get(result.get('level'), '?')
+            words = ' '.join([result.get('ruleId') or '', (result.get('message') or {}).get('text') or '',
+                              *(str(v) for v in props.values() if isinstance(v, str))])
             locs = result.get('locations') or [{}]
             for loc in locs:
                 phys = loc.get('physicalLocation', {})
                 found.append((phys.get('artifactLocation', {}).get('uri'),
-                              phys.get('region', {}).get('startLine'), disp))
+                              phys.get('region', {}).get('startLine'), disp, words))
     return found
 
 
@@ -148,7 +156,7 @@ def markdown_findings(text):
         if heading:
             disp = heading.group(1)
         elif (m := MARKDOWN.match(line)):
-            found.append((m.group(2), int(m.group(3)), disp))
+            found.append((m.group(2), int(m.group(3)), disp, line))
     return found
 
 
@@ -183,14 +191,28 @@ def review_findings(meta, sarifs):
 
 
 def judge(case, findings):
-    """{'caught', 'caught_any', 'blocking', 'findings'} for one case."""
-    def hits(path, line):
-        targets = case['targets'].get(path) or []
-        return line is not None and any(abs(line - t) <= TOLERANCE for t in targets)
+    """{'caught', 'located', 'caught_any', 'blocking', 'findings', 'by'} for one case.
+
+    caught: a BLOCKER or REQUIRED finding near a target line whose text names
+    the defect (any `defect` term, a case-insensitive regex). located: such a
+    finding near the lines, about anything. Location alone proved nothing on
+    LD-585: every nearby finding was about another part of the change."""
+    terms = [re.compile(t, re.I) for t in case.get('defect', [])]
+
+    def near(f):
+        targets = case['targets'].get(f[0]) or []
+        return f[1] is not None and any(abs(f[1] - t) <= TOLERANCE for t in targets)
+
+    def named(f):
+        return bool(terms) and any(t.search(f[3] if len(f) > 3 else '') for t in terms)
+
     blocking = [f for f in findings if f[2] in BLOCKING]
-    return {'caught': any(hits(p, l) for p, l, _ in blocking),
-            'caught_any': any(hits(p, l) for p, l, _ in findings),
-            'blocking': len(blocking), 'findings': len(findings)}
+    caught = [f for f in blocking if near(f) and named(f)]
+    return {'caught': bool(caught),
+            'located': any(near(f) for f in blocking),
+            'caught_any': any(near(f) and named(f) for f in findings),
+            'blocking': len(blocking), 'findings': len(findings),
+            'by': sorted({(f[3] or '').split()[0] for f in caught if f[3]}) if caught else []}
 
 
 def item(case, result):
@@ -221,8 +243,19 @@ def tally(names, items, kinds):
 
 # ---------------------------------------------------------------- producing
 
-def produce(case, repo, budget):
-    """Run a standalone /review on the case's change, in a throwaway project."""
+def keep(out, meta, sarifs):
+    """Save what the review produced, so a result can be read after the run:
+    the report text, the run metadata and every SARIF file."""
+    out.mkdir(parents=True, exist_ok=True)
+    (out / 'report.md').write_text(meta.get('result') or '')
+    (out / 'meta.json').write_text(json.dumps({k: v for k, v in meta.items() if k != 'result'}, indent=2) + '\n')
+    for s in sarifs:
+        (out / s.name).write_text(s.read_text())
+
+
+def produce(case, repo, budget, out=None):
+    """Run a standalone /review on the case's change, in a throwaway project.
+    With `out`, the report, metadata and SARIF are copied there first."""
     with tempfile.TemporaryDirectory() as tmp:
         project = spec_eval.build_project(Path(tmp) / 'project', repo, f'{case["change"]}^')
         patch = git(repo, 'diff', '--binary', '--no-ext-diff', f'{case["change"]}^', case['change'])
@@ -241,6 +274,8 @@ def produce(case, repo, budget):
             raise RuntimeError(f'claude exited {result.returncode}: {result.stderr[-600:]}')
         meta = json.loads(result.stdout)
         sarifs = sorted((project / 'docs' / 'reviews').glob('*.sarif'))
+        if out:
+            keep(out, meta, sarifs)
         findings, source = review_findings(meta, [s.read_text() for s in sarifs])
         return findings, meta, source
 
@@ -256,6 +291,8 @@ def main(argv=None):
     parser.add_argument('--tag', action='append', default=[],
                         help='with --new: a behavior tag for the case; otherwise run only cases carrying any given tag')
     parser.add_argument('--holdout', action='store_true', help='with --new: the case is holdout, never read while tuning')
+    parser.add_argument('--defect', action='append', default=[],
+                        help='with --new --fix: a regex the finding must contain to count as caught (repeatable)')
     parser.add_argument('--fixture', action='append', default=[])
     parser.add_argument('--all', action='store_true', help='every case under fixtures/')
     parser.add_argument('--split', choices=('optimization', 'holdout'), help='run only this split')
@@ -273,6 +310,11 @@ def main(argv=None):
         out = FIXTURES / args.new
         out.mkdir(parents=True, exist_ok=True)
         case.update(tags=sorted(set(args.tag)), split='holdout' if args.holdout else 'optimization')
+        if case['kind'] == 'bug':
+            case['defect'] = args.defect
+            if not args.defect:
+                print('Warning: no --defect terms. The case cannot score CAUGHT until you add a '
+                      '"defect" list to case.json.', file=sys.stderr)
         (out / 'case.json').write_text(json.dumps({'name': args.new, **case}, indent=2) + '\n')
         where = ', '.join(f'{p} ({len(v)} line(s))' for p, v in case['targets'].items()) or 'none (clean case)'
         print(f'Case {out}: {case["kind"]}, {case["split"]}, tags {", ".join(case["tags"]) or "-"}, '
@@ -289,13 +331,16 @@ def main(argv=None):
     for name in names:
         case = load(name)
         kinds[name], splits[name], tags[name] = case['kind'], case.get('split', 'optimization'), case.get('tags', [])
+        if case['kind'] == 'bug' and not case.get('defect'):
+            print(f'  {name}: no "defect" terms in case.json; it can score LOCATED at best', file=sys.stderr)
         if args.findings:
             findings, source = sarif_findings(args.findings.read_text()), 'given'
         else:
             if not args.repo:
                 parser.error('producing needs --repo')
             try:
-                findings, meta, source = produce(case, args.repo, args.budget)
+                findings, meta, source = produce(case, args.repo, args.budget,
+                                                 args.output / name if args.output else None)
             except RuntimeError as err:
                 # No usable review: leave the case unscored, never count it quiet.
                 results[name] = {'kind': case['kind'], 'error': str(err)}
@@ -306,7 +351,8 @@ def main(argv=None):
         result = judge(case, findings)
         results[name] = {**result, 'kind': case['kind'], 'source': source, 'split': splits[name], 'tags': tags[name]}
         items[name] = item(case, result)
-        mark = ('CAUGHT' if result['caught'] else 'missed') if case['kind'] == 'bug' else \
+        mark = ('CAUGHT' if result['caught'] else 'LOCATED, not named' if result['located'] else 'missed') \
+            if case['kind'] == 'bug' else \
             ('quiet' if result['blocking'] == 0 else f'{result["blocking"]} blocking finding(s)')
         print(f'  {name:<32} {case["kind"]:<6} {mark:<24} findings {result["findings"]} ({source})')
 

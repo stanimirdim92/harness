@@ -237,6 +237,7 @@ Layers: 1 verification before review ·
 
 | Found | Ticket that shipped it | Bug | Fix commit | Should have caught it | Why it missed | Eval case |
 |---|---|---|---|---|---|---|
+| 2026-11-18 | none (ad-hoc search commits `b779dfaa`, `24158069`, `11c44ce9`; column from schema snapshot `9f212dad`) | LD-585: advertiser search drops 1-letter words ("R+V"), sorts A–Z with no relevance, `name_search` strips accents, all-short-word names unfindable | leadbuster `a47f7cfd` | 2 AI review (causes 1, 2, 4); 1 verification (3, data-dependent) | Trial 2026-11-18: same mechanism as 4 caught (CR-4 empty-term BLOCKER); 2 only as ADVISORY intent question (BLIND-10); 1 and 3 missed. The 3/3 eval score overstated the result: matches were line-proximity, not cause. Fixed — `review-eval` requires `defect` terms | `ld-585`, `ld-585-filter`, `ld-585-order` (accents case not buildable: no fix line blames to `9f212dad`) |
 
 ## Per ticket
 

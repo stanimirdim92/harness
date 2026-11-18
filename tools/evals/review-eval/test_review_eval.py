@@ -49,15 +49,48 @@ class History(unittest.TestCase):
         self.assertEqual(case['targets'], {'feed.py': [3]})
 
     def test_judging(self):
-        case = rev.bug_case(self.repo, self.fix)
-        sarif = lambda line, disp: json.dumps({'runs': [{'tool': {'driver': {'name': 'code-reviewer'}}, 'results': [
-            {'ruleId': 'CODE-1', 'properties': {'disposition': disp},
-             'locations': [{'physicalLocation': {'artifactLocation': {'uri': 'feed.py'}, 'region': {'startLine': line}}}]}]}]})
+        case = {**rev.bug_case(self.repo, self.fix), 'defect': ['drops the first', r'\[1:\]']}
+        sarif = lambda line, disp, text='The slice drops the first post.': json.dumps(
+            {'runs': [{'tool': {'driver': {'name': 'code-reviewer'}}, 'results': [
+                {'ruleId': 'CODE-1', 'message': {'text': text}, 'properties': {'disposition': disp},
+                 'locations': [{'physicalLocation': {'artifactLocation': {'uri': 'feed.py'},
+                                                     'region': {'startLine': line}}}]}]}]})
         self.assertTrue(rev.judge(case, rev.sarif_findings(sarif(4, 'BLOCKER')))['caught'])
         far = rev.judge(case, rev.sarif_findings(sarif(40, 'BLOCKER')))
         self.assertFalse(far['caught'])
         advisory = rev.judge(case, rev.sarif_findings(sarif(3, 'ADVISORY')))
         self.assertEqual((advisory['caught'], advisory['caught_any']), (False, True))
+
+    def test_a_nearby_finding_about_something_else_is_located_not_caught(self):
+        # LD-585: every finding near the fixed lines was about another part of the change.
+        case = {**rev.bug_case(self.repo, self.fix), 'defect': ['drops the first']}
+        other = json.dumps({'runs': [{'results': [
+            {'ruleId': 'CODE-4', 'message': {'text': 'Leading spaces are not trimmed.'},
+             'properties': {'disposition': 'BLOCKER'},
+             'locations': [{'physicalLocation': {'artifactLocation': {'uri': 'feed.py'}, 'region': {'startLine': 3}}}]}]}]})
+        result = rev.judge(case, rev.sarif_findings(other))
+        self.assertEqual((result['caught'], result['located']), (False, True))
+
+    def test_a_case_without_defect_terms_is_never_caught(self):
+        case = rev.bug_case(self.repo, self.fix)
+        near = [('feed.py', 3, 'BLOCKER', 'The slice drops the first post.')]
+        result = rev.judge(case, near)
+        self.assertEqual((result['caught'], result['located']), (False, True))
+
+    def test_the_markdown_fallback_keeps_the_finding_text(self):
+        case = {**rev.bug_case(self.repo, self.fix), 'defect': ['drops the first']}
+        report = '### BLOCKER\n- [CODE-1] [feed.py:3] (confidence: high) The slice drops the first post.\n'
+        self.assertTrue(rev.judge(case, rev.markdown_findings(report))['caught'])
+
+    def test_keep_saves_report_meta_and_sarif(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            sarif = Path(tmp) / 'REVIEW-EVAL-abc.sarif'
+            sarif.write_text('{"runs": []}')
+            out = Path(tmp) / 'out' / 'case-1'
+            rev.keep(out, {'result': '## Review\nNothing to fix.', 'total_cost_usd': 1.5}, [sarif])
+            self.assertEqual((out / 'report.md').read_text(), '## Review\nNothing to fix.')
+            self.assertEqual(json.loads((out / 'meta.json').read_text()), {'total_cost_usd': 1.5})
+            self.assertEqual((out / sarif.name).read_text(), '{"runs": []}')
 
     def test_clean_case_counts_blocking_findings_as_noise(self):
         case = rev.clean_case(self.repo, 'HEAD~1')
@@ -68,7 +101,7 @@ class History(unittest.TestCase):
 
     def test_markdown_fallback(self):
         text = '### BLOCKER\n- [CODE-1] [feed.py:3] (confidence: high) drops the first post\n### ADVISORY\n- [CODE-2] [feed.py:1] name\n'
-        self.assertEqual(rev.markdown_findings(text), [('feed.py', 3, 'BLOCKER'), ('feed.py', 1, 'ADVISORY')])
+        self.assertEqual([f[:3] for f in rev.markdown_findings(text)], [('feed.py', 3, 'BLOCKER'), ('feed.py', 1, 'ADVISORY')])
 
 
 class Produce(unittest.TestCase):
@@ -133,7 +166,7 @@ class Produce(unittest.TestCase):
     def test_parsed_markdown_findings_are_a_valid_review(self):
         self.stub(is_error=False, result='### REQUIRED\n- [CODE-1] [feed.py:1] wrong\n')
         findings, _, _ = rev.produce(self.case, self.repo, '1')
-        self.assertEqual(findings, [('feed.py', 1, 'REQUIRED')])
+        self.assertEqual([f[:3] for f in findings], [('feed.py', 1, 'REQUIRED')])
 
     def test_errored_case_is_reported_and_not_scored(self):
         fixtures = Path(self.tmp.name) / 'fixtures'

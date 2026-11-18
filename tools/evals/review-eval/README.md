@@ -8,7 +8,16 @@ that were fine?
 A bugfix commit holds its own answer key. The lines it changed were wrong.
 `git blame` on those lines finds the commit that wrote them. The eval runs a
 standalone `/review` on that commit, on the code as it was just before it, and
-checks whether a BLOCKER or REQUIRED finding points within 3 lines of them.
+checks whether a BLOCKER or REQUIRED finding points within 3 lines of them
+**and names the defect**.
+
+Location alone is not enough. On LD-585 every finding near the fixed lines was
+about another part of the change, and the old judge scored all three cases
+CAUGHT. A bug case now carries `defect`: regexes, any of which the finding's
+text must match (its message, claim, failure scenario or class). A finding
+near the lines that matches none is **LOCATED, not named** and does not count.
+A case without `defect` terms can score LOCATED at best; add them to
+`case.json` by hand for cases built before this rule.
 
 A **clean case** is a commit nobody had to fix. There every BLOCKER or REQUIRED
 finding is noise.
@@ -20,7 +29,7 @@ cd tools/evals/review-eval
 P=/path/to/project
 
 # Build cases once (free). Pick fixes whose bug a reviewer could see in one diff.
-python3 run.py --new feed-order --repo $P --fix <bugfix sha>
+python3 run.py --new feed-order --repo $P --fix <bugfix sha> --defect 'order|sort' --defect 'newest'
 python3 run.py --new quiet-1    --repo $P --clean <sha of a commit that needed no fix>
 
 # Baseline, then after a harness change (each case is one paid /review run)
@@ -30,6 +39,14 @@ python3 run.py --fixture feed-order --fixture quiet-1 --repo $P --output ./after
 # Judge a SARIF file you already have (free)
 python3 run.py --fixture feed-order --findings path/to/review.sarif
 ```
+
+Write `--defect` terms from the fix, not from the review you hope to see: the
+words a reviewer who saw the bug would have to use. Two or three alternatives
+per case are enough.
+
+With `--output`, each case keeps what the review produced in
+`<output>/<case>/`: `report.md`, `meta.json` and every SARIF file. Read them
+before you trust a score.
 
 A review that did not finish is not scored. An error result, REVIEW BLOCKED,
 empty output, or a findings count the report does not back up marks the case
