@@ -80,7 +80,7 @@ BLOCKER and marked low-confidence, with the evidence that would confirm or
 refute it named so the resolution loop can settle it.
 
 Label each finding with one of the release dispositions `/review` and `/ship`
-use (`../references/component-response-contracts.md` §Dispositions):
+use (`../references/findings.md` §Dispositions):
 
 - **BLOCKER** — incorrect behavior, data loss, security exposure, broken contract.
 - **REQUIRED** — should fix before merge: unhandled path, missing test for a

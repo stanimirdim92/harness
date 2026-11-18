@@ -60,7 +60,7 @@ categories when useful.
 ## Severity
 
 Label each finding with one of the release dispositions `/review` and `/ship`
-use (`../references/component-response-contracts.md` §Dispositions):
+use (`../references/findings.md` §Dispositions):
 
 - **BLOCKER** — a practical exploit with significant impact: broad compromise,
   data breach, or a direct path to either. Fix before release.

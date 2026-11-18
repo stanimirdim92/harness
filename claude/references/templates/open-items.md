@@ -2,7 +2,7 @@
 
 The canonical shape of `docs/tasks/[TICKET]-open.md`: one register per ticket
 for everything the spec, plan and todo do not track. The rules for it are in
-`../plan-quality-gates.md` §6, and `check-ledger.py` reads it.
+`../ticket-ledger.md`, and `check-ledger.py` reads it.
 
 ```markdown
 # Open items: [TICKET]

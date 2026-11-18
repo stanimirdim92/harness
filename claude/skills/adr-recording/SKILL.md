@@ -1,6 +1,6 @@
 ---
 name: adr-recording
-description: Records a technical/architectural decision as one file in that project's docs/adr/*.md, in the Decision/Rejected format this machine uses everywhere. Use whenever a real choice between alternatives gets made — a technology pick, a config flip, a pattern change, or a decision that reverses an earlier one — that a future session or teammate would otherwise re-litigate from scratch with no memory it was already settled. Not for routine implementation where only one reasonable option existed, and not for undecided ideas (those belong in docs/IDEAS.md — see documentation-practices.md if this project has it).
+description: Records a technical/architectural decision as one file in that project's docs/adr/*.md, in the Decision/Rejected format this machine uses everywhere. Use whenever a real choice between alternatives gets made — a technology pick, a config flip, a pattern change, or a decision that reverses an earlier one — that a future session or teammate would otherwise re-litigate from scratch with no memory it was already settled. Not for routine implementation where only one reasonable option existed, and not for undecided ideas (those belong in docs/IDEAS.md — see records.md).
 ---
 
 # Recording a technical decision
@@ -38,7 +38,7 @@ reversed decision stays on the record instead of being edited away.
 - Only one reasonable option existed — that's not a decision, it's the
   obvious move, and doesn't need a record.
 - The idea isn't decided yet — park it in `docs/IDEAS.md` instead (see
-  `documentation-practices.md`'s Ideas vs. decisions section); a decision
+  `../../references/records.md` §Ideas vs. decisions); a decision
   record for something unbuilt just becomes a lie the moment plans
   change.
 

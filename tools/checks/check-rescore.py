@@ -33,6 +33,7 @@ WATCHED = (
     'claude/commands/review.md',
     'claude/references/reviewer-triggers.md',
     'claude/references/risk-tiers.md',
+    'claude/references/findings.md',
     'codex/agents/code-reviewer*.toml',
     'codex/agents/blind-reviewer*.toml',
     'codex/agents/security-auditor*.toml',

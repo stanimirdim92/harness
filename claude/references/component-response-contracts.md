@@ -14,7 +14,7 @@ sources — review it whenever a file listed below changes shape.
 
 ## 1. Claude hooks
 
-Thirteen files live in `../hooks/`: twelve hooks and one sourced library. Each hook is a
+Fifteen files live in `../hooks/`: fourteen hooks and one sourced library. Each hook is a
 `PreToolUse`, `PostToolUse`, `SubagentStop`, or `SessionStart` script that reads one JSON object on stdin and prints one JSON
 decision object on stdout, always exiting 0 — the decision, not the exit code,
 is what the host runtime acts on (per
@@ -255,6 +255,8 @@ and a Verification Story that includes the weakened-test list.
 ```markdown
 ## Blind Review
 
+**Findings:** N BLOCKER · N REQUIRED · N ADVISORY · N intent-dependent — or **Nothing to fix.**
+
 **What this change appears to do:** [2-4 sentences, read from the diff alone]
 
 ### BLOCKER
@@ -280,13 +282,13 @@ holds the diff and the actual intent together.
 
 ### `security-auditor`
 
-`SEC-N`, disposition (§Dispositions), confidence, file:line, attack
+`SEC-N`, disposition (`findings.md` §Dispositions), confidence, file:line, attack
 path/failure mode, impact, specific remediation. No GO/NO-GO, no dispatch of
 another agent.
 
 ### `distributed-systems-reviewer`
 
-`DIST-N`, disposition (§Dispositions), confidence, file:line, failure
+`DIST-N`, disposition (`findings.md` §Dispositions), confidence, file:line, failure
 scenario, recommendation, in the fenced report template of
 `agents/distributed-systems-reviewer.md`.
 
@@ -309,7 +311,7 @@ notice and a recommended action. A finding only a browser can settle is
 written as a check (page, steps, what to look for); `/review` routes it to
 `/test`, and to the owner only when the verifier cannot run it.
 A defect present at the candidate base that the
-diff does not introduce or reach is marked `pre-existing` (§Dispositions).
+diff does not introduce or reach is marked `pre-existing` (`findings.md` §Dispositions).
 When the packet holds the project's `REVIEW.md`, its definition of Important
 (BLOCKER or REQUIRED), its do-not-report list and its always-check rules apply
 (ADR 0091, 0094). Report every ADVISORY finding; no nit cap applies (ADR 0130).
@@ -397,24 +399,8 @@ production-code fix invalidates a prior VERIFY result.
 Every reviewer labels each finding with one of three dispositions. The
 label is set once, by the reviewer, and carried unchanged to `/ship`.
 
-#### Dispositions
-
-| Disposition | Means | `/ship` resolves it by | SARIF level |
-|---|---|---|---|
-| BLOCKER | Incorrect behavior, data loss, a security exposure, or a broken contract | a fix; a suspected (low-confidence) one also by recorded refuting evidence | `error` |
-| REQUIRED | A defect to fix before merge: an unhandled path, a missing test, a weak contract | a fix, refuting evidence, accepted risk, or a deferral with a reason | `warning` |
-| ADVISORY | An optional improvement | nothing; it never blocks | `note` |
-
-`blind-reviewer` also returns intent-dependent findings with no disposition
-yet; `/review` gives each one a disposition or closes it. This table is the
-only definition: personas, `/review` and `/ship` point here.
-
-**Pre-existing.** A finding is marked `pre-existing` when the defect already
-exists at the candidate base and the change neither introduces it nor makes it
-reachable or worse. It keeps its disposition, so its seriousness stays visible.
-It does not block `/ship`; `/ship` records it as a follow-up. A change that
-adds a caller of the old defect, copies it, or depends on it makes it new, and
-then it is not pre-existing (ADR 0090).
+The dispositions and the `pre-existing` mark are defined once, in
+`findings.md` §Dispositions.
 
 Report includes: candidate branch/diff scope, BUILD candidate and any accepted
 post-BUILD test-only commits, the **Risk · Depth** line (`risk-tiers.md`),
@@ -430,48 +416,8 @@ disposition. Answered findings share one `Answered:` line with their ids.
 
 ### Review SARIF
 
-`/review` also writes its findings as SARIF 2.1.0 (OASIS). One run per
-reviewer; the disposition decides `level` (§Dispositions):
-
-```json
-{
-  "version": "2.1.0",
-  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
-  "runs": [{
-    "tool": {"driver": {"name": "code-reviewer"}},
-    "results": [{
-      "ruleId": "CODE-1",
-      "level": "error",
-      "message": {"text": "problem + recommended fix"},
-      "locations": [{"physicalLocation": {
-        "artifactLocation": {"uri": "app/Services/Feed.php"},
-        "region": {"startLine": 42}}}],
-      "baselineState": "new",
-      "properties": {"disposition": "BLOCKER", "confidence": "high",
-                     "requirement": "REQ-003", "resolution": "open",
-                     "verification": "CONFIRMED", "class": "missing-tenant-scope"}
-    }]
-  }]
-}
-```
-
-`baselineState` is `unchanged` for a pre-existing finding and `new` otherwise.
-`verification` is the BLOCKER check's verdict (CONFIRMED, REFUTED or UNSURE);
-other findings omit it.
-`resolution` is `open`, `fixed`, `refuted` (the claim is false), `answered`
-(the approved spec answers it, or it restates the owner's request; never a
-BLOCKER), `accepted`, `deferred`, `follow-up` or `declined`. `/review` sets
-`answered`; `/ship` sets the rest. `review-noise.py` counts `answered` as
-neither a finding fixed nor noise.
-`aliases` lists the other ids of a duplicate group (`["BLIND-7"]`). Each id
-stays its own result.
-`class` is a short kebab-case name for the kind of defect, the same name for
-the same kind on every ticket. Reuse a name from `review-noise.py --classes`
-when one fits; coin a new one only when none does (ADR 0105).
-`uri` is relative to the repository root. A finding without a line keeps the
-`artifactLocation` and drops `region`; one without a file drops `locations`.
-`properties` keeps what SARIF has no field for, so nothing in the markdown
-report is lost.
+`/review` also writes its findings as SARIF 2.1.0. The shape and every
+property are defined in `findings.md` §Review SARIF.
 
 ### `/ship` → GO / NO-GO / SHIP BLOCKED
 

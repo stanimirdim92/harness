@@ -110,19 +110,19 @@ def check(spec, pinned, plan, todo, open_text, commits, ship=False):
     if plan is not None:
         if pinned is None:
             fail.append(('plan', 1, 'the `Spec revision:` pin does not resolve; re-pin it '
-                                    '(plan-quality-gates.md §2)'))
+                                    '(spec-pin.md)'))
         else:
             added = sorted(set(SPEC_ID.findall(spec)) - set(SPEC_ID.findall(pinned)))
             if added and (header(plan, 'Status') or '') != 'Needs replan':
                 fail.append(('plan', 1, f'the spec gained {", ".join(added)} after the plan pin; set the plan '
-                                        '`Needs replan` and replan, or re-pin (plan-quality-gates.md §2)'))
+                                        '`Needs replan` and replan, or re-pin (spec-pin.md)'))
 
     for label, text in (('spec', spec), ('plan', plan), ('todo', todo)):
         for n, line in enumerate((text or '').splitlines(), 1):
             named = OPEN_ID.findall(line)
             if label != 'spec' and DEFERRAL.search(line) and not named:
                 fail.append((label, n, 'deferred work names no OPEN-### id; add it to the open-items file '
-                                       '(plan-quality-gates.md §6)'))
+                                       '(ticket-ledger.md)'))
             for oid in named:
                 if oid not in items:
                     fail.append((label, n, f'{oid} is not in the open-items file'))

@@ -162,7 +162,7 @@ Small, focused changes are easier to review and safer to deploy:
 ## Severity labels
 
 Use exactly these three. They are the release dispositions `/review` reports
-and `/ship` decides on (`../references/component-response-contracts.md`
+and `/ship` decides on (`../references/findings.md`
 §Dispositions); the skill defines the bar:
 
 **BLOCKER** — blocks merge (security vulnerability, data loss risk, broken

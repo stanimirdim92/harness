@@ -30,7 +30,7 @@ listed entry resolved as a finding or a stated reason. A missing result or
 **Weakened tests: Not verified** is **SHIP BLOCKED** (ADR 0078).
 
 Run the ledger check with `--ship` on the current tree
-(`../references/plan-quality-gates.md` §6):
+(`../references/ticket-ledger.md`):
 
 ```bash
 python3 ~/.claude/skills/spec-driven-development/scripts/check-ledger.py <TICKET> --ship
@@ -122,7 +122,7 @@ setup command from the project's `CLAUDE.md` when a fresh worktree needs one
 ## 2. Resolve findings
 
 Carry REVIEW findings forward unchanged. Their dispositions are defined once,
-in `../references/component-response-contracts.md` §Dispositions.
+in `../references/findings.md` §Dispositions.
 
 - every **BLOCKER** must be resolved before GO: fixed, or — for a finding the
   reviewer marked low-confidence (suspected) — refuted with recorded evidence

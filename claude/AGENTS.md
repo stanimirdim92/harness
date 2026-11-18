@@ -149,7 +149,7 @@ as a hypothesis, and only when the user asks.
   blockers, and remaining work.
 - For ticket work, write remaining work, open questions and known failures to
   `docs/tasks/<TICKET>-open.md`
-  (`~/.claude/references/plan-quality-gates.md` §6), not only to the chat or a
+  (`~/.claude/references/ticket-ledger.md`), not only to the chat or a
   compaction summary.
 
 ## Writing for humans
@@ -205,4 +205,4 @@ ADR numbers in the global instructions, commands, agents and skills ("ADR
 0116", `docs/adr/0058`) point to the harness repository's records. They are
 provenance for its maintainer. Do not look them up in the current project's
 `docs/adr/`, which numbers its own decisions. Record types are defined in
-`~/.claude/references/documentation-practices.md`.
+`~/.claude/references/records.md`.

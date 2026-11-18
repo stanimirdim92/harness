@@ -61,6 +61,4 @@ Ticket-scoped work defaults to one isolated worktree per ticket.
     Write a long commit message to a file with Write, then run
     `git commit -F <file>`.
 - `/build` runs workstreams sequentially unless the user asks for parallel
-  ones and the conditions in `../commands/build.md` hold (ADR 0136). Worktrees isolate git and files only; a database, queue, cache,
-  or fixed port is still shared, and concurrent writers need their own instance
-  of every mutable resource their checks touch.
+  ones and the conditions in `parallel-workstreams.md` hold (ADR 0136).

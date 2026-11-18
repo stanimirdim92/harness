@@ -32,12 +32,22 @@ class ContractsDoc(unittest.TestCase):
             self.assertIn(f'| `/{path.stem}` |', commands, path.stem)
 
     def test_the_counts_in_the_prose_match(self):
-        self.assertEqual(len(list((CLAUDE / 'hooks').glob('*.sh'))), 15)
-        self.assertIn('Thirteen files live in `../hooks/`', DOC)
-        self.assertEqual(len(list((CLAUDE / 'agents').glob('*.md'))), 10)
-        self.assertIn('Ten personas live in', DOC)
-        self.assertEqual(len(list((CLAUDE / 'commands').glob('*.md'))), 7)
-        self.assertIn('Seven commands live in', DOC)
+        # Derived from the directories, so a new file fails here until the prose
+        # is updated, rather than the test pinning a stale number.
+        words = {7: 'Seven', 10: 'Ten', 13: 'Thirteen', 14: 'Fourteen', 15: 'Fifteen', 16: 'Sixteen'}
+        hooks = len(list((CLAUDE / 'hooks').glob('*.sh')))
+        self.assertIn(f'{words[hooks]} files live in `../hooks/`', DOC)
+        self.assertIn(f'{words[len(list((CLAUDE / "agents").glob("*.md")))]} personas live in', DOC)
+        self.assertIn(f'{words[len(list((CLAUDE / "commands").glob("*.md")))]} commands live in', DOC)
+
+    def test_findings_reference_is_the_one_definition(self):
+        findings = (CLAUDE / 'references' / 'findings.md').read_text()
+        # The definitions live in findings.md only; the catalogue points there.
+        for marker in ('| BLOCKER | Incorrect behavior', 'json.schemastore.org/sarif'):
+            self.assertIn(marker, findings)
+            self.assertNotIn(marker, DOC)
+        for heading in ('## Dispositions', '## Review SARIF'):
+            self.assertIn(heading, findings)
 
 
 if __name__ == '__main__':

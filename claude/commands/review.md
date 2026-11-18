@@ -173,7 +173,7 @@ review file name. Leave `docs/reviews/` out of every diff a reviewer gets
 
 Every finding carries the disposition its reviewer gave it: BLOCKER,
 REQUIRED or ADVISORY, as defined in
-`../references/component-response-contracts.md` §Dispositions. Report it
+`../references/findings.md` §Dispositions. Report it
 unchanged; change one only with a stated reason.
 
 A finding that asks for a check in a browser goes to the verifier, not to the
@@ -255,7 +255,7 @@ instructions: Not verified**.
 ### Ledger
 
 Check that the ticket's records still agree
-(`../references/plan-quality-gates.md` §6):
+(`../references/ticket-ledger.md`):
 
 ```bash
 python3 ~/.claude/skills/spec-driven-development/scripts/check-ledger.py <TICKET>
@@ -311,7 +311,7 @@ a minute with no progress shown. Fix: add a progress bar. Your choice: fix
 now, or accept and measure after release.`
 
 Also write every finding to a SARIF 2.1.0 file, so code-scanning tools can
-read the review (`../references/component-response-contracts.md` §Review SARIF):
+read the review (`../references/findings.md` §Review SARIF):
 
 ```bash
 out="docs/reviews/<TICKET>-$(git rev-parse --short HEAD).sarif"
@@ -319,7 +319,7 @@ out="docs/reviews/<TICKET>-$(git rev-parse --short HEAD).sarif"
 
 Each id stays its own SARIF result. Record a group's aliases in each member's `properties.aliases`.
 
-Give every finding a `class` (§Review SARIF). List the names already in use
+Give every finding a `class` (`findings.md` §Review SARIF). List the names already in use
 first, and reuse one when it fits:
 
 ```bash

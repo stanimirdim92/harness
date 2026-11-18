@@ -49,6 +49,7 @@ GUARDED = [
     'skills/spec-driven-development/SKILL.md',
     'skills/planning-and-task-breakdown/SKILL.md',
     'references/spec-quality-gates.md', 'references/plan-quality-gates.md',
+    'references/spec-pin.md', 'references/ticket-ledger.md', 'references/findings.md',
     'references/target-selection.md', 'references/verification-triggers.md',
     'references/risk-tiers.md',
     'references/templates/spec.md', 'references/templates/bugfix-spec.md',

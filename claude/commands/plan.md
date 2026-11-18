@@ -21,7 +21,7 @@ selected spec path before drafting; never guess among multiple specs.
 
 Read the selected spec from disk. Apply the skill's Preconditions: approved
 status, stable requirement ids, and a committed spec with no uncommitted edits.
-Record its commit pin under `../references/plan-quality-gates.md` §2.
+Record its commit pin under `../references/spec-pin.md`.
 
 Start from the committed spec's repository pointers: `/plan` runs in a fresh
 context and does not see `/spec`'s recon report (ADR 0084). Follow

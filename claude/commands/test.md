@@ -33,8 +33,8 @@ uncommitted BUILD diff, current HEAD/tree, base revision, and any pre-existing
 staged, unstaged, or untracked changes.
 Reconcile differences from BUILD, accepting only declared passing test-only
 changes; unexplained differences or changed production code block the pipeline
-VERIFY gate. Check the plan's spec pin under `../references/plan-quality-gates.md`
-§2 so verification uses the approved behavior for this candidate.
+VERIFY gate. Check the plan's spec pin under `../references/spec-pin.md`
+so verification uses the approved behavior for this candidate.
 
 If BUILD evidence is missing, do not invent it or rerun implementation. An
 explicitly requested standalone test investigation may still run against a

@@ -57,7 +57,7 @@ Check the changed semantics that apply:
 State the concrete production failure for every finding, not just "could be an
 issue."
 
-Disposition (`../references/component-response-contracts.md` §Dispositions):
+Disposition (`../references/findings.md` §Dispositions):
 
 - **BLOCKER** — concrete path to data loss, duplicate irreversible effects, or
   broad outage.

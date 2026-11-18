@@ -39,7 +39,7 @@ re-pin the new commit, note it, proceed. Behavioral, **or any change to the
 pinned sha no longer resolves (rebased or squashed away), treat the plan as
 `Needs replan` rather than guessing. Report which path was taken; a difference
 waved through without the diff defeats the check
-(`../references/plan-quality-gates.md` §2).
+(`../references/spec-pin.md`).
 
 ### Resume from committed progress
 
@@ -230,48 +230,11 @@ The executor invokes only additional skills selected by `/build`.
 ### Parallelism
 
 **Sequential by default** (ADR 0136). Run workstreams one after another, in
-dependency order, so each executor builds on the code already merged. Run
-workstreams in parallel only when the user asks for it in this run. Then
-dispatch concurrently, one executor each, only the workstreams that satisfy
-ALL of the conditions below; the rest queue and run sequentially. A condition
-that cannot be proved from repository evidence is unmet.
-
-- the user asked for parallel workstreams in this run;
-- the plan's Workstreams section fixes the contract between them, and their
-  planned files do not overlap;
-
-- the workstreams are genuinely independent (no unfinished dependency between
-  them, no shared mutable state);
-- each is dependency-ready now (any gating checkpoint has already passed);
-- every concurrent writer explicitly requests `isolation: worktree` in the
-  dispatch call — never two writing agents against the same checkout;
-- **their verification commands do not share mutable runtime state.** A
-  worktree isolates git and files; it does not isolate a database, queue,
-  cache, search index, or a fixed port. Two suites migrating or truncating one
-  database corrupt each other silently — no lock error, just a suite that fails
-  for reasons unrelated to its own diff. Dispatch concurrently only when each
-  executor has its own instance of every mutable resource its checks touch, or
-  when those checks are deferred and run serially at integration. Establish
-  which applies from repository evidence, never by assumption;
-- the session is not near its rate limit. Concurrent executors share one limit,
-  so once throttled, N-wide finishes no faster than a smaller fan-out plus
-  queueing, and often slower. When near the limit, reduce the fan-out and queue
-  the rest.
-
-"Probably independent" is not established. Each additional executor buys
-wall-clock only when unthrottled, truly independent, and runtime-isolated;
-otherwise it spends tokens for no speedup, or produces verification results that
-cannot be trusted. A condition in doubt is a condition unmet: that workstream
-queues. Speed is never bought by skipping or weakening a check.
-
-State the actual dispatch in the completion report: how many ran concurrently,
-which workstreams, and how the runtime-isolation condition was satisfied for
-each — separate instances, or checks deferred to serial integration. A dispatch
-made without establishing that condition is a reportable slip, named as such.
-
-Parallel workstreams still integrate sequentially in dependency order.
-
-Parallelism buys elapsed time, not fewer tokens.
+dependency order, so each executor builds on the code already merged. Run them
+in parallel only when the user asks for it in this run. Then read
+`../references/parallel-workstreams.md` before any dispatch and
+follow it: it decides which workstreams may run at once and what the
+completion report must state.
 
 ### Model and retry policy
 
@@ -439,7 +402,7 @@ A fix or change made in conversation on a ticket branch skips this command,
 so none of its records update. Record it in the same session:
 
 - Add an `unplanned commit` item to `docs/tasks/<TICKET>-open.md` that names
-  the commit's short sha (`../references/plan-quality-gates.md` §6).
+  the commit's short sha (`../references/ticket-ledger.md`).
 - For a behavior change, also add a `DEC-###` to the spec. Add an `Amends:`
   line when it changes an earlier rule, and set the plan to `Needs replan`.
 - Run `check-ledger.py <TICKET>` before you end the session.

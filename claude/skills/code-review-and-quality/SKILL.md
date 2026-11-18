@@ -209,7 +209,7 @@ Step 3 appears in the output with a severity label and a confidence level
 optional:
 
 BLOCKER, REQUIRED and ADVISORY, and what the author must do for each, are
-defined once in `../../references/component-response-contracts.md`
+defined once in `../../references/findings.md`
 §Dispositions. Typical cases: a security hole, data loss or broken behavior is
 BLOCKER; a missing test, wrong abstraction or poor error handling is REQUIRED;
 naming, style or an optional optimization is ADVISORY.

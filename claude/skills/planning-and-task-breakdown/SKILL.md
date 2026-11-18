@@ -30,7 +30,7 @@ required by the `/build` pipeline.
    `REQ-###` ids. Any other state returns to `/spec`.
 2. Require the spec committed with no uncommitted edits. Record the commit that
    last touched it as `Spec revision: git-commit:<sha>:<spec path>` according to
-   `../../references/plan-quality-gates.md` §2.
+   `../../references/spec-pin.md`.
 3. Start from the spec's repository pointers; a fresh `/plan` does not see the
    spec's recon report (ADR 0084). Use
    the smallest adequate evidence path in
@@ -215,7 +215,8 @@ decision, contract, or verification command—sets `Needs replan` in the same
 edit and requires the Approval Check plus renewed human approval. Editorial
 corrections do not. If the pinned spec changes behaviorally, the spec returns to
 `/spec` and the plan becomes `Needs replan`. See
-`../../references/plan-quality-gates.md` §1–2.
+`../../references/plan-quality-gates.md` §1 and
+`../../references/spec-pin.md`.
 
 When reconciling an amendment, search the plan and its authoritative task file
 for superseded behavior. Update the technical approach, decisions, risks,

@@ -26,7 +26,8 @@ SCHEMA = {
     'additionalProperties': False,
 }
 COMMON_FILES = ['references/repository-precedent.md', 'references/spec-quality-gates.md',
-                'references/plan-quality-gates.md']
+                'references/plan-quality-gates.md', 'references/spec-pin.md',
+                'references/ticket-ledger.md']
 STAGES = {
     'jira': ['skills/jira-ticket/SKILL.md'],
     'spec': ['commands/spec.md', 'skills/spec-driven-development/SKILL.md',
