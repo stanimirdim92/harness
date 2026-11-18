@@ -12,15 +12,15 @@ Reuse the intake, user decisions, and current repository evidence; ask only for
 material information still missing. Do not repeat a questionnaire or ask the
 user to supply facts the repository establishes.
 
-For ticket-backed work, accept Jira intake only when its complete output is in
-the current conversation, in `docs/specs/<TICKET>-intake.md`, or the user
-manually supplies it in this conversation.
-If it is absent, incomplete, or stale for the requested scope, refetch the main
-ticket and every discovered ticket/subticket by following `jira-ticket` §§1–3,
-including its source-coverage and blocker rules, before repository recon or
-drafting. Do not reconstruct intake from memory or an agent summary. If Jira is
-unavailable and the user has not supplied the complete intake, report the
-specific blocker and request that intake.
+For ticket-backed work, the intake always comes from the `jira-ticket` skill.
+Reuse its output when it is complete and current for the requested scope, in
+the current conversation or in `docs/specs/<TICKET>-intake.md`. Otherwise
+invoke the `jira-ticket` skill now, before repository recon or drafting. Do not
+fetch Jira yourself, follow its steps inline, or rebuild intake from memory or
+an agent summary. Ticket contents the user pastes go through the skill too; it
+takes them as its source when Jira is unavailable. When the skill returns,
+continue this `/spec` from the intake it saved. If it reports a blocker that
+stops intake, report that blocker and stop.
 
 An intake design reference marked partially read or unread is finished here,
 before drafting. Open each pinned Figma node with the available Figma tools:

@@ -147,6 +147,7 @@ that explanation here, just the index.
 | [0137](0137-scripted-mutation-probes.md) | Mutation probes are scripted, one mutant per run | Accepted |
 | [0138](0138-references-split-by-reader.md) | References split by reader | Accepted |
 | [0139](0139-incremental-implementation-skill-removed.md) | The incremental-implementation skill is removed | Accepted |
+| [0140](0140-spec-always-invokes-jira-ticket.md) | `/spec` always takes its Jira intake from the jira-ticket skill | Accepted |
 
 Adding a new decision: create the next-numbered `NNNN-kebab-title.md`
 (4-digit, zero-padded — MADR-style, matches the files already here) and
