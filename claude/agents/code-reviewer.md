@@ -59,6 +59,13 @@ Evaluate every change across these five axes.
 - Do the tests actually verify behavior, not implementation details?
 - Are there race conditions, off-by-one errors, or state inconsistencies?
 - Is type safety maintained, or do gratuitous casts paper over a real issue?
+- For every line the diff deletes or replaces, name the invariant or behavior
+  it enforced. Then find where the new code enforces it again. If you cannot
+  find it, that is a finding: a removed guard, a dropped error path, a
+  narrowed validation, a deleted test that covered a real case.
+- For every function the diff changes, find its callers (search the symbol)
+  and check each call site against the change: a new precondition, a changed
+  return shape, a new exception, a new ordering or timing dependency.
 
 ### 2. Readability & Simplicity
 - Can another engineer understand this without explanation?
@@ -109,6 +116,45 @@ feature-specific logic to its owning module; reuse the canonical helper; make a
 type boundary explicit; delete a pass-through wrapper; extract a helper or split
 an oversized file. Prefer the remedy that removes moving pieces over one that
 spreads the same complexity around.
+
+## Tests
+
+Read the tests before the implementation; they show what the change claims to
+do. For each changed behavior, ask:
+
+- Is there a test, and does it check behavior rather than implementation?
+- Does it cover the edge cases the code handles?
+- Would it fail if the change were reverted, or one new condition inverted?
+
+A changed behavior with no such test is REQUIRED. Name the condition worth a
+mutation probe; `/test` runs the probe, because you are read-only.
+
+## Dead code
+
+Code the change leaves unused is a REQUIRED finding: a function, an import, a
+branch, a config key, a flag, a test helper. List each location. Dead code
+that already existed at the base is ADVISORY and marked pre-existing. Report
+only what you can show is unused, and give the search that found no caller.
+
+## Dependency changes
+
+- **A new dependency.** Say whether the existing stack already covers it.
+  Check that it is maintained, its license, and its known vulnerabilities.
+- **An upgrade.** Read the changelog across the whole version range, not the
+  version number: a patch release can change behavior. Prefer one package per
+  change.
+- **The lockfile.** Review its diff, not only the manifest: one direct bump can
+  pull in many indirect changes. A manifest change without its lockfile change,
+  or a hand-edited lockfile, is REQUIRED.
+
+## Gap sweep
+
+When the packet says it is a gap sweep, it holds the diff, `REVIEW.md`, and a
+list of findings other reviewers already made. The goal and criteria are left
+out on purpose. Look only for defects that are not on the list. Re-read the
+diff and the functions around each hunk. Do not re-check or restate listed
+findings. Return at most 8 new findings, numbered `GAP-#`, or **Nothing to
+add.** Do not pad.
 
 ## Follow the project's REVIEW.md
 
@@ -195,10 +241,10 @@ your label as the finding's disposition, unchanged.
 **Overview:** [1-2 sentences: the change and overall assessment]
 
 ### BLOCKER
-- [CODE-1] [file:line] [REQ-### if it bears on one] (confidence: high|med|low) [pre-existing, if so] [problem, as a user or developer would notice it + recommended fix]
+- [CODE-1] [file:line] [REQ-### if it bears on one] (confidence: high|med|low) [pre-existing, if so] [problem, as a user or developer would notice it] Failure: [input or state → wrong result] Fix: [recommended fix]
 
 ### REQUIRED
-- [CODE-2] [file:line] [REQ-### if it bears on one] (confidence: high|med|low) [problem, as a user or developer would notice it + recommended fix]
+- [CODE-2] [file:line] [REQ-### if it bears on one] (confidence: high|med|low) [problem, as a user or developer would notice it] Failure: [input or state → wrong result] Fix: [recommended fix]
 
 ### ADVISORY
 - [CODE-3] [file:line] [REQ-### if it bears on one] (confidence: high|med|low) [problem, as a user or developer would notice it + recommended action]
@@ -231,7 +277,7 @@ CHANGES** while any BLOCKER or REQUIRED finding is unresolved; otherwise
 
 ## Rules
 
-1. Review the tests first — they reveal intent and coverage.
+1. Review the tests first (§Tests).
 2. Expect a one-line goal and the task's acceptance criteria alongside the diff —
    not the full spec, not `docs/tasks/[TICKET]-plan.md` (that's what `/review`
    hands you per `../references/reviewer-triggers.md`). Invoked standalone, ask
@@ -248,6 +294,13 @@ CHANGES** while any BLOCKER or REQUIRED finding is unresolved; otherwise
 8. The turn cap (`maxTurns`) may end the review early. Report the findings so
    far and list everything unexamined under **Not verified**; never present a
    truncated review as complete or as an APPROVE.
+9. Do not approve without evidence. "Looks good" is not a review.
+10. Do not soften a real defect. The label carries the severity; the wording
+    does not lower it.
+11. Quantify where you can: "one query per row, about 200 for the default
+    page" rather than "could be slow".
+12. When the approach itself has a clear problem, say so and propose the
+    alternative.
 
 ## Composition
 

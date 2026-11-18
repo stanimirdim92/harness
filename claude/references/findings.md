@@ -17,6 +17,11 @@ read it whole. The other output contracts are catalogued in
 yet; `/review` gives each one a disposition or closes it. This table is the
 only definition: personas, `/review` and `/ship` point here.
 
+**Failure scenario.** Every BLOCKER and REQUIRED finding names one: the
+input, state or timing, and the wrong result it produces. A claim with no
+nameable failure scenario is ADVISORY at most, or goes under Not verified. The
+independent check in `/review` tests this scenario.
+
 **Pre-existing.** A finding is marked `pre-existing` when the defect already
 exists at the candidate base and the change neither introduces it nor makes it
 reachable or worse. It keeps its disposition, so its seriousness stays visible.

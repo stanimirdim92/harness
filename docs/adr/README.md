@@ -99,7 +99,7 @@ that explanation here, just the index.
 | [0089](0089-review-converges-in-three-rounds.md) | Review converges in three rounds | Accepted |
 | [0090](0090-pre-existing-findings-do-not-block.md) | Pre-existing findings do not block | Accepted |
 | [0091](0091-review-md-guides-every-reviewer.md) | A project REVIEW.md guides every reviewer | Amended by [0094](0094-review-md-from-the-base-branch.md) (read from the base branch); nit cap removed by [0130](0130-no-advisory-cap.md) |
-| [0092](0092-every-blocker-gets-an-independent-check.md) | Every BLOCKER gets an independent check | Accepted |
+| [0092](0092-every-blocker-gets-an-independent-check.md) | Every BLOCKER gets an independent check | Amended by [0141](0141-review-adopts-failure-scenarios-and-gap-sweep.md) (REQUIRED findings checked at Standard and Deep) |
 | [0093](0093-review-eval-and-noise-count.md) | A review eval from shipped bugs, and a count of review noise | Accepted; the SARIF file moved to docs/reviews by [0120](0120-review-sarif-committed-under-docs.md) |
 | [0094](0094-review-md-from-the-base-branch.md) | REVIEW.md is read from the base branch | Accepted |
 | [0095](0095-ship-checks-the-current-base.md) | /ship checks the candidate on the current base | Accepted |
@@ -148,6 +148,7 @@ that explanation here, just the index.
 | [0138](0138-references-split-by-reader.md) | References split by reader | Accepted |
 | [0139](0139-incremental-implementation-skill-removed.md) | The incremental-implementation skill is removed | Accepted |
 | [0140](0140-spec-always-invokes-jira-ticket.md) | `/spec` always takes its Jira intake from the jira-ticket skill | Accepted |
+| [0141](0141-review-adopts-failure-scenarios-and-gap-sweep.md) | Review adopts failure scenarios, a wider check and a gap sweep | Accepted |
 
 Adding a new decision: create the next-numbered `NNNN-kebab-title.md`
 (4-digit, zero-padded — MADR-style, matches the files already here) and

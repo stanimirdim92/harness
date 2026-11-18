@@ -203,7 +203,7 @@ A finding of any reviewer resolves as `answered` when the approved spec already
 answers it, or when it restates what the owner asked for. Name the `REQ-###`
 or `DEC-###` line that answers it, and confirm the code matches that line.
 `answered` is not `refuted`: `refuted` means the claim is false. A BLOCKER
-never resolves as `answered`; it follows §Verify each BLOCKER and `/ship`.
+never resolves as `answered`; it follows §Independent check and `/ship`.
 
 Every finding keeps a stable id, source, disposition, confidence,
 file/location, and resolution state. Confidence travels with the
@@ -218,10 +218,10 @@ rules. Send a missing or unanswered rule back to `code-reviewer` once, with
 only that rule and the diff. If it is still missing, report "REVIEW.md not
 followed: <rule>" as a REQUIRED finding with the id `RULE-#`.
 
-### Verify each BLOCKER
+### Independent check
 
 Before reporting, give every BLOCKER one independent check that tries to refute
-it (ADR 0092). At Deep, REQUIRED findings get the same check
+it (ADR 0092). At Standard and Deep, REQUIRED findings get the same check
 (`../references/risk-tiers.md`). Dispatch a fresh reviewer that did not raise it: `code-reviewer`
 for a `BLIND-#` finding, `blind-reviewer` for a `CODE-#` finding, and a fresh
 instance of the same specialist for a `SEC-#` or `DIST-#` finding. The packet
@@ -233,11 +233,29 @@ evidence:
 
 - **CONFIRMED** — the failure scenario follows from the code. Record the
   confidence as high.
-- **REFUTED** — the code prevents it. Keep the BLOCKER, record the confidence
-  as low, and attach the refuting evidence.
+- **REFUTED** — the code prevents it. Keep the finding and its disposition,
+  record the confidence as low, and attach the refuting evidence.
 - **UNSURE** — leave the finding as it is.
 
-In a later round, verify only new BLOCKERs.
+REFUTED needs proof from the code: quote the line that contradicts the claim,
+show the type, constant or invariant that rules it out, or cite the guard in
+this diff. A scenario that needs realistic state is not refuted for being
+unlikely: a race, a rare but reachable path, a cold cache, a missing optional
+field, a retry after a partial failure. Answer UNSURE for those.
+
+In a later round, check only new findings.
+
+### Sweep for gaps
+
+At Standard and Deep, after the independent checks, dispatch one fresh
+`code-reviewer` with the integrated diff, the base-branch `REVIEW.md` files,
+and the deduplicated finding list (id, `file:line`, one-line claim). This is
+the one packet that carries other reviewers' findings. It looks only for
+defects not on the list, re-reads the diff and the functions around each hunk,
+and returns at most 8 new findings, or none. It does not re-check listed
+findings and does not pad. Number its findings `GAP-#`. A new BLOCKER, and at
+Standard and Deep a new REQUIRED finding, gets the independent check. Skip the
+sweep in later rounds.
 
 ### Stale instructions
 
@@ -285,7 +303,9 @@ Report, starting with one count line before anything else (ADR 0099):
 - the ledger result: **Ledger: clean**, the `LEDGER-#` findings, or
   **Ledger: Not verified**;
 - each reviewer result under its own heading;
-- the verification verdict of every BLOCKER, with its evidence;
+- the independent-check verdict of every checked finding, with its evidence;
+- the gap sweep: the `GAP-#` findings, **Gap sweep: none found**, or
+  **Gap sweep: not run** with the depth that skipped it;
 - all findings with canonical disposition, each tagged with the `REQ-###` it
   bears on when it bears on one, in the form below;
 - **requirement evidence**: one line per `REQ-###` in the spec — the change that
