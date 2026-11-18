@@ -96,6 +96,11 @@ answer is an open question for the owner, not a gap to leave (ADR 0134).
 - A separate foundation task must be independently verifiable and consumed by
   at least two downstream tasks. A separate test task needs value before the
   production change, such as characterization evidence.
+- When independent consumers share a contract, define the contract in an
+  earlier task. The consumers count as independent only after it.
+- Put expensive uncertainty first: an external API, a migration, a concurrency
+  invariant, a framework limit. A task that can fail should fail before
+  low-risk work depends on it.
 - Every task uses stable `T###` ids and carries its requirements, acceptance
   criteria, verification, dependencies, workstream, material context pointers,
   likely areas, and estimated scope.

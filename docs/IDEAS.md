@@ -152,7 +152,8 @@ doing, not just what it is.
 
   **Logging (built 2026-11-14).** `log-failure-event.sh` appends each
   `StopFailure` and `PermissionDenied` event to `~/.claude/logs/failures.jsonl`.
-  The pipeline reads that file to report why a run stopped.
+  Nothing reads it yet: open it by hand to see why a run stopped. A reader
+  in `/ship` or `run-metrics.sh` is still to be built.
 
   **Ready when** the next 3–5 tickets go `/build` → `/test` → `/review`
   interactively with no owner answer mid-run.

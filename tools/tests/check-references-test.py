@@ -154,5 +154,22 @@ class Places(unittest.TestCase):
         self.assertEqual(self.check('`test-engineer` §42\n'), ['agents/test-engineer.md §42 (no such section)'])
         self.assertEqual(self.check('`not-a-skill` §Anything\n'), [])
 
+class AdrIndex(unittest.TestCase):
+    def test_an_adr_missing_from_the_index_is_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            adr = Path(tmp)
+            (adr / '0001-one.md').write_text('# One\n')
+            (adr / '0002-two.md').write_text('# Two\n')
+            (adr / 'README.md').write_text('| [0001](0001-one.md) | One | Accepted |\n')
+            self.assertEqual(cr.unindexed_adrs(adr), ['0002-two.md'])
+
+    def test_a_complete_index_passes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            adr = Path(tmp)
+            (adr / '0001-one.md').write_text('# One\n')
+            (adr / 'README.md').write_text('| [0001](0001-one.md) | One | Accepted |\n')
+            self.assertEqual(cr.unindexed_adrs(adr), [])
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=1)

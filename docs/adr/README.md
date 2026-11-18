@@ -46,7 +46,7 @@ that explanation here, just the index.
 | [0036](0036-specialist-reviewers-to-sonnet-and-narrowed-triggers.md) | Specialist reviewers to Sonnet/medium with narrowed triggers | Partially superseded by [0056](0056-role-tiered-models-blind-review-recon-width-writer-isolation.md) (tier reversed to Opus/xhigh; narrowed triggers and reference loading stand) |
 | [0037](0037-fixed-session-context-reduced.md) | Fixed session context reduced: compact prompts and settings | Partially superseded by [0043](0043-automatic-memory-and-compaction-window-restored.md) (both settings changes reversed; the prompt compression stands) |
 | [0038](0038-verify-pass-test-only-candidate-identity.md) | VERIFY PASS test-only commits may advance the BUILD candidate | Accepted |
-| [0039](0039-runtime-catalog-narrowed-by-observed-use.md) | Runtime plugins narrowed; standalone engineering skills retained | Partially superseded by [0043](0043-automatic-memory-and-compaction-window-restored.md) (automatic memory no longer disabled); TDD skill re-enabled by [0083](0083-tdd-skill-back-in-the-executor.md) |
+| [0039](0039-runtime-catalog-narrowed-by-observed-use.md) | Runtime plugins narrowed; standalone engineering skills retained | Partially superseded by [0043](0043-automatic-memory-and-compaction-window-restored.md) (automatic memory no longer disabled); TDD skill re-enabled by [0083](0083-tdd-skill-back-in-the-executor.md); `incremental-implementation` removed by [0139](0139-incremental-implementation-skill-removed.md); Qdrant Skills and LLM Application Dev disabled in `settings.json` on 2026-11-08 (7b9a49c), no ADR |
 | [0040](0040-openspec-conventions-adopted.md) | Four conventions adopted from Fission-AI/openspec; nothing vendored | Accepted |
 | [0041](0041-recon-delegated-to-repo-recon-subagent.md) | Repository recon delegated to a `repo-recon` subagent | Partially superseded by [0051](0051-repository-recon-made-evidence-triggered.md) (agent isolation retained; dispatch is no longer mandatory); recon gains a limited Write by [0127](0127-repo-recon-writes-its-report-file.md) |
 | [0042](0042-third-executor-as-conditional-exception.md) | A third concurrent executor as a conditional exception, not a raised cap | Superseded by [0054](0054-executor-concurrency-condition-gated-not-capped.md) |
@@ -125,9 +125,12 @@ that explanation here, just the index.
 | [0115](0115-ticket-runner-end-to-end.md) | One ticket runs end to end; only High-risk questions wait | Superseded by [0119](0119-headless-runners-removed.md) |
 | [0116](0116-lessons-from-ld-507.md) | Lessons from LD-507: same quality, less owner time and fewer tokens | Accepted (evals pending) |
 | [0117](0117-evals-carry-tags-and-a-holdout-split.md) | Evals carry tags and a holdout split | Accepted |
-| [0118](0118-figma-tools-only-in-figma-copies.md) | Figma tools only in figma- copies of executor and test-engineer | Accepted |
+| [0118](0118-figma-tools-only-in-figma-copies.md) | Figma tools only in figma- copies of executor and test-engineer | Amended 2026-11-07 (d97010b): the copies grant a fixed read-only set of ten Figma tools (`FIGMA_TOOLS` in `validate-frontmatter.py`), not `mcp__figma__*` |
 | [0119](0119-headless-runners-removed.md) | Headless runners removed | Accepted |
 | [0120](0120-review-sarif-committed-under-docs.md) | Review SARIF committed under docs/reviews | Accepted |
+| [0121](0121-git-workflow-skill-removed.md) | The git-workflow-and-versioning skill is removed | Accepted |
+| [0122](0122-agents-md-worktree-rules-moved-to-reference.md) | Worktree rules moved from AGENTS.md to a reference | Accepted |
+| [0123](0123-filter-passing-test-output.md) | Filter the output of passing test runs | Accepted |
 | [0124](0124-compaction-window-200k-orchestrator-stays-1m.md) | Compaction window back to 200k; the orchestrator stays on opus[1m] | Partially superseded by [0129](0129-compaction-window-400k.md) (window raised to 400k; opus[1m] stands) |
 | [0125](0125-subagent-doc-alignment-pins-fields-cache.md) | Subagent model pins enforced, frontmatter fields checked, executor cache 1h | Revised: 1h cache for every subagent |
 | [0126](0126-repo-recon-effort-medium.md) | repo-recon runs at effort medium | Revised: recon back on `high` |
@@ -143,6 +146,7 @@ that explanation here, just the index.
 | [0136](0136-sequential-workstreams-by-default.md) | Workstreams run sequentially by default | Accepted |
 | [0137](0137-scripted-mutation-probes.md) | Mutation probes are scripted, one mutant per run | Accepted |
 | [0138](0138-references-split-by-reader.md) | References split by reader | Accepted |
+| [0139](0139-incremental-implementation-skill-removed.md) | The incremental-implementation skill is removed | Accepted |
 
 Adding a new decision: create the next-numbered `NNNN-kebab-title.md`
 (4-digit, zero-padded — MADR-style, matches the files already here) and

@@ -188,6 +188,17 @@ def broken(path, text, top_level=False):
     return out
 
 
+def unindexed_adrs(adr_dir):
+    """ADR files the index README does not link. 0121-0123 went unlisted for
+    weeks, so a reader of the index never saw them."""
+    index = adr_dir / 'README.md'
+    if not index.is_file():
+        return []
+    text = index.read_text()
+    return [p.name for p in sorted(adr_dir.glob('[0-9][0-9][0-9][0-9]-*.md'))
+            if f'({p.name})' not in text]
+
+
 def main():
     if not HARNESS.is_dir():
         print(f'check-references: no harness tree at {HARNESS}', file=sys.stderr)
@@ -205,6 +216,9 @@ def main():
             rel = path.relative_to(ROOT)
             for target in found:
                 problems.append(f'{rel} -> {target}')
+
+    for name in unindexed_adrs(ROOT / 'docs' / 'adr'):
+        problems.append(f'docs/adr/README.md -> {name} (not in the index)')
 
     for problem in problems:
         print(f'  BROKEN  {problem}')
