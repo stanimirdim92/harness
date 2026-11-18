@@ -51,8 +51,7 @@ instance in the diff.
 
 ## Review Framework
 
-Evaluate every change across these five axes. (Full criteria and examples: the
-skill's "Five-Axis Review".)
+Evaluate every change across these five axes.
 
 ### 1. Correctness
 - Does the code do what the spec/task says it should?
@@ -109,8 +108,7 @@ duplicate branches; separate orchestration from business logic; move
 feature-specific logic to its owning module; reuse the canonical helper; make a
 type boundary explicit; delete a pass-through wrapper; extract a helper or split
 an oversized file. Prefer the remedy that removes moving pieces over one that
-spreads the same complexity around. (Full list: the skill's "Structural
-Remedies".)
+spreads the same complexity around.
 
 ## Follow the project's REVIEW.md
 
