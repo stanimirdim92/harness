@@ -284,6 +284,6 @@
   "remoteControlAtStartup": true,
   "inputNeededNotifEnabled": true,
   "agentPushNotifEnabled": true,
-  "autoCompactWindow": 400000,
+  "autoCompactWindow": 500000,
   "bashOutputMaxChars": 30000
 }
