@@ -134,6 +134,10 @@ Its packet carries the usual §2 fields, plus:
 - the diff since the verified commit;
 - the full requirement list, not only the changed ones.
 
+Review fixes are not re-verified one round at a time. `/test` runs once, after
+`/review` has no open BLOCKER or REQUIRED finding (ADR 0144). Its diff then
+covers every fix round since the last VERIFY PASS.
+
 The fresh verifier re-runs every check the diff can affect, not only the
 changed lines. At Deep it runs the full suite again. A check the diff cannot
 affect keeps its earlier evidence, cited with the verified commit. When unsure

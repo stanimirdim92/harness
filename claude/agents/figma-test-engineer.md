@@ -249,7 +249,10 @@ fails before its tests start (setup, database guard, timeout) is not a kill:
 re-run it or report it. A mutation tool's result counts only from a serial
 run, one mutant per child process, such as a project runner's `--mutate`
 mode. Never use its parallel mode (ADR 0137). A tool mutates whole classes,
-so prefer the scripted probes when only a few conditions changed.
+so use it only when the candidate adds the class, and then in place of the
+scripted probes, never as well. In a fix round, probe only the conditions the
+fix adds or changes. A timed-out mutant proves nothing: count it apart, never
+as a kill.
 
 Probe the conditions whose failure would break an acceptance criterion. One
 probe per condition is enough; do not mutate every line. At Deep depth
@@ -261,6 +264,9 @@ committed. If a file cannot be restored exactly, stop and report it.
 At Deep, start the candidate's full suite in the background as your first run
 (§1). Do the browser and runtime checks while it runs. Do not start mutation
 probes until it finishes: a mutant must never be in the tree during that run.
+Run the full suite once. After your own test-only commit, re-run the test files
+you changed. Re-run the full suite only when that commit changes a shared test
+helper, fixture, or test configuration.
 
 When the full suite has failures, compare them with the base revision's
 result. Store the base result once, machine-readable (for example JUnit XML),

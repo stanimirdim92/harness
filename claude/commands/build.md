@@ -366,6 +366,11 @@ The plan checks in §1 still apply; task resume does not.
    reports the finding as disputed, with `file:line` evidence; the next
    `/review` round decides. Each commit carries a `Task:` trailer naming the
    finding ids (`Task: CODE-2, SEC-1`) and the `Refs:` trailer.
+   Before it reports, the executor looks for the same failure next to each
+   fix: the rest of the function, its callers, and code that copies the
+   pattern. It also checks that its own fix adds no new case of it. It fixes
+   each new instance the same way, test-first, and lists it under the finding
+   (ADR 0144).
 5. Report BUILD COMPLETE with one line per finding: fixed (commit), disputed
    (evidence), or blocked (why). The plan and todo do not change. The next
    stage is `/review`.

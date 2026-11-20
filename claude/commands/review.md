@@ -52,6 +52,14 @@ Require `/test`'s result for this exact candidate.
   **Independent verification: NOT REQUIRED** and use `/build`'s verification
   evidence. When it does not, return **REVIEW BLOCKED** with `/test` as the
   next step.
+- **Fix round** (a later round whose new commits come only from
+  `/build <TICKET> review fixes`): do not send it to `/test` (ADR 0144). The
+  earlier round's VERIFY PASS and the executor's test-first proof for each
+  fixed finding are enough. Record **Independent verification: DEFERRED (fix
+  round)**. When the round leaves no open BLOCKER or REQUIRED finding, the
+  next step is `/test` once, on that candidate. Then run one closing round on
+  the commits `/test` added, or none when it added none. The closing round
+  records **PASS** and does not count toward the round-4 stop.
 - No result for this candidate: return **REVIEW BLOCKED** with `/test` as the
   next step.
 - A **VERIFY PASS** run at a lower depth than the tier §3 sets for this
