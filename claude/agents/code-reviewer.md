@@ -280,7 +280,7 @@ CHANGES** while any BLOCKER or REQUIRED finding is unresolved; otherwise
 1. Review the tests first (§Tests).
 2. Expect a one-line goal and the task's acceptance criteria alongside the diff —
    not the full spec, not `docs/tasks/[TICKET]-plan.md` (that's what `/review`
-   hands you per `../references/reviewer-triggers.md`). Invoked standalone, ask
+   hands you per `../commands/review.md` §3). Invoked standalone, ask
    for the spec or task description rather than reviewing without it.
 3. Record every finding; never drop one to keep the list short (finding standard
    above).

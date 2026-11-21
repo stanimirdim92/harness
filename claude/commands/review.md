@@ -140,22 +140,20 @@ naturally reach for is exactly what must not go in. A reviewer told what the
 change is for reads the code as confirming it, which is what `code-reviewer`
 is for; this one asks only what the code does.
 
-Do not send either reviewer the full spec or plan.
+Do not send any reviewer the full spec, the plan, or another reviewer's
+output.
 
 Dispatch `security-auditor` on every round, with the same packet as
 `code-reviewer`. Use `../references/reviewer-triggers.md` to decide whether
 `distributed-systems-reviewer` is also required. Give each specialist the
-project's `REVIEW.md` too.
+project's `REVIEW.md` too. Give `distributed-systems-reviewer` the plan's
+Failure Modes table as well, when the plan has one.
 
 Dispatch every reviewer at once (ADR 0133), and wait for every report before
 you continue (`AGENTS.md` §Agent orchestration). The built-in review below runs
 in this session while they work. Reviewers form judgments
 independently; do not pass one reviewer's findings to another — least of all
 `code-reviewer`'s to `blind-reviewer`.
-
-Use each persona's configured model and effort. The reviewers already sit at
-the highest tier their definitions declare; raise a specialist beyond it only
-when the matched risk is both high-impact and materially ambiguous.
 
 ### Built-in code review (trial)
 
@@ -336,7 +334,7 @@ Report, starting with one count line before anything else (ADR 0099):
 - the review round, and for a later round the commit it was reviewed from;
 - candidate branch/diff scope;
 - BUILD candidate and any accepted post-BUILD test-only commits;
-- **Independent verification: NOT REQUIRED | PASS**;
+- **Independent verification: NOT REQUIRED | PASS | DEFERRED (fix round) | STALE (depth)**;
 - **Risk: <tier> — <reason> · Depth: <depth>** (ADR 0106);
 - required-reviewer list and trigger decisions;
 - whether the project has a `REVIEW.md`, and which ones were used;
@@ -348,7 +346,6 @@ Report, starting with one count line before anything else (ADR 0099):
 - the weakened-test result, and how each listed change was resolved;
 - the ledger result: **Ledger: clean**, the `LEDGER-#` findings, or
   **Ledger: Not verified**;
-- each reviewer result under its own heading;
 - the independent-check verdict of every checked finding, with its evidence;
 - the gap sweep: the `GAP-#` findings, **Gap sweep: none found**, or
   **Gap sweep: not run** with the depth that skipped it;
@@ -402,4 +399,4 @@ of its findings for tools.
 Then stop. The next stage is `/ship`.
 
 Any candidate change after REVIEW invalidates the review. A production fix
-returns to `/build`, then `/test`, then `/review`.
+returns to `/build`, then `/review`; `/test` runs as §2 says (ADR 0144).
