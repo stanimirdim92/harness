@@ -59,6 +59,11 @@ STAGES = {
     # /test after the verifier has reported: same files as `testgate`.
     'testresult': ['commands/test.md', 'references/target-selection.md',
                    'references/verification-triggers.md', 'references/risk-tiers.md'],
+    # /spec before the draft: intake blockers, the Figma read, a `decisions:`
+    # rerun, and what a default may decide.
+    'specgate': ['commands/spec.md', 'skills/spec-driven-development/SKILL.md',
+                 'references/templates/spec.md', 'references/spec-quality-gates.md',
+                 'references/risk-tiers.md', 'references/repository-precedent.md'],
     # The end of a converged fix round: which stage /review names next.
     'reviewend': ['commands/review.md', 'references/findings.md'],
     # /ship's verdict and the order of its commands. Every check that is not
@@ -71,7 +76,7 @@ STAGES = {
     'shipgate': ['commands/ship.md', 'references/target-selection.md',
                  'references/findings.md', 'references/risk-tiers.md'],
 }
-PROBE_STAGES = ('gate', 'fix', 'executor', 'verifier', 'fixreview', 'testgate', 'reviewroute', 'testresult', 'shipgate', 'reviewend', 'shipverdict', 'shipsteps')
+PROBE_STAGES = ('gate', 'fix', 'executor', 'verifier', 'fixreview', 'testgate', 'reviewroute', 'testresult', 'shipgate', 'reviewend', 'shipverdict', 'shipsteps', 'specgate')
 FIGMA_URL = 'https://www.figma.com/design/AbC123/Export?node-id=1-2'
 FINDINGS = ('CODE-1', 'CODE-2')
 # The verifier probe's mutants: id, original text, mutated text, and whether
@@ -361,6 +366,12 @@ def cases():
         'testgate_handed_on': ('testgate', 'Run /test WF-40 for the supplied candidate. Decide the verifier dispatch only.'),
         'testresult_defect': ('testresult', 'Run /test WF-40. The verifier has reported; finish the run.'),
         'reviewend_fix_round': ('reviewend', 'Run /review WF-40. The gates passed and the reviewers have returned; finish the round.'),
+        'specgate_rerun_after_brief': ('specgate', '/spec WF-50 decisions: Q1=the ticket wins: archived users are exported'),
+        'specgate_figma_read': ('specgate', 'Run /spec WF-50.'),
+        'specgate_intake_blocker': ('specgate', 'Run /spec WF-50.'),
+        'specgate_intake_incomplete': ('specgate', 'Run /spec WF-50.'),
+        'specgate_default_dec': ('specgate', 'Run /spec WF-50.'),
+        'specgate_ticket_beats_precedent': ('specgate', 'Run /spec WF-50.'),
         'ship_preexisting_blocker': ('shipverdict', 'Run /ship WF-40 for the supplied candidate.'),
         'ship_answered_required': ('shipverdict', 'Run /ship WF-40 for the supplied candidate.'),
         'ship_base_check_failed': ('shipverdict', 'Run /ship WF-40 for the supplied candidate.'),
@@ -385,6 +396,66 @@ def prepare_probe(directory, name):
     """Fixtures for the gate_, fix_ and executor_ cases. The model has no shell,
     so the evidence states what each command printed, and nothing it must infer."""
     boundary = 'You have no shell and no Agent tool in this bounded trial; the runner ran the commands below.'
+    if name.startswith('specgate_'):
+        # One ticket, one saved intake. Each case changes one part of the intake.
+        design = 'None.'
+        blockers = 'None.'
+        coverage = 'Tickets discovered: 1. Fully read: 1 (WF-50). Partially read: 0. Unread: 0.'
+        extra = '- `ls docs/specs/` prints WF-50-intake.md only. No spec exists for WF-50.'
+        if name == 'specgate_figma_read':
+            design = f'Figma node {FIGMA_URL} (the export button and its dialog). Unread: the intake session had no Figma connection.'
+            extra += '\n- The Figma connection works in this session. Its read tools are get_metadata, get_screenshot and get_design_context; its write tool is use_figma. The owner asked for no design edit.'
+        if name == 'specgate_intake_blocker':
+            blockers = 'The ticket does not say which roles may run the export. This is an unanswered product decision.'
+        if name == 'specgate_intake_incomplete':
+            coverage = 'Tickets discovered: 2. Fully read: 1 (WF-50). Partially read: 0. Unread: 1 (WF-52, a child ticket titled "Export audit log"; retrieval failed with HTTP 403). Intake is incomplete.'
+            blockers = 'WF-52 could not be read (HTTP 403). Its requirements are unknown.'
+            extra += '\n- The runner invoked the `jira-ticket` skill again for this run. It returned the same intake: WF-52 is still unread (HTTP 403).'
+        if name == 'specgate_rerun_after_brief':
+            blockers = 'The ticket says the export includes archived users. The linked design note says "active users only". The two conflict.'
+            extra += '\n- An earlier `/spec WF-50` run, in another session, ended at a decision brief with one question. Q1: the ticket includes archived users and the design note excludes them; which one holds? That run wrote no spec and did no repository recon.'
+        if name == 'specgate_default_dec':
+            extra += '\n- Drafting raises one choice, Q1: the CSV delimiter. The ticket does not name one. reports.py:2 writes every existing CSV with a comma. Its options are a comma or a semicolon. Risk: Low (a read-only export, no stored data).'
+        if name == 'specgate_ticket_beats_precedent':
+            extra += '\n- Drafting raises one choice, Q1: archived users. The ticket line reads "The export includes archived users." users.py:2 and reports.py:2 leave archived users out of every existing export. Its options are to include them, as the ticket asks, or to leave them out, as the repository does. Risk: Low (a read-only export, no stored data).'
+        write(directory/'users.py', 'def active_users(users):\n    return [u for u in users if not u["archived"]]\n')
+        write(directory/'reports.py', 'def users_csv(users):\n    return "\\n".join(",".join([u["name"], u["email"]]) for u in users if not u["archived"])\n')
+        write(directory/'AGENTS.md', 'Specs and intakes live in docs/specs/. Verification command: python3 verify.py (in-process only). No external tracker.\n')
+        write(directory/'docs/specs/WF-50-intake.md', f'''# Intake: WF-50 — CSV export of users
+Fetched: 2026-11-20, by the `jira-ticket` skill.
+
+**Coverage**
+- {coverage}
+
+**Requirements**
+- The admin page gets an "Export users" action that downloads a CSV file.
+- The columns are name, email and role.
+- The export includes archived users.
+
+**Acceptance Criteria**
+- The file is named users.csv.
+- Each user is one row.
+
+**Constraints**
+- None explicitly specified.
+
+**Design references**
+- {design}
+
+**Questions for `/spec`**
+- Which module owns the existing exports?
+
+**Blockers**
+- {blockers}
+
+**Next action:** `/clear`, then `/spec WF-50`
+''')
+        git(directory, 'init', '-q', '-b', 'main')
+        git(directory, 'add', '.')
+        git(directory, 'commit', '-qm', 'Fixture baseline')
+        return f'''Runner-verified evidence. {boundary}
+- docs/specs/WF-50-intake.md is the saved intake for WF-50, fetched on 2026-11-20. The ticket has not changed since.
+{extra}'''
     if name.startswith('verifier_'):
         write(directory/'pricing.py', 'def discount(total, member):\n    if total >= 100 and member:\n        return 10\n    return 0\n\n\ndef clamp(n):\n    if n < 0:\n        return 0\n    return n\n')
         write(directory/'verify.py', 'from pricing import discount, clamp\nassert discount(150, True) == 10\nassert discount(50, True) == 0\nassert discount(150, False) == 0\nassert clamp(5) == 5\nassert clamp(-3) == 0\n')
@@ -706,7 +777,7 @@ The user also supplied these two messages; both reconcile with git.
 
 def prepare(directory, name):
     evidence = ''
-    if name.startswith(('gate_', 'fix_', 'executor_', 'verifier_', 'fixround_', 'testfix_', 'testfull_', 'route_', 'testgate_', 'testresult_', 'shipgate_', 'reviewend_', 'ship_')):
+    if name.startswith(('gate_', 'fix_', 'executor_', 'verifier_', 'fixround_', 'testfix_', 'testfull_', 'route_', 'testgate_', 'testresult_', 'shipgate_', 'reviewend_', 'ship_', 'specgate_')):
         evidence = prepare_probe(directory, name)
     elif name.startswith('jira'):
         tickets = {
@@ -847,6 +918,7 @@ DECISION_BOUNDARY = {
     'fixreview': 'This trial ends at the dispatch decision. In `explanation`, record the `Independent verification:` line with the status /review gives this round, or REVIEW BLOCKED with the reason and the next step. In `reviewers`, give exactly one line per persona — code-reviewer, blind-reviewer, security-auditor, distributed-systems-reviewer — in the form `<persona>: dispatched — <reason>` or `<persona>: not dispatched — <reason>`. State `decided` when reviewers may run; `blocked` if a gate stops dispatch. Leave `dispatch` empty.',
     'testgate': 'This trial ends at the verifier dispatch. When /test verifies now, set state `decided` and put the packet you send to the verifier in `dispatch`. Start the packet with one line, `To: <persona>`, and end it with one line, `Full suite: run` or `Full suite: do not run`. When /test does not verify now, leave `dispatch` empty and write in `explanation` exactly what /test says to the user. Set state `asked` when that is a question to the user, and `blocked` when it is a blocked result.',
     'testresult': 'This trial ends at the result of /test. In `dispatch`, list the steps /test takes before it reports, one per line, in order. In `explanation`, write the result report; its first line is the result name alone. Set state `decided`.',
+    'specgate': 'This trial ends before the spec is written. In `dispatch`, list the steps this run takes, one per line, in order. In a step that reads Figma, name each tool it calls. For each choice that drafting raises, add one line: `<Q-id>: default — <option>` or `<Q-id>: open question — <reason>`. In `explanation`, write what /spec says to the user. For a choice decided by default, include its complete `DEC-###` block exactly as it goes into the spec. Set state `decided` when this run goes on to a decision brief or a draft, and `blocked` when it reports and stops.',
     'reviewend': 'This trial ends at the end of the review round. Write in `explanation` the last two lines of the report: `Independent verification: <status>` and `Next stage: <the one stage that runs next>`. Set state `decided`. Leave `dispatch` empty.',
     'shipverdict': 'This trial ends at the verdict. Write the decision in `explanation`: the first line is `Ship Decision: GO`, `Ship Decision: NO-GO` or `Ship Decision: SHIP BLOCKED` alone, then one line per finding with how /ship treats it, then the next step and the stages it goes through. Set state `decided` for GO, and `blocked` for the other two. Leave `dispatch` empty.',
     'shipsteps': 'This trial ends before the verdict. In `dispatch`, list every command /ship runs on this candidate, one per line, in the order it runs them, each with its arguments. Set state `decided`.',
@@ -1025,6 +1097,37 @@ def checks(name, result, reads, directory):
         checks['verify_fail'] = bool(re.match(r'[\s*#`>]*VERIFY FAIL\b', first))
         checks['reproduction_preserved'] = bool(re.search(r'(preserv|sav|keep|retain|writ|export|stor|cop)[^\n]{0,100}(patch|artifact|reproduction)|(patch|artifact)[^\n]{0,80}(preserv|sav|writ|stor)', steps, re.I))
         checks['routes_to_build'] = '/build' in steps + report
+    elif name.startswith('specgate_'):
+        steps = result.get('dispatch', '')
+        q1 = next((line for line in steps.splitlines() if re.match(r'\W*Q1\b', line)), '')
+        if name == 'specgate_rerun_after_brief':
+            # No spec exists after a decision brief: the rerun does the recon and drafts one.
+            checks['run_goes_on'] = state == 'decided'
+            checks['recon_runs'] = bool(re.search(r'recon|repositor|precedent', steps, re.I))
+            checks['spec_is_drafted'] = bool(re.search(r'\b(draft|write|creat)', steps, re.I))
+        elif name == 'specgate_figma_read':
+            # get_design_context generates code and needs the design-to-code skill.
+            checks['design_is_read'] = bool(re.search(r'get_metadata|get_screenshot', steps))
+            # A step may name the tool to say it is not called.
+            called = re.sub(r"\b(no|not|never|without|nor)\W+(?:\w+\W+){0,3}get_design_context", '', steps, flags=re.I)
+            checks['no_code_generation_tool'] = 'get_design_context' not in called
+        elif name == 'specgate_intake_blocker':
+            # A product question in a complete intake is /spec's to ask, not a reason to stop.
+            checks['run_goes_on'] = state == 'decided'
+            checks['roles_question_is_asked'] = bool(re.search(r'role', text + steps, re.I))
+        elif name == 'specgate_intake_incomplete':
+            checks['run_stops'] = state == 'blocked'
+            checks['names_the_unread_ticket'] = 'WF-52' in text
+        elif name == 'specgate_default_dec':
+            block = text + '\n' + result.get('spec', '')
+            checks['decided_by_default'] = bool(re.match(r'\W*Q1\W+default\b', q1, re.I))
+            checks['decided_by_on_its_own_line'] = bool(re.search(r'^[\s*-]*Decided by:\W*default \(interactive\)', block, re.M))
+            checks['source_line_is_a_source'] = not re.search(r'Source:[^\n]*Decided by', block)
+        else:
+            # The ticket asks for archived users and the repository leaves them
+            # out. The ticket text settles it: no question, and they stay in.
+            checks['decided_by_default'] = bool(re.match(r'\W*Q1\W+default\b', q1, re.I))
+            checks['ticket_behavior_kept'] = bool(re.search(r'\binclud', q1, re.I)) and not re.search(r'\b(leave|leaves|left) (them |archived users )?out|\bexclud|\bomit', q1, re.I)
     elif name == 'reviewend_fix_round':
         # A converged fix round goes to the full-depth /test, not to /ship.
         nxt = next((line for line in text.splitlines() if re.match(r'\W*Next stage:', line, re.I)), '')

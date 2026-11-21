@@ -373,6 +373,56 @@ class OrchestrationDecisionTests(unittest.TestCase):
             self.assertIn('did not close it as answered', evidence)
             self.assertNotIn('WF-77', evidence)
 
+    def test_spec_gate_checks(self):
+        stops = result(state='blocked', explanation='No spec exists to revise.')
+        self.assertFalse(checks('specgate_rerun_after_brief', stops, set(), Path('.'))['run_goes_on'])
+        drafts = result(state='decided', dispatch='Read the intake\nRepository recon for the export module\nDraft docs/specs/WF-50-SPEC.md with Q1 decided')
+        self.assertTrue(all(checks('specgate_rerun_after_brief', drafts, set(), Path('.')).values()))
+        code = result(state='decided', dispatch='Figma: get_design_context on node 1-2')
+        got = checks('specgate_figma_read', code, set(), Path('.'))
+        self.assertFalse(got['design_is_read'] or got['no_code_generation_tool'])
+        read = result(state='decided', dispatch='Figma: get_metadata and get_screenshot on node 1-2')
+        self.assertTrue(all(checks('specgate_figma_read', read, set(), Path('.')).values()))
+        for line in ('get_metadata, then get_screenshot. Do not call get_design_context or use_figma.', 'tools get_metadata, get_screenshot (no get_design_context, no use_figma)'):
+            self.assertTrue(all(checks('specgate_figma_read', result(state='decided', dispatch=line), set(), Path('.')).values()), line)
+        both = result(state='decided', dispatch='get_screenshot for the picture, get_design_context for the layout; no use_figma')
+        self.assertFalse(checks('specgate_figma_read', both, set(), Path('.'))['no_code_generation_tool'])
+        asks = result(state='decided', dispatch='Draft\nQ1: open question — which roles may export', explanation='One question stays open.')
+        self.assertTrue(all(checks('specgate_intake_blocker', asks, set(), Path('.')).values()))
+        self.assertFalse(checks('specgate_intake_incomplete', asks, set(), Path('.'))['run_stops'])
+        halt = result(state='blocked', explanation='The intake is incomplete: WF-52 is unread.')
+        self.assertTrue(all(checks('specgate_intake_incomplete', halt, set(), Path('.')).values()))
+        self.assertFalse(checks('specgate_intake_blocker', halt, set(), Path('.'))['run_goes_on'])
+        merged = result(state='decided', dispatch='Q1: default — comma', explanation='### DEC-001 — Delimiter\n- Decision: comma\n- Source: Decided by: default (interactive); reports.py:2')
+        got = checks('specgate_default_dec', merged, set(), Path('.'))
+        self.assertFalse(got['decided_by_on_its_own_line'] or got['source_line_is_a_source'])
+        own = result(state='decided', dispatch='Q1: default — comma', explanation='### DEC-001 — Delimiter\n- Decision: comma\n- Source: repository precedent, reports.py:2\n- Decided by: default (interactive)')
+        self.assertTrue(all(checks('specgate_default_dec', own, set(), Path('.')).values()))
+        asked = result(state='decided', dispatch='Q1: open question — the ticket asks for archived users')
+        self.assertFalse(checks('specgate_ticket_beats_precedent', asked, set(), Path('.'))['decided_by_default'])
+        dropped = result(state='decided', dispatch='Q1: default — leave archived users out, as reports.py:2 does')
+        self.assertFalse(checks('specgate_ticket_beats_precedent', dropped, set(), Path('.'))['ticket_behavior_kept'])
+        kept = result(state='decided', dispatch='Q1: default — include archived users (the ticket line settles it)')
+        self.assertTrue(all(checks('specgate_ticket_beats_precedent', kept, set(), Path('.')).values()))
+
+    def test_spec_gate_fixtures_change_one_part_of_the_intake(self):
+        marks = {'specgate_rerun_after_brief': 'ended at a decision brief', 'specgate_figma_read': 'get_design_context',
+                 'specgate_intake_blocker': None, 'specgate_intake_incomplete': 'WF-52 is still unread',
+                 'specgate_default_dec': 'the CSV delimiter', 'specgate_ticket_beats_precedent': 'Q1: archived users'}
+        for name, mark in marks.items():
+            with tempfile.TemporaryDirectory() as tmp:
+                evidence = prepare(Path(tmp), name)
+                intake = (Path(tmp) / 'docs/specs/WF-50-intake.md').read_text()
+                for other in filter(None, marks.values()):
+                    self.assertEqual(other in evidence, other == mark, (name, other))
+                self.assertEqual('Intake is incomplete' in intake, name == 'specgate_intake_incomplete', name)
+                self.assertEqual('which roles may run the export' in intake, name == 'specgate_intake_blocker', name)
+                self.assertEqual('figma.com' in intake, name == 'specgate_figma_read', name)
+                self.assertFalse((Path(tmp) / 'docs/specs/WF-50-SPEC.md').exists(), name)
+                # The precedent the evidence cites is in the tree.
+                done = subprocess.run(['python3', '-c', 'from reports import users_csv; from users import active_users; u=[{"name":"a","email":"b","archived":True}]; assert users_csv(u)=="" and active_users(u)==[]'], cwd=tmp)
+                self.assertEqual(done.returncode, 0, name)
+
     def test_ship_stats_run_after_the_resolutions(self):
         early = result(dispatch='check-ledger.py WF-40 --ship\nticket-stats.py WF-40\nreview-sarif.py resolve WF-40 CODE-5=follow-up')
         self.assertFalse(checks('ship_stats_order', early, set(), Path('.'))['stats_after_resolutions'])

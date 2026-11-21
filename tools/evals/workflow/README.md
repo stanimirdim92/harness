@@ -140,6 +140,22 @@ Two more cases pin gates that must stop:
   `docs/reviews/` that is not the ticket's SARIF. `/build <TICKET> review
   fixes` does not start; the candidate goes to `/review` first.
 
+Six cases pin `/spec` before the draft. One saved intake, and each case
+changes one part of it:
+
+- `specgate_rerun_after_brief`: a `decisions:` rerun after a decision brief
+  finds no spec. It does the recon and drafts one.
+- `specgate_figma_read`: an unread design is read with `get_metadata` and
+  `get_screenshot`, never with `get_design_context`.
+- `specgate_intake_blocker`: a product question in a complete intake does
+  not stop `/spec`.
+- `specgate_intake_incomplete`: an unread child ticket does.
+- `specgate_default_dec`: a default's `DEC-###` block has `Decided by:` on
+  its own line, not inside `Source:`.
+- `specgate_ticket_beats_precedent`: the ticket asks for a behavior that
+  the repository's other exports leave out. The ticket text settles it by
+  default: the behavior stays in, and the owner gets no question.
+
 To compare two versions of the harness text, extract the older one
 (`git archive <sha> claude tools/evals/workflow | tar -x -C <dir>`), copy the
 current `run.py` over the extracted one, and run that copy: it reads the
