@@ -19,8 +19,10 @@ invoke the `jira-ticket` skill now, before repository recon or drafting. Do not
 fetch Jira yourself, follow its steps inline, or rebuild intake from memory or
 an agent summary. Ticket contents the user pastes go through the skill too; it
 takes them as its source when Jira is unavailable. When the skill returns,
-continue this `/spec` from the intake it saved. If it reports a blocker that
-stops intake, report that blocker and stop.
+continue this `/spec` from the intake it saved. If it reports the intake
+incomplete (a discovered ticket it could not read, or no saved summary), report
+that and stop. A Blocker listed in a complete intake does not stop `/spec`: it
+becomes an `OPEN QUESTION`, or a question in the decision brief.
 
 An intake design reference marked partially read or unread is finished here,
 before drafting. Open each pinned Figma node with the available Figma tools:
@@ -28,8 +30,8 @@ before drafting. Open each pinned Figma node with the available Figma tools:
 node that still cannot be read stays an Assumption under the skill's
 design-backed rule.
 
-Design edits are out of `/spec` scope. Read designs with `get_metadata`,
-`get_screenshot` or `get_design_context`. Write tools such as `use_figma` need
+Design edits are out of `/spec` scope. Read designs with `get_metadata` and
+`get_screenshot`. Write tools such as `use_figma` need
 an edit seat. When the owner asks for a design edit, try it once. On a seat or
 access error, stop and give paste-ready comment text for the designer. Ask the
 owner to re-authenticate only when the error names authentication.
@@ -78,6 +80,9 @@ recommendation rules in §Deciding by default.
   `Decided by: default (interactive)`. Remove the block.
 - Medium questions nothing settles, and every High question, stay
   `OPEN QUESTION` blocks.
+- A default never takes an option that narrows or drops a behavior the
+  ticket asks for. Repository precedent does not outrank the ticket text
+  (`../references/spec-quality-gates.md` §1).
 - List each default in the report, one line each, under
   `Defaults taken (override by id)`, before the approval request. An override
   rewrites that `DEC-###` as §Deciding by default's last paragraph describes.
@@ -110,7 +115,9 @@ Report the spec's path, status, and remaining blockers. When `OPEN QUESTION`
 blocks remain, number them Q1, Q2, … in spec order and end the report with one
 line the user can fill in and send back:
 `/spec <TICKET> decisions: Q1=…, Q2=…`. A rerun with that line revises the
-same spec in place with those decisions; it does not repeat recon.
+same spec in place with those decisions; it does not repeat recon. After a
+decision brief no spec exists yet: the rerun does the recon and drafts the
+spec with those decisions.
 
 When the user approves in this conversation, set `Status: Approved`,
 `Approved by` and `Approved at` in one edit. Read the header back from disk and

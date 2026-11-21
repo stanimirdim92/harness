@@ -112,6 +112,7 @@ disappearing into the final prose. "None" is a valid entry.]
 - Alternatives: [what was rejected]
 - Reason: [why, referencing the REQ id that forced it]
 - Source: [user decision + date / project rule / repository precedent]
+- Decided by: [owner, date, source | default (interactive)]
 - Affects: [REQ ids]
 
 ## Tech Stack
