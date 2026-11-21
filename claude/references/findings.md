@@ -31,8 +31,15 @@ then it is not pre-existing (ADR 0090).
 
 ## Review SARIF
 
-`/review` also writes its findings as SARIF 2.1.0 (OASIS). One run per
-reviewer; the disposition decides `level` (§Dispositions):
+`/review` also writes its findings as SARIF 2.1.0 (OASIS), in one file per
+ticket: `docs/reviews/<TICKET>.sarif` (ADR 0145). Each round appends one run
+per reviewer; the disposition decides `level` (§Dispositions). Every run
+carries `round`, `approach`, `reviewedCommit` and `closing` in its
+`properties`. A round counts toward the round-4 stop when it is not a closing
+round and belongs to the current approach, the highest one in the file. The
+stats scripts count the non-closing rounds of every approach. Read and write
+the file with `review-sarif.py`; never load it whole. `latest --all --open`
+lists the open findings of every round:
 
 ```json
 {
@@ -40,6 +47,8 @@ reviewer; the disposition decides `level` (§Dispositions):
   "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
   "runs": [{
     "tool": {"driver": {"name": "code-reviewer"}},
+    "automationDetails": {"id": "review/LD-1/a1r1/code-reviewer"},
+    "properties": {"round": 1, "approach": 1, "reviewedCommit": "abc1234", "closing": false},
     "results": [{
       "ruleId": "CODE-1",
       "level": "error",

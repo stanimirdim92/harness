@@ -54,7 +54,7 @@ LOOPS = [
     ('test', 'build', 'VERIFY FAIL: fix the code', 'commands/test.md', 'a production fix returns to `/build`'),
     ('test', 'spec', 'the spec does not settle it', 'commands/test.md', 'spec does not settle routes to `/spec`'),
     ('review', 'build', 'BLOCKER / REQUIRED: fix, 3 rounds max', 'commands/review.md',
-     'Round 4 means three rounds did not converge'),
+     '`counted=4` means three rounds did not converge'),
     ('ship', 'build', 'NO-GO: fix, then /test and /review', 'commands/ship.md', 'A production fix returns to `/build`'),
     ('ship', 'spec', 'withdraw a requirement', 'commands/ship.md',
      'withdrawn from the spec through `/spec` with re-approval'),
@@ -830,7 +830,7 @@ CONVENTIONS = [
     ('Paths', '`docs/specs/[TICKET]-SPEC.md`', 'The one spec per ticket; any other spelling fails CI', '/spec', 'references/templates/plan.md', 'docs/specs/[TICKET]-SPEC.md'),
     ('Paths', '`docs/tasks/[TICKET]-plan.md`, `-todo.md`', 'The plan and its task packets', '/plan', 'references/templates/plan.md', 'docs/tasks/[TICKET]-'),
     ('Paths', '`.git/explain/<TICKET>-<sha>.html`', 'An /explain review page, outside the working tree', '/explain', 'commands/explain.md', 'git-common-dir)/explain/'),
-    ('Paths', '`docs/reviews/<TICKET>-<sha>.sarif`', 'The review findings as SARIF 2.1.0; disposition decides the level (error / warning / note)', '/review', 'commands/review.md', 'docs/reviews/<TICKET>-'),
+    ('Paths', '`docs/reviews/<TICKET>.sarif`', 'The review findings as SARIF 2.1.0, one file per ticket; disposition decides the level (error / warning / note)', '/review', 'commands/review.md', 'docs/reviews/<TICKET>.sarif'),
 ]
 # Where a convention comes from, when it is an outside standard rather than
 # the harness's own; keyed by the marker shown in CONVENTIONS.
@@ -844,7 +844,7 @@ ORIGIN = {
     '`<type>[scope]: <description>`': 'Conventional Commits 1.0',
     'One instruction per sentence, 20 words or fewer': 'ASD-STE100 (its rules, not its dictionary)',
     '`file:line`': 'GNU error-message format',
-    '`docs/reviews/<TICKET>-<sha>.sarif`': 'SARIF 2.1.0 (OASIS)',
+    '`docs/reviews/<TICKET>.sarif`': 'SARIF 2.1.0 (OASIS)',
     'killed / survived': 'Mutation testing',
 }
 # Seen in the target projects' history, not defined by any harness file.

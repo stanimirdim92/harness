@@ -10,7 +10,8 @@ from what the pipeline already records, and prints the row for the
 - open items: `OPEN-###` ids in docs/tasks/<TICKET>-open.md, raised after the plan;
 - approvals: commits that set an `Approved at:` line in the spec or plan,
   so a reapproval counts again;
-- review rounds: the ticket's review SARIF files;
+- review rounds: the non-closing rounds in docs/reviews/<TICKET>.sarif, or the
+  ticket's old per-round files (ADR 0145);
 - findings: how review findings ended (fixed, refuted, other).
 
 It also reads the ticket's Claude Code transcripts (ADR 0113), the main
@@ -100,14 +101,19 @@ def stats(ticket, review_dir):
     _, out = git('log', '--format=%H', r'-G^Approved at:\s*[0-9]', '--', *paths)
     found['approvals'] = len(out.split())
     rounds, endings = 0, {'fixed': 0, 'refuted': 0, 'other': 0}
-    for path in sorted(Path(review_dir).glob(f'{ticket}-*.sarif')):
-        if not re.fullmatch(rf'{re.escape(ticket)}-[0-9a-f]{{7,40}}\.sarif', path.name):
+    one = Path(review_dir) / f'{ticket}.sarif'
+    for path in sorted(Path(review_dir).glob(f'{ticket}-*.sarif')) + ([one] if one.exists() else []):
+        old = re.fullmatch(rf'{re.escape(ticket)}-[0-9a-f]{{7,40}}\.sarif', path.name)
+        if not old and path != one:
             continue
-        rounds += 1
         try:
             data = json.loads(path.read_text())
         except ValueError:
             continue
+        # One file per ticket (ADR 0145): count its non-closing rounds.
+        rounds += 1 if old else len({(r.get('properties', {}).get('approach', 1),
+                                      r.get('properties', {}).get('round', 0))
+                                     for r in data.get('runs', []) if not r.get('properties', {}).get('closing')})
         for run in data.get('runs', []):
             for r in run.get('results', []):
                 end = r.get('properties', {}).get('resolution', 'open')

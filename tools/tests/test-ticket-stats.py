@@ -61,6 +61,17 @@ class TicketStats(unittest.TestCase):
         self.git('add', path)
         self.git('commit', '-q', '-m', message)
 
+    def test_one_file_per_ticket_counts_non_closing_rounds(self):
+        run = lambda rnd, closing, *ends: {'properties': {'round': rnd, 'approach': 1, 'closing': closing},
+                                           'results': [{'properties': {'resolution': e}} for e in ends]}
+        for old in self.reviews.glob('AB-1-*.sarif'):
+            old.unlink()
+        (self.reviews / 'AB-1.sarif').write_text(json.dumps({'runs': [
+            run(1, False, 'fixed'), run(1, False, 'refuted'), run(2, False, 'open'), run(3, True)]}))
+        s = ts.stats('AB-1', self.reviews)
+        self.assertEqual(s['review_rounds'], 2)
+        self.assertEqual(s['findings'], {'fixed': 1, 'refuted': 1, 'other': 1})
+
     def test_counts(self):
         s = ts.stats('AB-1', self.reviews)
         self.assertEqual((s['decisions'], s['open_items'], s['approvals'], s['review_rounds']), (2, 2, 3, 2))

@@ -127,7 +127,7 @@ that explanation here, just the index.
 | [0117](0117-evals-carry-tags-and-a-holdout-split.md) | Evals carry tags and a holdout split | Accepted |
 | [0118](0118-figma-tools-only-in-figma-copies.md) | Figma tools only in figma- copies of executor and test-engineer | Amended 2026-11-07 (d97010b): the copies grant a fixed read-only set of ten Figma tools (`FIGMA_TOOLS` in `validate-frontmatter.py`), not `mcp__figma__*` |
 | [0119](0119-headless-runners-removed.md) | Headless runners removed | Accepted |
-| [0120](0120-review-sarif-committed-under-docs.md) | Review SARIF committed under docs/reviews | Accepted |
+| [0120](0120-review-sarif-committed-under-docs.md) | Review SARIF committed under docs/reviews | Partially superseded by [0145](0145-one-review-sarif-per-ticket.md) (one file per ticket, not per round) |
 | [0121](0121-git-workflow-skill-removed.md) | The git-workflow-and-versioning skill is removed | Accepted |
 | [0122](0122-agents-md-worktree-rules-moved-to-reference.md) | Worktree rules moved from AGENTS.md to a reference | Accepted |
 | [0123](0123-filter-passing-test-output.md) | Filter the output of passing test runs | Accepted |
@@ -152,6 +152,7 @@ that explanation here, just the index.
 | [0142](0142-built-in-code-review-as-trial-reviewer.md) | Claude Code's built-in `/code-review` runs in `/review` as a trial reviewer | Accepted |
 | [0143](0143-review-eval-judges-the-defect-not-the-location.md) | review-eval judges the defect, not only the location | Accepted |
 | [0144](0144-fix-rounds-skip-test-until-review-converges.md) | Fix rounds skip /test until review converges | Accepted |
+| [0145](0145-one-review-sarif-per-ticket.md) | One review SARIF per ticket | Accepted |
 
 Adding a new decision: create the next-numbered `NNNN-kebab-title.md`
 (4-digit, zero-padded — MADR-style, matches the files already here) and

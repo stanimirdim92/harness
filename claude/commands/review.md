@@ -29,17 +29,25 @@ BLOCKED**.
 Standalone review may still be performed when directly requested, but it is not
 the pipeline REVIEW gate.
 
-Count the review round: one more than the ticket's earlier review files.
+Count the review round from the ticket's one SARIF file (ADR 0145):
 
 ```bash
-ls docs/reviews/<TICKET>-*.sarif 2>/dev/null | wc -l
+python3 ~/.claude/skills/code-review-and-quality/scripts/review-sarif.py round <TICKET>
 ```
 
+It prints `approach=<a> round=<n> counted=<c>`. When it reports old
+per-round files, run its `merge <TICKET>` command, commit the result alone,
+and count again.
+
 Round 1 reviews the whole candidate. A later round reviews a fix (§3 Later
-rounds). Round 4 means three rounds did not converge. Return **REVIEW
+rounds). `counted=4` means three rounds did not converge. Return **REVIEW
 BLOCKED**, list the findings that came back in more than one round, and ask
-the user to reconsider the approach before another fix (ADR 0089). Delete the
-ticket's old review files only when the user starts a new approach.
+the user to reconsider the approach before another fix (ADR 0089). The
+closing round after `/test` never counts, so ignore `counted` for it
+(ADR 0144). When the
+user starts a new approach, pass `--new-approach` to `round` and `add` on its
+first round only; a second one starts yet another approach. The count starts
+again, and the file keeps the earlier rounds.
 
 ## 2. Independent-verification gate
 
@@ -195,9 +203,9 @@ whether it finds what the personas miss.
 ### Later rounds
 
 From round 2 the candidate fixes earlier findings. Review the fix, not the
-whole change again. The last reviewed commit is the short sha in the newest
-review file name. Leave `docs/reviews/` out of every diff a reviewer gets
-(`git diff <sha>..HEAD -- . ':!docs/reviews'`).
+whole change again. The last reviewed commit is the `reviewedCommit` that
+`review-sarif.py latest <TICKET>` prints. Leave `docs/reviews/` out of every
+diff a reviewer gets (`git diff <sha>..HEAD -- . ':!docs/reviews'`).
 
 - Give `code-reviewer` the diff since that commit and the earlier findings with
   their resolutions. It does not raise a resolved finding again unless the new
@@ -375,12 +383,15 @@ Example: `CODE-1 = BLIND-12 · REQUIRED · An import of 50k rows takes about
 a minute with no progress shown. Fix: add a progress bar. Your choice: fix
 now, or accept and measure after release.`
 
-Also write every finding to a SARIF 2.1.0 file, so code-scanning tools can
-read the review (`../references/findings.md` §Review SARIF):
+Also write every finding as SARIF 2.1.0, so code-scanning tools can read the
+review (`../references/findings.md` §Review SARIF). Write this round's runs to
+a scratch file, then append them to the ticket's file:
 
 ```bash
-out="docs/reviews/<TICKET>-$(git rev-parse --short HEAD).sarif"
+python3 ~/.claude/skills/code-review-and-quality/scripts/review-sarif.py add <TICKET> <round-file> --commit $(git rev-parse --short HEAD)
 ```
+
+Add `--closing` for the closing round after `/test` (ADR 0144).
 
 Each id stays its own SARIF result. Record a group's aliases in each member's `properties.aliases`.
 
@@ -391,9 +402,9 @@ first, and reuse one when it fits:
 python3 ~/.claude/skills/code-review-and-quality/scripts/review-noise.py --classes
 ```
 
-Commit the file alone: `review: <TICKET> round <n> findings`. The sha in its
-name is the reviewed commit, the one before this commit (ADR 0120). Give its
-path in the report. The markdown report stays the gate artifact; the SARIF file is a copy
+Commit `docs/reviews/<TICKET>.sarif` alone: `review: <TICKET> round <n>
+findings`. Its `reviewedCommit` is the commit before this one (ADR 0120). Give
+its path in the report. The markdown report stays the gate artifact; the SARIF file is a copy
 of its findings for tools.
 
 Then stop. The next stage is `/ship`.

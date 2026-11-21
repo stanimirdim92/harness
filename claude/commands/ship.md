@@ -49,7 +49,7 @@ in the approved spec, or the owner's answer to the question below. Quote the
 other `Open` item to the owner in one question before the verdict: one numbered
 line per item, with what it means for the release. Until the owner answers,
 the item stays `Open` and the result stays **SHIP BLOCKED**. A commit that
-changes only `docs/tasks/<TICKET>-open.md` or `docs/reviews/<TICKET>-*.sarif`
+changes only `docs/tasks/<TICKET>-open.md` or `docs/reviews/<TICKET>.sarif`
 after review leaves the reviewed code unchanged. Report it as "Ledger-only commit after review: <sha>". Any
 other change is still **SHIP BLOCKED**.
 
@@ -153,8 +153,11 @@ in `../references/findings.md` §Dispositions.
   row. A pre-existing BLOCKER with no tracked follow-up is NO-GO.
 
 Write each finding's resolution into the review SARIF file
-(`properties.resolution`): `fixed`, `refuted`, `answered`, `accepted`,
-`deferred`, `follow-up` for a tracked pre-existing finding, or `open`.
+(`properties.resolution`) with `review-sarif.py resolve <TICKET>
+<ID>=<resolution> ...` (`/review` §1). It writes the newest round that holds
+the id; pass `--round <n>` for an earlier one. The resolutions are `fixed`,
+`refuted`, `answered`, `accepted`, `deferred`, `follow-up` for a tracked
+pre-existing finding, or `open`.
 ADVISORY findings the author declined are `declined`. Never write `refuted`
 for an `answered` finding: `refuted` means the claim is false, and
 `answered` means the spec or the owner already settled it. `review-noise.py`

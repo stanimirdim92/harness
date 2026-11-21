@@ -39,6 +39,14 @@ class ReviewNoise(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
+    def test_one_file_per_ticket_counts_non_closing_rounds(self):
+        data = json.loads(sarif(('code-reviewer', [{'resolution': 'fixed'}]), ('blind-reviewer', []),
+                                ('code-reviewer', []), ('code-reviewer', [])))
+        for run, (rnd, closing) in zip(data['runs'], [(1, False), (1, False), (2, False), (3, True)]):
+            run['properties'] = {'round': rnd, 'approach': 1, 'closing': closing}
+        (self.dir / 'AB-7.sarif').write_text(json.dumps(data))
+        self.assertEqual(rn.tally([self.dir / 'AB-7.sarif'])['rounds'], {'AB-7': 2})
+
     def test_endings_and_rounds(self):
         t = rn.tally(sorted(self.dir.glob('*.sarif')))
         code = t['reviewers']['code-reviewer']

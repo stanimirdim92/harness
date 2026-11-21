@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Count how review findings ended, per reviewer, from the review SARIF files.
 
-/review writes and commits one SARIF file per round to docs/reviews/ (ADR 0120),
-and /ship writes each finding's resolution into it (ADR 0093). A finding that
+/review appends each round to one SARIF file per ticket, docs/reviews/<TICKET>.sarif
+(ADR 0145; older tickets have one file per round, ADR 0120), and /ship writes each finding's resolution into it (ADR 0093). A finding that
 ends `fixed` was worth raising. One that ends `refuted` was noise: the code was
 already right. `answered` is a question the approved spec already answers, or
 a restatement of the owner's own request: neither a bug found nor a false
@@ -40,6 +40,12 @@ UNJUDGED = ('open', 'answered')    # not judged real or false: outside every noi
 NAME = re.compile(r'^(?P<ticket>.+)-(?P<sha>[0-9a-f]{7,40})\.sarif$')
 
 
+def counted_rounds(data):
+    """The (approach, round) pairs of a one-file-per-ticket SARIF, closing rounds left out (ADR 0145)."""
+    return {(r.get('properties', {}).get('approach', 1), r.get('properties', {}).get('round', 0))
+            for r in data.get('runs', []) if not r.get('properties', {}).get('closing')}
+
+
 def review_dir():
     out = subprocess.run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True)
     if out.returncode:
@@ -56,13 +62,12 @@ def tally(files):
     for path in files:
         m = NAME.match(path.name)
         ticket = m.group('ticket') if m else path.stem
-        if m:
-            rounds[ticket] += 1
         try:
             data = json.loads(path.read_text())
         except (OSError, ValueError) as err:
             print(f'review-noise: skipped {path.name}: {err}', file=sys.stderr)
             continue
+        rounds[ticket] += 1 if m else len(counted_rounds(data))
         for run in data.get('runs', []):
             name = run.get('tool', {}).get('driver', {}).get('name', '?')
             for result in run.get('results', []):
@@ -171,7 +176,9 @@ def main(argv=None):
     parser.add_argument('--json', action='store_true')
     args = parser.parse_args(argv)
     directory = args.dir or review_dir()
-    files = sorted(directory.glob(f'{args.ticket}-*.sarif' if args.ticket else '*.sarif'))
+    files = sorted(directory.glob(f'{args.ticket}-*.sarif') if args.ticket else directory.glob('*.sarif'))
+    if args.ticket and (directory / f'{args.ticket}.sarif').exists():
+        files.append(directory / f'{args.ticket}.sarif')
     if not files:
         print(f'review-noise: no review files in {directory}', file=sys.stderr)
         return 1
