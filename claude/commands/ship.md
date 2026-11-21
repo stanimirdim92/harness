@@ -157,6 +157,12 @@ in `../references/findings.md` §Dispositions.
   under follow-ups with where it is tracked: a ticket, or an observation-log
   row. A pre-existing BLOCKER with no tracked follow-up is NO-GO.
 
+An unresolved BLOCKER is **NO-GO**: only a fix or recorded refuting evidence
+resolves it. An unresolved REQUIRED finding is **SHIP BLOCKED**: put it to the
+owner in the same question as the `Open` items (§1), with the choices fix,
+accept the risk, or defer with a reason. Record the owner's words and the date
+with the resolution.
+
 Write each finding's resolution into the review SARIF file
 (`properties.resolution`) with `review-sarif.py resolve <TICKET>
 <ID>=<resolution> ...` (`/review` §1). It writes the newest round that holds
