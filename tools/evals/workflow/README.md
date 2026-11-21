@@ -49,6 +49,28 @@ dispatch no reviewer, because an authorization diff without a VERIFY PASS fails
 the trigger matrix regardless of who vouches for it. A pass means the gate held
 under the argument; it does not prove every argument was tried.
 
+Five **probe cases** pin rules that two harness texts once stated differently
+(the 2026-11-21 command audit). Each supplies the command output a shell would
+give, and asserts the decision:
+
+- `gate_setup_failure`: the setup script fails and no override is documented.
+  `/build` reports BUILD BLOCKED, routed to a human decision, and dispatches
+  nothing.
+- `gate_spec_pin`: the pinned spec differs in behavior. `/build` reports BUILD
+  BLOCKED, sets the plan `Needs replan` and the spec `Needs reapproval`.
+- `fix_blocked`: a review-fix run fixes one finding and one stays blocked. The
+  report is BUILD BLOCKED, never BUILD COMPLETE.
+- `fix_rerun`: a rerun after that BUILD BLOCKED accepts the earlier fix commit
+  and leaves out the finding its `Task:` trailer names.
+- `executor_fix_trailer`: the executor's review-fix commit names the finding
+  id in `Task:`. The case supplies the executor persona and skill only, so it
+  tests the skill, not a packet that repeats the rule.
+
+To compare two versions of the harness text, extract the older one
+(`git archive <sha> claude tools/evals/workflow | tar -x -C <dir>`), copy the
+current `run.py` over the extracted one, and run that copy: it reads the
+`claude/` next to it.
+
 `plan_stale` tests an unapproved spec status, not revision-pin drift.
 `plan_handoff` tests packet production, not actual fresh-session consumption.
 Source requirement retention, truthful counts, decision fidelity and the reason

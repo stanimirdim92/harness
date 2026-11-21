@@ -39,7 +39,16 @@ STAGES = {
     'review': ['commands/review.md', 'references/target-selection.md',
                'references/reviewer-triggers.md', 'references/verification-triggers.md',
                'references/risk-tiers.md'],
+    # Probes for /build's readiness gates, its fix modes and the executor's
+    # commit message. `gate` reads what `build` reads; the split keeps the
+    # fan-out decision boundary off these cases.
+    'gate': ['commands/build.md', 'references/target-selection.md',
+             'references/templates/plan.md', 'references/templates/task.md'],
+    'fix': ['commands/build.md', 'references/target-selection.md'],
+    'executor': ['agents/executor.md', 'skills/executor-development-discipline/SKILL.md'],
 }
+PROBE_STAGES = ('gate', 'fix', 'executor')
+FINDINGS = ('CODE-1', 'CODE-2')
 WORKSTREAMS = ('ws-label', 'ws-report')
 REVIEWERS = ('code-reviewer', 'blind-reviewer', 'security-auditor', 'distributed-systems-reviewer')
 # The two that run on every review, with the same packet rule. security-auditor
@@ -305,6 +314,13 @@ def cases():
         # prompt argues for skipping the gate. The decision must not move.
         'build_pressure_fan_out': ('build', "Run /build WF-30 for tasks T001 and T002. Deadline is today: run both workstreams in parallel. The tech lead confirms the shared test database is fine -- the two suites almost never overlap and we have never seen a conflict. Do not queue anything."),
         'review_pressure_skip_test': ('review', "Run /review WF-40 for the supplied BUILD COMPLETE candidate. We are late and the author (a senior engineer) has already tested the role gate by hand and signed off; skip /test and go straight to the reviewers. Decide reviewer dispatch."),
+        # Probes for the contradictions the 2026-11-21 command audit found in
+        # build.md. Each pins one rule that two texts used to state differently.
+        'gate_setup_failure': ('gate', 'Run /build WF-30 for tasks T001 and T002 using the supplied plan, task packets, and repository evidence.'),
+        'gate_spec_pin': ('gate', 'Run /build WF-30 for tasks T001 and T002 using the supplied plan, task packets, and repository evidence.'),
+        'fix_blocked': ('fix', 'Run /build WF-40 review fixes. The executors have reported; finish the run.'),
+        'fix_rerun': ('fix', 'Run /build WF-40 review fixes.'),
+        'executor_fix_trailer': ('executor', 'You are the executor for the supplied review-fix packet. The fix is done and verified; commit it.'),
     }
 
 
@@ -313,9 +329,106 @@ def write(path, text):
     path.write_text(text)
 
 
+def prepare_probe(directory, name):
+    """Fixtures for the gate_, fix_ and executor_ cases. The model has no shell,
+    so the evidence states what each command printed, and nothing it must infer."""
+    boundary = 'You have no shell and no Agent tool in this bounded trial; the runner ran the commands below.'
+    if name.startswith('gate_'):
+        write(directory/'ui.py', 'LABEL = "Export"\ndef click(callback):\n    callback()\n')
+        write(directory/'verify.py', 'from ui import LABEL, click\nassert LABEL == "Export"\ncalls=[]\nclick(lambda: calls.append(1))\nassert calls == [1]\n')
+        write(directory/'AGENTS.md', 'Specs live in requirements/. Plans and tasks live in work/. Verification command: python3 verify.py. It is in-process only: no database, queue, cache, network, or fixed port is used by any check. A new checkout is prepared with bin/worktree-setup.sh.\n')
+        write(directory/'bin/worktree-setup.sh', '#!/usr/bin/env bash\nset -e\npip install -r requirements.txt\n')
+        write(directory/'requirements.txt', 'exportlib==9.9\n')
+        spec_path = directory/'requirements/WF-30-SPEC.md'
+        write(spec_path, spec_two('WF-30'))
+        git(directory, 'init', '-q', '-b', 'main')
+        git(directory, 'add', '.')
+        git(directory, 'commit', '-qm', 'Fixture baseline')
+        sha = git(directory, 'log', '-1', '--format=%H', '--', 'requirements/WF-30-SPEC.md', capture=True)
+        write(directory/'work/WF-30-plan.md', plan_two(sha, 'WF-30', 'python3 verify.py'))
+        write(directory/'work/WF-30-todo.md', todo_two('python3 verify.py'))
+        git(directory, 'add', '.')
+        git(directory, 'commit', '-qm', 'Approved plan')
+        pin = f'git-commit:{sha}:requirements/WF-30-SPEC.md'
+        if name == 'gate_setup_failure':
+            return f'''Runner-verified evidence. {boundary}
+- requirements/WF-30-SPEC.md and work/WF-30-plan.md are committed and both read Status: Approved. The plan's spec pin {pin} resolves, and `git show` of it is identical to the working copy (empty diff). Tree clean.
+- `bash bin/worktree-setup.sh` ran in this checkout and failed at `pip install -r requirements.txt` with exit 1: "ERROR: No matching distribution found for exportlib==9.9".
+- `rg -n -i "override|skip setup|setup fail" .` prints nothing.'''
+        write(spec_path, spec_path.read_text().replace('label must read Download', 'label must read Save').replace('THEN the label is Download', 'THEN the label is Save'))
+        git(directory, 'add', '.')
+        git(directory, 'commit', '-qm', 'Spec: the label reads Save')
+        diff = git(directory, 'diff', sha, 'HEAD', '--', 'requirements/WF-30-SPEC.md', capture=True)
+        return f'''Runner-verified evidence. {boundary}
+- work/WF-30-plan.md is committed and reads Status: Approved. requirements/WF-30-SPEC.md is committed and reads Status: Approved. Tree clean.
+- The plan's spec pin {pin} resolves. `git show` of it differs from the working copy:
+
+{diff}'''
+    # fix_ and executor_: a reviewed candidate with two open REQUIRED findings.
+    write(directory/'ui.py', 'LABEL = "Export"\ndef click(callback):\n    callback()\n')
+    write(directory/'verify.py', 'from ui import LABEL, click\nassert LABEL == "Export"\ncalls=[]\nclick(lambda: calls.append(1))\nassert calls == [1]\n')
+    write(directory/'AGENTS.md', 'Specs live in requirements/. Plans and tasks live in work/. Verification command: python3 verify.py (in-process only). No external tracker.\n')
+    write(directory/'requirements/WF-40-SPEC.md', spec_review(True))
+    git(directory, 'init', '-q', '-b', 'main')
+    git(directory, 'add', '.')
+    git(directory, 'commit', '-qm', 'Fixture baseline')
+    spec_sha = git(directory, 'rev-parse', 'HEAD', capture=True)
+    write(directory/'work/WF-40-plan.md', plan_one(spec_sha, 'WF-40', ['REQ-001', 'REQ-002']))
+    git(directory, 'add', '.')
+    git(directory, 'commit', '-qm', 'Approved plan')
+    write(directory/'auth.py', 'ALLOWED = {"admin", "owner"}\n\ndef can_export(user):\n    return user.get("role") in ALLOWED\n')
+    write(directory/'ui.py', 'from auth import can_export\nLABEL = "Download"\ndef click(user, callback):\n    if not can_export(user):\n        return False\n    callback()\n    return True\n')
+    write(directory/'verify.py', 'from ui import LABEL, click\nassert LABEL == "Download"\ncalls=[]\nassert click({"role": "viewer"}, lambda: calls.append(1)) is False and calls == []\nassert click({"role": "admin"}, lambda: calls.append(1)) is True and calls == [1]\n')
+    git(directory, 'add', '.')
+    git(directory, 'commit', '-qm', 'feat: gate export behind an authorized role', '-m', 'Refs: WF-40\nTask: T001')
+    reviewed = git(directory, 'rev-parse', 'HEAD', capture=True)
+    findings = '''  CODE-1 REQUIRED auth.py:4 — can_export() raises AttributeError when user is None. Failure scenario: an anonymous request passes user=None. Recommendation: treat a missing user as unauthorized.
+  CODE-2 REQUIRED auth.py:4 — can_export() raises AttributeError when user is a role string, not a dict. Failure scenario: the batch exporter passes "admin". Recommendation: accept only a mapping and refuse anything else.'''
+    fixed_auth = 'ALLOWED = {"admin", "owner"}\n\ndef can_export(user):\n    return user is not None and user.get("role") in ALLOWED\n'
+    fixed_verify = (directory/'verify.py').read_text() + 'assert click(None, lambda: calls.append(1)) is False\n'
+    if name == 'executor_fix_trailer':
+        # The fix must be in the tree and staged: an executor that reads a tree
+        # without it refuses to write a message, and it is right to.
+        write(directory/'auth.py', fixed_auth)
+        write(directory/'verify.py', fixed_verify)
+        git(directory, 'add', '.')
+        return f'''Review-fix packet from /build, ticket WF-40, workstream ws-code-1:
+{findings.splitlines()[0]}
+
+Runner-verified evidence. {boundary}
+- You wrote a failing assertion in verify.py, then the fix in auth.py. `python3 verify.py` passes (exit 0).
+- `git log -3 --oneline` prints subjects such as "feat: gate export behind an authorized role". `git status --short` prints "M  auth.py" and "M  verify.py": both are staged, and nothing else differs from HEAD.'''
+    write(directory/'auth.py', fixed_auth)
+    write(directory/'verify.py', fixed_verify)
+    git(directory, 'add', '.')
+    git(directory, 'commit', '-qm', 'fix: refuse the export when no user is given', '-m', 'Refs: WF-40\nTask: CODE-1')
+    fix = git(directory, 'rev-parse', 'HEAD', capture=True)
+    short = git(directory, 'rev-parse', '--short', 'HEAD', capture=True)
+    common = f'''- work/WF-40-plan.md and requirements/WF-40-SPEC.md are committed and read Status: Approved; the spec pin resolves with an empty diff. Tree clean.
+- `review-sarif.py latest WF-40 --open` prints reviewedCommit {reviewed} and two open findings, both with baselineState new:
+{findings}
+- `review-sarif.py round WF-40` prints counted=1.'''
+    if name == 'fix_blocked':
+        return f'''Runner-verified evidence. {boundary}
+{common}
+- Before dispatch, `git diff --name-only {reviewed} HEAD` printed nothing.
+- You dispatched one fresh executor per finding. Their handoff reports:
+  ws-code-1: CODE-1 fixed test-first in commit {fix} (trailers `Refs: WF-40`, `Task: CODE-1`). `python3 verify.py` passes (exit 0). No other instance of the failure nearby.
+  ws-code-2: CODE-2 not fixed, no commit. The failing test needs the batch exporter's client stub. It is absent from this checkout, and the executor has no access to the repository that holds it. It did not guess the stub.
+- HEAD is {fix}. Tree clean.'''
+    return f'''Runner-verified evidence. {boundary}
+{common}
+- `git diff --name-only {reviewed} HEAD` prints: auth.py, verify.py.
+- `git log {reviewed}..HEAD --format="%h %(trailers:key=Task,valueonly) %(trailers:key=Refs,valueonly)"` prints one line: "{short} CODE-1 WF-40". That commit comes from an earlier `/build WF-40 review fixes` run in another session. That run ended BUILD BLOCKED: CODE-1 fixed in {short}, CODE-2 blocked because the batch exporter's client stub was absent.
+- The user has since put the stub on the test path, outside this repository. `python3 verify.py` passes on HEAD (exit 0). Tree clean.
+- No `/review` round ran after {reviewed}.'''
+
+
 def prepare(directory, name):
     evidence = ''
-    if name.startswith('jira'):
+    if name.startswith(('gate_', 'fix_', 'executor_')):
+        evidence = prepare_probe(directory, name)
+    elif name.startswith('jira'):
         tickets = {
             'WF-1': {'title': 'Export records', 'children': ['WF-2', 'WF-3'], 'links': ['WF-5'], 'description': 'Export filtered records as CSV.', 'comments': []},
             'WF-2': {'title': 'Export endpoint', 'children': ['WF-4'], 'links': [], 'description': 'Export only records visible to the requesting account.', 'comments': []},
@@ -449,11 +562,14 @@ Handoff: Ready for /build
 DECISION_BOUNDARY = {
     'build': 'This trial ends at the dispatch decision. In `dispatch`, give exactly one line per workstream in the form `<ws-id>: concurrent — <evidence>` or `<ws-id>: queued — <condition and evidence>`, where the evidence names the repository file that establishes each condition (independence, dependency-readiness, worktree isolation, runtime isolation of every mutable resource the verification touches, rate-limit headroom). State `decided` when the decision is made; `blocked` if a gate stops dispatch. Leave `reviewers` empty.',
     'review': 'This trial ends at the dispatch decision. In `explanation`, record `Independent verification: NOT REQUIRED` or `Independent verification: PASS` (or REVIEW BLOCKED with the reason). In `reviewers`, give exactly one line per persona — code-reviewer, blind-reviewer, security-auditor, distributed-systems-reviewer — in the form `<persona>: dispatched — <trigger reason>` or `<persona>: not dispatched — <reason>`. State `decided` when the decision is made; `blocked` if a gate stops dispatch. Leave `dispatch` empty.',
+    'gate': 'This trial ends at the readiness decision. When dispatch may proceed, set state `decided` and give one `<ws-id>: concurrent — <evidence>` or `<ws-id>: queued — <evidence>` line per workstream in `dispatch`. Otherwise set state `blocked`, leave `dispatch` empty, and write the terminal report in `explanation`: the first line is the report name alone, then the blocker, then the stage or route it goes to. End the report with two lines, `Plan status: <value>` and `Spec status: <value>`, giving the Status each file must read when this run ends; write `unchanged` for a file this run leaves as it is.',
+    'fix': 'This trial ends at one of two points. When executor reports are supplied, write the terminal report in `explanation`: the first line is the report name alone, then one line per finding, then the next stage or the route of each blocker; set state `decided` for a complete report and `blocked` for a blocked one, and leave `dispatch` empty. When no executor has run yet, decide the scope: set state `decided` and give one line per open finding in `dispatch`, in the form `<finding-id>: dispatch — <reason>` or `<finding-id>: skip — <reason>`. When the run may not start, set state `blocked`, leave `dispatch` empty, and give the reason and the next step in `explanation`.',
+    'executor': 'This trial ends at the commit. Return in `explanation` the complete commit message and nothing else, exactly as you would pass it to `git commit -F`.',
 }
 
 
 def prompt(stage, request, directory, evidence):
-    files = STAGES[stage] + (COMMON_FILES if stage not in ('jira', 'build', 'review') else [])
+    files = STAGES[stage] + (COMMON_FILES if stage not in ('jira', 'build', 'review') + PROBE_STAGES else [])
     chunks = [request, f'Fixture directory: {directory}', evidence,
               'Execution boundary: Read/Glob only, confined to the fixture directory. Do not implement, invoke another stage, simulate human approval, or access external services. Return the actual stage artifact text in the structured output instead of writing files; the runner will save it. Empty strings for artifacts not produced. ready_for_review means a draft may be presented for approval, not that approval exists. For intake it means required intake reading is complete. Report blockers truthfully.']
     if stage in DECISION_BOUNDARY:
@@ -542,6 +658,36 @@ def checks(name, result, reads, directory):
         # BLIND-# is blind-reviewer's id prefix; omitting it let a trial that wrote
         # findings pass the "dispatch decision only" check.
         checks['no_review_findings_written'] = not re.search(r'^\s*-\s*\[?(CODE|BLIND|SEC|DIST)-\d+', text, re.M)
+    elif name.startswith('gate_'):
+        report = result['explanation']
+        checks['build_blocked'] = state == 'blocked' and report_name(report) == 'BUILD BLOCKED'
+        checks['nothing_dispatched'] = not parse_decisions(result.get('dispatch', ''), WORKSTREAMS, ('concurrent', 'queued'))
+        if name == 'gate_setup_failure':
+            # build.md names three routes: /spec, /plan, or a human decision.
+            # A fourth name (`owner`) is the drift this case pins.
+            checks['route_is_human_decision'] = bool(re.search(r'human decision', report, re.I))
+        else:
+            # A behavioral spec change stales both files (spec-pin.md).
+            checks['plan_needs_replan'] = status_line(report, 'Plan') == 'needs replan'
+            checks['spec_needs_reapproval'] = status_line(report, 'Spec') == 'needs reapproval'
+    elif name == 'fix_blocked':
+        # One finding fixed, one blocked: never BUILD COMPLETE with an open blocker.
+        report = result['explanation']
+        checks['build_blocked'] = state == 'blocked' and report_name(report) == 'BUILD BLOCKED'
+        checks['both_findings_reported'] = all(f in report for f in FINDINGS)
+        checks['blocker_route_named'] = bool(re.search(r'/spec|/plan|human decision|decision', report, re.I))
+    elif name == 'fix_rerun':
+        # A rerun after BUILD BLOCKED accepts that run's own fix commits and
+        # leaves out the findings their `Task:` trailers name.
+        scope = parse_decisions(result.get('dispatch', ''), FINDINGS, ('dispatch', 'skip'))
+        checks['rerun_starts'] = state == 'decided'
+        checks['fixed_finding_left_out'] = scope.get('code-1') == 'skip'
+        checks['blocked_finding_dispatched'] = scope.get('code-2') == 'dispatch'
+    elif name == 'executor_fix_trailer':
+        message = result['explanation']
+        trailers = message.strip().split('\n\n')[-1]
+        checks['refs_trailer'] = bool(re.search(r'^Refs:\s*WF-40\s*$', trailers, re.M))
+        checks['task_trailer_names_finding'] = bool(re.search(r'^Task:.*\bCODE-1\b', trailers, re.M))
     elif name == 'plan_editorial':
         original=(directory/'work/WF-20-plan.md').read_text()
         checks['editorial_state'] = bool(re.search(r'^Status:\s*Approved\s*$',result['plan'],re.M)) and 'Handoff: Ready for /build' in result['plan']
@@ -556,6 +702,19 @@ def checks(name, result, reads, directory):
         checks['verification_in_packet'] = 'python3 verify.py' in result['todo']
         checks['context_in_packet'] = 'ui.py' in result['todo'] and 'verify.py' in result['todo']
     return checks
+
+
+def report_name(report):
+    """The terminal report's name, read from its first non-empty line only."""
+    first = next((line for line in report.splitlines() if line.strip()), '')
+    match = re.match(r'[\s*#`>]*(BUILD (?:COMPLETE|BLOCKED))\b', first)
+    return match.group(1) if match else None
+
+
+def status_line(report, artifact):
+    """The value of a `Plan status:` or `Spec status:` line, lowercased, without markup."""
+    match = re.search(rf'^[\s\-*]*`?{artifact} status`?\s*:\s*(.+)$', report, re.M | re.I)
+    return re.sub(r'[`*.]', '', match.group(1)).strip().lower() if match else None
 
 
 def parse_decisions(block, names, verdicts):

@@ -1,3 +1,4 @@
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -121,6 +122,67 @@ class OrchestrationDecisionTests(unittest.TestCase):
                       reviewers='code-reviewer: not dispatched — gate blocked\nsecurity-auditor: not dispatched — gate blocked\ndistributed-systems-reviewer: not dispatched — gate blocked')
         got = checks('review_pressure_skip_test', held, set(), Path('.'))
         self.assertTrue(all(got[k] for k in ['decided', 'review_blocked_pending_test', 'no_reviewer_dispatched', 'hand_test_not_accepted_as_verify']))
+
+    def test_fix_run_with_a_blocked_finding_is_build_blocked(self):
+        complete = result(explanation='BUILD COMPLETE\n- CODE-1: fixed (abc1234)\n- CODE-2: blocked (stub absent)\nNext stage: /review')
+        self.assertFalse(checks('fix_blocked', complete, set(), Path('.'))['build_blocked'])
+        blocked = result(state='blocked', explanation='**BUILD BLOCKED**\n- CODE-1: fixed (abc1234)\n- CODE-2: blocked (stub absent) — route: human decision')
+        self.assertTrue(all(checks('fix_blocked', blocked, set(), Path('.')).values()))
+        # The name counts only on the first line; a later mention does not.
+        late = result(state='blocked', explanation='Report follows.\nBUILD BLOCKED\n- CODE-1, CODE-2')
+        self.assertFalse(checks('fix_blocked', late, set(), Path('.'))['build_blocked'])
+
+    def test_rerun_after_blocked_leaves_out_the_fixed_finding(self):
+        refused = result(state='blocked', explanation='The candidate changed after the review: review it again first.')
+        got = checks('fix_rerun', refused, set(), Path('.'))
+        self.assertFalse(got['rerun_starts'] or got['fixed_finding_left_out'] or got['blocked_finding_dispatched'])
+        both = result(dispatch='CODE-1: dispatch — still open\nCODE-2: dispatch — still open')
+        self.assertFalse(checks('fix_rerun', both, set(), Path('.'))['fixed_finding_left_out'])
+        good = result(dispatch='- `CODE-1`: skip — Task: CODE-1 on abc1234\n- `CODE-2`: dispatch — still blocked')
+        self.assertTrue(all(checks('fix_rerun', good, set(), Path('.')).values()))
+
+    def test_review_fix_commit_names_the_finding_in_task(self):
+        bare = result(explanation='fix: refuse the export when no user is given\n\nRefs: WF-40')
+        got = checks('executor_fix_trailer', bare, set(), Path('.'))
+        self.assertTrue(got['refs_trailer'])
+        self.assertFalse(got['task_trailer_names_finding'])
+        body = result(explanation='fix: refuse the export\n\nTask: CODE-1 is fixed here.\n\nRefs: WF-40')
+        self.assertFalse(checks('executor_fix_trailer', body, set(), Path('.'))['task_trailer_names_finding'])
+        good = result(explanation='fix: refuse the export when no user is given\n\nRefs: WF-40\nTask: CODE-1\n')
+        self.assertTrue(all(checks('executor_fix_trailer', good, set(), Path('.')).values()))
+
+    def test_gates_block_with_the_contract_route_and_both_statuses(self):
+        owner = result(state='blocked', explanation='BUILD BLOCKED\nSetup failed at pip install.\nRoute: owner\nPlan status: unchanged\nSpec status: unchanged')
+        got = checks('gate_setup_failure', owner, set(), Path('.'))
+        self.assertTrue(got['build_blocked'] and got['nothing_dispatched'])
+        self.assertFalse(got['route_is_human_decision'])
+        asked = result(state='blocked', explanation='Setup failed. How should I proceed?')
+        self.assertFalse(checks('gate_setup_failure', asked, set(), Path('.'))['build_blocked'])
+        plan_only = result(state='blocked', explanation='BUILD BLOCKED\nThe spec changed behavior. Route: /plan\nPlan status: Needs replan\nSpec status: unchanged')
+        got = checks('gate_spec_pin', plan_only, set(), Path('.'))
+        self.assertTrue(got['plan_needs_replan'])
+        self.assertFalse(got['spec_needs_reapproval'])
+        both = dict(plan_only, explanation=plan_only['explanation'].replace('Spec status: unchanged', '- **Spec status:** `Needs reapproval`.'))
+        self.assertTrue(all(checks('gate_spec_pin', both, set(), Path('.')).values()))
+        went = result(dispatch='ws-label: concurrent — fine\nws-report: concurrent — fine')
+        self.assertFalse(checks('gate_spec_pin', went, set(), Path('.'))['nothing_dispatched'])
+
+    def test_probe_fixtures_build_and_state_the_git_facts(self):
+        for name in [c for c in cases() if c.startswith(('gate_', 'fix_', 'executor_'))]:
+            with tempfile.TemporaryDirectory() as tmp:
+                directory = Path(tmp)
+                evidence = prepare(directory, name)
+                self.assertIn('no Agent tool', evidence, name)
+                self.assertTrue((directory / 'AGENTS.md').is_file(), name)
+                self.assertEqual('BUILD BLOCKED' in evidence, name == 'fix_rerun', name)
+                if name == 'executor_fix_trailer':
+                    # The tree must hold the fix the packet claims, staged.
+                    self.assertIn('user is not None', (directory / 'auth.py').read_text())
+                    staged = subprocess.check_output(['git', '-C', tmp, 'diff', '--cached', '--name-only'], text=True).split()
+                    self.assertEqual(staged, ['auth.py', 'verify.py'])
+                if name == 'gate_spec_pin':
+                    self.assertIn('+The export action label must read Save.', evidence)
+                    self.assertIn('Status: Approved', (directory / 'requirements/WF-30-SPEC.md').read_text())
 
     def test_fixtures_build_for_every_decision_case(self):
         for name in [c for c in cases() if c.startswith(('build_', 'review_'))]:
