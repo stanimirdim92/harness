@@ -53,6 +53,11 @@ def load(path):
 def save(path, data):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + '\n')
+    # A project with Prettier checks JSON in its commit hook: format the file the same way.
+    top = subprocess.run(['git', 'rev-parse', '--show-toplevel'], cwd=path.parent, capture_output=True, text=True)
+    prettier = Path(top.stdout.strip()) / 'node_modules' / '.bin' / 'prettier'
+    if top.returncode == 0 and prettier.exists():
+        subprocess.run([str(prettier), '--write', str(path)], capture_output=True)
 
 
 def rounds(data):
