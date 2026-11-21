@@ -354,6 +354,10 @@ The plan checks in §1 still apply; task resume does not.
 2. The scope is every finding still `open` that is BLOCKER or REQUIRED and not
    pre-existing (`baselineState` is not `unchanged`), plus any ADVISORY the user
    named. Nothing else: no refactor, no plan task, no other finding.
+   When the user names a pre-existing finding, recommend a follow-up ticket
+   first: its fix changes behavior outside the ticket and gives the next round
+   new code to review. Include it only when the user confirms after that
+   warning.
 3. Group findings that touch the same files into one workstream. Dispatch a
    fresh executor per workstream; never resume a build executor. Its packet
    carries, for each finding: id, `file:line`, claim, failure scenario and

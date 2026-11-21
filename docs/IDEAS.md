@@ -241,6 +241,16 @@ doing, not just what it is.
   - **Revisit when** probes on real tickets show an agent edited approved
     criterion text. Unmeasured so far.
 
+- **Pruning pass and a word budget per command file** — **M**. Owner agreed
+  on 2026-11-21 to do it at the next harness update. Commands keep growing:
+  from 11-10 to 11-21, `review.md` went from 2,428 to 3,102 words (+28%),
+  `code-reviewer.md` +24% and `test-engineer.md` +15%. Each incident adds a
+  clause and almost none are removed. The cost showed on 11-21: the ADR 0142
+  `/code-review` trial never ran for 3 days, because a `skillOverrides` entry
+  from `bc7826b` contradicted it. Shape: find clauses that no session
+  transcript or SARIF shows being exercised, remove them, and set a word
+  budget per command file that a check enforces.
+
 ## Considered and rejected
 
 | Idea | Reason rejected |

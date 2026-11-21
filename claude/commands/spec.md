@@ -82,6 +82,12 @@ recommendation rules in §Deciding by default.
   `Defaults taken (override by id)`, before the approval request. An override
   rewrites that `DEC-###` as §Deciding by default's last paragraph describes.
 
+With the approval request, show one step-by-step example. Take a real record from
+the ticket or the repository, preferably one the riskiest rule touches. Walk
+it step by step through the new behavior to the stored or shown result. A
+wrong rule is easier to see in an example than in a requirement: on LD-546,
+an example exposed one that 8 review rounds missed.
+
 ## Approval state
 
 New specs start as Draft. Only explicit human approval sets Approved and its

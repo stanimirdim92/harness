@@ -268,6 +268,11 @@ Run the full suite once. After your own test-only commit, re-run the test files
 you changed. Re-run the full suite only when that commit changes a shared test
 helper, fixture, or test configuration.
 
+Never run two full suites at once, backend or frontend: each one already uses
+all its workers. To check whether a test is flaky, repeat the runs one after
+another, never in parallel. Repeat the test file alone unless the failure
+shows only in the full suite.
+
 When the full suite has failures, compare them with the base revision's
 result. Store the base result once, machine-readable (for example JUnit XML),
 at `<git-common-dir>/test-baseline/<base-sha>.<ext>`. Resolve

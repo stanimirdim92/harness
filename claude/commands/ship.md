@@ -309,7 +309,9 @@ release, protected-branch mutation, or history rewriting.
 After the verdict, ask the owner one multi-select question:
 
 1. send the selected ADVISORY findings to `/build` as a fix round, listed by
-   id with the recommended action; `/test` and `/review` follow as usual;
+   id with the recommended action; `/test` and `/review` follow as usual.
+   Mark each pre-existing finding as pre-existing, and recommend a follow-up
+   ticket for it instead (`build.md` §Review fixes);
 2. post the ship summary as a comment on the Jira ticket.
 
 Do nothing until the owner selects. With no selection, stop. A fix round
