@@ -137,7 +137,8 @@ focused verification is green, and the tree is in a valid state. Use meaningful
 messages that explain the change and follow the repository's commit convention,
 and end each message with the `Refs: <TICKET>` trailer, plus `Task: T###` when
 the commit belongs to a plan task (§Ticket trailers below).
-A review fix or other unplanned commit has no `Task:`.
+A review fix or verify fix names its finding or REQ ids there. Any other
+unplanned commit has no `Task:`.
 
 Inspect recent commits (`git log -10 --oneline`) before the first message. If
 there is no clear convention, use Conventional Commits:
@@ -158,7 +159,9 @@ Task: T002
 
 - `Refs:` — the ticket key. One trailer per ticket, or comma-separated keys.
 - `Task:` — the plan task id (`T###`), when the commit implements a planned
-  task. Omit it for review fixes and other unplanned commits.
+  task. A review fix or verify fix names the ids from its packet
+  (`Task: CODE-2, SEC-1`, `Task: REQ-017`). Omit it for other unplanned
+  commits.
 
 Trailers go in the last paragraph, `Key: value`, with no blank line between
 them. Git parses them (`git log --format='%(trailers:key=Refs,valueonly)'`),

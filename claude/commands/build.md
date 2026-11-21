@@ -1,6 +1,6 @@
 ---
 description: Dispatch implementation for one or more planned tasks by workstream
-argument-hint: "[task number(s) from docs/tasks/[TICKET]-todo.md, a description naming planned task(s), or <TICKET> review fixes]"
+argument-hint: "[task number(s) from docs/tasks/[TICKET]-todo.md, a description naming planned task(s), <TICKET> review fixes, or <TICKET> verify fixes]"
 ---
 
 Dispatch `executor` agents for implementation.
@@ -35,9 +35,11 @@ Check the plan's own header before dispatching anything:
 A difference is not automatically a stale plan; an editorial fix changes the
 file without changing behavior. Read the diff before deciding. Editorial only →
 re-pin the new commit, note it, proceed. Behavioral, **or any change to the
-`Status` line** → the plan is stale: set it `Needs replan` and stop. If the
-pinned sha no longer resolves (rebased or squashed away), treat the plan as
-`Needs replan` rather than guessing. Report which path was taken; a difference
+`Status` line** → the plan is stale: set it `Needs replan`, set the spec
+`Needs reapproval` if its status does not say so, and stop. If the pinned sha
+no longer resolves (rebased or squashed away), treat the plan as
+`Needs replan` rather than guessing; re-pin only after the human confirms
+that the requirements did not change. Report which path was taken; a difference
 waved through without the diff defeats the check
 (`../references/spec-pin.md`).
 
@@ -132,7 +134,7 @@ fails, do not replay its steps by hand:
 - use an override only when the project documents one, and name it in the
   report;
 - with no documented override, the checkout is not ready: report BUILD
-  BLOCKED with route `owner`;
+  BLOCKED, routed to a human decision;
 - never copy an improvised workaround into executor packets.
 
 ### Test baseline
@@ -349,7 +351,9 @@ The plan checks in §1 still apply; task resume does not.
    HEAD may add only commits that touch `docs/reviews/` or
    `docs/tasks/<TICKET>-open.md` (`git diff --name-only <sha> HEAD`). Any
    other change means the candidate changed after the review: review it again
-   first, never fix it blind. Run `review-sarif.py round <TICKET>`. When it
+   first, never fix it blind. After a BUILD BLOCKED fix run, a rerun also
+   accepts that run's fix commits (each `Task:` trailer names finding ids)
+   and leaves out the findings they name. Run `review-sarif.py round <TICKET>`. When it
    prints `counted=4`, stop and report that the approach needs the user
    (ADR 0089).
 2. The scope is every finding still `open` that is BLOCKER or REQUIRED and not
@@ -376,9 +380,10 @@ The plan checks in §1 still apply; task resume does not.
    pattern. It also checks that its own fix adds no new case of it. It fixes
    each new instance the same way, test-first, and lists it under the finding
    (ADR 0144).
-5. Report BUILD COMPLETE with one line per finding: fixed (commit), disputed
-   (evidence), or blocked (why). The plan and todo do not change. The next
-   stage is `/review`.
+5. Report one line per finding: fixed (commit), disputed (evidence), or
+   blocked (why). With no blocked finding, report BUILD COMPLETE; the next
+   stage is `/review`. Otherwise report BUILD BLOCKED, with the stage each
+   blocker routes to. The plan and todo do not change.
 
 ## Verify fixes
 
@@ -402,9 +407,10 @@ does not.
    fails the same way, then the fix (Prove-It). Each commit carries a `Task:`
    trailer naming the REQ ids (`Task: REQ-017`) and the `Refs:` trailer. The
    plan and todo do not change.
-4. Report **BUILD COMPLETE** with one line per defect: fixed (commit) or
-   blocked (why). The next stage is `/test` again, on the new
-   candidate, at the depth of the failed run or higher.
+4. Report one line per defect: fixed (commit) or blocked (why). With no
+   blocked defect, report **BUILD COMPLETE**; the next stage is `/test`
+   again, on the new candidate, at the depth of the failed run or higher.
+   Otherwise report **BUILD BLOCKED**, with the stage each blocker routes to.
 
 ## 4. Work outside `/build`
 
