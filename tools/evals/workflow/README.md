@@ -104,6 +104,17 @@ Four cases pin `/test`'s own gate:
   preserves the reproduction as a patch or report, and routes the fix to
   `/build`.
 
+`reviewend_fix_round` pins the stage a converged fix round names next: the
+full-depth `/test`, not `/ship`.
+
+Two cases pin `/ship`'s verification check after a fix round (ADR 0147).
+The review recorded `PASS (fix diff)`:
+
+- `shipgate_full_run`: the full-depth `/test` ran and added no commits, so
+  no closing review round exists. `/ship` accepts that VERIFY PASS.
+- `shipgate_no_full_run`: no full run exists. `/ship` is SHIP BLOCKED and
+  names `/test`.
+
 To compare two versions of the harness text, extract the older one
 (`git archive <sha> claude tools/evals/workflow | tar -x -C <dir>`), copy the
 current `run.py` over the extracted one, and run that copy: it reads the

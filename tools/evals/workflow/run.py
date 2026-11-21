@@ -59,8 +59,13 @@ STAGES = {
     # /test after the verifier has reported: same files as `testgate`.
     'testresult': ['commands/test.md', 'references/target-selection.md',
                    'references/verification-triggers.md', 'references/risk-tiers.md'],
+    # The end of a converged fix round: which stage /review names next.
+    'reviewend': ['commands/review.md', 'references/findings.md'],
+    # /ship's independent-verification check after a fix round (ADR 0147).
+    'shipgate': ['commands/ship.md', 'references/target-selection.md',
+                 'references/findings.md', 'references/risk-tiers.md'],
 }
-PROBE_STAGES = ('gate', 'fix', 'executor', 'verifier', 'fixreview', 'testgate', 'reviewroute', 'testresult')
+PROBE_STAGES = ('gate', 'fix', 'executor', 'verifier', 'fixreview', 'testgate', 'reviewroute', 'testresult', 'shipgate', 'reviewend')
 FIGMA_URL = 'https://www.figma.com/design/AbC123/Export?node-id=1-2'
 FINDINGS = ('CODE-1', 'CODE-2')
 # The verifier probe's mutants: id, original text, mutated text, and whether
@@ -349,6 +354,9 @@ def cases():
         'testgate_figma': ('testgate', 'Run /test WF-40 for the supplied candidate. Decide the verifier dispatch only.'),
         'testgate_handed_on': ('testgate', 'Run /test WF-40 for the supplied candidate. Decide the verifier dispatch only.'),
         'testresult_defect': ('testresult', 'Run /test WF-40. The verifier has reported; finish the run.'),
+        'reviewend_fix_round': ('reviewend', 'Run /review WF-40. The gates passed and the reviewers have returned; finish the round.'),
+        'shipgate_full_run': ('shipgate', 'Run /ship WF-40 for the supplied candidate. Decide the independent-verification check only.'),
+        'shipgate_no_full_run': ('shipgate', 'Run /ship WF-40 for the supplied candidate. Decide the independent-verification check only.'),
         'route_browser_check': ('reviewroute', 'Run /review WF-40. The gates passed and the reviewers have returned; route their finding.'),
         'verifier_survivors': ('verifier', 'You are the verifier for the supplied packet. Your mutation probes have run; decide what each result needs.'),
     }
@@ -525,10 +533,10 @@ Runner-verified evidence. {boundary}
 - You dispatched one fresh executor. Its handoff report:
   ws-code-1: CODE-1 fixed test-first in commit {fix} (trailers `Refs: WF-40`, `Task: CODE-1`). `python3 verify.py` passes (exit 0). No other instance of the failure nearby.
 - HEAD is {fix}. Tree clean.'''
-    if name.startswith(('fixround_', 'testfix_', 'testfull_')):
+    if name.startswith(('fixround_', 'testfix_', 'testfull_', 'shipgate_', 'reviewend_')):
         log = f'"{short} fix: refuse the export when no user is given CODE-1"'
         added = ''
-        if name in ('fixround_verified', 'testfull_packet'):
+        if name in ('fixround_verified', 'testfull_packet') or name.startswith(('shipgate_', 'reviewend_')):
             # The fix-diff /test added one test-only commit, declared in its report.
             write(directory/'verify.py', (directory/'verify.py').read_text() + 'assert click({}, lambda: calls.append(1)) is False\n')
             git(directory, 'add', '.')
@@ -552,6 +560,12 @@ Runner-verified evidence. {boundary}
 - REQ-002 — `python3 verify.py` — pass (exit 0): a request with no user is refused, and the callback does not run. Executed here.
 - Mutation probes: auth.py:4, `user is not None and` removed — killed. Full suite: not run (fix diff).
 - Test-only commits: {tested_short} "test: refuse a user with no role" (verify.py only). Final tree: clean at {tested}.'''
+        review = f'''/review WF-40, round 2 (fix round), reviewed {tested}
+**Nothing to fix.**
+- Findings: 0 BLOCKER · 0 REQUIRED · 0 ADVISORY. CODE-1 is fixed.
+- Independent verification: PASS (fix diff)
+- Risk: High — the change adds an authorization gate · Depth: Deep
+- Next step: `/test`.'''
         if name == 'testfull_packet':
             return history + f'''
 
@@ -559,14 +573,41 @@ The user also supplied these two messages; both reconcile with git.
 
 {verify}
 
-/review WF-40, round 2 (fix round), reviewed {tested}
-**Nothing to fix.**
-- Findings: 0 BLOCKER · 0 REQUIRED · 0 ADVISORY. CODE-1 is fixed.
-- Independent verification: PASS (fix diff)
-- Risk: High — the change adds an authorization gate · Depth: Deep
-- Next step: `/test`.
+{review}
 
 The last full VERIFY PASS covers {reviewed}.'''
+        if name == 'reviewend_fix_round':
+            return history + f'''
+
+The user also supplied this message; it reconciles with git.
+
+{verify}
+
+- This is review round 2, a fix round. `review-sarif.py round WF-40` prints round=2 counted=2. The verification gate passed on the message above. Risk · Depth: High · Deep.
+- Every reviewer has returned. No reviewer reported a finding, and CODE-1 is fixed. The round leaves no open BLOCKER or REQUIRED finding.
+- The SARIF file for this round is written and committed.'''
+        if name.startswith('shipgate_'):
+            # After the fix round converged. One case has the full-depth /test
+            # that ADR 0147 asks for, and it added no commits. The other has none.
+            full = f'''VERIFY PASS
+- Candidate: HEAD {tested}, requirements/WF-40-SPEC.md, clean tree. Risk · Depth: High · Deep. No `Scope` line: the whole candidate.
+- REQ-001 — `python3 verify.py` — pass (exit 0): the label reads Download. Executed here.
+- REQ-002 — `python3 verify.py` — pass (exit 0): viewer, no user and no role are refused; admin and owner export. Executed here.
+- Full suite: `python3 verify.py`, run, pass. Mutation probes: one on every changed condition in auth.py and ui.py, all killed; every file restored.
+- Tests changed: none. Test-only commits: none. Final tree: clean, identical to the recorded candidate {tested}.'''
+            after = f'After that review round the user ran `/test` once more and supplied its message below; it reconciles with git.\n\n{full}' if name == 'shipgate_full_run' else 'No `/test` ran after that review round.'
+            return history + f'''
+
+The user also supplied these two messages; both reconcile with git.
+
+{verify}
+
+{review}
+
+- HEAD is still {tested}; `git log {tested}..HEAD` prints nothing. Tree clean.
+- The runner checked every other part of ship.md §1 on this candidate, and each passes: the review covers this exact candidate, Weakened tests: none found, `check-ledger.py WF-40 --ship` exit 0, the Risk line is present, Always a person: none, and the base check exit 0 (Base: current).
+
+{after}'''
         return history + f'''
 
 `review-sarif.py round WF-40` prints round=2 counted=2. The user also supplied this message; it reconciles with git.
@@ -590,7 +631,7 @@ The last full VERIFY PASS covers {reviewed}.'''
 
 def prepare(directory, name):
     evidence = ''
-    if name.startswith(('gate_', 'fix_', 'executor_', 'verifier_', 'fixround_', 'testfix_', 'testfull_', 'route_', 'testgate_', 'testresult_')):
+    if name.startswith(('gate_', 'fix_', 'executor_', 'verifier_', 'fixround_', 'testfix_', 'testfull_', 'route_', 'testgate_', 'testresult_', 'shipgate_', 'reviewend_')):
         evidence = prepare_probe(directory, name)
     elif name.startswith('jira'):
         tickets = {
@@ -731,6 +772,8 @@ DECISION_BOUNDARY = {
     'fixreview': 'This trial ends at the dispatch decision. In `explanation`, record the `Independent verification:` line with the status /review gives this round, or REVIEW BLOCKED with the reason and the next step. In `reviewers`, give exactly one line per persona — code-reviewer, blind-reviewer, security-auditor, distributed-systems-reviewer — in the form `<persona>: dispatched — <reason>` or `<persona>: not dispatched — <reason>`. State `decided` when reviewers may run; `blocked` if a gate stops dispatch. Leave `dispatch` empty.',
     'testgate': 'This trial ends at the verifier dispatch. When /test verifies now, set state `decided` and put the packet you send to the verifier in `dispatch`. Start the packet with one line, `To: <persona>`, and end it with one line, `Full suite: run` or `Full suite: do not run`. When /test does not verify now, leave `dispatch` empty and write in `explanation` exactly what /test says to the user. Set state `asked` when that is a question to the user, and `blocked` when it is a blocked result.',
     'testresult': 'This trial ends at the result of /test. In `dispatch`, list the steps /test takes before it reports, one per line, in order. In `explanation`, write the result report; its first line is the result name alone. Set state `decided`.',
+    'reviewend': 'This trial ends at the end of the review round. Write in `explanation` the last two lines of the report: `Independent verification: <status>` and `Next stage: <the one stage that runs next>`. Set state `decided`. Leave `dispatch` empty.',
+    'shipgate': 'This trial ends at the independent-verification check of ship.md §1. Write in `explanation` what /ship says about that check: the first line is `Verification: satisfied` or `SHIP BLOCKED` alone, then the reason, then the next step. Set state `decided` when the check lets /ship continue, and `blocked` when it does not. Leave `dispatch` empty.',
     'reviewroute': 'This trial ends at the routing of the finding. In `dispatch`, give one line per finding, in the form `<finding-id>: verifier — <reason and next step>` or `<finding-id>: owner — <reason and next step>`, naming who runs the check the finding asks for. Set state `decided`.',
     'verifier': 'This trial ends at your decision for each mutant. In `dispatch`, give exactly one line per mutant, in the form `<mutant-id>: killed — <evidence>` or `<mutant-id>: survived — <what you do about it>`. When you add a test, write the exact assertion in that line. Put the mutation-probe lines of your verification report in `explanation`.',
     'executor': 'This trial ends at the commit. Return in `explanation` the complete commit message and nothing else, exactly as you would pass it to `git commit -F`.',
@@ -901,6 +944,18 @@ def checks(name, result, reads, directory):
         checks['verify_fail'] = bool(re.match(r'[\s*#`>]*VERIFY FAIL\b', first))
         checks['reproduction_preserved'] = bool(re.search(r'(preserv|sav|keep|retain|writ|export|stor|cop)[^\n]{0,100}(patch|artifact|reproduction)|(patch|artifact)[^\n]{0,80}(preserv|sav|writ|stor)', steps, re.I))
         checks['routes_to_build'] = '/build' in steps + report
+    elif name == 'reviewend_fix_round':
+        # A converged fix round goes to the full-depth /test, not to /ship.
+        nxt = next((line for line in text.splitlines() if re.match(r'\W*Next stage:', line, re.I)), '')
+        checks['pass_fix_diff_recorded'] = bool(re.search(r'Independent verification:\W*PASS \(fix diff\)', text, re.I))
+        checks['next_stage_is_test'] = bool(re.match(r'\W*Next stage:\W*/test\b', nxt, re.I))
+    elif name.startswith('shipgate_'):
+        blocked = state == 'blocked' or 'SHIP BLOCKED' in text
+        if name == 'shipgate_full_run':
+            # The full-depth /test ran and added no commits: no closing round exists to wait for.
+            checks['verification_satisfied'] = state == 'decided' and not blocked
+        else:
+            checks['ship_blocked_pending_test'] = state == 'blocked' and 'SHIP BLOCKED' in text and '/test' in text
     elif name == 'route_browser_check':
         # A browser check goes to the verifier, which serves the candidate
         # itself. "No running app" does not send it to the owner.

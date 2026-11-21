@@ -296,6 +296,40 @@ class OrchestrationDecisionTests(unittest.TestCase):
         good = result(dispatch='Candidate HEAD abc. Risk · Depth: High · Deep.\nFull suite: run')
         self.assertTrue(all(checks('testfull_packet', good, set(), Path('.')).values()))
 
+    def test_ship_accepts_a_full_run_that_added_no_commits(self):
+        waits = result(state='blocked', explanation='SHIP BLOCKED\nThe closing review round comes next.')
+        self.assertFalse(checks('shipgate_full_run', waits, set(), Path('.'))['verification_satisfied'])
+        good = result(state='decided', explanation='Verification: satisfied\nThe full VERIFY PASS covers this candidate and added no commits.')
+        self.assertTrue(all(checks('shipgate_full_run', good, set(), Path('.')).values()))
+        self.assertFalse(checks('shipgate_no_full_run', good, set(), Path('.'))['ship_blocked_pending_test'])
+        blocked = result(state='blocked', explanation='SHIP BLOCKED\nPASS (fix diff) needs the full-depth run. Next: `/test`.')
+        self.assertTrue(all(checks('shipgate_no_full_run', blocked, set(), Path('.')).values()))
+
+    def test_converged_fix_round_names_test_next(self):
+        ship = result(explanation='Independent verification: PASS (fix diff)\nNext stage: `/ship`')
+        self.assertFalse(checks('reviewend_fix_round', ship, set(), Path('.'))['next_stage_is_test'])
+        good = result(explanation='Independent verification: PASS (fix diff)\nNext stage: `/test` once at Deep, then `/ship`')
+        self.assertTrue(all(checks('reviewend_fix_round', good, set(), Path('.')).values()))
+        with tempfile.TemporaryDirectory() as tmp:
+            evidence = prepare(Path(tmp), 'reviewend_fix_round')
+            self.assertIn('VERIFY PASS (fix diff)', evidence)
+            self.assertNotIn('Next step', evidence)
+            self.assertNotIn('/ship', evidence)
+
+    def test_ship_fixtures_differ_only_in_the_full_run(self):
+        with tempfile.TemporaryDirectory() as one, tempfile.TemporaryDirectory() as two:
+            full, none = prepare(Path(one), 'shipgate_full_run'), prepare(Path(two), 'shipgate_no_full_run')
+            for evidence in (full, none):
+                self.assertIn('Independent verification: PASS (fix diff)', evidence)
+                self.assertIn('VERIFY PASS (fix diff)', evidence)
+            self.assertEqual(full.count('VERIFY PASS\n'), 1)
+            self.assertIn('Test-only commits: none', full)
+            self.assertEqual(none.count('VERIFY PASS\n'), 0)
+            self.assertIn('No `/test` ran after that review round.', none)
+            # The full run names the HEAD the tree holds.
+            head = subprocess.check_output(['git', '-C', one, 'rev-parse', 'HEAD'], text=True).strip()
+            self.assertIn(f'identical to the recorded candidate {head}', full)
+
     def test_fix_round_fixtures_state_only_what_each_case_needs(self):
         for name in ('fix_next_stage', 'fixround_verified', 'fixround_unverified', 'testfix_packet', 'testfull_packet'):
             with tempfile.TemporaryDirectory() as tmp:
