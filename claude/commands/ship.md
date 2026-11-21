@@ -24,8 +24,11 @@ Use `/review`'s independent-verification status:
 
 - `NOT REQUIRED` is valid when REVIEW recorded that decision for this candidate;
 - `PASS` is required when REVIEW required `/test`;
-- `PASS (fix diff)` is **SHIP BLOCKED**: the full-depth `/test` and the
-  closing review round come next (ADR 0147).
+- `PASS (fix diff)` needs the full-depth `/test` that follows it (ADR 0147).
+  A supplied **VERIFY PASS** for this exact candidate that added no commits
+  satisfies it. Without one it is **SHIP BLOCKED**, with `/test` as the next
+  step. When that `/test` added commits, the closing review round comes
+  first.
 
 Use `/review`'s weakened-test result: **Weakened tests: none found**, or every
 listed entry resolved as a finding or a stated reason. A missing result or

@@ -409,7 +409,8 @@ findings`. Its `reviewedCommit` is the commit before this one (ADR 0120). Give
 its path in the report. The markdown report stays the gate artifact; the SARIF file is a copy
 of its findings for tools.
 
-Then stop. The next stage is `/ship`.
+Then stop. The next stage is `/ship`, or the full-depth `/test` when this
+round recorded `PASS (fix diff)` (§2).
 
 Any candidate change after REVIEW invalidates the review. A production fix
 returns to `/build`, then `/test` on the fix diff, then `/review` (ADR 0147).
