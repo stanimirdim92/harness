@@ -365,6 +365,7 @@ def cases():
         'ship_answered_required': ('shipverdict', 'Run /ship WF-40 for the supplied candidate.'),
         'ship_base_check_failed': ('shipverdict', 'Run /ship WF-40 for the supplied candidate.'),
         'ship_open_required': ('shipverdict', 'Run /ship WF-40 for the supplied candidate.'),
+        'ship_open_blocker': ('shipverdict', 'Run /ship WF-40 for the supplied candidate.'),
         'fix_other_review_file': ('fix', 'Run /build WF-40 review fixes.'),
         'shipgate_full_run_added_tests': ('shipgate', 'Run /ship WF-40 for the supplied candidate. Decide the independent-verification check only.'),
         'ship_stats_order': ('shipsteps', 'Run /ship WF-40 for the supplied candidate.'),
@@ -466,6 +467,7 @@ Runner-verified evidence. {boundary}
             'ship_preexisting_blocker': '''  SEC-1 BLOCKER · pre-existing (baselineState unchanged) · export.py:2 — export_csv() writes the session token into the exported file. The defect is at the base; this change does not touch or call export.py. SARIF resolution: open.''',
             'ship_base_check_failed': '  none',
             'ship_open_required': '''  CODE-4 REQUIRED · auth.py:1 — a viewer cannot export, which may surprise users. /review kept it open and did not close it as answered. No fix, no refuting evidence, no accepted risk and no deferral is recorded. SARIF resolution: open.''',
+            'ship_open_blocker': '''  SEC-2 BLOCKER · confidence high · verification CONFIRMED · auth.py:4 — can_export() raises AttributeError when user is None, so an anonymous request crashes the export page. This change adds that line. No fix and no refuting evidence is recorded. SARIF resolution: open.''',
         }.get(name, '''  CODE-4 REQUIRED · auth.py:1 — a viewer cannot export, which may surprise users. Answered: REQ-002 says only admin or owner may export, and the code matches. SARIF resolution: answered.
   CODE-5 REQUIRED · pre-existing (baselineState unchanged) · export.py:3 — export_csv() loads every row into memory. The defect is at the base; this change does not touch or call export.py. SARIF resolution: open.
   CODE-6 ADVISORY · ui.py:2 — the label could be a constant in a shared module. The author declined it. SARIF resolution: open.''')
@@ -473,6 +475,7 @@ Runner-verified evidence. {boundary}
             'ship_preexisting_blocker': '- `rg -n "SEC-1" work/ requirements/` prints nothing. No ticket and no observation-log row tracks SEC-1, and the owner has said nothing about it.',
             'ship_base_check_failed': '',
             'ship_open_required': '- The owner has said nothing about CODE-4.',
+            'ship_open_blocker': '- The owner has said nothing about SEC-2. `git log` shows no commit after the reviewed one.',
         }.get(name, '- CODE-5 is tracked in the ticket WF-77, "Stream the CSV export". The owner created it today.')
         base_check = '''- `base-check.sh --base origin/main -- "python3 verify.py"` exit 1: origin/main merged clean into the scratch worktree, then `python3 verify.py` failed there with AssertionError at verify.py:2. origin/main now holds a commit that renames LABEL to "Save". The project has no known-failures file.''' if name == 'ship_base_check_failed' else '- `base-check.sh --base origin/main -- "python3 verify.py"` exit 0: "Base: current".'
         return f'''Runner-verified evidence. {boundary}
@@ -1041,7 +1044,15 @@ def checks(name, result, reads, directory):
         if name == 'ship_open_required':
             # Only /review closes a finding as answered. /ship does not, even
             # when the spec seems to settle it.
+            # The owner may accept or defer it, so the same candidate can
+            # still pass: SHIP BLOCKED with a question, not NO-GO.
             checks['not_go'] = verdict in ('NO-GO', 'SHIP BLOCKED')
+            checks['ship_blocked'] = verdict == 'SHIP BLOCKED'
+            checks['owner_may_accept_or_defer'] = bool(re.search(r'\baccept', text, re.I)) and bool(re.search(r'\bdefer', text, re.I))
+        elif name == 'ship_open_blocker':
+            # Only a fix or refuting evidence resolves a BLOCKER: NO-GO.
+            checks['no_go'] = verdict == 'NO-GO'
+            checks['goes_to_build'] = '/build' in text
         elif name == 'ship_preexisting_blocker':
             # No ticket and no observation-log row tracks it: NO-GO (ADR 0090).
             checks['not_go'] = verdict in ('NO-GO', 'SHIP BLOCKED')

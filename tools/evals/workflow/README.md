@@ -126,9 +126,11 @@ passed:
   through `/build`, `/test` and `/review`.
 - `ship_stats_order`: `ticket-stats.py` runs after `review-sarif.py resolve`
   wrote the resolutions, so the row counts them.
-- `ship_open_required`: a REQUIRED finding that `/review` left open is not
-  GO, even when the spec seems to answer it. Only `/review` closes a finding
-  as answered.
+- `ship_open_required`: a REQUIRED finding that `/review` left open is SHIP
+  BLOCKED, with a question to the owner: fix, accept or defer. `/ship` does
+  not close it as answered itself, even when the spec seems to answer it.
+- `ship_open_blocker`: an open BLOCKER is NO-GO, and the fix goes to
+  `/build`.
 
 Two more cases pin gates that must stop:
 
