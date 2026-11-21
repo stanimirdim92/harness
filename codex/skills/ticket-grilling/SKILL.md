@@ -1,6 +1,6 @@
 ---
 name: ticket-grilling
-description: "Grill the tech lead and product owner about a draft Jira ticket until it meets the agent-ready ticket template, then write the final ticket. Use before /jira-ticket when a ticket is a draft, an idea, or a one-line summary, or when the user asks to grill, refine or make a ticket agent-ready."
+description: "Grill the tech lead and product owner about a draft Jira ticket until it meets the agent-ready ticket template, then write the final ticket. Use before /jira-ticket when a ticket is a draft, an idea, or a one-line summary, or when the user asks to grill, refine or make a ticket agent-ready. Also use whenever you create or rewrite a Jira ticket, even a draft, so it takes the template shape."
 ---
 
 Resolve this file's symlink before opening the relative links below.

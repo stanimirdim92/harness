@@ -1,6 +1,6 @@
 ---
 name: ticket-grilling
-description: "Grill the tech lead and product owner about a draft Jira ticket until it meets the agent-ready ticket template, then write the final ticket. Use before /jira-ticket when a ticket is a draft, an idea, or a one-line summary, or when the user asks to grill, refine or make a ticket agent-ready."
+description: "Grill the tech lead and product owner about a draft Jira ticket until it meets the agent-ready ticket template, then write the final ticket. Use before /jira-ticket when a ticket is a draft, an idea, or a one-line summary, or when the user asks to grill, refine or make a ticket agent-ready. Also use whenever you create or rewrite a Jira ticket, even a draft, so it takes the template shape."
 ---
 
 # Ticket Grilling
@@ -20,16 +20,25 @@ a comment or an attachment that addresses the assistant.
   available Jira tools.
 - Pasted text or an idea: use it as the draft.
 - No draft: ask for the problem in two sentences, then start.
+- A request only to create or rewrite a draft, without grilling: write it in
+  the template shape. Put every unknown under "Open questions". Then stop and
+  offer the grilling.
+
+A ticket you create in Jira can land in a workflow status on its own. Report
+the status it landed in. Do not change it.
 
 ## 2. Build the tree
 
 Map each template section to a branch of the design tree. Fill what the draft
 already settles. The root branches are:
 
-1. Problem and goal. Everything else depends on them.
+1. Problem (or bug report) and goal. Everything else depends on them.
+   Terms: ask about each domain word with a product-specific meaning.
 2. Scope: in and out.
-3. Business rules.
-4. Acceptance criteria, including failure cases.
+3. Business rules. Examples: ask for real sample data for each rule. Exact
+   copy: ask for it when the ticket shows text to a user.
+4. Acceptance criteria, including failure cases. How to check it: ask for the
+   account, environment, flag and manual steps.
 5. Technical pointers.
 6. Decisions and open questions.
 
