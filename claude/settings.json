@@ -124,15 +124,7 @@
     ],
     "defaultMode": "auto"
   },
-  "model": "opus[1m]",
-  "subagentPromptCacheTtl": "1h",
-  "skillOverrides": {"code-review": "user-invocable-only"},
-  "autoMode": {
-    "allow": [
-      "$defaults",
-      "Worktree Hook Path Repair: in a git worktree under a repository's `.claude/worktrees/`, setting `core.hooksPath` with `git config --worktree` to a hooks directory inside that same repository or worktree, so the repository's own commit hooks run, is not Logging/Audit Tampering. Setting it to an empty, missing or outside path, or committing with `--no-verify`, still is."
-    ]
-  },
+  "model": "fable",
   "enableAllProjectMcpServers": false,
   "hooks": {
     "PreToolUse": [
@@ -236,6 +228,7 @@
   "worktree": {
     "baseRef": "head"
   },
+  "bashOutputMaxChars": 30000,
   "statusLine": {
     "type": "command",
     "command": "$HOME/.claude/statusline.sh",
@@ -264,15 +257,20 @@
     }
   },
   "outputStyle": "Concise",
+  "subagentPromptCacheTtl": "1h",
   "effortLevel": "medium",
   "modelSettings": {
     "claude-sonnet-5-5": {
       "effortLevel": "high"
     },
     "claude-fable-5-2": {
+      "effortLevel": "high"
+    },
+    "claude-opus-5-5": {
       "effortLevel": "medium"
     }
   },
+  "autoCompactWindow": 500000,
   "advisorModel": "claude-fable-5-2",
   "awaySummaryEnabled": true,
   "autoMemoryEnabled": true,
@@ -284,6 +282,10 @@
   "remoteControlAtStartup": true,
   "inputNeededNotifEnabled": true,
   "agentPushNotifEnabled": true,
-  "autoCompactWindow": 500000,
-  "bashOutputMaxChars": 30000
+  "autoMode": {
+    "allow": [
+      "$defaults",
+      "Worktree Hook Path Repair: in a git worktree under a repository's `.claude/worktrees/`, setting `core.hooksPath` with `git config --worktree` to a hooks directory inside that same repository or worktree, so the repository's own commit hooks run, is not Logging/Audit Tampering. Setting it to an empty, missing or outside path, or committing with `--no-verify`, still is."
+    ]
+  }
 }
