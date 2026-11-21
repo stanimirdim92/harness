@@ -46,9 +46,23 @@ STAGES = {
              'references/templates/plan.md', 'references/templates/task.md'],
     'fix': ['commands/build.md', 'references/target-selection.md'],
     'executor': ['agents/executor.md', 'skills/executor-development-discipline/SKILL.md'],
+    'verifier': ['agents/test-engineer.md'],
+    # A fix round at /review's verification gate and at /test (ADR 0147).
+    # `fixreview` reads what `review` reads, under a boundary that names no
+    # verification status.
+    'fixreview': ['commands/review.md', 'references/target-selection.md',
+                  'references/reviewer-triggers.md', 'references/verification-triggers.md',
+                  'references/risk-tiers.md'],
+    'testgate': ['commands/test.md', 'references/target-selection.md',
+                 'references/verification-triggers.md', 'references/risk-tiers.md'],
 }
-PROBE_STAGES = ('gate', 'fix', 'executor')
+PROBE_STAGES = ('gate', 'fix', 'executor', 'verifier', 'fixreview', 'testgate')
 FINDINGS = ('CODE-1', 'CODE-2')
+# The verifier probe's mutants: id, original text, mutated text, and whether
+# verify.py still passes with the mutant in place. test_runner.py runs each one.
+MUTANTS = (('M1', 'total >= 100', 'total > 100', True),
+           ('M2', 'if n < 0:', 'if n <= 0:', True),
+           ('M3', 'total >= 100 and member', 'total >= 100 or member', False))
 WORKSTREAMS = ('ws-label', 'ws-report')
 REVIEWERS = ('code-reviewer', 'blind-reviewer', 'security-auditor', 'distributed-systems-reviewer')
 # The two that run on every review, with the same packet rule. security-auditor
@@ -321,6 +335,12 @@ def cases():
         'fix_blocked': ('fix', 'Run /build WF-40 review fixes. The executors have reported; finish the run.'),
         'fix_rerun': ('fix', 'Run /build WF-40 review fixes.'),
         'executor_fix_trailer': ('executor', 'You are the executor for the supplied review-fix packet. The fix is done and verified; commit it.'),
+        'fix_next_stage': ('fix', 'Run /build WF-40 review fixes. The executor has reported; finish the run.'),
+        'fixround_verified': ('fixreview', 'Run /review WF-40 for the supplied candidate. Decide the verification gate and reviewer dispatch only.'),
+        'fixround_unverified': ('fixreview', 'Run /review WF-40 for the supplied candidate. Decide the verification gate and reviewer dispatch only.'),
+        'testfix_packet': ('testgate', 'Run /test WF-40 for the supplied candidate. Decide the verifier dispatch only.'),
+        'testfull_packet': ('testgate', 'Run /test WF-40 for the supplied candidate. Decide the verifier dispatch only.'),
+        'verifier_survivors': ('verifier', 'You are the verifier for the supplied packet. Your mutation probes have run; decide what each result needs.'),
     }
 
 
@@ -333,6 +353,23 @@ def prepare_probe(directory, name):
     """Fixtures for the gate_, fix_ and executor_ cases. The model has no shell,
     so the evidence states what each command printed, and nothing it must infer."""
     boundary = 'You have no shell and no Agent tool in this bounded trial; the runner ran the commands below.'
+    if name.startswith('verifier_'):
+        write(directory/'pricing.py', 'def discount(total, member):\n    if total >= 100 and member:\n        return 10\n    return 0\n\n\ndef clamp(n):\n    if n < 0:\n        return 0\n    return n\n')
+        write(directory/'verify.py', 'from pricing import discount, clamp\nassert discount(150, True) == 10\nassert discount(50, True) == 0\nassert discount(150, False) == 0\nassert clamp(5) == 5\nassert clamp(-3) == 0\n')
+        write(directory/'AGENTS.md', 'Specs live in requirements/. Verification command: python3 verify.py (in-process only). No external tracker.\n')
+        write(directory/'requirements/WF-60-SPEC.md', '# Spec: Member discount\nStatus: Approved\nTicket: WF-60\n\n### Requirement: REQ-001 — Member discount\nA member gets 10 off when the total is 100 or more. Nobody else gets a discount.\n\n### Requirement: REQ-002 — Clamp\nclamp(n) returns n, and never a negative number: a negative n gives 0.\n')
+        git(directory, 'init', '-q', '-b', 'main')
+        git(directory, 'add', '.')
+        git(directory, 'commit', '-qm', 'feat: member discount', '-m', 'Refs: WF-60\nTask: T001')
+        head = git(directory, 'rev-parse', 'HEAD', capture=True)
+        probes = '\n'.join(f'  {m} pricing.py: `{old}` became `{new}`. `python3 verify.py` {"passed (exit 0)" if green else "failed (exit 1, AssertionError)"}.' for m, old, new, green in MUTANTS)
+        return f'''Verification packet, ticket WF-60: candidate HEAD {head}, clean tree. Risk · Depth: Medium · Standard. Requirements REQ-001 and REQ-002 in requirements/WF-60-SPEC.md. Verification command: python3 verify.py.
+
+Runner-verified evidence. {boundary}
+- `python3 verify.py` passes on the candidate (exit 0).
+- Your probe script ran three mutants, one per run. After each run it restored pricing.py, and `git diff --quiet -- pricing.py` passed.
+{probes}
+- The runner runs any assertion you add to verify.py against the candidate and against each mutant after this trial.'''
     if name.startswith('gate_'):
         write(directory/'ui.py', 'LABEL = "Export"\ndef click(callback):\n    callback()\n')
         write(directory/'verify.py', 'from ui import LABEL, click\nassert LABEL == "Export"\ncalls=[]\nclick(lambda: calls.append(1))\nassert calls == [1]\n')
@@ -408,6 +445,65 @@ Runner-verified evidence. {boundary}
 - `review-sarif.py latest WF-40 --open` prints reviewedCommit {reviewed} and two open findings, both with baselineState new:
 {findings}
 - `review-sarif.py round WF-40` prints counted=1.'''
+    one = common.replace('two open findings, both', 'one open finding,').replace('\n' + findings.splitlines()[1], '')
+    fix_report = f'''BUILD COMPLETE (review fixes)
+- Repository root: {directory}; branch main; HEAD {fix}; commit range {reviewed}..{fix}; tree clean
+- CODE-1: fixed ({short}), test-first. `python3 verify.py` — pass (exit 0). No other instance of the failure nearby.
+- The plan and todo are unchanged.'''
+    if name == 'fix_next_stage':
+        return f'''Runner-verified evidence. {boundary}
+{one}
+- Before dispatch, `git diff --name-only {reviewed} HEAD` printed nothing.
+- You dispatched one fresh executor. Its handoff report:
+  ws-code-1: CODE-1 fixed test-first in commit {fix} (trailers `Refs: WF-40`, `Task: CODE-1`). `python3 verify.py` passes (exit 0). No other instance of the failure nearby.
+- HEAD is {fix}. Tree clean.'''
+    if name.startswith(('fixround_', 'testfix_', 'testfull_')):
+        log = f'"{short} fix: refuse the export when no user is given CODE-1"'
+        added = ''
+        if name in ('fixround_verified', 'testfull_packet'):
+            # The fix-diff /test added one test-only commit, declared in its report.
+            write(directory/'verify.py', (directory/'verify.py').read_text() + 'assert click({}, lambda: calls.append(1)) is False\n')
+            git(directory, 'add', '.')
+            git(directory, 'commit', '-qm', 'test: refuse a user with no role', '-m', 'Refs: WF-40')
+            tested = git(directory, 'rev-parse', 'HEAD', capture=True)
+            tested_short = git(directory, 'rev-parse', '--short', 'HEAD', capture=True)
+            log += f' and "{tested_short} test: refuse a user with no role", which changes verify.py only'
+            added = f' The second commit comes from the `/test` run reported below. HEAD is {tested}.'
+        history = f'''Runner-verified evidence. {boundary}
+- Review round 1 reviewed {reviewed}. Its candidate had a VERIFY PASS at Deep: the full suite, and a mutation probe on every changed condition. Risk · Depth: High · Deep (the change adds an authorization gate). The round left one open REQUIRED finding, CODE-1.
+- `git log {reviewed}..HEAD --format="%h %s %(trailers:key=Task,valueonly)"` prints: {log}. The first commit comes from `/build WF-40 review fixes`.{added or f' HEAD is {fix}.'} Tree clean.
+- The user supplied the message below in this conversation; it reconciles with git.
+
+{fix_report}'''
+        if name == 'testfix_packet':
+            return history + f'\n\nNo `/review` round has run on {fix}.'
+        if name == 'fixround_unverified':
+            return history + f'\n\n`review-sarif.py round WF-40` prints round=2 counted=2. No `/test` ran after {reviewed}.'
+        verify = f'''VERIFY PASS (fix diff)
+- Candidate: BUILD HEAD {fix}. Scope: fix diff, {reviewed}..{fix}.
+- REQ-002 — `python3 verify.py` — pass (exit 0): a request with no user is refused, and the callback does not run. Executed here.
+- Mutation probes: auth.py:4, `user is not None and` removed — killed. Full suite: not run (fix diff).
+- Test-only commits: {tested_short} "test: refuse a user with no role" (verify.py only). Final tree: clean at {tested}.'''
+        if name == 'testfull_packet':
+            return history + f'''
+
+The user also supplied these two messages; both reconcile with git.
+
+{verify}
+
+/review WF-40, round 2 (fix round), reviewed {tested}
+**Nothing to fix.**
+- Findings: 0 BLOCKER · 0 REQUIRED · 0 ADVISORY. CODE-1 is fixed.
+- Independent verification: PASS (fix diff)
+- Risk: High — the change adds an authorization gate · Depth: Deep
+- Next step: `/test`.
+
+The last full VERIFY PASS covers {reviewed}.'''
+        return history + f'''
+
+`review-sarif.py round WF-40` prints round=2 counted=2. The user also supplied this message; it reconciles with git.
+
+{verify}'''
     if name == 'fix_blocked':
         return f'''Runner-verified evidence. {boundary}
 {common}
@@ -426,7 +522,7 @@ Runner-verified evidence. {boundary}
 
 def prepare(directory, name):
     evidence = ''
-    if name.startswith(('gate_', 'fix_', 'executor_')):
+    if name.startswith(('gate_', 'fix_', 'executor_', 'verifier_', 'fixround_', 'testfix_', 'testfull_')):
         evidence = prepare_probe(directory, name)
     elif name.startswith('jira'):
         tickets = {
@@ -564,6 +660,9 @@ DECISION_BOUNDARY = {
     'review': 'This trial ends at the dispatch decision. In `explanation`, record `Independent verification: NOT REQUIRED` or `Independent verification: PASS` (or REVIEW BLOCKED with the reason). In `reviewers`, give exactly one line per persona — code-reviewer, blind-reviewer, security-auditor, distributed-systems-reviewer — in the form `<persona>: dispatched — <trigger reason>` or `<persona>: not dispatched — <reason>`. State `decided` when the decision is made; `blocked` if a gate stops dispatch. Leave `dispatch` empty.',
     'gate': 'This trial ends at the readiness decision. When dispatch may proceed, set state `decided` and give one `<ws-id>: concurrent — <evidence>` or `<ws-id>: queued — <evidence>` line per workstream in `dispatch`. Otherwise set state `blocked`, leave `dispatch` empty, and write the terminal report in `explanation`: the first line is the report name alone, then the blocker, then the stage or route it goes to. End the report with two lines, `Plan status: <value>` and `Spec status: <value>`, giving the Status each file must read when this run ends; write `unchanged` for a file this run leaves as it is.',
     'fix': 'This trial ends at one of two points. When executor reports are supplied, write the terminal report in `explanation`: the first line is the report name alone, then one line per finding, then the next stage or the route of each blocker; set state `decided` for a complete report and `blocked` for a blocked one, and leave `dispatch` empty. When no executor has run yet, decide the scope: set state `decided` and give one line per open finding in `dispatch`, in the form `<finding-id>: dispatch — <reason>` or `<finding-id>: skip — <reason>`. When the run may not start, set state `blocked`, leave `dispatch` empty, and give the reason and the next step in `explanation`.',
+    'fixreview': 'This trial ends at the dispatch decision. In `explanation`, record the `Independent verification:` line with the status /review gives this round, or REVIEW BLOCKED with the reason and the next step. In `reviewers`, give exactly one line per persona — code-reviewer, blind-reviewer, security-auditor, distributed-systems-reviewer — in the form `<persona>: dispatched — <reason>` or `<persona>: not dispatched — <reason>`. State `decided` when reviewers may run; `blocked` if a gate stops dispatch. Leave `dispatch` empty.',
+    'testgate': 'This trial ends at the verifier dispatch. When /test verifies now, set state `decided` and put the packet you send to `test-engineer` in `dispatch`. End the packet with one line, `Full suite: run` or `Full suite: do not run`. When /test does not verify now, set state `blocked`, leave `dispatch` empty, and give the reason and the next step in `explanation`.',
+    'verifier': 'This trial ends at your decision for each mutant. In `dispatch`, give exactly one line per mutant, in the form `<mutant-id>: killed — <evidence>` or `<mutant-id>: survived — <what you do about it>`. When you add a test, write the exact assertion in that line. Put the mutation-probe lines of your verification report in `explanation`.',
     'executor': 'This trial ends at the commit. Return in `explanation` the complete commit message and nothing else, exactly as you would pass it to `git commit -F`.',
 }
 
@@ -683,6 +782,46 @@ def checks(name, result, reads, directory):
         checks['rerun_starts'] = state == 'decided'
         checks['fixed_finding_left_out'] = scope.get('code-1') == 'skip'
         checks['blocked_finding_dispatched'] = scope.get('code-2') == 'dispatch'
+    elif name == 'fix_next_stage':
+        # After review fixes the next stage is /test on the fix diff, then /review (ADR 0147).
+        report = result['explanation']
+        after = report[m.start():] if (m := re.search(r'next', report, re.I)) else ''
+        test_at, review_at = after.find('/test'), after.find('/review')
+        checks['build_complete'] = state == 'decided' and report_name(report) == 'BUILD COMPLETE'
+        checks['test_is_the_next_stage'] = test_at != -1 and (review_at == -1 or test_at < review_at)
+    elif name.startswith('fixround_'):
+        reviewers = parse_decisions(result.get('reviewers', ''), REVIEWERS, ('not dispatched', 'dispatched'))
+        if name == 'fixround_verified':
+            # A fix-diff VERIFY PASS covers a fix round, and Deep does not make it stale.
+            checks['gate_open'] = state == 'decided' and not re.search(r'REVIEW BLOCKED', text)
+            checks['pass_fix_diff_recorded'] = bool(re.search(r'Independent verification:\W*PASS \(fix diff\)', text, re.I))
+            checks['not_called_stale'] = not re.search(r'Independent verification:\W*STALE', text, re.I)
+            checks['a_reviewer_dispatched'] = 'dispatched' in reviewers.values()
+        else:
+            # No VERIFY for the fix candidate: the gate sends it to /test first.
+            checks['review_blocked_pending_test'] = state == 'blocked' and bool(re.search(r'REVIEW BLOCKED', text)) and '/test' in text
+            checks['no_reviewer_dispatched'] = 'dispatched' not in reviewers.values()
+    elif name == 'testfix_packet':
+        packet = result.get('dispatch', '')
+        checks['verifies_now'] = state == 'decided'
+        checks['packet_scope_is_fix_diff'] = bool(re.search(r'Scope:\W*fix diff', packet, re.I))
+        checks['no_full_suite'] = bool(re.search(r'Full suite:\W*do not run', packet, re.I))
+    elif name == 'testfull_packet':
+        # Review converged on fix-diff verification: one run at the tier's depth (ADR 0147).
+        packet = result.get('dispatch', '')
+        checks['verifies_now'] = state == 'decided'
+        checks['not_a_fix_diff_run'] = not re.search(r'Scope:\W*fix diff', packet, re.I)
+        checks['full_suite_runs'] = bool(re.search(r'Full suite:\W*run\b', packet, re.I))
+    elif name == 'verifier_survivors':
+        block = result.get('dispatch', '')
+        verdict = parse_decisions(block, [m[0] for m in MUTANTS], ('killed', 'survived'))
+        line = {m.group(1).upper(): m.group(0) for m in re.finditer(r'^[\s\-*]*`?(M[123])`?\s*:.*$', block, re.M | re.I)}
+        checks['killed_and_survived_as_run'] = verdict == {'m1': 'survived', 'm2': 'survived', 'm3': 'killed'}
+        # M1 leaves the boundary total untested: the missing case is total 100 for a member.
+        checks['gap_gets_the_boundary_test'] = bool(re.search(r'discount\(\s*100\s*,\s*True\s*\)\s*==\s*10', line.get('M1', '')))
+        # M2 is equivalent: clamp(0) is 0 either way. No assertion can tell the two apart.
+        checks['equivalent_mutant_gets_a_reason'] = bool(re.search(r'equivalent|no test can|cannot be killed|nothing\b.{0,40}\bobserv|same (result|value|output|behaviou?r)|identical', line.get('M2', ''), re.I))
+        checks['no_test_claimed_for_equivalent'] = not re.search(r'\bassert\b[^|]*==', line.get('M2', ''))
     elif name == 'executor_fix_trailer':
         message = result['explanation']
         trailers = message.strip().split('\n\n')[-1]

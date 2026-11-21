@@ -66,6 +66,25 @@ give, and asserts the decision:
   id in `Task:`. The case supplies the executor persona and skill only, so it
   tests the skill, not a packet that repeats the rule.
 
+- `verifier_survivors`: two mutants survive the verifier's probes. One marks
+  a missing test, and one is equivalent. The verifier adds the boundary test
+  for the first and reports the second with a reason, never as a kill. The
+  unit tests run every mutant, so the fixture cannot claim a false result.
+
+Four cases pin the fix-round order of ADR 0147, build then test then review:
+
+- `fix_next_stage`: a review-fix run names `/test` on the fix diff as its
+  next stage, before `/review`.
+- `fixround_verified`: `/review` accepts a **VERIFY PASS (fix diff)** for a
+  fix round at Deep depth, and does not call it stale. The candidate carries
+  one test-only commit that the fix-diff run declared.
+- `fixround_unverified`: with no VERIFY for the fix candidate, `/review`
+  returns REVIEW BLOCKED and names `/test`.
+- `testfix_packet`: `/test` verifies a fix candidate now. Its packet says
+  `Scope: fix diff` and does not run the full suite.
+- `testfull_packet`: `/review` converged on fix-diff verification. `/test`
+  runs once at the tier's depth: no `Scope: fix diff`, and the full suite.
+
 To compare two versions of the harness text, extract the older one
 (`git archive <sha> claude tools/evals/workflow | tar -x -C <dir>`), copy the
 current `run.py` over the extracted one, and run that copy: it reads the
