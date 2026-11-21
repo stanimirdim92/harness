@@ -151,9 +151,10 @@ that explanation here, just the index.
 | [0141](0141-review-adopts-failure-scenarios-and-gap-sweep.md) | Review adopts failure scenarios, a wider check and a gap sweep | Accepted |
 | [0142](0142-built-in-code-review-as-trial-reviewer.md) | Claude Code's built-in `/code-review` runs in `/review` as a trial reviewer | Accepted |
 | [0143](0143-review-eval-judges-the-defect-not-the-location.md) | review-eval judges the defect, not only the location | Accepted |
-| [0144](0144-fix-rounds-skip-test-until-review-converges.md) | Fix rounds skip /test until review converges | Accepted |
+| [0144](0144-fix-rounds-skip-test-until-review-converges.md) | Fix rounds skip /test until review converges | Partially superseded by [0147](0147-fix-rounds-run-test-on-the-fix-diff.md) (fix rounds run `/test` on the fix diff; the closing round and the executor's same-failure sweep stand) |
 | [0145](0145-one-review-sarif-per-ticket.md) | One review SARIF per ticket | Accepted |
 | [0146](0146-remove-explain-command.md) | Remove the /explain command | Accepted |
+| [0147](0147-fix-rounds-run-test-on-the-fix-diff.md) | Fix rounds run /test on the fix diff | Accepted |
 
 Adding a new decision: create the next-numbered `NNNN-kebab-title.md`
 (4-digit, zero-padded — MADR-style, matches the files already here) and

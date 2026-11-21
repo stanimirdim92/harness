@@ -43,7 +43,7 @@ Round 1 reviews the whole candidate. A later round reviews a fix (§3 Later
 rounds). `counted=4` means three rounds did not converge. Return **REVIEW
 BLOCKED**, list the findings that came back in more than one round, and ask
 the user to reconsider the approach before another fix (ADR 0089). The
-closing round after `/test` never counts, so ignore `counted` for it
+closing round after the full-depth `/test` never counts, so ignore `counted` for it
 (ADR 0144). When the
 user starts a new approach, pass `--new-approach` to `round` and `add` on its
 first round only; a second one starts yet another approach. The count starts
@@ -61,11 +61,12 @@ Require `/test`'s result for this exact candidate.
   evidence. When it does not, return **REVIEW BLOCKED** with `/test` as the
   next step.
 - **Fix round** (a later round whose new commits come only from
-  `/build <TICKET> review fixes`): do not send it to `/test` (ADR 0144). The
-  earlier round's VERIFY PASS and the executor's test-first proof for each
-  fixed finding are enough. Record **Independent verification: DEFERRED (fix
-  round)**. When the round leaves no open BLOCKER or REQUIRED finding, the
-  next step is `/test` once, on that candidate. Then run one closing round on
+  `/build <TICKET> review fixes`, plus the test-only commits its VERIFY PASS
+  (fix diff) declared): require a **VERIFY PASS (fix diff)** for
+  this candidate (ADR 0147). It covers the fix diff only, so the depth rule
+  below does not make it stale. Record **Independent verification: PASS (fix
+  diff)**. When the round leaves no open BLOCKER or REQUIRED finding, the
+  next step is `/test` once at the tier's depth, on the whole candidate. Then run one closing round on
   the commits `/test` added, or none when it added none. The closing round
   records **PASS** and does not count toward the round-4 stop.
 - No result for this candidate: return **REVIEW BLOCKED** with `/test` as the
@@ -342,7 +343,7 @@ Report, starting with one count line before anything else (ADR 0099):
 - the review round, and for a later round the commit it was reviewed from;
 - candidate branch/diff scope;
 - BUILD candidate and any accepted post-BUILD test-only commits;
-- **Independent verification: NOT REQUIRED | PASS | DEFERRED (fix round) | STALE (depth)**;
+- **Independent verification: NOT REQUIRED | PASS | PASS (fix diff) | STALE (depth)**;
 - **Risk: <tier> — <reason> · Depth: <depth>** (ADR 0106);
 - required-reviewer list and trigger decisions;
 - whether the project has a `REVIEW.md`, and which ones were used;
@@ -391,7 +392,8 @@ a scratch file, then append them to the ticket's file:
 python3 ~/.claude/skills/code-review-and-quality/scripts/review-sarif.py add <TICKET> <round-file> --commit $(git rev-parse --short HEAD)
 ```
 
-Add `--closing` for the closing round after `/test` (ADR 0144).
+Add `--closing` only for the closing round after the full-depth `/test`
+(ADR 0144). A fix round is never a closing round.
 
 Each id stays its own SARIF result. Record a group's aliases in each member's `properties.aliases`.
 
@@ -410,4 +412,4 @@ of its findings for tools.
 Then stop. The next stage is `/ship`.
 
 Any candidate change after REVIEW invalidates the review. A production fix
-returns to `/build`, then `/review`; `/test` runs as §2 says (ADR 0144).
+returns to `/build`, then `/test` on the fix diff, then `/review` (ADR 0147).

@@ -234,7 +234,10 @@ on an in-scope requirement's path:
 
 A mutant that fails a test is killed. A mutant that stays green has survived:
 a test case is missing. Write that case as a test-only change, then run the
-mutant once more to show the new test kills it.
+mutant once more to show the new test kills it. The one exception is an
+equivalent mutant, which changes nothing a caller can observe. No test can
+kill it: report it as a survivor with that reason and the evidence, never as
+a kill.
 
 Script the probes; do not edit by hand. Write the mutants as a list (file,
 original text, mutated text) and give the list to one script. The script runs
@@ -257,7 +260,8 @@ as a kill.
 Probe the conditions whose failure would break an acceptance criterion. One
 probe per condition is enough; do not mutate every line. At Deep depth
 (the packet's Risk · Depth line), probe every condition the candidate adds or
-changes, and run the full suite as well as the focused tests. The mutation is the
+changes, and run the full suite as well as the focused tests. A fix-diff
+packet is the exception: no full suite at any depth. The mutation is the
 only production-code edit you may make, it lasts one test run, and it is never
 committed. If a file cannot be restored exactly, stop and report it.
 
@@ -316,7 +320,7 @@ When dispatched by `/test`, report:
   code reasoning, and blocked checks;
 - reproduced defects with expected versus actual behavior and reproduction;
 - mutation probes: `file:line`, the mutation, killed or survived, and the
-  test added for each survivor;
+  test added for each survivor, or the reason no test can kill it;
 - test-only files/commits, final tree state, and any changes from the baseline;
 - required checks not run, blockers, and the next action needed.
 

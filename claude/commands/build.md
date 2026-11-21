@@ -382,7 +382,7 @@ The plan checks in §1 still apply; task resume does not.
    (ADR 0144).
 5. Report one line per finding: fixed (commit), disputed (evidence), or
    blocked (why). With no blocked finding, report BUILD COMPLETE; the next
-   stage is `/review`. Otherwise report BUILD BLOCKED, with the stage each
+   stage is `/test` on the fix diff, then `/review` (ADR 0147). Otherwise report BUILD BLOCKED, with the stage each
    blocker routes to. The plan and todo do not change.
 
 ## Verify fixes
@@ -417,8 +417,9 @@ does not.
 A fix or change made in conversation on a ticket branch skips this command,
 so none of its records update. Record it in the same session:
 
-- Add an `unplanned commit` item to `docs/tasks/<TICKET>-open.md` that names
-  the commit's short sha (`../references/ticket-ledger.md`).
+- For a commit that changes more than the ticket's docs, add an
+  `unplanned commit` item to `docs/tasks/<TICKET>-open.md` that names its
+  short sha (`../references/ticket-ledger.md`).
 - For a behavior change, also add a `DEC-###` to the spec. Add an `Amends:`
   line when it changes an earlier rule, and set the plan to `Needs replan`.
 - Run `check-ledger.py <TICKET>` before you end the session.

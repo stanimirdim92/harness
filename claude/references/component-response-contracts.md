@@ -369,14 +369,15 @@ state and, except `/ship`, writes an artifact to a fixed path.
 
 ### `/build` → BUILD COMPLETE / BUILD BLOCKED
 
-**BUILD COMPLETE** only when every selected task is implemented, every
+**BUILD COMPLETE** only when every selected task `/build` owns is implemented
+(tasks handed on to `/test` or a person are listed, not implemented), every
 workstream integrated, every plan checkpoint in scope executed and passed,
 required verification is green with executed evidence, scoped local commits
 are complete (or the uncommitted exception was explicitly requested), and the
 tree is in the expected state. **BUILD BLOCKED** in every other terminal
 state — never reported with open blockers, skipped checkpoints, or unimplemented
-selected tasks. Both include: tasks/workstreams completed or blocked (with
-blocker and routing stage), checkpoints and outcomes, commits, exact
+selected tasks. Both include: tasks/workstreams completed, handed on or
+blocked (with blocker and routing stage), checkpoints and outcomes, commits, exact
 verification commands/outcomes, required scope expansions, untouched items
 noticed, branch/tree state, the full candidate identity, and actual run
 metrics when exposed (never estimated).
@@ -403,8 +404,8 @@ The dispositions and the `pre-existing` mark are defined once, in
 
 Report includes: candidate branch/diff scope, BUILD candidate and any accepted
 post-BUILD test-only commits, the **Risk · Depth** line (`risk-tiers.md`),
-**Independent verification: NOT REQUIRED \|
-PASS**, required-reviewer list and trigger decisions, each reviewer's result,
+**Independent verification: NOT REQUIRED \| PASS \| PASS (fix diff) \|
+STALE (depth)**, required-reviewer list and trigger decisions, each reviewer's result,
 every finding with disposition and its `REQ-###` where applicable, and one
 requirement-evidence line per spec `REQ-###` (implementation + verification, or
 an explicit gap — `/ship` blocks on a missing entry). Confidence travels with

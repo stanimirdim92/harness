@@ -24,8 +24,8 @@ Use `/review`'s independent-verification status:
 
 - `NOT REQUIRED` is valid when REVIEW recorded that decision for this candidate;
 - `PASS` is required when REVIEW required `/test`;
-- `DEFERRED (fix round)` is **SHIP BLOCKED**: `/test` and the closing review
-  round come next (ADR 0144).
+- `PASS (fix diff)` is **SHIP BLOCKED**: the full-depth `/test` and the
+  closing review round come next (ADR 0147).
 
 Use `/review`'s weakened-test result: **Weakened tests: none found**, or every
 listed entry resolved as a finding or a stated reason. A missing result or

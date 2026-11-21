@@ -36,4 +36,4 @@ python3 ~/.claude/skills/spec-driven-development/scripts/check-ledger.py <TICKET
 
 `/review` runs it, and `/ship` runs it with `--ship`, which also fails on an
 `Open` item and on a `Pending` task the plan index does not mark superseded.
-Run it on request after any work outside the pipeline.
+Run it after any work outside the pipeline, before the session ends.

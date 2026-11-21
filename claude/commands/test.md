@@ -134,12 +134,20 @@ Its packet carries the usual §2 fields, plus:
 - the diff since the verified commit;
 - the full requirement list, not only the changed ones.
 
-Review fixes are not re-verified one round at a time. `/test` runs once, after
-`/review` has no open BLOCKER or REQUIRED finding (ADR 0144). Its diff then
-covers every fix round since the last VERIFY PASS.
+A candidate that comes from `/build <TICKET> review fixes`, and that no
+`/review` round has seen, gets a fix-diff run (ADR 0147). The verifier
+re-runs every check that diff can affect and probes the conditions it adds or
+changes. It does not run the full suite, at any depth. The packet says
+`Scope: fix diff`. Report **VERIFY PASS (fix diff)**.
+
+When a supplied `/review` result records `PASS (fix diff)` and no open
+BLOCKER or REQUIRED finding, `/test` runs once at the tier's depth instead.
+The packet's diff starts at the last full VERIFY PASS, and it has no `Scope`
+line.
 
 The fresh verifier re-runs every check the diff can affect, not only the
-changed lines. At Deep it runs the full suite again. A check the diff cannot
+changed lines. At Deep, a full run executes the full suite again; a fix-diff
+run does not. A check the diff cannot
 affect keeps its earlier evidence, cited with the verified commit. When unsure
 whether the diff can affect a check, re-run it.
 
