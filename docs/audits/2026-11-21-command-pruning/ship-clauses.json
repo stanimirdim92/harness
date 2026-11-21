@@ -1,0 +1,578 @@
+[
+ {
+  "id": "S000",
+  "section": "",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 29,
+  "words": 23,
+  "text": "---\ndescription: Final release gate — synthesize review evidence into a GO/NO-GO decision with rollback\nargument-hint: \"[release/change under consideration, or commit range]\"\n---"
+ },
+ {
+  "id": "S001",
+  "section": "",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 29,
+  "words": 16,
+  "text": "`/ship` is the final **SHIP** gate. It synthesizes; it does not dispatch agents\nor implement fixes."
+ },
+ {
+  "id": "S002",
+  "section": "1. Require the REVIEW handoff",
+  "last_edited": "2026-08-29",
+  "runs_since_edit": 29,
+  "words": 13,
+  "text": "Resolve the target per `../references/target-selection.md`, and announce it (\"Using: <target>\") before anything else."
+ },
+ {
+  "id": "S003",
+  "section": "1. Require the REVIEW handoff",
+  "last_edited": "2026-09-07",
+  "runs_since_edit": 29,
+  "words": 19,
+  "text": "Require `/review`'s complete result from one of the valid sources in\n`../references/target-selection.md` §Gate handoffs for the exact current\ncandidate."
+ },
+ {
+  "id": "S004",
+  "section": "1. Require the REVIEW handoff",
+  "last_edited": "2026-10-18",
+  "runs_since_edit": 25,
+  "words": 49,
+  "text": "Confirm the current branch, commits, diff, and tree still match the reviewed\ncandidate. Re-read the handoff artifacts and any spec/plan documents from disk\neven if they appeared earlier in the conversation — the user may have edited\nthem since. Missing/stale review evidence or undeclared candidate changes are\n**SHIP BLOCKED**."
+ },
+ {
+  "id": "S005",
+  "section": "1. Require the REVIEW handoff",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 29,
+  "words": 4,
+  "text": "Use `/review`'s independent-verification status:"
+ },
+ {
+  "id": "S006",
+  "section": "1. Require the REVIEW handoff",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 29,
+  "words": 13,
+  "text": "- `NOT REQUIRED` is valid when REVIEW recorded that decision for this candidate;"
+ },
+ {
+  "id": "S007",
+  "section": "1. Require the REVIEW handoff",
+  "last_edited": "2026-11-20",
+  "runs_since_edit": 4,
+  "words": 8,
+  "text": "- `PASS` is required when REVIEW required `/test`;"
+ },
+ {
+  "id": "S008",
+  "section": "1. Require the REVIEW handoff",
+  "last_edited": "2026-11-20",
+  "runs_since_edit": 4,
+  "words": 17,
+  "text": "- `DEFERRED (fix round)` is **SHIP BLOCKED**: `/test` and the closing review\n  round come next (ADR 0144)."
+ },
+ {
+  "id": "S009",
+  "section": "1. Require the REVIEW handoff",
+  "last_edited": "2026-10-09",
+  "runs_since_edit": 25,
+  "words": 33,
+  "text": "Use `/review`'s weakened-test result: **Weakened tests: none found**, or every\nlisted entry resolved as a finding or a stated reason. A missing result or\n**Weakened tests: Not verified** is **SHIP BLOCKED** (ADR 0078)."
+ },
+ {
+  "id": "S010",
+  "section": "1. Require the REVIEW handoff",
+  "last_edited": "2026-11-18",
+  "runs_since_edit": 9,
+  "words": 11,
+  "text": "Run the ledger check with `--ship` on the current tree\n(`../references/ticket-ledger.md`):"
+ },
+ {
+  "id": "S011",
+  "section": "1. Require the REVIEW handoff",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 24,
+  "words": 6,
+  "text": "```bash\npython3 ~/.claude/skills/spec-driven-development/scripts/check-ledger.py <TICKET> --ship\n```"
+ },
+ {
+  "id": "S012",
+  "section": "1. Require the REVIEW handoff",
+  "last_edited": "2026-10-16",
+  "runs_since_edit": 25,
+  "words": 38,
+  "text": "Any FAIL is **SHIP BLOCKED**: an `Open` item, a `Pending` task that is not\nsuperseded, a spec that changed after the plan pin, or untracked deferred work.\nExit 2 is **SHIP BLOCKED** too. Warnings go into the report."
+ },
+ {
+  "id": "S013",
+  "section": "1. Require the REVIEW handoff",
+  "last_edited": "2026-11-21",
+  "runs_since_edit": 0,
+  "words": 121,
+  "text": "`/ship` never decides an open item itself. It may set an `OPEN-###`\ndisposition only when a recorded owner decision backs it. That is a `DEC-###`\nin the approved spec, or the owner's answer to the question below. Quote the\n`DEC-###` id, or the owner's words with the date, in the disposition. Put every\nother `Open` item to the owner in one question before the verdict: one numbered\nline per item, with what it means for the release. Until the owner answers,\nthe item stays `Open` and the result stays **SHIP BLOCKED**. A commit that\nchanges only `docs/tasks/<TICKET>-open.md` or `docs/reviews/<TICKET>.sarif`\nafter review leaves the reviewed code unchanged. Report it as \"Ledger-only commit after review: <sha>\". Any\nother change is still **SHIP BLOCKED**."
+ },
+ {
+  "id": "S014",
+  "section": "1. Require the REVIEW handoff",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 29,
+  "words": 16,
+  "text": "Do not independently re-run the trigger matrix or substitute new inline testing\nfor a missing gate."
+ },
+ {
+  "id": "S015",
+  "section": "Human time",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 24,
+  "words": 42,
+  "text": "Count what the ticket needed from a person (ADR 0112) and what it cost\n(ADR 0113), and print the row for the harness's `observation-log.md`\n\"Per ticket\" table under \"Human time\". The row adds time, tokens and\nlist-price dollars from the ticket's transcripts:"
+ },
+ {
+  "id": "S016",
+  "section": "Human time",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 24,
+  "words": 5,
+  "text": "```bash\npython3 ~/.claude/skills/spec-driven-development/scripts/ticket-stats.py <TICKET>\n```"
+ },
+ {
+  "id": "S017",
+  "section": "Human time",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 24,
+  "words": 54,
+  "text": "Print the header and the row exactly as `ticket-stats.py` outputs them, in\none table. Below it, add one plain sentence that says what the numbers mean\nfor this ticket, such as where the owner's time went. The owner adds the row\nto the harness repository; `/ship` does not write it. It never affects GO."
+ },
+ {
+  "id": "S018",
+  "section": "Shipped-bug record",
+  "last_edited": "2026-11-13",
+  "runs_since_edit": 19,
+  "words": 80,
+  "text": "When the spec has an `## Escaped From` section (ADR 0110), the bug reached\nthe base branch once already. After GO, print under \"Shipped-bug record\" the\nrow for the harness's `observation-log.md` \"Shipped bugs\" table (found, the\nticket that shipped it, the bug, this fix's commit, the layer, why it\nmissed). Also print the eval command for the fix:\n`python3 tools/evals/review-eval/run.py --new <short-name> --repo <project> --fix <fix sha>`.\nThe owner adds both to the harness repository; `/ship` does not write them."
+ },
+ {
+  "id": "S019",
+  "section": "Risk",
+  "last_edited": "2026-10-18",
+  "runs_since_edit": 25,
+  "words": 68,
+  "text": "Carry `/review`'s **Risk · Depth** line forward (ADR 0106) and put it at the\ntop of the report. Say what the owner should read before merging, from the\ndepth's row in `../references/risk-tiers.md`: the summary, the diff, or every\nchanged file and a second person. A missing Risk line is **SHIP BLOCKED**.\nAt Deep, a missing full-suite run or mutation probe in the VERIFY PASS is\n**SHIP BLOCKED** too."
+ },
+ {
+  "id": "S020",
+  "section": "Paths that always need a person",
+  "last_edited": "2026-10-18",
+  "runs_since_edit": 25,
+  "words": 53,
+  "text": "Carry `/review`'s \"Always a person\" result forward (ADR 0096). When it lists\nfiles, put them first in the report, under \"Read these yourself\", with the\nreason each matched. GO stays the user's decision; the warning makes sure the\nuser reads those files before merging. A missing or Not verified result is\n**SHIP BLOCKED**."
+ },
+ {
+  "id": "S021",
+  "section": "Current base",
+  "last_edited": "2026-10-18",
+  "runs_since_edit": 25,
+  "words": 42,
+  "text": "Check that the candidate still passes on the current base, as a merge queue\nwould (ADR 0095). The candidate itself is not touched: the script merges the\nbase into a scratch worktree, runs the plan's integrated verification commands\nthere, and removes it."
+ },
+ {
+  "id": "S022",
+  "section": "Current base",
+  "last_edited": "2026-11-07",
+  "runs_since_edit": 19,
+  "words": 15,
+  "text": "```bash\n~/.claude/skills/code-review-and-quality/scripts/base-check.sh \\\n    --base origin/<base branch> [--setup \"<worktree setup command>\"] -- \"<integrated command>\" ...\n```"
+ },
+ {
+  "id": "S023",
+  "section": "Current base",
+  "last_edited": "2026-10-18",
+  "runs_since_edit": 25,
+  "words": 25,
+  "text": "Take the commands from the plan's Verification Strategy (Integrated), and the\nsetup command from the project's `CLAUDE.md` when a fresh worktree needs one\n(dependencies, environment)."
+ },
+ {
+  "id": "S024",
+  "section": "Current base",
+  "last_edited": "2026-10-18",
+  "runs_since_edit": 25,
+  "words": 13,
+  "text": "- Exit 0: record the result line (\"Base: current\" or every check passing)."
+ },
+ {
+  "id": "S025",
+  "section": "Current base",
+  "last_edited": "2026-10-18",
+  "runs_since_edit": 25,
+  "words": 34,
+  "text": "- Exit 1: a merge conflict or a failing check is **NO-GO**. The fix is a new\n  candidate through `/build` and `/review`. A failure listed in the project's\n  known-failures file is pre-existing; say so."
+ },
+ {
+  "id": "S026",
+  "section": "Current base",
+  "last_edited": "2026-10-18",
+  "runs_since_edit": 25,
+  "words": 13,
+  "text": "- Exit 2: **SHIP BLOCKED** with the error; the check did not run."
+ },
+ {
+  "id": "S027",
+  "section": "2. Resolve findings",
+  "last_edited": "2026-11-18",
+  "runs_since_edit": 9,
+  "words": 13,
+  "text": "Carry REVIEW findings forward unchanged. Their dispositions are defined once,\nin `../references/findings.md` §Dispositions."
+ },
+ {
+  "id": "S028",
+  "section": "2. Resolve findings",
+  "last_edited": "2026-10-17",
+  "runs_since_edit": 25,
+  "words": 64,
+  "text": "- every **BLOCKER** must be resolved before GO: fixed, or — for a finding the\n  reviewer marked low-confidence (suspected) — refuted with recorded evidence\n  that addresses its specific failure scenario. Low confidence alone never\n  waives a BLOCKER, and refutation evidence comes from the resolution loop\n  (`/build` or the user) or from `/review`'s independent verification\n  (a REFUTED verdict with `file:line` evidence), not from `/ship` itself;"
+ },
+ {
+  "id": "S029",
+  "section": "2. Resolve findings",
+  "last_edited": "2026-09-01",
+  "runs_since_edit": 29,
+  "words": 90,
+  "text": "- every **REQUIRED** finding must be fixed, refuted with recorded evidence that\n  addresses its specific claim, explicitly accepted as risk, or deferred with a\n  concrete reason. Refutation is the resolution for a false positive; do not\n  record one as an accepted risk, which attributes to the release a risk it\n  does not carry. Unlike a BLOCKER, a REQUIRED finding may be refuted at any\n  confidence, but the evidence — not the reviewer's own uncertainty — is what\n  resolves it, and it comes from the resolution loop, not from `/ship` itself;"
+ },
+ {
+  "id": "S030",
+  "section": "2. Resolve findings",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 24,
+  "words": 57,
+  "text": "- a finding `/review` closed as **answered** keeps that resolution: the\n  approved spec already answers it, or it restates the owner's own request.\n  It needs the `REQ-###` or `DEC-###` line that answers it, and code that\n  matches that line. It is not a refutation: the finding's claim may be true.\n  A BLOCKER is never resolved as answered;"
+ },
+ {
+  "id": "S031",
+  "section": "2. Resolve findings",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 24,
+  "words": 36,
+  "text": "- a finding that asks for a check in a browser is resolved by `/test`'s\n  executed evidence for it (`/review` §4). Only when the verifier could not\n  run the check does it go to the owner;"
+ },
+ {
+  "id": "S032",
+  "section": "2. Resolve findings",
+  "last_edited": "2026-08-26",
+  "runs_since_edit": 29,
+  "words": 7,
+  "text": "- **ADVISORY** findings do not block shipping."
+ },
+ {
+  "id": "S033",
+  "section": "2. Resolve findings",
+  "last_edited": "2026-10-17",
+  "runs_since_edit": 25,
+  "words": 35,
+  "text": "- A finding marked **pre-existing** does not block at any disposition. List it\n  under follow-ups with where it is tracked: a ticket, or an observation-log\n  row. A pre-existing BLOCKER with no tracked follow-up is NO-GO."
+ },
+ {
+  "id": "S034",
+  "section": "2. Resolve findings",
+  "last_edited": "2026-11-21",
+  "runs_since_edit": 0,
+  "words": 119,
+  "text": "Write each finding's resolution into the review SARIF file\n(`properties.resolution`) with `review-sarif.py resolve <TICKET>\n<ID>=<resolution> ...` (`/review` §1). It writes the newest round that holds\nthe id; pass `--round <n>` for an earlier one. The resolutions are `fixed`,\n`refuted`, `answered`, `accepted`, `deferred`, `follow-up` for a tracked\npre-existing finding, or `open`.\nADVISORY findings the author declined are `declined`. Never write `refuted`\nfor an `answered` finding: `refuted` means the claim is false, and\n`answered` means the spec or the owner already settled it. `review-noise.py`\ncounts these to show which reviewers raise findings that end as fixes and\nwhich raise noise (ADR 0093). It counts `answered` apart, as neither. Commit\nthe file, with any ledger change, as a ledger-only commit (ADR 0120)."
+ },
+ {
+  "id": "S035",
+  "section": "2. Resolve findings",
+  "last_edited": "2026-10-18",
+  "runs_since_edit": 25,
+  "words": 14,
+  "text": "Then check whether this ticket's findings repeat a class from earlier tickets\n(ADR 0105):"
+ },
+ {
+  "id": "S036",
+  "section": "2. Resolve findings",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 24,
+  "words": 5,
+  "text": "```bash\npython3 ~/.claude/skills/code-review-and-quality/scripts/review-noise.py --repeats\n```"
+ },
+ {
+  "id": "S037",
+  "section": "2. Resolve findings",
+  "last_edited": "2026-10-18",
+  "runs_since_edit": 25,
+  "words": 26,
+  "text": "For each listed class that this ticket also raised, propose one change under\n\"Fix at the source\", with the exact text. Choose the first that fits:"
+ },
+ {
+  "id": "S038",
+  "section": "2. Resolve findings",
+  "last_edited": "2026-10-18",
+  "runs_since_edit": 25,
+  "words": 24,
+  "text": "1. a rule in the project's own linter or static analyser, when it can catch\n   the class (name the rule and the config file);"
+ },
+ {
+  "id": "S039",
+  "section": "2. Resolve findings",
+  "last_edited": "2026-11-13",
+  "runs_since_edit": 19,
+  "words": 50,
+  "text": "2. a shared test the project's suite runs, when a test can catch the class:\n   a dataset every new endpoint's test uses (bad ids, overflow, wrong types),\n   or an architecture test (name the file and the first use). `/build` runs\n   it, so the class is caught before review (ADR 0135);"
+ },
+ {
+  "id": "S040",
+  "section": "2. Resolve findings",
+  "last_edited": "2026-11-13",
+  "runs_since_edit": 19,
+  "words": 16,
+  "text": "3. a REVIEW.md \"Always check\" line, when it is a project convention a\n   reviewer must check;"
+ },
+ {
+  "id": "S041",
+  "section": "2. Resolve findings",
+  "last_edited": "2026-11-13",
+  "runs_since_edit": 19,
+  "words": 14,
+  "text": "4. a CLAUDE.md line, when it is how code gets written in this project;"
+ },
+ {
+  "id": "S042",
+  "section": "2. Resolve findings",
+  "last_edited": "2026-11-13",
+  "runs_since_edit": 19,
+  "words": 13,
+  "text": "5. a REVIEW.md \"Do not report\" line, when the class is mostly refuted."
+ },
+ {
+  "id": "S043",
+  "section": "2. Resolve findings",
+  "last_edited": "2026-10-18",
+  "runs_since_edit": 25,
+  "words": 30,
+  "text": "The owner accepts or declines it. Never edit REVIEW.md, CLAUDE.md or the lint\nconfig from `/ship`; an accepted change is its own ticket or commit. A\nproposal never blocks GO."
+ },
+ {
+  "id": "S044",
+  "section": "2. Resolve findings",
+  "last_edited": "2026-11-13",
+  "runs_since_edit": 19,
+  "words": 16,
+  "text": "A production fix returns to `/build`, then the new candidate goes through\n`/test` and `/review` again."
+ },
+ {
+  "id": "S045",
+  "section": "3. Requirement evidence",
+  "last_edited": "2026-09-01",
+  "runs_since_edit": 29,
+  "words": 20,
+  "text": "Carry `/review`'s per-requirement evidence forward. For every `REQ-###` in the\napproved spec, confirm both an implementing change and verification evidence."
+ },
+ {
+  "id": "S046",
+  "section": "3. Requirement evidence",
+  "last_edited": "2026-09-01",
+  "runs_since_edit": 29,
+  "words": 69,
+  "text": "A requirement missing either is **NO-GO**, not an advisory note: the spec said\nthe release must do this and nothing shows that it does. Two resolutions only —\nthe evidence is produced (back to `/build` or `/test`), or the requirement is\nwithdrawn from the spec through `/spec` with re-approval. Do not accept a\nmissing requirement as risk; risk acceptance is for a known finding, not for an\nunproven requirement."
+ },
+ {
+  "id": "S047",
+  "section": "3. Requirement evidence",
+  "last_edited": "2026-10-03",
+  "runs_since_edit": 28,
+  "words": 65,
+  "text": "Evidence covers each MUST and MUST NOT clause, and each SHOULD or SHOULD NOT\nclause or the exception the spec names for it. A MAY clause grants latitude and\nneeds no evidence of its own. A requirement the spec marks withdrawn needs no\nevidence. Explicitly preserved\nbehavior from Change Impact is a requirement like any other — its evidence is\nthat its tests still pass."
+ },
+ {
+  "id": "S048",
+  "section": "4. Release-readiness attestations",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 29,
+  "words": 8,
+  "text": "Record `PASS`, `FAIL`, or `BLOCKED` with evidence for:"
+ },
+ {
+  "id": "S049",
+  "section": "4. Release-readiness attestations",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 29,
+  "words": 18,
+  "text": "- **Infrastructure** — required env/config present; migrations/deploy ordering\n  safe; flags have defaults/owners; monitoring exists for meaningful new risk."
+ },
+ {
+  "id": "S050",
+  "section": "4. Release-readiness attestations",
+  "last_edited": "2026-11-05",
+  "runs_since_edit": 19,
+  "words": 57,
+  "text": "- **Documentation** — README/changelog/ADR/runbook updated when the change\n  actually requires them. If the project has a C4/Structurizr workspace\n  (`*.dsl`), it is updated when the change adds, removes or renames a\n  module, container, external system, or cross-boundary relationship\n  (queue, webhook, provider API). The updated DSL must pass Structurizr\n  `validate`. A stale workspace is `FAIL`; update it with `c4-architecture`."
+ },
+ {
+  "id": "S051",
+  "section": "4. Release-readiness attestations",
+  "last_edited": "2026-10-18",
+  "runs_since_edit": 25,
+  "words": 66,
+  "text": "- **Feature flag** — for new user-facing or risky behavior, the flag that\n  hides it and how to turn it off; or why it ships without one (ADR 0101).\n  A change that touches an \"Always a person\" path or migrates data and ships\n  without a flag needs that reason stated, not assumed. `PASS — not\n  applicable` covers changes with no new behavior: a refactor, docs, tests."
+ },
+ {
+  "id": "S052",
+  "section": "4. Release-readiness attestations",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 29,
+  "words": 13,
+  "text": "Use `PASS — not applicable: <reason>` when an axis genuinely does not apply."
+ },
+ {
+  "id": "S053",
+  "section": "5. Rollback",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 29,
+  "words": 21,
+  "text": "A concrete rollback plan is mandatory before GO. \"Revert the commit\" is enough\nonly when that is genuinely sufficient and safe."
+ },
+ {
+  "id": "S054",
+  "section": "6. Decision",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 29,
+  "words": 2,
+  "text": "GO requires:"
+ },
+ {
+  "id": "S055",
+  "section": "6. Decision",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 24,
+  "words": 10,
+  "text": "- unchanged reviewed candidate (a ledger-only commit is reported, §1);"
+ },
+ {
+  "id": "S056",
+  "section": "6. Decision",
+  "last_edited": "2026-10-18",
+  "runs_since_edit": 25,
+  "words": 9,
+  "text": "- the current-base check passing, or the base unchanged;"
+ },
+ {
+  "id": "S057",
+  "section": "6. Decision",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 29,
+  "words": 8,
+  "text": "- independent verification satisfied exactly as REVIEW required;"
+ },
+ {
+  "id": "S058",
+  "section": "6. Decision",
+  "last_edited": "2026-10-17",
+  "runs_since_edit": 25,
+  "words": 12,
+  "text": "- no unresolved BLOCKER, except a pre-existing one tracked as a follow-up;"
+ },
+ {
+  "id": "S059",
+  "section": "6. Decision",
+  "last_edited": "2026-10-16",
+  "runs_since_edit": 25,
+  "words": 4,
+  "text": "- `check-ledger.py --ship` passing;"
+ },
+ {
+  "id": "S060",
+  "section": "6. Decision",
+  "last_edited": "2026-09-01",
+  "runs_since_edit": 29,
+  "words": 10,
+  "text": "- every spec requirement carrying both implementation and verification evidence;"
+ },
+ {
+  "id": "S061",
+  "section": "6. Decision",
+  "last_edited": "2026-09-01",
+  "runs_since_edit": 29,
+  "words": 16,
+  "text": "- every REQUIRED finding resolved (fixed or refuted), explicitly risk-accepted,\n  or deferred with a concrete reason;"
+ },
+ {
+  "id": "S062",
+  "section": "6. Decision",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 29,
+  "words": 4,
+  "text": "- release-readiness attestations passed;"
+ },
+ {
+  "id": "S063",
+  "section": "6. Decision",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 29,
+  "words": 4,
+  "text": "- concrete rollback plan;"
+ },
+ {
+  "id": "S064",
+  "section": "6. Decision",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 29,
+  "words": 4,
+  "text": "- explained working-tree state."
+ },
+ {
+  "id": "S065",
+  "section": "6. Decision",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 29,
+  "words": 1,
+  "text": "Return:"
+ },
+ {
+  "id": "S066",
+  "section": "6. Decision",
+  "last_edited": "2026-11-13",
+  "runs_since_edit": 19,
+  "words": 236,
+  "text": "```markdown\n## Ship Decision: GO | NO-GO | SHIP BLOCKED\n\n**Risk: [Low | Medium | High] — [reason] · Depth: [Quick | Standard | Deep]** — before merging, read [the summary | the diff | every changed file, with a second person].\n\n### Read these yourself\n- [file] — matches `[glob]` in REVIEW.md \"Always a person\" (or: none)\n\n### Blockers\n- ...\n\n### Required findings / refutations / accepted risks\n- ...\n- Answered: [ids] — the spec or the owner's request already settles them (or: none)\n\n### Pre-existing findings (follow-ups)\n- [id] [disposition] — tracked in [ticket or observation-log row]\n\n### Fix at the source\n- [class] — [N] tickets; [lint rule | REVIEW.md line | CLAUDE.md line | Do not report]: \"[proposed text]\" (or: none)\n\n### Human time\n[ticket-stats.py header and row, exactly as printed]\n\n[One sentence: what these numbers mean for this ticket.]\n\n### Shipped-bug record\n- [observation-log row] · eval: `python3 tools/evals/review-eval/run.py --new [name] --repo [project] --fix [sha]` (or: not an escaped bug)\n\n### Requirement evidence\n- REQ-001: [implementing change] / [verification evidence]\n\n### Release-readiness\n- Infrastructure: ...\n- Documentation: ...\n- Feature flag: [flag name and how to turn it off | none, because ... | not applicable]\n\n### Rollback plan\n- Trigger conditions: ...\n- Procedure: ...\n- Recovery target: ...\n\n### Candidate\n- Base check: [Base: current | merged clean, checks pass]\n- Branch:\n- Commits:\n- Diff/status:\n```"
+ },
+ {
+  "id": "S067",
+  "section": "6. Decision",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 29,
+  "words": 19,
+  "text": "GO is a readiness verdict only. It does not authorize push, tag, deploy,\nrelease, protected-branch mutation, or history rewriting."
+ },
+ {
+  "id": "S068",
+  "section": "7. Next steps",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 24,
+  "words": 9,
+  "text": "After the verdict, ask the owner one multi-select question:"
+ },
+ {
+  "id": "S069",
+  "section": "7. Next steps",
+  "last_edited": "2026-11-21",
+  "runs_since_edit": 0,
+  "words": 42,
+  "text": "1. send the selected ADVISORY findings to `/build` as a fix round, listed by\n   id with the recommended action; `/test` and `/review` follow as usual.\n   Mark each pre-existing finding as pre-existing, and recommend a follow-up\n   ticket for it instead (`build.md` §Review fixes);"
+ },
+ {
+  "id": "S070",
+  "section": "7. Next steps",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 24,
+  "words": 12,
+  "text": "2. post the ship summary as a comment on the Jira ticket."
+ },
+ {
+  "id": "S071",
+  "section": "7. Next steps",
+  "last_edited": "2026-11-03",
+  "runs_since_edit": 19,
+  "words": 25,
+  "text": "Do nothing until the owner selects. With no selection, stop. A fix round\nmakes a new candidate, so this verdict no longer applies to it."
+ }
+]

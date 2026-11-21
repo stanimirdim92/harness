@@ -1,0 +1,686 @@
+[
+ {
+  "id": "R000",
+  "verdict": "USED",
+  "evidence": "49bbc2b9-684a-4833-a3f7-39b84dab7395: \"{\"skill\": \"review\", \"args\": \"LD-234\"}\"",
+  "note": "Frontmatter makes the command exist; invoked with the hinted argument shape in every post-edit run."
+ },
+ {
+  "id": "R001",
+  "verdict": "DUPLICATE",
+  "evidence": "docs/adr/README.md:142 (ADR 0132 '/test runs after every /build, before /review'); frontmatter R000",
+  "note": "Description and provenance only; frontmatter and ADR 0132 already say it."
+ },
+ {
+  "id": "R002",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"**Next:** run `/ship LD-593`\"",
+  "note": "Reports end by handing the verdict to /ship. Not stated in any reference /review loads."
+ },
+ {
+  "id": "R003",
+  "verdict": "DUPLICATE",
+  "evidence": "/var/www/html/personal/harness/claude/references/target-selection.md:17-20 ('announce the resolved target — Using: <target>'), which also says 'don't restate this in a command'",
+  "note": "Keep the pointer to target-selection.md; the announce rule is a restatement. Used in every run."
+ },
+ {
+  "id": "R004",
+  "verdict": "USED",
+  "evidence": "adba8200-6e18-47c5-8398-4b0929e05a25: \"**No valid handoff.** The BUILD COMPLETE message is in the `514-work` session,\"",
+  "note": "Also e8473dea 'I check that the candidate is unchanged'. Handoff rule partly restates target-selection.md:23-35."
+ },
+ {
+  "id": "R005",
+  "verdict": "USED",
+  "evidence": "b1cce9c1-8ce9-4aba-82cb-0c12616b31f4: \"It is BUILD `5f1167b2` plus test-only commit `8b94ccac`, which I confirmed contains only tests.\"",
+  "note": "Also a9abe07f, 040e3b39."
+ },
+ {
+  "id": "R006",
+  "verdict": "USED",
+  "evidence": "adba8200-6e18-47c5-8398-4b0929e05a25: \"**Undeclared working-tree change.** `.yarn/install-state.gz` is modified.\"",
+  "note": "Also a9abe07f round 2: production change after VERIFY led to REVIEW BLOCKED."
+ },
+ {
+  "id": "R007",
+  "verdict": "USED",
+  "evidence": "80a410e7-d140-4349-9a44-f37d0ff74a75: \"What I can do, and what the skill explicitly allows, is a **standalone review at your direct request**.\"",
+  "note": "Also offered in a9abe07f."
+ },
+ {
+  "id": "R008",
+  "verdict": "USED",
+  "evidence": "05c3f797-3977-4265-b4b8-5c6e363df92f: \"**Round:** 1, since there are no earlier LD-493 review files.\"",
+  "note": "Round counted in nearly every run."
+ },
+ {
+  "id": "R009",
+  "verdict": "USED",
+  "evidence": "7bb49947-701c-496a-98bf-84ca26d5bfe6: \"ls docs/reviews/LD-491-*.sarif 2>/dev/null | wc -l\"",
+  "note": "Exact command run in all post-edit sessions."
+ },
+ {
+  "id": "R010",
+  "verdict": "USED",
+  "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"## REVIEW BLOCKED: this would be round 4 ... Findings that came back in more than one round\"",
+  "note": "f449dd8d asked owner before round 4. Deviation: 3c6ffef2 ran rounds 4-6 after owner-requested fixes, no round-4 block."
+ },
+ {
+  "id": "R011",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"Independent verification:** PASS. Risk: Medium\"",
+  "note": "Checked in every post-11-13 run."
+ },
+ {
+  "id": "R012",
+  "verdict": "USED",
+  "evidence": "fe02f510-150f-44d5-a2a6-059548d06ebe: \"**Independent verification:** PASS. `/test` ran at Deep\"",
+  "note": "Record line produced consistently."
+ },
+ {
+  "id": "R013",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"**Independent verification: NOT REQUIRED.** The changes are tests and docs only.\"",
+  "note": "Exemption checked against changed files."
+ },
+ {
+  "id": "R014",
+  "verdict": "UNKNOWN",
+  "evidence": "0 /review runs after the 2026-11-20 edit",
+  "note": "No run to judge. Conflicts with R113 (production fix returns to /test)."
+ },
+ {
+  "id": "R015",
+  "verdict": "RARE-NEEDED",
+  "evidence": "No post-11-13 run lacked a /test result; earlier hits (038f50b0 11-13, 1a9c4498) predate the edit",
+  "note": "Guards the release gate against unverified candidates. Condition not seen since edit; earlier wording used often."
+ },
+ {
+  "id": "R016",
+  "verdict": "USED",
+  "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"The /test run did the mutation probes ... but skipped the full suite ... Review is blocked on that missing full suite. How should it proceed?\"",
+  "note": "Owner then overrode (OPEN-002); report recorded PASS by override."
+ },
+ {
+  "id": "R017",
+  "verdict": "USED",
+  "evidence": "adba8200-6e18-47c5-8398-4b0929e05a25: \"LD-514 needs a `/test` VERIFY PASS at **Deep** depth before I can review it.\"",
+  "note": "Names the depth as asked."
+ },
+ {
+  "id": "R018",
+  "verdict": "RARE-NEEDED",
+  "evidence": "Prohibition; no inline /test re-run found (b1cce9c1: 'No tests were run during review')",
+  "note": "Guards independence of the VERIFY gate. Second sentence is a maintainer note."
+ },
+ {
+  "id": "R019",
+  "verdict": "DUPLICATE",
+  "evidence": "/var/www/html/personal/harness/claude/references/reviewer-triggers.md:5-9",
+  "note": "Also USED (three reviewers every run); reviewer-triggers.md is read during /review (d4a0b946, 1e27523f)."
+ },
+ {
+  "id": "R020",
+  "verdict": "USED",
+  "evidence": "040e3b39-a6c1-4664-b23e-c5f01e7e84a2: \"Weakened-test guard (exit 1) listed:\"",
+  "note": "Implemented through the script in R021."
+ },
+ {
+  "id": "R021",
+  "verdict": "USED",
+  "evidence": "fe02f510-150f-44d5-a2a6-059548d06ebe: \"python3 /home/stanimir/.claude/skills/code-review-and-quality/scripts/weakened-tests.py --base 357927e1\"",
+  "note": "Run in every post-edit review."
+ },
+ {
+  "id": "R022",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"Weakened tests: none found.\"",
+  "note": ""
+ },
+ {
+  "id": "R023",
+  "verdict": "USED",
+  "evidence": "3c6ffef2-5ec6-4f67-997f-5e9f6d2f9a2a: \"Weakened-test guard listed 3 changes — resolve each as a finding or a stated reason\"",
+  "note": "List passed to code-reviewer in packet."
+ },
+ {
+  "id": "R024",
+  "verdict": "RARE-NEEDED",
+  "evidence": "No final exit 2 from weakened-tests.py in raw tool results; corpus2 search for 'Weakened tests: Not verified' empty",
+  "note": "Guards a false 'clean' on the release gate."
+ },
+ {
+  "id": "R025",
+  "verdict": "USED",
+  "evidence": "fe02f510-150f-44d5-a2a6-059548d06ebe: \"git show 357927e1:REVIEW.md\"",
+  "note": "Base-branch read in all runs. 04cd7fbd slip: reviewers read root copy (matched base)."
+ },
+ {
+  "id": "R026",
+  "verdict": "USED",
+  "evidence": "1003c22b-a1cc-4f84-ac2b-dfd84c160443: \"Always a person:** matched `bootstrap/app.php` and `EnsureAccountIsActive.php`.\"",
+  "note": "Lead-in to R027-R028."
+ },
+ {
+  "id": "R027",
+  "verdict": "USED",
+  "evidence": "3c6ffef2-5ec6-4f67-997f-5e9f6d2f9a2a: \"always-person.py --base 4319427e; echo exit=$?\"",
+  "note": ""
+ },
+ {
+  "id": "R028",
+  "verdict": "USED",
+  "evidence": "48eb39d3-867f-4918-8ab4-6fda99ef2e1b: \"\"Always a person\" matches 2 files, so every specialist runs\"",
+  "note": "Exit-1 branch used; exit-2 branch never triggered (3bde1d32 usage error was rerun)."
+ },
+ {
+  "id": "R029",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"Risk: Medium, a frontend display change. Depth: Standard, which is the floor `REVIEW.md` sets.\"",
+  "note": "Packets also say 'Report every ADVISORY finding too.'"
+ },
+ {
+  "id": "R030",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"\"description\": \"LD-593 code review round 1\"\"",
+  "note": "Lead-in for packet list."
+ },
+ {
+  "id": "R031",
+  "verdict": "DUPLICATE",
+  "evidence": "/var/www/html/personal/harness/claude/references/reviewer-triggers.md:30 ('the integrated diff')",
+  "note": "Also followed in every packet."
+ },
+ {
+  "id": "R032",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"Project REVIEW.md (from the base branch, applies to this review): .../REVIEW.md — read it whole.\"",
+  "note": "Not in reviewer-triggers.md; unique here."
+ },
+ {
+  "id": "R033",
+  "verdict": "USED",
+  "evidence": "f49b01e3-42bc-41e2-a13a-c0ebd008713f: \"Root-Cause Trace: docs/tasks/LD-487-plan.md §\"Root-Cause Trace\" — walk it against the code\"",
+  "note": "Also 7bb49947."
+ },
+ {
+  "id": "R034",
+  "verdict": "DUPLICATE",
+  "evidence": "/var/www/html/personal/harness/claude/references/reviewer-triggers.md:31 ('a one-line goal')",
+  "note": "Followed: 04cd7fbd packet 'Goal: Meta reach figures ...'."
+ },
+ {
+  "id": "R035",
+  "verdict": "DUPLICATE",
+  "evidence": "/var/www/html/personal/harness/claude/references/reviewer-triggers.md:32 ('relevant acceptance criteria')",
+  "note": "Followed in packets."
+ },
+ {
+  "id": "R036",
+  "verdict": "DUPLICATE",
+  "evidence": "/var/www/html/personal/harness/claude/references/reviewer-triggers.md:33 ('build/verify evidence needed to understand what was checked')",
+  "note": "Followed in packets."
+ },
+ {
+  "id": "R037",
+  "verdict": "DUPLICATE",
+  "evidence": "claude/commands/review.md R023 ('Exit 1: give the list to code-reviewer')",
+  "note": "Same instruction twice in this file."
+ },
+ {
+  "id": "R038",
+  "verdict": "DUPLICATE",
+  "evidence": "/var/www/html/personal/harness/claude/references/reviewer-triggers.md:39-44; /var/www/html/personal/harness/claude/agents/blind-reviewer.md:13-17",
+  "note": "Followed: no goal text in ~130 blind packets. Ticket ids leak via file paths (LD-223.diff)."
+ },
+ {
+  "id": "R039",
+  "verdict": "DUPLICATE",
+  "evidence": "/var/www/html/personal/harness/claude/references/reviewer-triggers.md:45 ('Do not give reviewers the full spec/plan')",
+  "note": "Prohibition; also code-reviewer.md:282."
+ },
+ {
+  "id": "R040",
+  "verdict": "USED",
+  "evidence": "fe02f510-150f-44d5-a2a6-059548d06ebe: \"\"description\": \"Distributed review LD-546\", \"prompt\": \"Distributed-systems review, round 1 (Deep tier)\"",
+  "note": "Security on every round; specialist by trigger."
+ },
+ {
+  "id": "R041",
+  "verdict": "USED",
+  "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"All gate scripts are clean ... Starting the three reviewers now, in parallel.\"",
+  "note": "'Do not pass findings' half duplicates reviewer-triggers.md:45; 'wait' half duplicates AGENTS.md:193."
+ },
+ {
+  "id": "R042",
+  "verdict": "DUPLICATE",
+  "evidence": "/var/www/html/personal/harness/claude/AGENTS.md:199-200 ('Agent definitions own default models. Override upward only ...')",
+  "note": "No model overrides seen in review dispatches."
+ },
+ {
+  "id": "R043",
+  "verdict": "NOT-FOLLOWED",
+  "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"The built-in code review is turned off in your settings, so I am recording it as not available.\"",
+  "note": "Every round 1 since edit: skill disabled/absent (3c6ffef2, fe02f510, 04cd7fbd). Config defect; 8a82692 may fix."
+ },
+ {
+  "id": "R044",
+  "verdict": "USED",
+  "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"{\"skill\": \"code-review\", \"args\": \"high LD-225\"}\"",
+  "note": "Standard mapped to high correctly; only one invocation since edit."
+ },
+ {
+  "id": "R045",
+  "verdict": "USED",
+  "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"Review round 1, Risk Medium · Depth Standard. / {\"skill\": \"code-review\", \"args\": \"high LD-225\"}\"",
+  "note": "Called right after the three persona dispatches. 'not available' record also used (3c6ffef2, fe02f510)."
+ },
+ {
+  "id": "R046",
+  "verdict": "DEAD",
+  "evidence": "Searches 'CR-[0-9]', 'ReportFindings', 'Built-in overlap', '\"name\": \"code-review\"', 'reviewed range' in 5 post-11-18 sessions: no hits",
+  "note": "Trial never ran: skill disabled. Not evidence the clause is useless; re-audit after 8a82692."
+ },
+ {
+  "id": "R047",
+  "verdict": "UNKNOWN",
+  "evidence": "Prohibition; built-in review never ran, so the /verify offer never appeared",
+  "note": "Re-audit once the trial runs."
+ },
+ {
+  "id": "R048",
+  "verdict": "DEAD",
+  "evidence": "Search 'CR-[0-9]' in post-11-18 corpus2: no hits",
+  "note": "Trial never produced findings (skill disabled). Do not prune before a real trial run."
+ },
+ {
+  "id": "R049",
+  "verdict": "DEAD",
+  "evidence": "Search 'CR-[0-9]' in 5 post-11-18 sessions: no hits",
+  "note": "Same cause as R048."
+ },
+ {
+  "id": "R050",
+  "verdict": "DEAD",
+  "evidence": "Searches 'CR-[0-9]' and '\"name\": \"code-review\"' in 5 post-11-18 sessions: no hits",
+  "note": "Same cause as R048."
+ },
+ {
+  "id": "R051",
+  "verdict": "DEAD",
+  "evidence": "Search 'Built-in overlap' post-11-18: no hits",
+  "note": "Same cause as R048; R096's 'not available' branch was used instead."
+ },
+ {
+  "id": "R052",
+  "verdict": "USED",
+  "evidence": "41e679ab-d8f1-400f-92e2-663f195faccd: \"git diff --stat 009594c5..HEAD -- . ':!docs/reviews'\"",
+  "note": "Fix diff since newest review sha."
+ },
+ {
+  "id": "R053",
+  "verdict": "USED",
+  "evidence": "f49b01e3-42bc-41e2-a13a-c0ebd008713f: \"Round-1 findings and resolutions (docs/reviews/LD-487-e017c797...\"",
+  "note": ""
+ },
+ {
+  "id": "R054",
+  "verdict": "USED",
+  "evidence": "49bbc2b9-684a-4833-a3f7-39b84dab7395: \"**BLIND-12 is dropped.** It repeats BLIND-2 at the same line, which the full PHPStan run refuted in round 1.\"",
+  "note": "Also d4a0b946 SARIF 'droppedRepeat'."
+ },
+ {
+  "id": "R055",
+  "verdict": "USED",
+  "evidence": "41e679ab-d8f1-400f-92e2-663f195faccd: \"Distributed-systems ran because the diff changes the conditional UPDATE.\"",
+  "note": "Security re-run every later round."
+ },
+ {
+  "id": "R056",
+  "verdict": "USED",
+  "evidence": "3c6ffef2-5ec6-4f67-997f-5e9f6d2f9a2a: \"13 found and not reported in this round.\"",
+  "note": "Exact phrase in 8 sessions."
+ },
+ {
+  "id": "R057",
+  "verdict": "USED",
+  "evidence": "41e679ab-d8f1-400f-92e2-663f195faccd: \"Weakened-test guard flagged one item for the whole candidate\"",
+  "note": "Ledger also re-run each round."
+ },
+ {
+  "id": "R058",
+  "verdict": "USED",
+  "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"Lowered from REQUIRED: one-off command and 0 such rows on main DB.\"",
+  "note": "Change made with a stated reason."
+ },
+ {
+  "id": "R059",
+  "verdict": "USED",
+  "evidence": "3c6ffef2-5ec6-4f67-997f-5e9f6d2f9a2a: \"`/test` should check this in a browser on the Snapshot page for both Meta and Google ads.\"",
+  "note": "CODE-9 = BLIND-8 routed to the verifier with page and target."
+ },
+ {
+  "id": "R060",
+  "verdict": "DUPLICATE",
+  "evidence": "claude/commands/review.md R061-R062 (the two items it introduces)",
+  "note": "Lead-in only; the actions live in R061-R062."
+ },
+ {
+  "id": "R061",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"**Blind review summary:** its own reading of the diff matches the goal.\"",
+  "note": ""
+ },
+ {
+  "id": "R062",
+  "verdict": "USED",
+  "evidence": "f49b01e3-42bc-41e2-a13a-c0ebd008713f: \"The intent-dependent one, BLIND-23 ... I rate it ADVISORY\"",
+  "note": "Settled against the spec."
+ },
+ {
+  "id": "R063",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"**Answered by the spec** / - BLIND-3 (REQ-003)\"",
+  "note": "BLOCKER-never-answered part also in findings.md:62-64."
+ },
+ {
+  "id": "R064",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"**CODE-1 = BLIND-5** · confirmed · REQ-001\"",
+  "note": "Ids, confidence, resolution carried into SARIF."
+ },
+ {
+  "id": "R065",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"Every \"Always check\" rule was answered.\"",
+  "note": "Send-back and RULE-# branch never triggered (search 'RULE-[0-9]' empty)."
+ },
+ {
+  "id": "R066",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"\"description\": \"Independent check of one finding\", \"run_in_background\": true, \"prompt\": \"Independent check of ONE review finding. Try to refute it.\"",
+  "note": "Deviation: 5d6c5543 check packet to blind-reviewer kept 'LD-225 REQ-008' in the claim."
+ },
+ {
+  "id": "R067",
+  "verdict": "USED",
+  "evidence": "41e679ab-d8f1-400f-92e2-663f195faccd: \"BLIND-39 = CODE-28 = DIST-9 (independent check: CONFIRMED)\"",
+  "note": ""
+ },
+ {
+  "id": "R068",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"- **BLIND-1 = CODE-3 = BLIND-4** · the independent check refuted it, so confidence is low\"",
+  "note": "Kept as REQUIRED with evidence."
+ },
+ {
+  "id": "R069",
+  "verdict": "USED",
+  "evidence": "48eb39d3-867f-4918-8ab4-6fda99ef2e1b: \"2 BLOCKER (both UNSURE, low confidence)\"",
+  "note": "Findings kept."
+ },
+ {
+  "id": "R070",
+  "verdict": "USED",
+  "evidence": "3c6ffef2-5ec6-4f67-997f-5e9f6d2f9a2a: \"Realistic-but-rare state is UNSURE, not REFUTED.\"",
+  "note": "Passed into check packets; also fe02f510."
+ },
+ {
+  "id": "R071",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"Not run in a later round:** independent check (no new BLOCKER or REQUIRED)\"",
+  "note": "41e679ab round 3 checked only BLIND-39/40."
+ },
+ {
+  "id": "R072",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"Gap sweep. Look ONLY for defects not already on the list below ... at most 8 new findings (number them GAP-1…)\"",
+  "note": "Persona side duplicated at code-reviewer.md:150-157; tier gate at risk-tiers.md:43."
+ },
+ {
+  "id": "R073",
+  "verdict": "USED",
+  "evidence": "a9abe07f-c7b8-413f-b270-e0b4a02d4c54: \"I'm recording it as STALE-1 (= BLIND-18), raised to REQUIRED because stale instruction lines are REQUIRED.\"",
+  "note": "Lead-in to R074."
+ },
+ {
+  "id": "R074",
+  "verdict": "USED",
+  "evidence": "3c6ffef2-5ec6-4f67-997f-5e9f6d2f9a2a: \"stale-instructions.py --base 4319427e; echo exit=$?\"",
+  "note": ""
+ },
+ {
+  "id": "R075",
+  "verdict": "USED",
+  "evidence": "a9abe07f-c7b8-413f-b270-e0b4a02d4c54: \"recording it as STALE-1 ... raised to REQUIRED\"",
+  "note": "Exit-2 branch never triggered."
+ },
+ {
+  "id": "R076",
+  "verdict": "USED",
+  "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"check-ledger.py LD-223; echo lg=$?\"",
+  "note": ""
+ },
+ {
+  "id": "R077",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"python3 /home/stanimir/.claude/skills/spec-driven-development/scripts/check-ledger.py LD-593\"",
+  "note": ""
+ },
+ {
+  "id": "R078",
+  "verdict": "USED",
+  "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"r(\"LEDGER-1\",\"REQUIRED\",\"high\",\"ledger\",\"docs/specs/LD-596-SPEC.md\",11,\"check-ledger FAIL: ...\"",
+  "note": "Warnings as ADVISORY too (04cd7fbd LEDGER-1). Exit-2 branch never triggered."
+ },
+ {
+  "id": "R079",
+  "verdict": "USED",
+  "evidence": "41e679ab-d8f1-400f-92e2-663f195faccd: \"**Findings: 0 BLOCKER · 2 REQUIRED · 11 ADVISORY.**\"",
+  "note": "Count line first in every report."
+ },
+ {
+  "id": "R080",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"**Findings: 0 BLOCKER · 3 REQUIRED · 8 ADVISORY · 3 pre-existing**\"",
+  "note": ""
+ },
+ {
+  "id": "R081",
+  "verdict": "USED",
+  "evidence": "3c6ffef2-5ec6-4f67-997f-5e9f6d2f9a2a: \"(round 2, reviewing the fix diff from fbf7dd56 to 41665dd3)\"",
+  "note": ""
+ },
+ {
+  "id": "R082",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"**Candidate:** `worktree-LD-593`, `d9400de6..63c51d7e`\"",
+  "note": ""
+ },
+ {
+  "id": "R083",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"BUILD commit `63c51d7e`. There are no test-only commits after it.\"",
+  "note": ""
+ },
+ {
+  "id": "R084",
+  "verdict": "DUPLICATE",
+  "evidence": "claude/commands/review.md R012-R013 (record PASS / NOT REQUIRED)",
+  "note": "Also stale: omits DEFERRED (R014) and STALE (R016) values."
+ },
+ {
+  "id": "R085",
+  "verdict": "DUPLICATE",
+  "evidence": "claude/commands/review.md R029 ('Record **Risk: ... · Depth: ...**')",
+  "note": "Same record line twice in this file."
+ },
+ {
+  "id": "R086",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"**Reviewers:** code, blind and security. No distributed-systems trigger matched.\"",
+  "note": ""
+ },
+ {
+  "id": "R087",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"**`REVIEW.md`:** the repo-root file from the base.\"",
+  "note": ""
+ },
+ {
+  "id": "R088",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"Always a person: no match (11 files).\"",
+  "note": ""
+ },
+ {
+  "id": "R089",
+  "verdict": "USED",
+  "evidence": "41e679ab-d8f1-400f-92e2-663f195faccd: \"every \"Always check\" rule was answered\"",
+  "note": ""
+ },
+ {
+  "id": "R090",
+  "verdict": "USED",
+  "evidence": "41e679ab-d8f1-400f-92e2-663f195faccd: \"**Stale instructions:** none found.\"",
+  "note": ""
+ },
+ {
+  "id": "R091",
+  "verdict": "USED",
+  "evidence": "41e679ab-d8f1-400f-92e2-663f195faccd: \"**Weakened tests:** the phpstan baseline lost two entries ... this tightens the checks\"",
+  "note": ""
+ },
+ {
+  "id": "R092",
+  "verdict": "USED",
+  "evidence": "fe02f510-150f-44d5-a2a6-059548d06ebe: \"Ledger: clean, with one warning (LEDGER-1).\"",
+  "note": ""
+ },
+ {
+  "id": "R093",
+  "verdict": "USED",
+  "evidence": "d4a0b946-234b-4782-ac8e-a129f6688f07: \"### Code-reviewer: APPROVE, 9 ADVISORY / ### Blind-reviewer: 15 ADVISORY / ### Security-auditor: Nothing to fix\"",
+  "note": "Mostly not followed: per-reviewer lines in ~6 of 38 reports; most group by disposition."
+ },
+ {
+  "id": "R094",
+  "verdict": "USED",
+  "evidence": "41e679ab-d8f1-400f-92e2-663f195faccd: \"BLIND-40 (independent check: REFUTED, low confidence) ... The resolver test at `GoogleAddressResolverTest.php:303` already pins the change.\"",
+  "note": ""
+ },
+ {
+  "id": "R095",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"**GAP-1** · confirmed · pre-existing · REQ-001\"",
+  "note": "41e679ab: 'Gap sweep and built-in review: not run' in a later round."
+ },
+ {
+  "id": "R096",
+  "verdict": "DUPLICATE",
+  "evidence": "claude/commands/review.md R044 ('record Built-in code review: not available') and R051 (level, range, overlap line)",
+  "note": "Followed: 04cd7fbd 'Built-in code review: not available in this session.'"
+ },
+ {
+  "id": "R097",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"**CODE-1 = BLIND-5** · confirmed · REQ-001\"",
+  "note": ""
+ },
+ {
+  "id": "R098",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"REQ-002: the Meta branch of `reachDisplay`. Proven only by unit tests with synthetic bounds\"",
+  "note": "Gaps stated explicitly."
+ },
+ {
+  "id": "R099",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"A future reader may think the lower bound affects the number shown.\"",
+  "note": "Lead-in for R100-R105."
+ },
+ {
+  "id": "R100",
+  "verdict": "USED",
+  "evidence": "77ec7fb0-7390-487c-9dc3-9445adff4751: \"All 12 ids are listed below.\"",
+  "note": ""
+ },
+ {
+  "id": "R101",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"r(\"CODE-3\", \"REQUIRED\", \"Raised: duplicate of BLIND-1. ...\"",
+  "note": "Deviation: 040e3b39 'Duplicate of CODE-3; downgraded from REQUIRED' breaks 'Never lower one'."
+ },
+ {
+  "id": "R102",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"Fix: give \"This month\" a distinct value and point `:505` at it.\"",
+  "note": ""
+ },
+ {
+  "id": "R103",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"**BLIND-6:** add a short comment to `reachDisplay`\"",
+  "note": ""
+ },
+ {
+  "id": "R104",
+  "verdict": "USED",
+  "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"**Answered:** BLIND-8, BLIND-9, BLIND-16, BLIND-17, BLIND-19, BLIND-21 (the spec's reuse rule, TD-010, REQ-009/\"",
+  "note": ""
+ },
+ {
+  "id": "R105",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"Fix: remove the parameter and the dead field ... Your choice: fix now, or accept.\"",
+  "note": "Example shape copied in reports."
+ },
+ {
+  "id": "R106",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"**SARIF:** `docs/reviews/LD-593-63c51d7e.sarif`, committed alone as `76b0260a`.\"",
+  "note": ""
+ },
+ {
+  "id": "R107",
+  "verdict": "USED",
+  "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"SHA=$(git rev-parse --short HEAD) ... docs/reviews/LD-223-c360082e.sarif\"",
+  "note": ""
+ },
+ {
+  "id": "R108",
+  "verdict": "USED",
+  "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"aliases=[\"CODE-10\"]\"",
+  "note": "Each member keeps its own result with aliases."
+ },
+ {
+  "id": "R109",
+  "verdict": "USED",
+  "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"python3 ~/.claude/skills/code-review-and-quality/scripts/review-noise.py --classes 2>&1 | head -30\"",
+  "note": "Classes listed before writing SARIF."
+ },
+ {
+  "id": "R110",
+  "verdict": "USED",
+  "evidence": "fe02f510-150f-44d5-a2a6-059548d06ebe: \"review-noise.py --classes\"",
+  "note": ""
+ },
+ {
+  "id": "R111",
+  "verdict": "USED",
+  "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"git add docs/reviews/LD-223-c360082e.sarif && git diff --cached --name-only && git commit -q -m \"review: LD-223 round 1 findings\"",
+  "note": ""
+ },
+ {
+  "id": "R112",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"**Next:** run `/ship LD-593`, or `/build LD-593 review fixes` first\"",
+  "note": "Raw transcript: next action came from the user's /build at 11:35."
+ },
+ {
+  "id": "R113",
+  "verdict": "USED",
+  "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"**Independent verification: PASS.** `/test` re-checked a543e122\"",
+  "note": "Round 2 after a production fix ran /build, /test, /review. Contradicts R014 (fix rounds skip /test, ADR 0144)."
+ }
+]

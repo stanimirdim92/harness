@@ -10,8 +10,8 @@
 # `-F` / `--file`. A commit that reuses a message (`--amend --no-edit`, `-C`,
 # `-c`, `--fixup`, `--squash`) or opens an editor is allowed: there is no new
 # message to check, or none this hook can see. A file it cannot read is allowed
-# too — a broken hook must not wedge a build. `Task:` is not required: review
-# fixes and other unplanned commits have no task id.
+# too — a broken hook must not wedge a build. `Task:` is not required: an
+# unplanned commit has no task id.
 #
 # Exit 0 always; the decision is JSON on stdout, per
 # https://code.claude.com/docs/en/hooks.

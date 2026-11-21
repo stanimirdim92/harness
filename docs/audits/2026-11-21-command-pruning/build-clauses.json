@@ -1,0 +1,978 @@
+[
+ {
+  "id": "B000",
+  "section": "",
+  "last_edited": "2026-10-18",
+  "runs_since_edit": 52,
+  "words": 27,
+  "text": "---\ndescription: Dispatch implementation for one or more planned tasks by workstream\nargument-hint: \"[task number(s) from docs/tasks/[TICKET]-todo.md, a description naming planned task(s), or <TICKET> review fixes]\"\n---"
+ },
+ {
+  "id": "B001",
+  "section": "",
+  "last_edited": "2026-08-22",
+  "runs_since_edit": 55,
+  "words": 5,
+  "text": "Dispatch `executor` agents for implementation."
+ },
+ {
+  "id": "B002",
+  "section": "",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 16,
+  "text": "`/build` owns orchestration and integration. The executor owns implementation\ndiscipline, tests, verification, and scoped local commits."
+ },
+ {
+  "id": "B003",
+  "section": "1. Resolve scope before dispatch",
+  "last_edited": "2026-08-29",
+  "runs_since_edit": 55,
+  "words": 13,
+  "text": "Resolve the target per `../references/target-selection.md`, and announce it (\"Using: <target>\") before anything else."
+ },
+ {
+  "id": "B004",
+  "section": "1. Resolve scope before dispatch",
+  "last_edited": "2026-09-06",
+  "runs_since_edit": 55,
+  "words": 60,
+  "text": "Read the selected plan's header, task index, dependencies/checkpoints, and\nVerification Strategy. Resolve full task packets from its designated local\ntodo or external tracker, honoring project artifact locations; default to\n`docs/tasks/[TICKET]-todo.md` only when no alternative is designated. If the\nauthoritative packets cannot be read, report the missing source and stop;\ndo not reconstruct them from summaries or a stale local copy."
+ },
+ {
+  "id": "B005",
+  "section": "Require a current plan",
+  "last_edited": "2026-09-01",
+  "runs_since_edit": 55,
+  "words": 8,
+  "text": "Check the plan's own header before dispatching anything:"
+ },
+ {
+  "id": "B006",
+  "section": "Require a current plan",
+  "last_edited": "2026-09-03",
+  "runs_since_edit": 55,
+  "words": 18,
+  "text": "- The **plan's** `Status` must read `Approved`. `Draft`, `Needs replan` or\n  `Superseded` stops dispatch and returns to `/plan`."
+ },
+ {
+  "id": "B007",
+  "section": "Require a current plan",
+  "last_edited": "2026-09-03",
+  "runs_since_edit": 55,
+  "words": 43,
+  "text": "- The **spec's** `Status` must still read `Approved` too. A plan approved\n  against a spec that has since gone `Needs reapproval` or `Superseded` is\n  building to requirements nobody currently stands behind — check the spec\n  header, not just the plan's record of it."
+ },
+ {
+  "id": "B008",
+  "section": "Require a current plan",
+  "last_edited": "2026-09-03",
+  "runs_since_edit": 55,
+  "words": 16,
+  "text": "- Retrieve the pinned spec and diff it:\n  `git show <sha>:<spec path>` against the working copy."
+ },
+ {
+  "id": "B009",
+  "section": "Require a current plan",
+  "last_edited": "2026-11-18",
+  "runs_since_edit": 16,
+  "words": 87,
+  "text": "A difference is not automatically a stale plan; an editorial fix changes the\nfile without changing behavior. Read the diff before deciding. Editorial only →\nre-pin the new commit, note it, proceed. Behavioral, **or any change to the\n`Status` line** → the plan is stale: set it `Needs replan` and stop. If the\npinned sha no longer resolves (rebased or squashed away), treat the plan as\n`Needs replan` rather than guessing. Report which path was taken; a difference\nwaved through without the diff defeats the check\n(`../references/spec-pin.md`)."
+ },
+ {
+  "id": "B010",
+  "section": "Resume from committed progress",
+  "last_edited": "2026-10-02",
+  "runs_since_edit": 54,
+  "words": 110,
+  "text": "Read each selected task's `Status:` in the todo as committed at `HEAD` (`git\nshow HEAD:<todo path>`), not the working copy. `Done` means the commit that\ncompleted the task is already in this branch: skip it and report it as already\ncomplete. `Pending` tasks are dispatched as usual. A re-run after a crash, a\ncompaction, or in a fresh session therefore resumes at the first unfinished\ntask instead of redoing or guessing. A `Done` task whose acceptance criteria\nthe integrated verification later fails is not trusted for being marked: it\nreturns to an executor like any other failure. External trackers keep their own\nstatus; update it at the same point instead."
+ },
+ {
+  "id": "B011",
+  "section": "Tasks that are not `/build`'s",
+  "last_edited": "2026-11-13",
+  "runs_since_edit": 32,
+  "words": 102,
+  "text": "A task the plan gives to a later stage or to a person — a browser check that\n`/test` runs, a measurement on production-size data, a sign-off — is not\n`/build`'s to implement, whatever workstream it sits in. Do not dispatch an\nexecutor for it, leave its `Status` as the plan set it, and do not count it as\nunimplemented: when every task `/build` owns is implemented and the\ncheckpoints pass, report **BUILD COMPLETE** and list those tasks under\n**Handed on**, each with its stage (`/test`) or person. A checkpoint that\ndepends on such a task runs without it and says so."
+ },
+ {
+  "id": "B012",
+  "section": "Tasks that are not `/build`'s",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 5,
+  "text": "For each selected task resolve:"
+ },
+ {
+  "id": "B013",
+  "section": "Tasks that are not `/build`'s",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 5,
+  "text": "- outcome and acceptance criteria;"
+ },
+ {
+  "id": "B014",
+  "section": "Tasks that are not `/build`'s",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 2,
+  "text": "- dependencies;"
+ },
+ {
+  "id": "B015",
+  "section": "Tasks that are not `/build`'s",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 3,
+  "text": "- planned workstream;"
+ },
+ {
+  "id": "B016",
+  "section": "Tasks that are not `/build`'s",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 4,
+  "text": "- expected file/area scope;"
+ },
+ {
+  "id": "B017",
+  "section": "Tasks that are not `/build`'s",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 2,
+  "text": "- verification;"
+ },
+ {
+  "id": "B018",
+  "section": "Tasks that are not `/build`'s",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 3,
+  "text": "- required skills."
+ },
+ {
+  "id": "B019",
+  "section": "Tasks that are not `/build`'s",
+  "last_edited": "2026-09-24",
+  "runs_since_edit": 54,
+  "words": 77,
+  "text": "Honor `/plan`'s workstream assignment. For a task in an older approved plan that\nrecords no workstream, infer one using the same rules. Work with no approved\nplan is not `/build`'s input: it goes to `/plan` first. Stop before dispatch when the recorded workstream\nconflicts with dependencies, or when the task is ambiguous — meaning you cannot\nstate the expected observable behavior from the packet and plan without\ninventing a decision. Report what is missing instead of guessing."
+ },
+ {
+  "id": "B020",
+  "section": "2. Dispatch by workstream",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 9,
+  "text": "Use **one executor per workstream, not one per task**."
+ },
+ {
+  "id": "B021",
+  "section": "2. Dispatch by workstream",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 11,
+  "text": "- first selected task in a workstream -> fresh named `executor`;"
+ },
+ {
+  "id": "B022",
+  "section": "2. Dispatch by workstream",
+  "last_edited": "2026-11-13",
+  "runs_since_edit": 32,
+  "words": 32,
+  "text": "- later tasks in that workstream -> resume the same executor only when both\n  hold: it was idle under about 15 minutes, and its context is under about\n  350k tokens (ADR 0116);"
+ },
+ {
+  "id": "B023",
+  "section": "2. Dispatch by workstream",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 50,
+  "words": 30,
+  "text": "- otherwise -> a fresh executor. Its packet carries the task packet, the\n  previous handoff report, and the workstream's commits so far, so nothing the\n  old executor knew is lost;"
+ },
+ {
+  "id": "B024",
+  "section": "2. Dispatch by workstream",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 50,
+  "words": 11,
+  "text": "- tasks inside a workstream stay sequential and follow dependency order;"
+ },
+ {
+  "id": "B025",
+  "section": "2. Dispatch by workstream",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 50,
+  "words": 13,
+  "text": "- among dependency-ready tasks, dispatch those with no checkpoint dependency\n  before checkpoint-gated ones."
+ },
+ {
+  "id": "B026",
+  "section": "2. Dispatch by workstream",
+  "last_edited": "2026-11-07",
+  "runs_since_edit": 37,
+  "words": 63,
+  "text": "A task whose spec or task packet links a Figma design gets `figma-executor`\nin place of `executor`, fresh or resumed. Every other task gets `executor`.\nThe two share one body and one set of gates. Only the Figma copy loads the\nFigma tools, and only the read-only design-to-code set, because a subagent\nloads every granted tool in full on every call (ADR 0118)."
+ },
+ {
+  "id": "B027",
+  "section": "2. Dispatch by workstream",
+  "last_edited": "2026-11-13",
+  "runs_since_edit": 32,
+  "words": 22,
+  "text": "A resume after the cache expired rewrites the whole context at full price. A\nlarge context also slows and degrades the executor."
+ },
+ {
+  "id": "B028",
+  "section": "Checkout and infrastructure readiness",
+  "last_edited": "2026-11-13",
+  "runs_since_edit": 32,
+  "words": 63,
+  "text": "Run sequential executors in the existing ticket checkout; omit an isolation\nargument. The executor definition deliberately has no unconditional isolation.\nFor concurrent writers, explicitly set `isolation: worktree` on each dispatch\nand verify its returned checkout path before accepting implementation evidence.\nIf the runtime cannot provide separate checkouts, queue the workstreams.\nThe test-engineer keeps its own isolated checkout, and reviewers keep\nindependent contexts (docs/adr/0058)."
+ },
+ {
+  "id": "B029",
+  "section": "Checkout and infrastructure readiness",
+  "last_edited": "2026-09-18",
+  "runs_since_edit": 54,
+  "words": 104,
+  "text": "Before dispatch, establish the assigned Git checkout and branch. Refuse the main\ncheckout's default branch, detached HEAD, or unverifiable Git state. When the\nproject provides executable `bin/worktree-doctor.sh`, run it with\n`--infrastructure` and require exit 0. The contract is a fast, nonmutating check\nthat needs no installed project dependencies; nonzero output names the repair.\nIf the main registered checkout provides the doctor but the ticket checkout\nlacks it, reconcile the project runner changes first. Do not force arbitrary\nmerges or refresh dependencies merely because a ticket is behind the default\nbranch. Claude's dispatch hook enforces this; other runtimes must perform the\nsame readiness check explicitly."
+ },
+ {
+  "id": "B030",
+  "section": "Checkout and infrastructure readiness",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 50,
+  "words": 17,
+  "text": "When the project's worktree setup script (such as `bin/worktree-setup.sh`)\nfails, do not replay its steps by hand:"
+ },
+ {
+  "id": "B031",
+  "section": "Checkout and infrastructure readiness",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 50,
+  "words": 9,
+  "text": "- report the failing step and its error output;"
+ },
+ {
+  "id": "B032",
+  "section": "Checkout and infrastructure readiness",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 50,
+  "words": 16,
+  "text": "- use an override only when the project documents one, and name it in the\n  report;"
+ },
+ {
+  "id": "B033",
+  "section": "Checkout and infrastructure readiness",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 50,
+  "words": 16,
+  "text": "- with no documented override, the checkout is not ready: report BUILD\n  BLOCKED with route `owner`;"
+ },
+ {
+  "id": "B034",
+  "section": "Checkout and infrastructure readiness",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 50,
+  "words": 9,
+  "text": "- never copy an improvised workaround into executor packets."
+ },
+ {
+  "id": "B035",
+  "section": "Test baseline",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 50,
+  "words": 58,
+  "text": "When the tree has failures before the change, record them once before\ndispatch. Run the suite once with machine-readable output: JUnit XML (for\nexample `--log-junit <file>` or `--reporter=junit`) or the runner's\nequivalent. Save it in the scratchpad. Do not rerun the suite to re-parse its\ntext output. Each later comparison writes JUnit too and compares by test\nidentity:"
+ },
+ {
+  "id": "B036",
+  "section": "Test baseline",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 50,
+  "words": 6,
+  "text": "```bash\npython3 ~/.claude/skills/executor-development-discipline/scripts/junit-diff.py <baseline.xml> <after.xml>\n```"
+ },
+ {
+  "id": "B037",
+  "section": "Test baseline",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 50,
+  "words": 29,
+  "text": "It exits 1 on a new failure, a newly skipped test, or a baseline test missing\nfrom the later run. Pass the baseline path to executors in the packet."
+ },
+ {
+  "id": "B038",
+  "section": "Checkpoints gate dependency-readiness",
+  "last_edited": "2026-08-28",
+  "runs_since_edit": 55,
+  "words": 71,
+  "text": "Honor every checkpoint recorded in the plan. A task ordered after a checkpoint\nis not dependency-ready until that checkpoint's criteria have been executed and\npassed — run them at the boundary; do not take an upstream executor's task\ncompletion as the checkpoint result. This applies with force to\ncontract-separated workstreams: never dispatch the downstream workstream before\nits named contract checkpoint passes, even when executors are idle and the work\n\"could start.\""
+ },
+ {
+  "id": "B039",
+  "section": "Executor packet",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 8,
+  "text": "Send only what is needed to start correctly:"
+ },
+ {
+  "id": "B040",
+  "section": "Executor packet",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 2,
+  "text": "- task/outcome;"
+ },
+ {
+  "id": "B041",
+  "section": "Executor packet",
+  "last_edited": "2026-09-03",
+  "runs_since_edit": 55,
+  "words": 29,
+  "text": "- `requirements: [REQ-###, ...]` — copied from the task packet. The executor\n  needs to know which requirement its work answers, and `/review` and `/ship`\n  trace evidence against these ids;"
+ },
+ {
+  "id": "B042",
+  "section": "Executor packet",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 3,
+  "text": "- acceptance criteria;"
+ },
+ {
+  "id": "B043",
+  "section": "Executor packet",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 2,
+  "text": "- dependencies;"
+ },
+ {
+  "id": "B044",
+  "section": "Executor packet",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 2,
+  "text": "- workstream;"
+ },
+ {
+  "id": "B045",
+  "section": "Executor packet",
+  "last_edited": "2026-09-18",
+  "runs_since_edit": 54,
+  "words": 14,
+  "text": "- assigned checkout path and execution mode (sequential inherited checkout or\n  concurrent isolated checkout);"
+ },
+ {
+  "id": "B046",
+  "section": "Executor packet",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 3,
+  "text": "- expected scope;"
+ },
+ {
+  "id": "B047",
+  "section": "Executor packet",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 2,
+  "text": "- verification;"
+ },
+ {
+  "id": "B048",
+  "section": "Executor packet",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 2,
+  "text": "- `required_skills`;"
+ },
+ {
+  "id": "B049",
+  "section": "Executor packet",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 3,
+  "text": "- `is_last_selected_task_in_workstream: yes|no`;"
+ },
+ {
+  "id": "B050",
+  "section": "Executor packet",
+  "last_edited": "2026-10-02",
+  "runs_since_edit": 54,
+  "words": 18,
+  "text": "- the todo path and task id whose `Status:` the executor sets to `Done` in its\n  completing commit;"
+ },
+ {
+  "id": "B051",
+  "section": "Executor packet",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 50,
+  "words": 20,
+  "text": "- for a fresh executor on a later task: the previous handoff report and the\n  workstream's commit ids so far;"
+ },
+ {
+  "id": "B052",
+  "section": "Executor packet",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 50,
+  "words": 9,
+  "text": "- the test-baseline JUnit path, when one was recorded;"
+ },
+ {
+  "id": "B053",
+  "section": "Executor packet",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 50,
+  "words": 10,
+  "text": "- pre-authorization `TD-###` ids and external-tool blockers the plan records;"
+ },
+ {
+  "id": "B054",
+  "section": "Executor packet",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 6,
+  "text": "- workstream verification command when applicable;"
+ },
+ {
+  "id": "B055",
+  "section": "Executor packet",
+  "last_edited": "2026-11-13",
+  "runs_since_edit": 32,
+  "words": 14,
+  "text": "- useful pointers to project/module rules, one or two precedents, and any shared\n  contract/invariant;"
+ },
+ {
+  "id": "B056",
+  "section": "Executor packet",
+  "last_edited": "2026-11-13",
+  "runs_since_edit": 32,
+  "words": 15,
+  "text": "- the path of the project's `REVIEW.md` from the base branch, when there is one."
+ },
+ {
+  "id": "B057",
+  "section": "Executor packet",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 50,
+  "words": 28,
+  "text": "Prefer pointers over pasted documents. Do not dump the full spec, plan, project\nrules, investigation transcript, or another agent's output. The previous\nhandoff report is the one exception."
+ },
+ {
+  "id": "B058",
+  "section": "Skills",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 4,
+  "text": "Every fresh executor receives:"
+ },
+ {
+  "id": "B059",
+  "section": "Skills",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 50,
+  "words": 7,
+  "text": "```text\nrequired_skills:\n  - executor-development-discipline\n  - test-driven-development\n```"
+ },
+ {
+  "id": "B060",
+  "section": "Skills",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 15,
+  "text": "That baseline is preloaded by the executor definition. Do not paste or invoke it\nagain."
+ },
+ {
+  "id": "B061",
+  "section": "Skills",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 13,
+  "text": "Add a task-specific skill only when its methodology is materially required.\nTypical examples:"
+ },
+ {
+  "id": "B062",
+  "section": "Skills",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 7,
+  "text": "- shared/public API or contract -> `api-and-interface-design`;"
+ },
+ {
+  "id": "B063",
+  "section": "Skills",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 4,
+  "text": "- compatibility/deprecation/migration -> `deprecation-and-migration`;"
+ },
+ {
+  "id": "B064",
+  "section": "Skills",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 10,
+  "text": "- auth, permissions, secrets, or sensitive trust boundary ->\n  `security-and-hardening`."
+ },
+ {
+  "id": "B065",
+  "section": "Skills",
+  "last_edited": "2026-10-25",
+  "runs_since_edit": 49,
+  "words": 42,
+  "text": "- a task whose spec or task packet links a Figma design ->\n  `figma-design-to-code` (needs the Figma MCP server and the skill fetched by\n  `tools/setup/fetch-figma-skill.sh`; when either is missing, the\n  executor reports the blocker instead of building from memory of the design);"
+ },
+ {
+  "id": "B066",
+  "section": "Skills",
+  "last_edited": "2026-10-03",
+  "runs_since_edit": 54,
+  "words": 14,
+  "text": "- adding or reshaping a React component's API (props, compound components,\n  providers) -> `vercel-composition-patterns`;"
+ },
+ {
+  "id": "B067",
+  "section": "Skills",
+  "last_edited": "2026-10-03",
+  "runs_since_edit": 54,
+  "words": 14,
+  "text": "- Vite config or plugins -> `vite`; Vitest tests, mocking or config -> `vitest`."
+ },
+ {
+  "id": "B068",
+  "section": "Skills",
+  "last_edited": "2026-10-25",
+  "runs_since_edit": 49,
+  "words": 14,
+  "text": "Never select `browser-testing-with-devtools` for an executor. Executors hold no\nbrowser tools; test-engineer does (docs/adr/0070)."
+ },
+ {
+  "id": "B069",
+  "section": "Skills",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 9,
+  "text": "The executor invokes only additional skills selected by `/build`."
+ },
+ {
+  "id": "B070",
+  "section": "Parallelism",
+  "last_edited": "2026-11-18",
+  "runs_since_edit": 16,
+  "words": 60,
+  "text": "**Sequential by default** (ADR 0136). Run workstreams one after another, in\ndependency order, so each executor builds on the code already merged. Run them\nin parallel only when the user asks for it in this run. Then read\n`../references/parallel-workstreams.md` before any dispatch and\nfollow it: it decides which workstreams may run at once and what the\ncompletion report must state."
+ },
+ {
+  "id": "B071",
+  "section": "Model and retry policy",
+  "last_edited": "2026-08-28",
+  "runs_since_edit": 55,
+  "words": 35,
+  "text": "Use the executor's configured default model for routine work. Override upward\nonly for high-risk work where a wrong decision is expensive to undo — e.g.\nirreversible migrations, concurrency/consistency invariants, security-sensitive\nboundaries, or novel external contracts."
+ },
+ {
+  "id": "B072",
+  "section": "Model and retry policy",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 15,
+  "text": "Never blind-retry. A retry needs new evidence, a code/config/environment change,\nor a materially different hypothesis."
+ },
+ {
+  "id": "B073",
+  "section": "Model and retry policy",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 17,
+  "text": "Do not broaden tools, permissions, scope, or external write authority for\nconvenience. Surface a genuine capability boundary."
+ },
+ {
+  "id": "B074",
+  "section": "Executor blockers and conflicts",
+  "last_edited": "2026-08-28",
+  "runs_since_edit": 55,
+  "words": 25,
+  "text": "When an executor reports a blocker or a task-packet conflict (acceptance\ncriteria infeasible against the repository, contradicted by the code, or\nrequiring an absent decision):"
+ },
+ {
+  "id": "B075",
+  "section": "Executor blockers and conflicts",
+  "last_edited": "2026-08-28",
+  "runs_since_edit": 55,
+  "words": 19,
+  "text": "- stop that workstream at the blocked task; do not re-dispatch the same task\n  hoping for a different reading;"
+ },
+ {
+  "id": "B076",
+  "section": "Executor blockers and conflicts",
+  "last_edited": "2026-08-28",
+  "runs_since_edit": 55,
+  "words": 19,
+  "text": "- continue other workstreams only if they do not depend on the blocked task or\n  a checkpoint behind it;"
+ },
+ {
+  "id": "B077",
+  "section": "Executor blockers and conflicts",
+  "last_edited": "2026-08-28",
+  "runs_since_edit": 55,
+  "words": 29,
+  "text": "- a behavior conflict is a `SPEC CONFLICT` — route it to the human toward\n  `/spec`; a plan-level defect (wrong dependency, wrong workstream, missing\n  verification command) routes toward `/plan`;"
+ },
+ {
+  "id": "B078",
+  "section": "Executor blockers and conflicts",
+  "last_edited": "2026-08-28",
+  "runs_since_edit": 55,
+  "words": 8,
+  "text": "- record the blocker in the completion report."
+ },
+ {
+  "id": "B079",
+  "section": "3. Completion",
+  "last_edited": "2026-09-06",
+  "runs_since_edit": 55,
+  "words": 62,
+  "text": "For sequential and parallel builds alike, run affected checks after each\nintegration and the plan's **Verification Strategy → Integrated** commands\non the final integrated tree. Reuse an identical successful check only when\nno intervening change could affect its result. For a selected subset, report\nthat scope without claiming unselected behavior complete; do not silently\ndrop or rewrite required commands that cannot run."
+ },
+ {
+  "id": "B080",
+  "section": "3. Completion",
+  "last_edited": "2026-10-03",
+  "runs_since_edit": 54,
+  "words": 22,
+  "text": "When the candidate changes a deployed runtime entrypoint or critical end-to-end\npath, run the repository-defined smoke check in the appropriate safe\nenvironment."
+ },
+ {
+  "id": "B081",
+  "section": "3. Completion",
+  "last_edited": "2026-11-13",
+  "runs_since_edit": 32,
+  "words": 54,
+  "text": "BUILD does not prove browser-dependent acceptance criteria: actual rendering,\nbrowser APIs, navigation, console, or network behavior. Executors have no\nbrowser tools. List each such criterion in the completion message as\n`Needs real-browser check: <REQ id> — <criterion>`. Do not count component\ntests as evidence for it. `/test` runs next, and test-engineer runs the check."
+ },
+ {
+  "id": "B082",
+  "section": "3. Completion",
+  "last_edited": "2026-10-02",
+  "runs_since_edit": 54,
+  "words": 39,
+  "text": "Rerun every selected task's `Change-surface search` on the integrated tree. A\nhit no task changed and no task lists as unchanged goes back to the owning\nexecutor: an integration can drop a location one workstream handled and\nanother reverted."
+ },
+ {
+  "id": "B083",
+  "section": "3. Completion",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 50,
+  "words": 61,
+  "text": "Check executor evidence against the selected acceptance criteria and shared\ninvariants under the development skill's completion rules. A green command\nor executor summary alone does not establish an outcome its checks did not\nexercise. Return an evidence gap to the owning workstream's executor for\nfocused verification, resumed or fresh under §2's rule; route missing plan decisions or behavior conflicts under §2."
+ },
+ {
+  "id": "B084",
+  "section": "3. Completion",
+  "last_edited": "2026-09-06",
+  "runs_since_edit": 55,
+  "words": 34,
+  "text": "Confirm affected project documentation matches the integrated result under\n`../references/documentation-practices.md` §Project documentation. Return stale\nin-scope sections to the owning executor; report missing scope through the\nexisting blocker process rather than declaring the documentation complete."
+ },
+ {
+  "id": "B085",
+  "section": "3. Completion",
+  "last_edited": "2026-08-28",
+  "runs_since_edit": 55,
+  "words": 8,
+  "text": "`/build` ends in exactly one of two reports."
+ },
+ {
+  "id": "B086",
+  "section": "3. Completion",
+  "last_edited": "2026-08-28",
+  "runs_since_edit": 55,
+  "words": 10,
+  "text": "**BUILD COMPLETE** — only when all of the following hold:"
+ },
+ {
+  "id": "B087",
+  "section": "3. Completion",
+  "last_edited": "2026-10-20",
+  "runs_since_edit": 52,
+  "words": 20,
+  "text": "- all selected tasks `/build` owns are implemented (tasks handed on to `/test`\n  or a person are listed, not implemented);"
+ },
+ {
+  "id": "B088",
+  "section": "3. Completion",
+  "last_edited": "2026-08-22",
+  "runs_since_edit": 55,
+  "words": 6,
+  "text": "- all selected workstreams are integrated;"
+ },
+ {
+  "id": "B089",
+  "section": "3. Completion",
+  "last_edited": "2026-08-28",
+  "runs_since_edit": 55,
+  "words": 12,
+  "text": "- every plan checkpoint in the selected scope was executed and passed;"
+ },
+ {
+  "id": "B090",
+  "section": "3. Completion",
+  "last_edited": "2026-08-22",
+  "runs_since_edit": 55,
+  "words": 5,
+  "text": "- executor-required verification is green;"
+ },
+ {
+  "id": "B091",
+  "section": "3. Completion",
+  "last_edited": "2026-09-06",
+  "runs_since_edit": 55,
+  "words": 11,
+  "text": "- integrated verification is green and claimed outcomes have executed evidence;"
+ },
+ {
+  "id": "B092",
+  "section": "3. Completion",
+  "last_edited": "2026-09-06",
+  "runs_since_edit": 55,
+  "words": 21,
+  "text": "- scoped local commits are complete, unless the user explicitly requested an\n  uncommitted result (report that instruction and the remaining diff);"
+ },
+ {
+  "id": "B093",
+  "section": "3. Completion",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 8,
+  "text": "- the tree is in the expected state."
+ },
+ {
+  "id": "B094",
+  "section": "3. Completion",
+  "last_edited": "2026-10-20",
+  "runs_since_edit": 52,
+  "words": 23,
+  "text": "**BUILD BLOCKED** — in every other terminal state. Never report BUILD COMPLETE\nwith open blockers, skipped checkpoints, or unimplemented tasks of its own."
+ },
+ {
+  "id": "B095",
+  "section": "3. Completion",
+  "last_edited": "2026-08-28",
+  "runs_since_edit": 55,
+  "words": 3,
+  "text": "Both reports include:"
+ },
+ {
+  "id": "B096",
+  "section": "3. Completion",
+  "last_edited": "2026-10-20",
+  "runs_since_edit": 52,
+  "words": 35,
+  "text": "- tasks/workstreams completed, tasks handed on (to `/test` or a person), and\n  (for BUILD BLOCKED) tasks blocked or not started, each with its blocker and\n  the stage it routes to (`/spec`, `/plan`, or human decision);"
+ },
+ {
+  "id": "B097",
+  "section": "3. Completion",
+  "last_edited": "2026-08-28",
+  "runs_since_edit": 55,
+  "words": 6,
+  "text": "- checkpoints executed and their outcomes;"
+ },
+ {
+  "id": "B098",
+  "section": "3. Completion",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 3,
+  "text": "- commits created;"
+ },
+ {
+  "id": "B099",
+  "section": "3. Completion",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 6,
+  "text": "- exact verification commands and outcomes;"
+ },
+ {
+  "id": "B100",
+  "section": "3. Completion",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 5,
+  "text": "- directly required scope expansions;"
+ },
+ {
+  "id": "B101",
+  "section": "3. Completion",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 6,
+  "text": "- anything noticed but intentionally untouched;"
+ },
+ {
+  "id": "B102",
+  "section": "3. Completion",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 4,
+  "text": "- current branch/tree state;"
+ },
+ {
+  "id": "B103",
+  "section": "3. Completion",
+  "last_edited": "2026-09-07",
+  "runs_since_edit": 55,
+  "words": 10,
+  "text": "- the complete candidate identity required by\n  `../references/target-selection.md` §Gate handoffs;"
+ },
+ {
+  "id": "B104",
+  "section": "3. Completion",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 22,
+  "text": "- actual run metrics when exposed: fresh executor dispatches, resumes,\n  model-tier overrides, verification failures causing rework, human redirects,\n  and required scope expansions."
+ },
+ {
+  "id": "B105",
+  "section": "3. Completion",
+  "last_edited": "2026-08-27",
+  "runs_since_edit": 55,
+  "words": 5,
+  "text": "Never estimate unavailable token/cost/time data."
+ },
+ {
+  "id": "B106",
+  "section": "3. Completion",
+  "last_edited": "2026-11-13",
+  "runs_since_edit": 32,
+  "words": 23,
+  "text": "Do not dispatch independent verifiers or reviewers here. The next stage is\n`/test`. It verifies the candidate, or records that it is exempt."
+ },
+ {
+  "id": "B107",
+  "section": "Review fixes",
+  "last_edited": "2026-11-03",
+  "runs_since_edit": 38,
+  "words": 36,
+  "text": "`/build <TICKET> review fixes` fixes what the last `/review` found, instead of\nplanned tasks (ADR 0108). It is how a finding goes back to `/build`.\nThe plan checks in §1 still apply; task resume does not."
+ },
+ {
+  "id": "B108",
+  "section": "Review fixes",
+  "last_edited": "2026-11-21",
+  "runs_since_edit": 0,
+  "words": 73,
+  "text": "1. Run `review-sarif.py latest <TICKET> --open` (`/review` §1). It prints the\n   newest round's `reviewedCommit` and its open findings. After that commit,\n   HEAD may add only commits that touch `docs/reviews/` or\n   `docs/tasks/<TICKET>-open.md` (`git diff --name-only <sha> HEAD`). Any\n   other change means the candidate changed after the review: review it again\n   first, never fix it blind. Run `review-sarif.py round <TICKET>`. When it\n   prints `counted=4`, stop and report that the approach needs the user\n   (ADR 0089)."
+ },
+ {
+  "id": "B109",
+  "section": "Review fixes",
+  "last_edited": "2026-11-21",
+  "runs_since_edit": 0,
+  "words": 74,
+  "text": "2. The scope is every finding still `open` that is BLOCKER or REQUIRED and not\n   pre-existing (`baselineState` is not `unchanged`), plus any ADVISORY the user\n   named. Nothing else: no refactor, no plan task, no other finding.\n   When the user names a pre-existing finding, recommend a follow-up ticket\n   first: its fix changes behavior outside the ticket and gives the next round\n   new code to review. Include it only when the user confirms after that\n   warning."
+ },
+ {
+  "id": "B110",
+  "section": "Review fixes",
+  "last_edited": "2026-11-03",
+  "runs_since_edit": 38,
+  "words": 70,
+  "text": "3. Group findings that touch the same files into one workstream. Dispatch a\n   fresh executor per workstream; never resume a build executor. Its packet\n   carries, for each finding: id, `file:line`, claim, failure scenario and\n   recommendation. A class finding lists every instance. It also carries the\n   workstream's previous handoff report and the candidate diff (`git diff\n   <candidate base>...HEAD`). When this session has no handoff report, pass\n   the ticket's commit log instead."
+ },
+ {
+  "id": "B111",
+  "section": "Review fixes",
+  "last_edited": "2026-11-20",
+  "runs_since_edit": 0,
+  "words": 113,
+  "text": "4. The executor fixes test-first: a test that fails on the finding, then the\n   fix (Prove-It). If the code is already right, it changes nothing and\n   reports the finding as disputed, with `file:line` evidence; the next\n   `/review` round decides. Each commit carries a `Task:` trailer naming the\n   finding ids (`Task: CODE-2, SEC-1`) and the `Refs:` trailer.\n   Before it reports, the executor looks for the same failure next to each\n   fix: the rest of the function, its callers, and code that copies the\n   pattern. It also checks that its own fix adds no new case of it. It fixes\n   each new instance the same way, test-first, and lists it under the finding\n   (ADR 0144)."
+ },
+ {
+  "id": "B112",
+  "section": "Review fixes",
+  "last_edited": "2026-10-18",
+  "runs_since_edit": 52,
+  "words": 28,
+  "text": "5. Report BUILD COMPLETE with one line per finding: fixed (commit), disputed\n   (evidence), or blocked (why). The plan and todo do not change. The next\n   stage is `/review`."
+ },
+ {
+  "id": "B113",
+  "section": "Verify fixes",
+  "last_edited": "2026-11-03",
+  "runs_since_edit": 38,
+  "words": 42,
+  "text": "`/build <TICKET> verify fixes` fixes the production defects the last `/test`\nproved, instead of planned tasks. Use it after a **VERIFY FAIL** routed to\n`/build`, with the VERIFY report pasted verbatim. The plan checks in §1 still apply; task resume\ndoes not."
+ },
+ {
+  "id": "B114",
+  "section": "Verify fixes",
+  "last_edited": "2026-11-03",
+  "runs_since_edit": 38,
+  "words": 61,
+  "text": "1. The scope is each `REQ-###` the VERIFY FAIL names, with its reproduction:\n   expected versus actual, the failing test, or the patch artifact the\n   verifier preserved. Nothing else: no plan task, no refactor, no review\n   finding. A defect whose fix needs a behavior the spec does not settle is\n   not fixed here: report **BUILD BLOCKED**, naming `/spec` and the REQ id."
+ },
+ {
+  "id": "B115",
+  "section": "Verify fixes",
+  "last_edited": "2026-10-24",
+  "runs_since_edit": 49,
+  "words": 63,
+  "text": "2. Group the defects that touch the same files into one workstream. Dispatch\n   a fresh executor per workstream; never resume a build executor. Its packet\n   carries, per defect: the REQ id, the reproduction, expected versus actual\n   and the verifier's patch when there is one; plus the candidate diff and\n   the workstream's previous handoff report (the ticket's commit log when\n   this session has none)."
+ },
+ {
+  "id": "B116",
+  "section": "Verify fixes",
+  "last_edited": "2026-10-24",
+  "runs_since_edit": 49,
+  "words": 43,
+  "text": "3. The executor fixes test-first: the verifier's reproduction, or a test that\n   fails the same way, then the fix (Prove-It). Each commit carries a `Task:`\n   trailer naming the REQ ids (`Task: REQ-017`) and the `Refs:` trailer. The\n   plan and todo do not change."
+ },
+ {
+  "id": "B117",
+  "section": "Verify fixes",
+  "last_edited": "2026-11-03",
+  "runs_since_edit": 38,
+  "words": 33,
+  "text": "4. Report **BUILD COMPLETE** with one line per defect: fixed (commit) or\n   blocked (why). The next stage is `/test` again, on the new\n   candidate, at the depth of the failed run or higher."
+ },
+ {
+  "id": "B118",
+  "section": "4. Work outside `/build`",
+  "last_edited": "2026-10-16",
+  "runs_since_edit": 52,
+  "words": 26,
+  "text": "A fix or change made in conversation on a ticket branch skips this command,\nso none of its records update. Record it in the same session:"
+ },
+ {
+  "id": "B119",
+  "section": "4. Work outside `/build`",
+  "last_edited": "2026-11-18",
+  "runs_since_edit": 16,
+  "words": 15,
+  "text": "- Add an `unplanned commit` item to `docs/tasks/<TICKET>-open.md` that names\n  the commit's short sha (`../references/ticket-ledger.md`)."
+ },
+ {
+  "id": "B120",
+  "section": "4. Work outside `/build`",
+  "last_edited": "2026-10-16",
+  "runs_since_edit": 52,
+  "words": 29,
+  "text": "- For a behavior change, also add a `DEC-###` to the spec. Add an `Amends:`\n  line when it changes an earlier rule, and set the plan to `Needs replan`."
+ },
+ {
+  "id": "B121",
+  "section": "4. Work outside `/build`",
+  "last_edited": "2026-10-16",
+  "runs_since_edit": 52,
+  "words": 9,
+  "text": "- Run `check-ledger.py <TICKET>` before you end the session."
+ }
+]

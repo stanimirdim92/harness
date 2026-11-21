@@ -1,0 +1,914 @@
+[
+ {
+  "id": "R000",
+  "section": "",
+  "last_edited": "2026-11-13",
+  "review_runs_since_edit": 30,
+  "words": 21,
+  "text": "---\ndescription: Conduct independent review of a candidate that /test has verified\nargument-hint: \"[commit range, PR, diff, task, or feature]\"\n---"
+ },
+ {
+  "id": "R001",
+  "section": "",
+  "last_edited": "2026-11-13",
+  "review_runs_since_edit": 30,
+  "words": 16,
+  "text": "`/review` is the independent **REVIEW** gate after `/test` (ADR 0132). It\ndecides which review personas run."
+ },
+ {
+  "id": "R002",
+  "section": "",
+  "last_edited": "2026-08-27",
+  "review_runs_since_edit": 55,
+  "words": 8,
+  "text": "It reports findings. `/ship` owns the release verdict."
+ },
+ {
+  "id": "R003",
+  "section": "1. Establish the candidate",
+  "last_edited": "2026-08-29",
+  "review_runs_since_edit": 55,
+  "words": 13,
+  "text": "Resolve the target per `../references/target-selection.md`, and announce it (\"Using: <target>\") before anything else."
+ },
+ {
+  "id": "R004",
+  "section": "1. Establish the candidate",
+  "last_edited": "2026-09-07",
+  "review_runs_since_edit": 55,
+  "words": 50,
+  "text": "Require `/build`'s **BUILD COMPLETE** message from one of the valid sources in\n`../references/target-selection.md` §Gate handoffs and record its candidate\nidentity. Inspect the current branch, commits, diff, and tree state. Re-read\nspec/plan/task artifacts from disk even if they appeared earlier in the\nconversation — the user may have edited them since."
+ },
+ {
+  "id": "R005",
+  "section": "1. Establish the candidate",
+  "last_edited": "2026-08-27",
+  "review_runs_since_edit": 55,
+  "words": 34,
+  "text": "The current candidate may differ from BUILD only by passing test-only commits\nthat `/test` declared in a **VERIFY PASS** for this exact current candidate.\nConfirm those commits contain only tests, fixtures, or test configuration."
+ },
+ {
+  "id": "R006",
+  "section": "1. Establish the candidate",
+  "last_edited": "2026-08-27",
+  "review_runs_since_edit": 55,
+  "words": 20,
+  "text": "Any production change after BUILD, undeclared post-BUILD commit/change, stale\nVERIFY result, ambiguous scope, or undeclared working-tree change is **REVIEW\nBLOCKED**."
+ },
+ {
+  "id": "R007",
+  "section": "1. Establish the candidate",
+  "last_edited": "2026-08-27",
+  "review_runs_since_edit": 55,
+  "words": 17,
+  "text": "Standalone review may still be performed when directly requested, but it is not\nthe pipeline REVIEW gate."
+ },
+ {
+  "id": "R008",
+  "section": "1. Establish the candidate",
+  "last_edited": "2026-10-17",
+  "review_runs_since_edit": 49,
+  "words": 12,
+  "text": "Count the review round: one more than the ticket's earlier review files."
+ },
+ {
+  "id": "R009",
+  "section": "1. Establish the candidate",
+  "last_edited": "2026-11-06",
+  "review_runs_since_edit": 36,
+  "words": 8,
+  "text": "```bash\nls docs/reviews/<TICKET>-*.sarif 2>/dev/null | wc -l\n```"
+ },
+ {
+  "id": "R010",
+  "section": "1. Establish the candidate",
+  "last_edited": "2026-10-17",
+  "review_runs_since_edit": 49,
+  "words": 64,
+  "text": "Round 1 reviews the whole candidate. A later round reviews a fix (§3 Later\nrounds). Round 4 means three rounds did not converge. Return **REVIEW\nBLOCKED**, list the findings that came back in more than one round, and ask\nthe user to reconsider the approach before another fix (ADR 0089). Delete the\nticket's old review files only when the user starts a new approach."
+ },
+ {
+  "id": "R011",
+  "section": "2. Independent-verification gate",
+  "last_edited": "2026-11-13",
+  "review_runs_since_edit": 30,
+  "words": 7,
+  "text": "Require `/test`'s result for this exact candidate."
+ },
+ {
+  "id": "R012",
+  "section": "2. Independent-verification gate",
+  "last_edited": "2026-11-13",
+  "review_runs_since_edit": 30,
+  "words": 15,
+  "text": "- **VERIFY PASS:** record **Independent verification: PASS**. This also\n  covers the test-only commits it declared."
+ },
+ {
+  "id": "R013",
+  "section": "2. Independent-verification gate",
+  "last_edited": "2026-11-13",
+  "review_runs_since_edit": 30,
+  "words": 35,
+  "text": "- **VERIFY NOT REQUIRED:** check the exemption against\n  `../references/verification-triggers.md`. When it holds, record\n  **Independent verification: NOT REQUIRED** and use `/build`'s verification\n  evidence. When it does not, return **REVIEW BLOCKED** with `/test` as the\n  next step."
+ },
+ {
+  "id": "R014",
+  "section": "2. Independent-verification gate",
+  "last_edited": "2026-11-20",
+  "review_runs_since_edit": 0,
+  "words": 94,
+  "text": "- **Fix round** (a later round whose new commits come only from\n  `/build <TICKET> review fixes`): do not send it to `/test` (ADR 0144). The\n  earlier round's VERIFY PASS and the executor's test-first proof for each\n  fixed finding are enough. Record **Independent verification: DEFERRED (fix\n  round)**. When the round leaves no open BLOCKER or REQUIRED finding, the\n  next step is `/test` once, on that candidate. Then run one closing round on\n  the commits `/test` added, or none when it added none. The closing round\n  records **PASS** and does not count toward the round-4 stop."
+ },
+ {
+  "id": "R015",
+  "section": "2. Independent-verification gate",
+  "last_edited": "2026-11-13",
+  "review_runs_since_edit": 30,
+  "words": 15,
+  "text": "- No result for this candidate: return **REVIEW BLOCKED** with `/test` as the\n  next step."
+ },
+ {
+  "id": "R016",
+  "section": "2. Independent-verification gate",
+  "last_edited": "2026-10-24",
+  "review_runs_since_edit": 46,
+  "words": 38,
+  "text": "- A **VERIFY PASS** run at a lower depth than the tier §3 sets for this\n  candidate is stale: Deep needs the full suite and a mutation probe on\n  every changed condition (`../references/risk-tiers.md`). Record\n  **Independent verification: STALE (depth)**."
+ },
+ {
+  "id": "R017",
+  "section": "2. Independent-verification gate",
+  "last_edited": "2026-11-03",
+  "review_runs_since_edit": 36,
+  "words": 28,
+  "text": "- If required verification is missing or stale, return **REVIEW BLOCKED** with\n  `/test` as the next step, at the depth it names. The review repeats after\n  that verification."
+ },
+ {
+  "id": "R018",
+  "section": "2. Independent-verification gate",
+  "last_edited": "2026-10-18",
+  "review_runs_since_edit": 49,
+  "words": 13,
+  "text": "Do not re-run `/test` inline and do not duplicate the exemption list here."
+ },
+ {
+  "id": "R019",
+  "section": "3. Dispatch reviewers",
+  "last_edited": "2026-10-18",
+  "review_runs_since_edit": 49,
+  "words": 22,
+  "text": "Three reviewers always run: `code-reviewer` and `blind-reviewer` read the same\ndiff from opposite directions, and `security-auditor` reviews it for security\n(ADR 0102)."
+ },
+ {
+  "id": "R020",
+  "section": "3. Dispatch reviewers",
+  "last_edited": "2026-10-04",
+  "review_runs_since_edit": 52,
+  "words": 26,
+  "text": "First, list the changes that make passing easier instead of making the code\nright: deleted or skipped tests, removed assertions, new suppressions, changed\nchecker config, stubs."
+ },
+ {
+  "id": "R021",
+  "section": "3. Dispatch reviewers",
+  "last_edited": "2026-10-23",
+  "review_runs_since_edit": 47,
+  "words": 7,
+  "text": "```bash\npython3 ~/.claude/skills/code-review-and-quality/scripts/weakened-tests.py --base <candidate base>\n```"
+ },
+ {
+  "id": "R022",
+  "section": "3. Dispatch reviewers",
+  "last_edited": "2026-10-04",
+  "review_runs_since_edit": 52,
+  "words": 8,
+  "text": "- Exit 0: record **Weakened tests: none found**."
+ },
+ {
+  "id": "R023",
+  "section": "3. Dispatch reviewers",
+  "last_edited": "2026-10-04",
+  "review_runs_since_edit": 52,
+  "words": 29,
+  "text": "- Exit 1: give the list to `code-reviewer`. Each entry ends as a finding or as\n  a stated reason, such as a test deleted with the feature it tested."
+ },
+ {
+  "id": "R024",
+  "section": "3. Dispatch reviewers",
+  "last_edited": "2026-10-04",
+  "review_runs_since_edit": 52,
+  "words": 16,
+  "text": "- Exit 2: record **Weakened tests: Not verified** with the error. Never read\n  it as clean."
+ },
+ {
+  "id": "R025",
+  "section": "3. Dispatch reviewers",
+  "last_edited": "2026-10-17",
+  "review_runs_since_edit": 49,
+  "words": 98,
+  "text": "Read the project's `REVIEW.md` from the candidate base, never from the\ncandidate: the one at the repository root, and any in a directory the diff\ntouches (`git show <base>:REVIEW.md`, `git show <base>:<dir>/REVIEW.md`).\nA change to `REVIEW.md` does not apply to its own review, so a change cannot\nlower its own bar (ADR 0094). Template: `../references/templates/review.md`.\nIt says what failure looks like in this repository, what to always check,\nwhich paths to skip, and the rules for findings. It describes the area, not\nthe change, so every reviewer gets it (ADR 0091). Without one, say so in the\nreport."
+ },
+ {
+  "id": "R026",
+  "section": "3. Dispatch reviewers",
+  "last_edited": "2026-10-18",
+  "review_runs_since_edit": 49,
+  "words": 12,
+  "text": "Check the project's \"Always a person\" list, read from the base branch:"
+ },
+ {
+  "id": "R027",
+  "section": "3. Dispatch reviewers",
+  "last_edited": "2026-10-23",
+  "review_runs_since_edit": 47,
+  "words": 7,
+  "text": "```bash\npython3 ~/.claude/skills/code-review-and-quality/scripts/always-person.py --base <candidate base>\n```"
+ },
+ {
+  "id": "R028",
+  "section": "3. Dispatch reviewers",
+  "last_edited": "2026-10-18",
+  "review_runs_since_edit": 49,
+  "words": 33,
+  "text": "Exit 1 means the change touches a path that always needs a person (ADR 0096):\nrun every specialist (`../references/reviewer-triggers.md`) and require\n`/test` (`../references/verification-triggers.md`). Exit 2 is **Always a\nperson: Not verified**; report it."
+ },
+ {
+  "id": "R029",
+  "section": "3. Dispatch reviewers",
+  "last_edited": "2026-11-13",
+  "review_runs_since_edit": 30,
+  "words": 81,
+  "text": "Set the risk tier and depth from `../references/risk-tiers.md` (ADR 0106),\nincluding any `## Review depth` floor in the base branch's `REVIEW.md`.\nRecord **Risk: <Low | Medium | High> — <the line that matched> · Depth:\n<Quick | Standard | Deep>** and apply that depth's column to dispatch, the\nindependent check and the `/test` packet. Reviewers report every ADVISORY\nfinding, and the report keeps all of them (ADR 0130). Do not lower the tier\nfor a small diff or a trusted author."
+ },
+ {
+  "id": "R030",
+  "section": "3. Dispatch reviewers",
+  "last_edited": "2026-09-14",
+  "review_runs_since_edit": 55,
+  "words": 3,
+  "text": "Dispatch `code-reviewer` with:"
+ },
+ {
+  "id": "R031",
+  "section": "3. Dispatch reviewers",
+  "last_edited": "2026-08-27",
+  "review_runs_since_edit": 55,
+  "words": 4,
+  "text": "- the integrated diff;"
+ },
+ {
+  "id": "R032",
+  "section": "3. Dispatch reviewers",
+  "last_edited": "2026-10-17",
+  "review_runs_since_edit": 49,
+  "words": 8,
+  "text": "- the project's `REVIEW.md`, when there is one;"
+ },
+ {
+  "id": "R033",
+  "section": "3. Dispatch reviewers",
+  "last_edited": "2026-10-18",
+  "review_runs_since_edit": 49,
+  "words": 18,
+  "text": "- for a bug fix, the plan's Root-Cause Trace section (ADR 0097), which\n  `code-reviewer` walks against the code;"
+ },
+ {
+  "id": "R034",
+  "section": "3. Dispatch reviewers",
+  "last_edited": "2026-08-27",
+  "review_runs_since_edit": 55,
+  "words": 4,
+  "text": "- a one-line goal;"
+ },
+ {
+  "id": "R035",
+  "section": "3. Dispatch reviewers",
+  "last_edited": "2026-08-27",
+  "review_runs_since_edit": 55,
+  "words": 5,
+  "text": "- the relevant acceptance criteria;"
+ },
+ {
+  "id": "R036",
+  "section": "3. Dispatch reviewers",
+  "last_edited": "2026-10-04",
+  "review_runs_since_edit": 52,
+  "words": 10,
+  "text": "- the build/verify evidence needed to understand what was checked;"
+ },
+ {
+  "id": "R037",
+  "section": "3. Dispatch reviewers",
+  "last_edited": "2026-10-04",
+  "review_runs_since_edit": 52,
+  "words": 8,
+  "text": "- the weakened-test list, when there is one."
+ },
+ {
+  "id": "R038",
+  "section": "3. Dispatch reviewers",
+  "last_edited": "2026-10-17",
+  "review_runs_since_edit": 49,
+  "words": 85,
+  "text": "Dispatch `blind-reviewer` with **the integrated diff and nothing else**, except\nthe project's `REVIEW.md`, which describes the area rather than the change. No\ngoal, no acceptance criteria, no build evidence, no ticket id in the packet\ntext. Assembling this packet is a deliberate act of withholding: everything you\nnaturally reach for is exactly what must not go in. A reviewer told what the\nchange is for reads the code as confirming it, which is what `code-reviewer`\nis for; this one asks only what the code does."
+ },
+ {
+  "id": "R039",
+  "section": "3. Dispatch reviewers",
+  "last_edited": "2026-09-14",
+  "review_runs_since_edit": 55,
+  "words": 10,
+  "text": "Do not send either reviewer the full spec or plan."
+ },
+ {
+  "id": "R040",
+  "section": "3. Dispatch reviewers",
+  "last_edited": "2026-10-18",
+  "review_runs_since_edit": 49,
+  "words": 27,
+  "text": "Dispatch `security-auditor` on every round, with the same packet as\n`code-reviewer`. Use `../references/reviewer-triggers.md` to decide whether\n`distributed-systems-reviewer` is also required. Give each specialist the\nproject's `REVIEW.md` too."
+ },
+ {
+  "id": "R041",
+  "section": "3. Dispatch reviewers",
+  "last_edited": "2026-11-18",
+  "review_runs_since_edit": 14,
+  "words": 48,
+  "text": "Dispatch every reviewer at once (ADR 0133), and wait for every report before\nyou continue (`AGENTS.md` §Agent orchestration). The built-in review below runs\nin this session while they work. Reviewers form judgments\nindependently; do not pass one reviewer's findings to another — least of all\n`code-reviewer`'s to `blind-reviewer`."
+ },
+ {
+  "id": "R042",
+  "section": "3. Dispatch reviewers",
+  "last_edited": "2026-09-14",
+  "review_runs_since_edit": 55,
+  "words": 34,
+  "text": "Use each persona's configured model and effort. The reviewers already sit at\nthe highest tier their definitions declare; raise a specialist beyond it only\nwhen the matched risk is both high-impact and materially ambiguous."
+ },
+ {
+  "id": "R043",
+  "section": "Built-in code review (trial)",
+  "last_edited": "2026-11-18",
+  "review_runs_since_edit": 14,
+  "words": 48,
+  "text": "In round 1, also run Claude Code's built-in `/code-review` as one more\nreviewer (ADR 0142). It runs in this session, through the Skill tool, and\nstarts its own finder and verifier agents. It is a trial: its job is to show\nwhether it finds what the personas miss."
+ },
+ {
+  "id": "R044",
+  "section": "Built-in code review (trial)",
+  "last_edited": "2026-11-18",
+  "review_runs_since_edit": 14,
+  "words": 52,
+  "text": "- **When.** Invoke it right after you dispatch the personas, before you read\n  any of their reports, so it judges on its own. Skip it in later rounds; it\n  cannot review a fix diff alone. In Codex, or when the skill is not available,\n  record **Built-in code review: not available** and continue."
+ },
+ {
+  "id": "R045",
+  "section": "Built-in code review (trial)",
+  "last_edited": "2026-11-18",
+  "review_runs_since_edit": 14,
+  "words": 27,
+  "text": "- **Arguments.** The effort level from the depth, then the candidate branch:\n  Quick → `medium`, Standard → `high`, Deep → `xhigh`. Never pass `--fix`,\n  `--comment` or `max`."
+ },
+ {
+  "id": "R046",
+  "section": "Built-in code review (trial)",
+  "last_edited": "2026-11-18",
+  "review_runs_since_edit": 14,
+  "words": 44,
+  "text": "- **Scope.** It picks its own diff. Record the range it says it reviewed. Drop\n  any finding on a file outside the candidate diff, and say so. It may return\n  its findings through the ReportFindings tool instead of text; take them from\n  that call."
+ },
+ {
+  "id": "R047",
+  "section": "Built-in code review (trial)",
+  "last_edited": "2026-11-18",
+  "review_runs_since_edit": 14,
+  "words": 18,
+  "text": "- **Its last step.** It may offer to run `/verify` afterwards. Do not:\n  `/test` already verified this candidate."
+ },
+ {
+  "id": "R048",
+  "section": "Built-in code review (trial)",
+  "last_edited": "2026-11-18",
+  "review_runs_since_edit": 14,
+  "words": 60,
+  "text": "- **Ids and dispositions.** Number its findings `CR-#`. Give each one a\n  disposition from `../references/findings.md` §Dispositions:\n  - a correctness finding whose failure scenario is incorrect behavior, data\n    loss, a security exposure or a broken contract: BLOCKER; any other\n    correctness finding: REQUIRED;\n  - a conventions finding that quotes a broken CLAUDE.md rule: REQUIRED;\n  - reuse, simplification, efficiency and altitude findings: ADVISORY."
+ },
+ {
+  "id": "R049",
+  "section": "Built-in code review (trial)",
+  "last_edited": "2026-11-18",
+  "review_runs_since_edit": 14,
+  "words": 11,
+  "text": "  Its verdict sets the confidence: CONFIRMED high, PLAUSIBLE medium, none low."
+ },
+ {
+  "id": "R050",
+  "section": "Built-in code review (trial)",
+  "last_edited": "2026-11-18",
+  "review_runs_since_edit": 14,
+  "words": 37,
+  "text": "- **After that,** treat `CR-#` findings like any other reviewer's. Group\n  duplicates, run the independent check (the checker is `code-reviewer`), and\n  include them in the gap sweep's list. In the SARIF, its run's driver name is\n  `code-review`."
+ },
+ {
+  "id": "R051",
+  "section": "Built-in code review (trial)",
+  "last_edited": "2026-11-18",
+  "review_runs_since_edit": 14,
+  "words": 37,
+  "text": "- **Report the trial.** Under its own heading, list the level, the range it\n  reviewed, and **Built-in overlap: <n> found only by it, <m> also found by a\n  persona, <k> persona findings it missed**, with the ids."
+ },
+ {
+  "id": "R052",
+  "section": "Later rounds",
+  "last_edited": "2026-11-06",
+  "review_runs_since_edit": 36,
+  "words": 45,
+  "text": "From round 2 the candidate fixes earlier findings. Review the fix, not the\nwhole change again. The last reviewed commit is the short sha in the newest\nreview file name. Leave `docs/reviews/` out of every diff a reviewer gets\n(`git diff <sha>..HEAD -- . ':!docs/reviews'`)."
+ },
+ {
+  "id": "R053",
+  "section": "Later rounds",
+  "last_edited": "2026-10-17",
+  "review_runs_since_edit": 49,
+  "words": 30,
+  "text": "- Give `code-reviewer` the diff since that commit and the earlier findings with\n  their resolutions. It does not raise a resolved finding again unless the new\n  diff brings it back."
+ },
+ {
+  "id": "R054",
+  "section": "Later rounds",
+  "last_edited": "2026-10-17",
+  "review_runs_since_edit": 49,
+  "words": 31,
+  "text": "- Give `blind-reviewer` the diff since that commit and nothing else. Drop any of\n  its findings that repeat a resolved finding at the same location, and say so\n  in the report."
+ },
+ {
+  "id": "R055",
+  "section": "Later rounds",
+  "last_edited": "2026-10-18",
+  "review_runs_since_edit": 49,
+  "words": 19,
+  "text": "- Run `security-auditor` again on the new diff; run\n  `distributed-systems-reviewer` again only when the new diff matches its\n  trigger."
+ },
+ {
+  "id": "R056",
+  "section": "Later rounds",
+  "last_edited": "2026-10-17",
+  "review_runs_since_edit": 49,
+  "words": 23,
+  "text": "- Report no new ADVISORY or pre-existing finding. Count them, and end the\n  summary with \"<n> found and not reported in this round\"."
+ },
+ {
+  "id": "R057",
+  "section": "Later rounds",
+  "last_edited": "2026-10-17",
+  "review_runs_since_edit": 49,
+  "words": 17,
+  "text": "- Run the weakened-test guard and the ledger check on the whole candidate, as\n  in round 1."
+ },
+ {
+  "id": "R058",
+  "section": "4. Report",
+  "last_edited": "2026-11-18",
+  "review_runs_since_edit": 14,
+  "words": 28,
+  "text": "Every finding carries the disposition its reviewer gave it: BLOCKER,\nREQUIRED or ADVISORY, as defined in\n`../references/findings.md` §Dispositions. Report it\nunchanged; change one only with a stated reason."
+ },
+ {
+  "id": "R059",
+  "section": "4. Report",
+  "last_edited": "2026-11-13",
+  "review_runs_since_edit": 30,
+  "words": 83,
+  "text": "A finding that asks for a check in a browser goes to the verifier, not to the\nowner. List it with the page, the steps and what to look for, so `/test` can\nrun it before `/ship`. The finding keeps its disposition until that evidence\nexists. The next step is `/test` with this report, and the review repeats on\nthe same candidate, once. Only when the verifier cannot run the check (no browser tool, no\nrunning app) does it go to the owner."
+ },
+ {
+  "id": "R060",
+  "section": "4. Report",
+  "last_edited": "2026-09-14",
+  "review_runs_since_edit": 55,
+  "words": 27,
+  "text": "`blind-reviewer` also returns two things no other reviewer produces, and both\nare yours to resolve because you are the only participant holding the diff\n*and* the intent:"
+ },
+ {
+  "id": "R061",
+  "section": "4. Report",
+  "last_edited": "2026-10-07",
+  "review_runs_since_edit": 52,
+  "words": 61,
+  "text": "- **\"What this change appears to do\"** — its reading of the diff without the\n  goal. Compare it against the actual goal. A material mismatch is a finding in\n  its own right at the disposition the gap warrants: either the code does not do\n  what was asked, or it does but says so badly enough that a careful reader\n  cannot tell."
+ },
+ {
+  "id": "R062",
+  "section": "4. Report",
+  "last_edited": "2026-10-23",
+  "review_runs_since_edit": 47,
+  "words": 58,
+  "text": "- **Intent-dependent findings** — where correctness genuinely turns on\n  information the reviewer was not given. Settle each against the acceptance\n  criteria you hold: close it as `answered`, or promote it to its warranted\n  disposition when the criteria confirm the defect. Never pass one through\n  unresolved; an unresolved intent-dependent finding is work you skipped, not a\n  finding you reported."
+ },
+ {
+  "id": "R063",
+  "section": "4. Report",
+  "last_edited": "2026-11-18",
+  "review_runs_since_edit": 14,
+  "words": 62,
+  "text": "A finding of any reviewer resolves as `answered` when the approved spec already\nanswers it, or when it restates what the owner asked for. Name the `REQ-###`\nor `DEC-###` line that answers it, and confirm the code matches that line.\n`answered` is not `refuted`: `refuted` means the claim is false. A BLOCKER\nnever resolves as `answered`; it follows §Independent check and `/ship`."
+ },
+ {
+  "id": "R064",
+  "section": "4. Report",
+  "last_edited": "2026-10-07",
+  "review_runs_since_edit": 52,
+  "words": 43,
+  "text": "Every finding keeps a stable id, source, disposition, confidence,\nfile/location, and resolution state. Confidence travels with the\nfinding so `/ship` can distinguish a confirmed BLOCKER (resolved only by a fix)\nfrom a suspected one (resolvable by a fix or by recorded refuting evidence)."
+ },
+ {
+  "id": "R065",
+  "section": "REVIEW.md checklist",
+  "last_edited": "2026-10-18",
+  "review_runs_since_edit": 49,
+  "words": 60,
+  "text": "When the project has a `REVIEW.md` with \"Always check\" rules, `code-reviewer`\nanswers each one in its checklist (ADR 0103). Compare the checklist with the\nrules. Send a missing or unanswered rule back to `code-reviewer` once, with\nonly that rule and the diff. If it is still missing, report \"REVIEW.md not\nfollowed: <rule>\" as a REQUIRED finding with the id `RULE-#`."
+ },
+ {
+  "id": "R066",
+  "section": "Independent check",
+  "last_edited": "2026-11-18",
+  "review_runs_since_edit": 14,
+  "words": 106,
+  "text": "Before reporting, give every BLOCKER one independent check that tries to refute\nit (ADR 0092). At Standard and Deep, REQUIRED findings get the same check\n(`../references/risk-tiers.md`). Dispatch a fresh reviewer that did not raise it: `code-reviewer`\nfor a `BLIND-#` finding, `blind-reviewer` for a `CODE-#` finding, and a fresh\ninstance of the same specialist for a `SEC-#` or `DIST-#` finding. The packet\nholds the diff, the base-branch `REVIEW.md` files this review used, and that\none finding (id, `file:line`, claim, failure scenario). It holds nothing from\nthe other reviewers. For `blind-reviewer`, remove any `REQ-###`\nor goal wording from the finding first. Ask for one verdict with `file:line`\nevidence:"
+ },
+ {
+  "id": "R067",
+  "section": "Independent check",
+  "last_edited": "2026-10-17",
+  "review_runs_since_edit": 49,
+  "words": 15,
+  "text": "- **CONFIRMED** — the failure scenario follows from the code. Record the\n  confidence as high."
+ },
+ {
+  "id": "R068",
+  "section": "Independent check",
+  "last_edited": "2026-11-18",
+  "review_runs_since_edit": 14,
+  "words": 23,
+  "text": "- **REFUTED** — the code prevents it. Keep the finding and its disposition,\n  record the confidence as low, and attach the refuting evidence."
+ },
+ {
+  "id": "R069",
+  "section": "Independent check",
+  "last_edited": "2026-10-17",
+  "review_runs_since_edit": 49,
+  "words": 9,
+  "text": "- **UNSURE** — leave the finding as it is."
+ },
+ {
+  "id": "R070",
+  "section": "Independent check",
+  "last_edited": "2026-11-18",
+  "review_runs_since_edit": 14,
+  "words": 66,
+  "text": "REFUTED needs proof from the code: quote the line that contradicts the claim,\nshow the type, constant or invariant that rules it out, or cite the guard in\nthis diff. A scenario that needs realistic state is not refuted for being\nunlikely: a race, a rare but reachable path, a cold cache, a missing optional\nfield, a retry after a partial failure. Answer UNSURE for those."
+ },
+ {
+  "id": "R071",
+  "section": "Independent check",
+  "last_edited": "2026-11-18",
+  "review_runs_since_edit": 14,
+  "words": 8,
+  "text": "In a later round, check only new findings."
+ },
+ {
+  "id": "R072",
+  "section": "Sweep for gaps",
+  "last_edited": "2026-11-18",
+  "review_runs_since_edit": 14,
+  "words": 102,
+  "text": "At Standard and Deep, after the independent checks, dispatch one fresh\n`code-reviewer` with the integrated diff, the base-branch `REVIEW.md` files,\nand the deduplicated finding list (id, `file:line`, one-line claim). This is\nthe one packet that carries other reviewers' findings. It looks only for\ndefects not on the list, re-reads the diff and the functions around each hunk,\nand returns at most 8 new findings, or none. It does not re-check listed\nfindings and does not pad. Number its findings `GAP-#`. A new BLOCKER, and at\nStandard and Deep a new REQUIRED finding, gets the independent check. Skip the\nsweep in later rounds."
+ },
+ {
+  "id": "R073",
+  "section": "Stale instructions",
+  "last_edited": "2026-10-18",
+  "review_runs_since_edit": 49,
+  "words": 20,
+  "text": "Check that the change leaves no instruction line pointing at a file or script\nit deleted or renamed (ADR 0098):"
+ },
+ {
+  "id": "R074",
+  "section": "Stale instructions",
+  "last_edited": "2026-10-23",
+  "review_runs_since_edit": 47,
+  "words": 7,
+  "text": "```bash\npython3 ~/.claude/skills/code-review-and-quality/scripts/stale-instructions.py --base <candidate base>\n```"
+ },
+ {
+  "id": "R075",
+  "section": "Stale instructions",
+  "last_edited": "2026-10-18",
+  "review_runs_since_edit": 49,
+  "words": 27,
+  "text": "Report each hit as a REQUIRED finding with the id `STALE-#` and its\n`file:line`. Exit 2 means the check did not run: record **Stale\ninstructions: Not verified**."
+ },
+ {
+  "id": "R076",
+  "section": "Ledger",
+  "last_edited": "2026-11-18",
+  "review_runs_since_edit": 14,
+  "words": 8,
+  "text": "Check that the ticket's records still agree\n(`../references/ticket-ledger.md`):"
+ },
+ {
+  "id": "R077",
+  "section": "Ledger",
+  "last_edited": "2026-10-23",
+  "review_runs_since_edit": 47,
+  "words": 5,
+  "text": "```bash\npython3 ~/.claude/skills/spec-driven-development/scripts/check-ledger.py <TICKET>\n```"
+ },
+ {
+  "id": "R078",
+  "section": "Ledger",
+  "last_edited": "2026-10-16",
+  "review_runs_since_edit": 49,
+  "words": 30,
+  "text": "Report each FAIL as a REQUIRED finding with the id `LEDGER-#`. Report each\nwarning as an ADVISORY finding. Exit 2 means the spec was not found: record\n**Ledger: Not verified**."
+ },
+ {
+  "id": "R079",
+  "section": "Ledger",
+  "last_edited": "2026-10-18",
+  "review_runs_since_edit": 49,
+  "words": 11,
+  "text": "Report, starting with one count line before anything else (ADR 0099):"
+ },
+ {
+  "id": "R080",
+  "section": "Ledger",
+  "last_edited": "2026-10-18",
+  "review_runs_since_edit": 49,
+  "words": 27,
+  "text": "- `**Findings: N BLOCKER · N REQUIRED · N ADVISORY**`, adding `· N pre-existing`\n  when there are any; or `**Nothing to fix.**` when every count is zero;"
+ },
+ {
+  "id": "R081",
+  "section": "Ledger",
+  "last_edited": "2026-10-17",
+  "review_runs_since_edit": 49,
+  "words": 15,
+  "text": "- the review round, and for a later round the commit it was reviewed from;"
+ },
+ {
+  "id": "R082",
+  "section": "Ledger",
+  "last_edited": "2026-08-27",
+  "review_runs_since_edit": 55,
+  "words": 4,
+  "text": "- candidate branch/diff scope;"
+ },
+ {
+  "id": "R083",
+  "section": "Ledger",
+  "last_edited": "2026-08-27",
+  "review_runs_since_edit": 55,
+  "words": 9,
+  "text": "- BUILD candidate and any accepted post-BUILD test-only commits;"
+ },
+ {
+  "id": "R084",
+  "section": "Ledger",
+  "last_edited": "2026-08-27",
+  "review_runs_since_edit": 55,
+  "words": 7,
+  "text": "- **Independent verification: NOT REQUIRED | PASS**;"
+ },
+ {
+  "id": "R085",
+  "section": "Ledger",
+  "last_edited": "2026-10-18",
+  "review_runs_since_edit": 49,
+  "words": 10,
+  "text": "- **Risk: <tier> — <reason> · Depth: <depth>** (ADR 0106);"
+ },
+ {
+  "id": "R086",
+  "section": "Ledger",
+  "last_edited": "2026-08-27",
+  "review_runs_since_edit": 55,
+  "words": 6,
+  "text": "- required-reviewer list and trigger decisions;"
+ },
+ {
+  "id": "R087",
+  "section": "Ledger",
+  "last_edited": "2026-10-17",
+  "review_runs_since_edit": 49,
+  "words": 12,
+  "text": "- whether the project has a `REVIEW.md`, and which ones were used;"
+ },
+ {
+  "id": "R088",
+  "section": "Ledger",
+  "last_edited": "2026-10-18",
+  "review_runs_since_edit": 49,
+  "words": 14,
+  "text": "- the \"Always a person\" result: no list, no match, or the matched files;"
+ },
+ {
+  "id": "R089",
+  "section": "Ledger",
+  "last_edited": "2026-10-18",
+  "review_runs_since_edit": 49,
+  "words": 13,
+  "text": "- the REVIEW.md checklist: every \"Always check\" rule answered, or the\n  `RULE-#` findings;"
+ },
+ {
+  "id": "R090",
+  "section": "Ledger",
+  "last_edited": "2026-10-18",
+  "review_runs_since_edit": 49,
+  "words": 14,
+  "text": "- the stale-instructions result: **Stale instructions: none found**, the\n  `STALE-#` findings, or **Not verified**;"
+ },
+ {
+  "id": "R091",
+  "section": "Ledger",
+  "last_edited": "2026-10-04",
+  "review_runs_since_edit": 52,
+  "words": 11,
+  "text": "- the weakened-test result, and how each listed change was resolved;"
+ },
+ {
+  "id": "R092",
+  "section": "Ledger",
+  "last_edited": "2026-10-16",
+  "review_runs_since_edit": 49,
+  "words": 13,
+  "text": "- the ledger result: **Ledger: clean**, the `LEDGER-#` findings, or\n  **Ledger: Not verified**;"
+ },
+ {
+  "id": "R093",
+  "section": "Ledger",
+  "last_edited": "2026-08-27",
+  "review_runs_since_edit": 55,
+  "words": 8,
+  "text": "- each reviewer result under its own heading;"
+ },
+ {
+  "id": "R094",
+  "section": "Ledger",
+  "last_edited": "2026-11-18",
+  "review_runs_since_edit": 14,
+  "words": 11,
+  "text": "- the independent-check verdict of every checked finding, with its evidence;"
+ },
+ {
+  "id": "R095",
+  "section": "Ledger",
+  "last_edited": "2026-11-18",
+  "review_runs_since_edit": 14,
+  "words": 22,
+  "text": "- the gap sweep: the `GAP-#` findings, **Gap sweep: none found**, or\n  **Gap sweep: not run** with the depth that skipped it;"
+ },
+ {
+  "id": "R096",
+  "section": "Ledger",
+  "last_edited": "2026-11-18",
+  "review_runs_since_edit": 14,
+  "words": 21,
+  "text": "- the built-in code review trial: its level, its range and the\n  **Built-in overlap** line, or **Built-in code review: not available**;"
+ },
+ {
+  "id": "R097",
+  "section": "Ledger",
+  "last_edited": "2026-10-23",
+  "review_runs_since_edit": 47,
+  "words": 23,
+  "text": "- all findings with canonical disposition, each tagged with the `REQ-###` it\n  bears on when it bears on one, in the form below;"
+ },
+ {
+  "id": "R098",
+  "section": "Ledger",
+  "last_edited": "2026-09-01",
+  "review_runs_since_edit": 55,
+  "words": 50,
+  "text": "- **requirement evidence**: one line per `REQ-###` in the spec — the change that\n  implements it and the verification that proves it, or an explicit statement\n  that one of those is missing. `/ship` blocks on a missing entry, so report the\n  gap rather than leaving the requirement off the list."
+ },
+ {
+  "id": "R099",
+  "section": "Ledger",
+  "last_edited": "2026-10-23",
+  "review_runs_since_edit": 47,
+  "words": 14,
+  "text": "Write the findings so the owner can act on them without the code open:"
+ },
+ {
+  "id": "R100",
+  "section": "Ledger",
+  "last_edited": "2026-10-23",
+  "review_runs_since_edit": 47,
+  "words": 13,
+  "text": "- Keep every finding and its id. Never drop or merge one away."
+ },
+ {
+  "id": "R101",
+  "section": "Ledger",
+  "last_edited": "2026-10-23",
+  "review_runs_since_edit": 47,
+  "words": 46,
+  "text": "- Group duplicates across reviewers under one primary id with its aliases:\n  `CODE-5 = BLIND-7`. The disposition and the resolution apply to all of them.\n  The group takes the highest disposition among them; say \"raised: duplicate\n  of <id>\" for any finding it raises. Never lower one."
+ },
+ {
+  "id": "R102",
+  "section": "Ledger",
+  "last_edited": "2026-10-23",
+  "review_runs_since_edit": 47,
+  "words": 27,
+  "text": "- Each line says, in plain words: what a user or developer would notice, the\n  recommended action, and the choice it asks of the owner (or \"none\")."
+ },
+ {
+  "id": "R103",
+  "section": "Ledger",
+  "last_edited": "2026-10-23",
+  "review_runs_since_edit": 47,
+  "words": 8,
+  "text": "- An ADVISORY finding carries a recommendation too."
+ },
+ {
+  "id": "R104",
+  "section": "Ledger",
+  "last_edited": "2026-10-23",
+  "review_runs_since_edit": 47,
+  "words": 21,
+  "text": "- Put the findings the spec answers, or that restate the owner's request, in\n  one line: `Answered: CODE-4, BLIND-2 (REQ-003, DEC-005)`."
+ },
+ {
+  "id": "R105",
+  "section": "Ledger",
+  "last_edited": "2026-10-23",
+  "review_runs_since_edit": 47,
+  "words": 35,
+  "text": "Example: `CODE-1 = BLIND-12 · REQUIRED · An import of 50k rows takes about\na minute with no progress shown. Fix: add a progress bar. Your choice: fix\nnow, or accept and measure after release.`"
+ },
+ {
+  "id": "R106",
+  "section": "Ledger",
+  "last_edited": "2026-11-18",
+  "review_runs_since_edit": 14,
+  "words": 19,
+  "text": "Also write every finding to a SARIF 2.1.0 file, so code-scanning tools can\nread the review (`../references/findings.md` §Review SARIF):"
+ },
+ {
+  "id": "R107",
+  "section": "Ledger",
+  "last_edited": "2026-11-06",
+  "review_runs_since_edit": 36,
+  "words": 6,
+  "text": "```bash\nout=\"docs/reviews/<TICKET>-$(git rev-parse --short HEAD).sarif\"\n```"
+ },
+ {
+  "id": "R108",
+  "section": "Ledger",
+  "last_edited": "2026-11-06",
+  "review_runs_since_edit": 36,
+  "words": 15,
+  "text": "Each id stays its own SARIF result. Record a group's aliases in each member's `properties.aliases`."
+ },
+ {
+  "id": "R109",
+  "section": "Ledger",
+  "last_edited": "2026-11-18",
+  "review_runs_since_edit": 14,
+  "words": 21,
+  "text": "Give every finding a `class` (`findings.md` §Review SARIF). List the names already in use\nfirst, and reuse one when it fits:"
+ },
+ {
+  "id": "R110",
+  "section": "Ledger",
+  "last_edited": "2026-10-23",
+  "review_runs_since_edit": 47,
+  "words": 5,
+  "text": "```bash\npython3 ~/.claude/skills/code-review-and-quality/scripts/review-noise.py --classes\n```"
+ },
+ {
+  "id": "R111",
+  "section": "Ledger",
+  "last_edited": "2026-11-06",
+  "review_runs_since_edit": 36,
+  "words": 49,
+  "text": "Commit the file alone: `review: <TICKET> round <n> findings`. The sha in its\nname is the reviewed commit, the one before this commit (ADR 0120). Give its\npath in the report. The markdown report stays the gate artifact; the SARIF file is a copy\nof its findings for tools."
+ },
+ {
+  "id": "R112",
+  "section": "Ledger",
+  "last_edited": "2026-08-27",
+  "review_runs_since_edit": 55,
+  "words": 7,
+  "text": "Then stop. The next stage is `/ship`."
+ },
+ {
+  "id": "R113",
+  "section": "Ledger",
+  "last_edited": "2026-11-13",
+  "review_runs_since_edit": 30,
+  "words": 18,
+  "text": "Any candidate change after REVIEW invalidates the review. A production fix\nreturns to `/build`, then `/test`, then `/review`."
+ }
+]

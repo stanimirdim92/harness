@@ -1,0 +1,535 @@
+{
+ "verdicts": [
+  {
+   "id": "S000",
+   "verdict": "USED",
+   "evidence": "7bb49947: {\"skill\": \"ship\", \"args\": \"LD-491 — review round 4 clean at 26b4f9a1 ...\"}",
+   "note": "Frontmatter makes the command exist; invoked with the hinted argument shape (pilot precedent R000)."
+  },
+  {
+   "id": "S001",
+   "verdict": "USED",
+   "evidence": "49bbc2b9: \"The full suite hasn't run. Deep depth requires `composer test` ... Run `! composer test`.\" (asks owner, no dispatch)",
+   "note": "Ship-only segments show scripts only; two executor dispatches listed as slips."
+  },
+  {
+   "id": "S002",
+   "verdict": "DUPLICATE",
+   "evidence": "claude/references/target-selection.md:18-21 (\"announce the resolved target — Using: `<target>`\"); line 5-6 says do not restate it",
+   "note": "Keep the pointer; the announce rule is a restatement. Followed: 04cd7fbd \"Using: LD-593 (`worktree-LD-593`, reviewed candidate a543e122).\""
+  },
+  {
+   "id": "S003",
+   "verdict": "USED",
+   "evidence": "48eb39d3: \"Under the gate rules this is **SHIP BLOCKED**: no review round covers the production commits 2d4da841..c610a30f.\"",
+   "note": "Handoff required for exact candidate."
+  },
+  {
+   "id": "S004",
+   "verdict": "USED",
+   "evidence": "3c6ffef2: \"The code changed after review. My R2-CODE-1 fix (da0449a7) ... is not a ledger-only commit.\" -> SHIP BLOCKED; 7bb49947: git diff --stat 26b4f9a1 HEAD -- . ':!docs'",
+   "note": "Candidate drift caught and blocked."
+  },
+  {
+   "id": "S005",
+   "verdict": "DUPLICATE",
+   "evidence": "ship.md:25-28 (S006-S008, the items it introduces)",
+   "note": "Lead-in only (pilot precedent R060)."
+  },
+  {
+   "id": "S006",
+   "verdict": "USED",
+   "evidence": "04cd7fbd: \"**Independent verification: NOT REQUIRED.** The production code is unchanged since the VERIFY PASS at 633a03e5.\"",
+   "note": ""
+  },
+  {
+   "id": "S007",
+   "verdict": "USED",
+   "evidence": "cf91d497 (2026-11-20T20:24Z, after the 17:20Z edit): \"Final verification on the merged tree: Backend: 3631 passed, 0 failed ... Frontend (Vitest): 1968 passed.\"",
+   "note": "Post-edit report shows a VERIFY result but no explicit PASS status line; see S004 slip."
+  },
+  {
+   "id": "S008",
+   "verdict": "RARE-NEEDED",
+   "evidence": "no \"DEFERRED (fix round)\" in any ship run after 2026-11-19 (gs.sh grep)",
+   "note": "Guards shipping a fix round that /test never verified (release path)."
+  },
+  {
+   "id": "S009",
+   "verdict": "USED",
+   "evidence": "1ded7e46: \"**Weakened tests:** the earlier rounds resolved all three entries\"",
+   "note": ""
+  },
+  {
+   "id": "S010",
+   "verdict": "USED",
+   "evidence": "7bb49947: \"check-ledger.py LD-491 --ship; echo \\\"exit=$?\\\"\"",
+   "note": "Ran in 26 of 31 ship runs."
+  },
+  {
+   "id": "S011",
+   "verdict": "USED",
+   "evidence": "7bb49947: python3 ~/.claude/skills/spec-driven-development/scripts/check-ledger.py LD-491 --ship",
+   "note": ""
+  },
+  {
+   "id": "S012",
+   "verdict": "USED",
+   "evidence": "7bb49947: \"**SHIP BLOCKED for now:** the ledger shows 8 items still Open.\"; 04cd7fbd: \"Ledger: 0 FAIL. 1 warning\"",
+   "note": ""
+  },
+  {
+   "id": "S013",
+   "verdict": "UNKNOWN",
+   "evidence": "edited 2026-11-21, 0 runs",
+   "note": "Prior behavior matches it: 7bb49947 closed OPEN-007 by DEC-009, asked owner one numbered question."
+  },
+  {
+   "id": "S014",
+   "verdict": "USED",
+   "evidence": "49bbc2b9: \"The full suite hasn't run ... Run `! composer test`\" (did not substitute own run)",
+   "note": "Prohibition; one possible slip (04cd7fbd)."
+  },
+  {
+   "id": "S015",
+   "verdict": "USED",
+   "evidence": "04cd7fbd: \"### Human time | Shipped | Ticket | Decisions | ...\"",
+   "note": ""
+  },
+  {
+   "id": "S016",
+   "verdict": "USED",
+   "evidence": "7bb49947: python3 ~/.claude/skills/spec-driven-development/scripts/ticket-stats.py LD-491",
+   "note": "Ran in 20 runs."
+  },
+  {
+   "id": "S017",
+   "verdict": "USED",
+   "evidence": "04cd7fbd: \"Most of your time went to the intake and the scope talk at the start, not to the 7-line code change.\"",
+   "note": ""
+  },
+  {
+   "id": "S018",
+   "verdict": "DEAD",
+   "evidence": "Post-edit (after 11-13) agents grepped \"Escaped From\" in specs: 7bb49947, f49b01e3, 04cd7fbd, 3c6ffef2, 41e679ab: none; reports say \"Not an escaped bug\" (7bb49947, f49b01e3, 04cd7fbd x3, cf91d497 x2, 1ded7e46, 48eb39d3, 49bbc2b9). `git log --all -S \"## Escaped From\"` in leadbuster: empty.",
+   "note": "Telemetry for harness eval only; guards no release path. Condition never true in 19 runs."
+  },
+  {
+   "id": "S019",
+   "verdict": "USED",
+   "evidence": "1ded7e46: \"**Risk: High — migrations and a data move · Depth: Deep.** Read every changed file with a second person\"; 49bbc2b9 blocked on missing Deep full suite",
+   "note": ""
+  },
+  {
+   "id": "S020",
+   "verdict": "USED",
+   "evidence": "1ded7e46: \"**Read these yourself:** the two `2026_11_17` migrations and the three `database/schema` files.\"",
+   "note": ""
+  },
+  {
+   "id": "S021",
+   "verdict": "USED",
+   "evidence": "1ded7e46: \"I merged `sprint/2026.16` (64a3a635) into a scratch copy and ran the plan's checks.\"",
+   "note": "One owner-directed skip (f49b01e3) listed as slip."
+  },
+  {
+   "id": "S022",
+   "verdict": "USED",
+   "evidence": "5d6c5543: \"~/.claude/skills/code-review-and-quality/scripts/base-check.sh --base leadbuster/main --setup ...\"",
+   "note": "11 runs. Several used manual ancestor checks instead (49bbc2b9: no origin remote)."
+  },
+  {
+   "id": "S023",
+   "verdict": "USED",
+   "evidence": "7bb49947: \"sed -n '/Integrated/,/^## /p' docs/tasks/LD-491-plan.md\"",
+   "note": ""
+  },
+  {
+   "id": "S024",
+   "verdict": "USED",
+   "evidence": "7bb49947: \"**Base check:** current. Local `main` has no commits that are not already in the candidate.\"",
+   "note": ""
+  },
+  {
+   "id": "S025",
+   "verdict": "USED",
+   "evidence": "41e679ab: \"**Base check:** conflict. `main` moved by 77 commits.\" -> NO-GO; 3c6ffef2: \"The merge with current `main` conflicts\" -> NO-GO",
+   "note": "Slips: 04cd7fbd GO after exit=1; 1ded7e46 offered risk acceptance. No rule for scratch-setup failures."
+  },
+  {
+   "id": "S026",
+   "verdict": "RARE-NEEDED",
+   "evidence": "no base-check exit 2 in any ship run (grep \"exit[= ]2\" near base)",
+   "note": "Guards GO without a base check (release path)."
+  },
+  {
+   "id": "S027",
+   "verdict": "USED",
+   "evidence": "04cd7fbd: \"CODE-1 = BLIND-5: fixed in 165a4165.\"",
+   "note": "Says dispositions are defined once, then S028-S029 restate them."
+  },
+  {
+   "id": "S028",
+   "verdict": "USED",
+   "evidence": "41e679ab: \"4 refuted, including round 1's low-confidence BLOCKER (BLIND-1), with independent-check evidence\"",
+   "note": ""
+  },
+  {
+   "id": "S029",
+   "verdict": "USED",
+   "evidence": "41e679ab: \"BLIND-40: refuted by `/review`'s independent check\"; 7bb49947: \"BLIND-R3-2: risk accepted by the owner\"; e4548615: \"Deferred: BLIND-R3-2\"",
+   "note": ""
+  },
+  {
+   "id": "S030",
+   "verdict": "USED",
+   "evidence": "04cd7fbd: \"Answered by REQ-001, REQ-003, DEC-001 and DEC-002: CODE-6 = BLIND-11, BLIND-3 ...\"",
+   "note": ""
+  },
+  {
+   "id": "S031",
+   "verdict": "USED",
+   "evidence": "f49b01e3 (ship report): \"CODE-10 = BLIND-6: the browser check showed the button does not overflow.\"",
+   "note": ""
+  },
+  {
+   "id": "S032",
+   "verdict": "DUPLICATE",
+   "evidence": "claude/references/findings.md:14 (\"ADVISORY | ... | nothing; it never blocks\"); ship.md:126-127 tells the agent to read it",
+   "note": "Exact restatement of the single-source table."
+  },
+  {
+   "id": "S033",
+   "verdict": "USED",
+   "evidence": "04cd7fbd: \"### Pre-existing findings (follow-ups) - GAP-1 (REQUIRED) ... It is not tracked yet. It needs a Jira ticket\"",
+   "note": "Conflicts with findings.md:28 on untracked pre-existing BLOCKER."
+  },
+  {
+   "id": "S034",
+   "verdict": "UNKNOWN",
+   "evidence": "edited 2026-11-21 (review-sarif.py), 0 runs",
+   "note": ""
+  },
+  {
+   "id": "S035",
+   "verdict": "USED",
+   "evidence": "7bb49947: \"review-noise.py --repeats; echo \\\"exit=$?\\\"\"",
+   "note": "Slip: 48eb39d3 skipped it."
+  },
+  {
+   "id": "S036",
+   "verdict": "USED",
+   "evidence": "41e679ab: \"python3 ~/.claude/skills/code-review-and-quality/scripts/review-noise.py --repeats 2>&1 | head -30\"",
+   "note": "Ran in 18 runs."
+  },
+  {
+   "id": "S037",
+   "verdict": "USED",
+   "evidence": "7bb49947: \"These are proposals for you to accept or decline. ... `lock-ttl-shorter-than-work`, 3 tickets: add to REVIEW.md\"",
+   "note": ""
+  },
+  {
+   "id": "S038",
+   "verdict": "USED",
+   "evidence": "04cd7fbd: \"Lint rule: `argsIgnorePattern: '^_'` in `eslint.config.js:66` ... Remove that option\"",
+   "note": ""
+  },
+  {
+   "id": "S039",
+   "verdict": "UNKNOWN",
+   "evidence": "No \"shared test\", \"dataset\" or \"architecture test\" proposal in any Fix-at-the-source section (19 runs). Arguable miss: 7bb49947 silent-skip -> CLAUDE.md line where an arch test might catch it.",
+   "note": "Never chosen. The template (ship.md:277) omits this option, which may explain it."
+  },
+  {
+   "id": "S040",
+   "verdict": "USED",
+   "evidence": "04cd7fbd: \"REVIEW.md \\\"Always check\\\" line: \\\"When a test fixture changes, the test name still describes what the test asserts.\\\"\"",
+   "note": ""
+  },
+  {
+   "id": "S041",
+   "verdict": "USED",
+   "evidence": "5d6c5543: \"Proposed CLAUDE.md line: \\\"In specs, plans and todos, cite code this ticket changes by symbol or test name\\\"\"",
+   "note": ""
+  },
+  {
+   "id": "S042",
+   "verdict": "USED",
+   "evidence": "1ded7e46: \"intent-question (9 tickets, 50 answered). Add a REVIEW.md \\\"Do not report\\\" line\"",
+   "note": ""
+  },
+  {
+   "id": "S043",
+   "verdict": "USED",
+   "evidence": "7bb49947: \"These are proposals for you to accept or decline. I did not apply them.\"",
+   "note": ""
+  },
+  {
+   "id": "S044",
+   "verdict": "USED",
+   "evidence": "3c6ffef2: \"To clear it, run `/test AD-312`, then `/review AD-312`.\"; cf91d497: \"That makes a new candidate, so `/test` and `/review` run again on it.\"",
+   "note": "Order conflicts with review.md fix-round rule (ADR 0144)."
+  },
+  {
+   "id": "S045",
+   "verdict": "USED",
+   "evidence": "04cd7fbd: \"REQ-001: `reachText` (63c51d7e, 165a4165). Verified by unit tests, 8/8 mutants killed and a browser run\"",
+   "note": ""
+  },
+  {
+   "id": "S046",
+   "verdict": "RARE-NEEDED",
+   "evidence": "no ship report shows a REQ without implementation or verification evidence (grep REQ-### near missing/no evidence)",
+   "note": "Guards shipping an unproven requirement (release path)."
+  },
+  {
+   "id": "S047",
+   "verdict": "USED",
+   "evidence": "3bde1d32: \"| Preserved behaviour | — | Full suite 1442/1442 at d70a9cc0 |\"",
+   "note": ""
+  },
+  {
+   "id": "S048",
+   "verdict": "USED",
+   "evidence": "04cd7fbd: \"### Release-readiness - Infrastructure: not applicable ...\"",
+   "note": ""
+  },
+  {
+   "id": "S049",
+   "verdict": "USED",
+   "evidence": "04cd7fbd: \"Infrastructure: not applicable. There is no migration, env change or backend change.\"",
+   "note": ""
+  },
+  {
+   "id": "S050",
+   "verdict": "USED",
+   "evidence": "1ded7e46: \"Documentation: PASS. ARCHITECTURE.md and the Structurizr workspace were updated in T004\"",
+   "note": ""
+  },
+  {
+   "id": "S051",
+   "verdict": "USED",
+   "evidence": "04cd7fbd: \"Feature flag: none. The change only alters how a number is formatted, and a revert undoes it at once.\"",
+   "note": ""
+  },
+  {
+   "id": "S052",
+   "verdict": "USED",
+   "evidence": "f49b01e3: \"Documentation: PASS, not applicable. This is a UI styling fix\"",
+   "note": ""
+  },
+  {
+   "id": "S053",
+   "verdict": "USED",
+   "evidence": "04cd7fbd: \"Procedure: revert a543e122, 165a4165 and 63c51d7e, then run `yarn build` and deploy.\"",
+   "note": ""
+  },
+  {
+   "id": "S054",
+   "verdict": "DUPLICATE",
+   "evidence": "ship.md:244-254 (S055-S064, the items it introduces)",
+   "note": "Lead-in only (pilot precedent R060)."
+  },
+  {
+   "id": "S055",
+   "verdict": "DUPLICATE",
+   "evidence": "ship.md:17-21 and ship.md:51-54",
+   "note": "Restates §1 candidate and ledger-only rules."
+  },
+  {
+   "id": "S056",
+   "verdict": "DUPLICATE",
+   "evidence": "ship.md:118-122",
+   "note": "Restates base-check exits."
+  },
+  {
+   "id": "S057",
+   "verdict": "DUPLICATE",
+   "evidence": "ship.md:23-28",
+   "note": "Restates verification status rule."
+  },
+  {
+   "id": "S058",
+   "verdict": "DUPLICATE",
+   "evidence": "ship.md:129-134 and ship.md:151-153",
+   "note": "Restates BLOCKER and pre-existing rules."
+  },
+  {
+   "id": "S059",
+   "verdict": "DUPLICATE",
+   "evidence": "ship.md:41-43",
+   "note": "Restates ledger FAIL rule."
+  },
+  {
+   "id": "S060",
+   "verdict": "DUPLICATE",
+   "evidence": "ship.md:198-206",
+   "note": "Restates requirement-evidence rule."
+  },
+  {
+   "id": "S061",
+   "verdict": "DUPLICATE",
+   "evidence": "ship.md:135-141 and claude/references/findings.md:13",
+   "note": "Drifted copy: omits answered and pre-existing exemptions."
+  },
+  {
+   "id": "S062",
+   "verdict": "DUPLICATE",
+   "evidence": "ship.md:217",
+   "note": "Restates attestation rule."
+  },
+  {
+   "id": "S063",
+   "verdict": "DUPLICATE",
+   "evidence": "ship.md:237-238",
+   "note": "Restates rollback rule."
+  },
+  {
+   "id": "S064",
+   "verdict": "USED",
+   "evidence": "04cd7fbd: \"**Tree:** clean.\"; 1ded7e46: \"The only uncommitted change is `.yarn/install-state.gz`, which stays unstaged.\"",
+   "note": "Only place this gate is stated."
+  },
+  {
+   "id": "S065",
+   "verdict": "DUPLICATE",
+   "evidence": "ship.md:258-305 (S066, the template it introduces)",
+   "note": "Lead-in only."
+  },
+  {
+   "id": "S066",
+   "verdict": "USED",
+   "evidence": "04cd7fbd: \"## Ship Decision: GO / **Risk: Medium. Depth: Standard.** ... ### Read these yourself - None.\"",
+   "note": "Freeform reports in 1ded7e46 (2nd run), 7bb49947; f449dd8d in Bulgarian."
+  },
+  {
+   "id": "S067",
+   "verdict": "USED",
+   "evidence": "04cd7fbd: \"GO is a readiness verdict only. Nothing is merged or pushed.\"",
+   "note": ""
+  },
+  {
+   "id": "S068",
+   "verdict": "USED",
+   "evidence": "04cd7fbd: {\"question\": \"LD-593 is GO. What should happen next?\", \"multiSelect\": true}",
+   "note": ""
+  },
+  {
+   "id": "S069",
+   "verdict": "UNKNOWN",
+   "evidence": "edited 2026-11-21, 0 runs",
+   "note": ""
+  },
+  {
+   "id": "S070",
+   "verdict": "USED",
+   "evidence": "04cd7fbd: addOrEditJiraIssueComment LD-593 \"**Ship decision: GO** (readiness only; nothing merged or pushed yet)\"",
+   "note": ""
+  },
+  {
+   "id": "S071",
+   "verdict": "USED",
+   "evidence": "04cd7fbd: Jira post and build dispatch only after the multi-select answer (\"Posted the Jira comment ... Starting the ADVISORY fix round.\")",
+   "note": ""
+  }
+ ],
+ "conflicts": [
+  {
+   "a": "claude/commands/ship.md:153 (\"A pre-existing BLOCKER with no tracked follow-up is NO-GO\") and ship.md:247",
+   "b": "claude/references/findings.md:28 (\"It does not block `/ship`; `/ship` records it as a follow-up.\")",
+   "situation": "A pre-existing BLOCKER has no ticket or observation-log row yet: ship says NO-GO, findings.md says it never blocks."
+  },
+  {
+   "a": "claude/commands/ship.md:250-251 (GO: REQUIRED \"fixed or refuted, risk-accepted, or deferred\") and claude/references/findings.md:13",
+   "b": "claude/commands/ship.md:142-146 (answered keeps its resolution) and ship.md:151 (pre-existing does not block at any disposition)",
+   "situation": "A REQUIRED finding closed as answered, or a pre-existing open REQUIRED: the GO checklist does not list either as resolved."
+  },
+  {
+   "a": "claude/commands/ship.md:201 (\"A requirement missing either is **NO-GO**\")",
+   "b": "claude/commands/review.md:366 (\"`/ship` blocks on a missing entry\")",
+   "situation": "REQ with no implementation or verification evidence: NO-GO (needs new candidate) versus blocked (missing input)."
+  },
+  {
+   "a": "claude/commands/ship.md:23-28 (handles NOT REQUIRED, PASS, DEFERRED (fix round))",
+   "b": "claude/commands/review.md:345 (\"NOT REQUIRED | PASS | DEFERRED (fix round) | STALE (depth)\")",
+   "situation": "REVIEW records STALE (depth): ship.md maps no verdict to it; only ship.md:91-92 covers the Deep case indirectly. Lists drifted."
+  },
+  {
+   "a": "claude/commands/ship.md:193-194 (\"A production fix returns to `/build`, then the new candidate goes through `/test` and `/review` again\")",
+   "b": "claude/commands/review.md:412-413 (\"A production fix returns to `/build`, then `/review`; `/test` runs as §2 says (ADR 0144)\") and review.md:63-70",
+   "situation": "A post-review production fix from findings: ship orders /test before /review, review.md defers /test until review converges."
+  },
+  {
+   "a": "claude/commands/ship.md:119-120 (base-check exit 1: \"new candidate through `/build` and `/review`\")",
+   "b": "claude/commands/ship.md:193-194 (production fix: \"/build ... `/test` and `/review` again\")",
+   "situation": "Fix for a base-check failure: one path omits /test, the other requires it. Agents followed the /test version (cf91d497)."
+  },
+  {
+   "a": "claude/commands/ship.md:158-160 (ship writes resolutions incl. `answered`)",
+   "b": "claude/references/findings.md:73-74 (\"`/review` sets `answered`; `/ship` sets the rest\")",
+   "situation": "Who may write `answered` into the SARIF."
+  },
+  {
+   "a": "claude/commands/ship.md:51-53 (ledger-only = only `docs/tasks/<TICKET>-open.md` or `docs/reviews/<TICKET>.sarif`)",
+   "b": "claude/commands/build.md:349-350 (after review HEAD may add commits touching `docs/reviews/` or `docs/tasks/<TICKET>-open.md`)",
+   "situation": "A post-review commit touching another file under docs/reviews/: build accepts it, ship blocks it."
+  },
+  {
+   "a": "claude/commands/ship.md:26-28 (DEFERRED (fix round) is SHIP BLOCKED until /test and the closing round)",
+   "b": "claude/commands/review.md:68-70 (\"Then run one closing round on the commits `/test` added, or none when it added none\")",
+   "situation": "/test adds no commits: no closing round runs, so the last REVIEW status stays DEFERRED and ship.md has no path to GO."
+  },
+  {
+   "a": "claude/commands/ship.md:178-187 (five fix-at-the-source options, shared test second)",
+   "b": "claude/commands/ship.md:277 (template: \"lint rule | REVIEW.md line | CLAUDE.md line | Do not report\")",
+   "situation": "Template omits the shared-test option (ADR 0135); no run ever proposed one."
+  },
+  {
+   "a": "claude/commands/ship.md:59-73 (Human time: run ticket-stats.py, print row exactly)",
+   "b": "claude/commands/ship.md:155-166 (write resolutions into the SARIF afterwards)",
+   "situation": "Section order makes the stats row count 0 fixed. Agents flagged it: 04cd7fbd \"the stats ran before this run wrote the fixed resolutions\"; b1cce9c1 same."
+  },
+  {
+   "a": "claude/commands/ship.md:242-254 (GO: base check passing \"or the base unchanged\"; ledger check passing)",
+   "b": "claude/references/component-response-contracts.md:472-478 (GO: \"a passing current-base check\"; no ledger item)",
+   "situation": "Second SHIP contract copy drifted. Not loaded in /ship (findings.md:5-6), so no runtime effect."
+  }
+ ],
+ "slips": [
+  {
+   "id": "S025",
+   "session": "1ded7e46",
+   "evidence": "After NO-GO on base PHPStan errors: \"2. **Accept them:** ... I'd record this as an accepted risk and switch the verdict to GO.\""
+  },
+  {
+   "id": "S021",
+   "session": "f49b01e3",
+   "evidence": "\"**Base check: not run.** You said on 2026-11-16 to ignore `main` for now. `main` is 1 commit ahead ... no tests ran on the merged re[sult]\" with GO (owner-directed)."
+  },
+  {
+   "id": "S025",
+   "session": "04cd7fbd",
+   "evidence": "Raw transcript: base-check.sh returned \"exit=1 ... Setup: FAILED\", then \"Test Files 162 failed\". Agent ran `yarn test` on the candidate and wrote \"Base check is clean\", GO."
+  },
+  {
+   "id": "S004",
+   "session": "cf91d497",
+   "evidence": "GO with \"After that verification run, 3 more commits changed only tests, the PHPStan baseline and docs; their tests were rerun\" (a baseline change is not test-only)."
+  },
+  {
+   "id": "S035",
+   "session": "48eb39d3",
+   "evidence": "\"Not run: the repeat-class check (`review-noise.py --repeats`) was skipped, so there are no proposals.\""
+  },
+  {
+   "id": "S044",
+   "session": "1ded7e46",
+   "evidence": "After NO-GO, dispatched {\"subagent_type\": \"executor\", \"description\": \"Fix LD-580 PHPStan errors\"} directly, not via /build."
+  },
+  {
+   "id": "S001",
+   "session": "7bb49947",
+   "evidence": "Inside the /ship run: \"Dispatching the T010 executor.\" (then stopped before it started)."
+  }
+ ]
+}

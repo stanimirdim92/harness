@@ -1,0 +1,500 @@
+{
+ "verdicts": [
+  {
+   "id": "T000",
+   "verdict": "USED",
+   "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"1. `/test LD-593`. This change touches only tests, so it should come back VERIFY NOT REQUIRED.\"",
+   "note": "Frontmatter makes the command exist; invoked with ticket argument in every run."
+  },
+  {
+   "id": "T001",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/references/verification-triggers.md:3-9 (\"`/test` is the separate, independent verifier\"; \"runs after every `/build`\"); frontmatter T000",
+   "note": "Positioning sentence; verification-triggers.md, which /test must read, says the same."
+  },
+  {
+   "id": "T002",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/references/verification-triggers.md:3-9 (runs the change like an engineer: browser, real requests, jobs; \"Tests passing is not the same as the change working\"; ADR 0104, 0132)",
+   "note": "Rationale restating ADR 0104/0132 and verification-triggers.md:3-9 almost word for word."
+  },
+  {
+   "id": "T003",
+   "verdict": "USED",
+   "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"**VERIFY NOT REQUIRED.** Every file changed since the last verified commit (633a03e5) is exempt, so I dispatched no verifier.\"",
+   "note": "Operative bit is \"dispatch nobody\". The user-asks clause duplicates verification-triggers.md:29."
+  },
+  {
+   "id": "T004",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/references/target-selection.md:18-20 (\"announce the resolved target — Using: `<target>`\"), which says \"don't restate this in a command\" (:5-6)",
+   "note": "Used in every run, but target-selection.md owns it. Keep only the pointer."
+  },
+  {
+   "id": "T005",
+   "verdict": "USED",
+   "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"**VERIFY BLOCKED** for LD-225. No BUILD COMPLETE message for LD-225 exists in this conversation, so I dispatched no verifier.\"",
+   "note": "Handoff-source part restates target-selection.md:25-33; identity check against git is test-specific."
+  },
+  {
+   "id": "T006",
+   "verdict": "USED",
+   "evidence": "3c6ffef2-5ec6-4f67-997f-5e9f6d2f9a2a: \"Using: `docs/tasks/AD-312-plan.md` (spec pin 9a1027de unchanged; all tasks Pending).\"; 1ded7e46-0910-4bea-923b-1abe49ba7611: \"Pre-existing tree change: ` M .yarn/install-state.gz`. It is not part of the candidate; ignore it.\"",
+   "note": "Baseline and spec-pin recorded before dispatch in post-edit runs."
+  },
+  {
+   "id": "T007",
+   "verdict": "USED",
+   "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"The LD-225 build ran in an earlier session. Git shows all 6 tasks Done ... Git state alone does not count as a handoff.\"",
+   "note": "Missing BUILD evidence returned VERIFY BLOCKED without rerunning implementation."
+  },
+  {
+   "id": "T008",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"Acceptance criteria: ... Implemented behavior (commits, oldest first): ... Regression risks to probe: ... Commands BUILD ran (prior evidence):\"",
+   "note": "List header; its items appear as packet sections."
+  },
+  {
+   "id": "T009",
+   "verdict": "USED",
+   "evidence": "1003c22b-a1cc-4f84-ac2b-dfd84c160443: \"## Handed on to /test: real-browser checks (each needs its own runtime line)\"",
+   "note": "Handed-on tasks carried into scope with one runtime line each."
+  },
+  {
+   "id": "T010",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"Use the `### Requirement:` / `#### Scenario:` list in `docs/specs/LD-580-SPEC.md`: REQ-001 to REQ-015 and every scenario.\"",
+   "note": "Every post-edit packet passes the REQ list by pointer."
+  },
+  {
+   "id": "T011",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"Implemented behavior (commits, oldest first):\"",
+   "note": "Present in packets."
+  },
+  {
+   "id": "T012",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"Regression risks to probe:\"",
+   "note": "Present in packets."
+  },
+  {
+   "id": "T013",
+   "verdict": "USED",
+   "evidence": "3c6ffef2-5ec6-4f67-997f-5e9f6d2f9a2a: \"High — Deep (carried from review round 2). Full backend and frontend suites again\"",
+   "note": "Review-set depth carried into the re-verify packet."
+  },
+  {
+   "id": "T014",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"Commands BUILD ran (prior evidence):\"",
+   "note": "Present in packets."
+  },
+  {
+   "id": "T015",
+   "verdict": "UNKNOWN",
+   "evidence": "No observable trace either way; main sessions that also ran /build had already read the code.",
+   "note": "Soft preference; cannot tell from transcripts whether main re-read the implementation for /test."
+  },
+  {
+   "id": "T016",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/commands/test.md:219-222 (VERIFY BLOCKED \"Use when scope/candidate identity ... prevent trustworthy PASS/FAIL evidence\")",
+   "note": "Same rule twice in test.md; also conflicts with target-selection.md:13 \"Otherwise ask\"."
+  },
+  {
+   "id": "T017",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"{\"subagent_type\": \"test-engineer\", ... \"prompt\": \"VERIFY packet: LD-580 (ticket key LD-580).\"",
+   "note": "One bounded packet per verification."
+  },
+  {
+   "id": "T018",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"Branch `worktree-LD-580`, HEAD `29f4b369...`, base `f2ca568b`. ... Pre-existing tree change: ` M .yarn/install-state.gz`.\"",
+   "note": "Candidate identity and baseline in packets."
+  },
+  {
+   "id": "T019",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"Risk · Depth: High · Deep.\"",
+   "note": "Every post-edit packet carries the line."
+  },
+  {
+   "id": "T020",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"Acceptance criteria:\"",
+   "note": "Present in packets."
+  },
+  {
+   "id": "T021",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"Implemented behavior (commits, oldest first):\"",
+   "note": "Present in packets."
+  },
+  {
+   "id": "T022",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"Regression risks to probe:\"",
+   "note": "Present in packets."
+  },
+  {
+   "id": "T023",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"Commands BUILD ran (prior evidence):\"",
+   "note": "Present in packets."
+  },
+  {
+   "id": "T024",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"Plan `docs/tasks/LD-580-plan.md`: §Failure Modes (each row names its proving task) and TD-001 to TD-011.\"",
+   "note": "Pointers, not pasted text."
+  },
+  {
+   "id": "T025",
+   "verdict": "RARE-NEEDED",
+   "evidence": "No run had a declared uncommitted BUILD diff; every packet says e.g. 23e37867-5e8e-4330-9b9b-3790df81f7b5: \"Base 357927e1, HEAD d2de9d0c, tree clean, no uncommitted BUILD diff.\"",
+   "note": "Guards candidate identity: a verifier worktree without the diff would PASS the wrong code."
+  },
+  {
+   "id": "T026",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"5. Browser (required_skills includes `browser-testing-with-devtools`): serve the candidate on 127.0.0.1 yourself and open the Details page\"",
+   "note": "Skill selection and self-serve used. Slip in 3bde1d32. \"Invokes each skill\" duplicates test-engineer.md:46."
+  },
+  {
+   "id": "T027",
+   "verdict": "USED",
+   "evidence": "adba8200-6e18-47c5-8398-4b0929e05a25: \"Figma parity is in scope, so I'm sending the check to `figma-test-engineer`.\"; adba8200-6e18-47c5-8398-4b0929e05a25: \"## VERIFY FAIL: the error-state icon doesn't match Figma (REQ-020)\"",
+   "note": "One Figma run; dispatch and FAIL path both used."
+  },
+  {
+   "id": "T028",
+   "verdict": "USED",
+   "evidence": "41e679ab-d8f1-400f-92e2-663f195faccd: \"I'll keep waiting for the verifier and start review round 4 as soon as it reports.\"",
+   "note": "Partly restates AGENTS.md:193-195, which it cites; keep as pointer."
+  },
+  {
+   "id": "T029",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"You are the independent verifier; BUILD's results are prior evidence, not your conclusion. ... Invariant: at most one row per (website_id, strategy)\"",
+   "note": "Invariant/decision pointers sent. \"Prior evidence\" also in test-engineer.md:45."
+  },
+  {
+   "id": "T030",
+   "verdict": "USED",
+   "evidence": "Largest post-edit test-engineer packet is 8.6k chars with 0 pasted WHEN/THEN lines; 1ded7e46-0910-4bea-923b-1abe49ba7611: \"Use the `### Requirement:` / `#### Scenario:` list in `docs/specs/LD-580-SPEC.md`\"",
+   "note": "Prohibition obeyed; packets point at spec/plan instead of pasting them."
+  },
+  {
+   "id": "T031",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/agents/test-engineer.md:59-283 (Approach §1-§6 covers every item of the list)",
+   "note": "List header for verifier duties that test-engineer.md already defines."
+  },
+  {
+   "id": "T032",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/agents/test-engineer.md:69-74 (\"Find the repository's own commands before the first run ... Never assume a default such as `npm test`\")",
+   "note": "Verbatim restatement of the verifier's own definition. Used."
+  },
+  {
+   "id": "T033",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/agents/test-engineer.md:105-107 (\"Tests are not enough. Run each changed surface ...\")",
+   "note": "Restates test-engineer §2; used in every run."
+  },
+  {
+   "id": "T034",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/agents/test-engineer.md:63-67 (\"Read the code being tested ... Check existing tests\")",
+   "note": "Restates test-engineer §1."
+  },
+  {
+   "id": "T035",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/agents/test-engineer.md:313-316 (one evidence entry per in-scope REQ-###)",
+   "note": "Restates test-engineer Output format."
+  },
+  {
+   "id": "T036",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/agents/test-engineer.md:29-30, 287-289 (\"Add test-only changes where the evidence needs them\")",
+   "note": "Restates test-engineer §7."
+  },
+  {
+   "id": "T037",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/agents/test-engineer.md:64, 191-208 (edge cases, error paths, regression of neighboring flow)",
+   "note": "Restates test-engineer §5."
+  },
+  {
+   "id": "T038",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/agents/test-engineer.md:257-266 (\"At Deep, start the candidate's full suite in the background as your first run\")",
+   "note": "Restates test-engineer §6; used, e.g. 49bbc2b9 started suite in background first."
+  },
+  {
+   "id": "T039",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/agents/test-engineer.md:94, 99-101, 121-123 (smoke test with repository command and a safe target; stay local)",
+   "note": "Restates test-engineer §2 smoke and stay-local rules."
+  },
+  {
+   "id": "T040",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/commands/test.md:149-152 (review Risk · Depth \"wins when higher\") and /var/www/html/personal/harness/claude/commands/test.md:53-55 (take the higher of the two)",
+   "note": "Third statement of the same higher-tier rule in test.md."
+  },
+  {
+   "id": "T041",
+   "verdict": "USED",
+   "evidence": "1003c22b-a1cc-4f84-ac2b-dfd84c160443: \"\"prompt\": \"Re-VERIFY LD-414 (fresh verifier). Ticket key for any test-only commit: `Refs: LD-414`\"",
+   "note": "d4a0b946 resume (10:21Z) predates the rule (d344258, 11:42Z). No later re-verify resumed."
+  },
+  {
+   "id": "T042",
+   "verdict": "USED",
+   "evidence": "49bbc2b9-684a-4833-a3f7-39b84dab7395: \"Previous VERIFY report (summary): PASS at 7198dba7.\"",
+   "note": "Present in re-verify packets."
+  },
+  {
+   "id": "T043",
+   "verdict": "USED",
+   "evidence": "a9abe07f-c7b8-413f-b270-e0b4a02d4c54: \"Diff since verified commit (f05b2c2a..4915cac3):\"",
+   "note": "Present in re-verify packets."
+  },
+  {
+   "id": "T044",
+   "verdict": "USED",
+   "evidence": "b1cce9c1-8ce9-4aba-82cb-0c12616b31f4: \"Full requirement list: `docs/specs/LD-521-SPEC.md` (all `### Requirement:` / `#### Scenario:` with REQ-### ids)\"",
+   "note": "Present in re-verify packets."
+  },
+  {
+   "id": "T045",
+   "verdict": "UNKNOWN",
+   "evidence": "runs_since_edit = 0 (edited 2026-11-20, ADR 0144).",
+   "note": "No run since edit. Conflicts with test.md:149-152 and review.md:231-235; see conflicts."
+  },
+  {
+   "id": "T046",
+   "verdict": "USED",
+   "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"The REQ-002 path (reachDisplay) and Google branch are untouched by the delta — keep earlier evidence cited with 63c51d7e unless you judge the delta can affect them.\"",
+   "note": "Delta-scoped re-verify with cited earlier evidence."
+  },
+  {
+   "id": "T047",
+   "verdict": "USED",
+   "evidence": "040e3b39-a6c1-4664-b23e-c5f01e7e84a2: \"2. I then send a fresh test-engineer for the real-page browser check only. The rest of this evidence stays valid.\"",
+   "note": "Browser-only split dispatch used."
+  },
+  {
+   "id": "T048",
+   "verdict": "USED",
+   "evidence": "48eb39d3-867f-4918-8ab4-6fda99ef2e1b: \"## Browser checks required (from review; run them in a real browser via chrome-devtools)\"",
+   "note": "Review browser checks carried verbatim."
+  },
+  {
+   "id": "T049",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"No production code was changed during verification.\"",
+   "note": "/test-level ownership boundary; verifier side is test-engineer.md:287-289."
+  },
+  {
+   "id": "T050",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"You may add test-only changes and commit them as one `test:` commit with the `Refs: LD-580` trailer\"; 1e27523f-0e7a-410f-a087-ab45fca3fc87: \"test: pin retry card polling, alert role and message reset (LD-536)\"",
+   "note": "Ticket key passed; test: commits made, none pushed."
+  },
+  {
+   "id": "T051",
+   "verdict": "USED",
+   "evidence": "3c6ffef2-5ec6-4f67-997f-5e9f6d2f9a2a: \"The reproductions are not committed:\"",
+   "note": "Defect branch occurred (3c6ffef2, 48eb39d3, adba8200, e15b7ac7)."
+  },
+  {
+   "id": "T052",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/agents/test-engineer.md:296-297 (\"preserve the failing reproduction as an external patch/report\"); used: 3c6ffef2-5ec6-4f67-997f-5e9f6d2f9a2a: \"/scratchpad/repro/tmp_boundary_test.php is a throwaway Pest test.\"",
+   "note": "Verifier action already in its own definition, there without \"when useful\"."
+  },
+  {
+   "id": "T053",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/agents/test-engineer.md:297-298 (\"then restore only the test changes you introduced\"); used: 3c6ffef2-5ec6-4f67-997f-5e9f6d2f9a2a: \"Final `git status` is clean.\"",
+   "note": "Verifier action already in its own definition."
+  },
+  {
+   "id": "T054",
+   "verdict": "USED",
+   "evidence": "adba8200-6e18-47c5-8398-4b0929e05a25: \"Treat 'toast' as loose wording for the Figma pill. Route a one-word spec correction to /spec; VERIFY can PASS.\"; 48eb39d3-867f-4918-8ab4-6fda99ef2e1b: \"Fix a VERIFY FAIL defect for Jira LD-414 (routed back to /build by /test).\"",
+   "note": "Both /build and /spec routes used."
+  },
+  {
+   "id": "T055",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/agents/test-engineer.md:299-301 (\"Report the artifact path in your report to `/test` ... `/test` decides where the defect goes\") and /var/www/html/personal/harness/claude/agents/test-engineer.md:57",
+   "note": "Verifier-facing rule, already in test-engineer.md."
+  },
+  {
+   "id": "T056",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/commands/test.md:158-159 (\"It must not modify production code\") and /var/www/html/personal/harness/claude/agents/test-engineer.md:287-289",
+   "note": "Slogan restating the ownership rule two paragraphs earlier."
+  },
+  {
+   "id": "T057",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"**VERIFY PASS** for LD-580 at High risk, Deep depth.\"",
+   "note": "Exactly one result in every report seen."
+  },
+  {
+   "id": "T058",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"The verifier added test-only commit `a2b1dc6a`, which I brought onto `worktree-LD-580`. Its added tests pass\"",
+   "note": "Slips: PASS issued after owner cut Deep checks (f449dd8d, 5d6c5543)."
+  },
+  {
+   "id": "T059",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"74 deliberate code changes were tried. All but 2 broke a test ... The 2 that broke no test were checked and shown to change nothing observable.\"",
+   "note": "Runtime lines and mutation-probe confirmation checked. The \"stated reason\" exit is absent from test-engineer.md."
+  },
+  {
+   "id": "T060",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"| REQ-001 | PASS | In Chrome, the box is 176px (`h-44`) and the link is 44px with 2 lines.\"",
+   "note": "Frequent slip: 7 of ~18 first-pass PASS reports summarize instead of one line per REQ."
+  },
+  {
+   "id": "T061",
+   "verdict": "USED",
+   "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"| `MetaAdsRowReach.test.tsx` (ac6749f6) | tests only |\"",
+   "note": "Per-file exemption and /build evidence cited. \"Every changed file is exempt\" restates verification-triggers.md:14."
+  },
+  {
+   "id": "T062",
+   "verdict": "USED",
+   "evidence": "48eb39d3-867f-4918-8ab4-6fda99ef2e1b: \"## VERIFY FAIL: Back/Forward goes wrong around a Ticker restored from history\"",
+   "note": "FAIL with REQ, repro and /build handoff (also e15b7ac7, 3c6ffef2)."
+  },
+  {
+   "id": "T063",
+   "verdict": "USED",
+   "evidence": "3c6ffef2-5ec6-4f67-997f-5e9f6d2f9a2a: \"**VERIFY FAIL**: one DEC-010 divergence was reproduced (low severity). The required browser check is also **BLOCKED**.\"",
+   "note": "FAIL over BLOCKED with other blocked checks reported."
+  },
+  {
+   "id": "T064",
+   "verdict": "USED",
+   "evidence": "1003c22b-a1cc-4f84-ac2b-dfd84c160443: \"**To unblock, pick one:** 1. Serve this worktree locally with `yarn build`\"",
+   "note": "Blocker, completed checks and unblock action reported."
+  },
+  {
+   "id": "T065",
+   "verdict": "USED",
+   "evidence": "48eb39d3-867f-4918-8ab4-6fda99ef2e1b: \"The production code changed, so the last VERIFY PASS no longer covers it.\"",
+   "note": "Now conflicts with ADR 0144 fix rounds (review.md:63-67)."
+  },
+  {
+   "id": "T066",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"The next stage is `/review LD-580`. Shall I run it?\"",
+   "note": "Sits under the VERIFY BLOCKED heading but applies to PASS/NOT REQUIRED."
+  }
+ ],
+ "conflicts": [
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/test.md:193-195 (each surviving mutant: a new test that kills it, or a stated reason why no test can)",
+   "b": "/var/www/html/personal/harness/claude/agents/test-engineer.md:235-237 and /var/www/html/personal/harness/claude/agents/test-engineer.md:318-319 (survivor: write the missing test and re-run; no reason exit)",
+   "situation": "Equivalent mutant. 1ded7e46 took the reason path (\"2 broke no test ... change nothing observable\"), which the verifier definition does not allow."
+  },
+  {
+   "a": "/var/www/html/personal/harness/claude/agents/test-engineer.md:253-254 (\"In a fix round, probe only the conditions the fix adds or changes\")",
+   "b": "/var/www/html/personal/harness/claude/agents/test-engineer.md:258-260 and /var/www/html/personal/harness/claude/references/risk-tiers.md:44 and /var/www/html/personal/harness/claude/commands/review.md:73-76 (Deep: a probe on every changed condition, else STALE (depth)); /var/www/html/personal/harness/claude/commands/test.md:141-142 (re-run every check the diff can affect)",
+   "situation": "Deep re-verify after review fixes: verifier probes only fix conditions; /review may then mark the VERIFY PASS stale."
+  },
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/test.md:137-139 (/test runs once, after /review has no open BLOCKER or REQUIRED; ADR 0144)",
+   "b": "/var/www/html/personal/harness/claude/commands/test.md:149-152 and /var/www/html/personal/harness/claude/commands/review.md:231-235 (a browser-check finding routes to /test now; the finding keeps its disposition; review repeats)",
+   "situation": "A review round with open REQUIRED code findings plus a browser-check finding: wait for convergence, or run /test now?"
+  },
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/test.md:226-227 (a production-code fix invalidates the previous VERIFY result and must go back through /build)",
+   "b": "/var/www/html/personal/harness/claude/commands/review.md:63-67 and /var/www/html/personal/harness/claude/commands/test.md:137-139 (fix round keeps the earlier VERIFY PASS; verification DEFERRED)",
+   "situation": "Review-fix commits change production code: test.md says the VERIFY is invalid; review.md says the earlier PASS covers the round."
+  },
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/test.md:85-88 and /var/www/html/personal/harness/claude/agents/test-engineer.md:138-140 (never hand a browser check to the person; a dev host not serving the candidate is not a missing capability)",
+   "b": "/var/www/html/personal/harness/claude/commands/review.md:235-236 (\"Only when the verifier cannot run the check (no browser tool, no running app) does it go to the owner\")",
+   "situation": "No running app for a review-listed browser check: review.md sends it to the owner; test.md says the verifier serves the app itself."
+  },
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/test.md:61-62 (candidate or scope cannot be determined: return VERIFY BLOCKED)",
+   "b": "/var/www/html/personal/harness/claude/references/target-selection.md:13-16 (more than one plausible candidate: ask, listing candidates)",
+   "situation": "Ambiguous target at /test start: block, or ask the user to choose."
+  },
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/test.md:90-97 (Figma mismatch is VERIFY FAIL; verifier follows the figma-design-to-code Verification section)",
+   "b": "/var/www/html/personal/harness/claude/skills/figma-design-to-code/SKILL.md:27-28 (Verification: \"fix EVERY in-scope mismatch before finishing\") vs /var/www/html/personal/harness/claude/agents/test-engineer.md:287-289 (never modify production code)",
+   "situation": "figma-test-engineer finds a Figma mismatch: the skill it must follow says fix it; test.md and its definition say report FAIL."
+  },
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/test.md:169 (preserve the reproduction as a patch/report artifact \"when useful\")",
+   "b": "/var/www/html/personal/harness/claude/agents/test-engineer.md:296-297 (always preserve the failing reproduction as an external patch/report)",
+   "situation": "A test proves a production defect: optional in test.md, mandatory for the verifier."
+  },
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/test.md:66-74 (§2 packet list: 7 items)",
+   "b": "/var/www/html/personal/harness/claude/agents/test-engineer.md:35-51 (Input list adds ticket key, required_skills, handed-on tasks, re-verify fields, review browser checks); /var/www/html/personal/harness/claude/agents/test-engineer.md:377 (4-item version)",
+   "situation": "Drifted lists. A packet built from test.md §2 alone omits handed-on tasks (test.md:46-47 says resolve, not send) and ticket key."
+  },
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/test.md:76-79 (never dispatch with an uncommitted BUILD diff; commit it or BLOCKED)",
+   "b": "/var/www/html/personal/harness/claude/agents/test-engineer.md:38-39 (packet candidate identity includes \"any declared uncommitted BUILD diff\")",
+   "situation": "Packet field that /test is told never to send; harmless because test-engineer.md:53-57 refuses it, but the lists disagree."
+  }
+ ],
+ "slips": [
+  {
+   "id": "T026",
+   "session": "3bde1d32-6ba9-4903-9f15-54631df6306d",
+   "evidence": "\"the browser checks did not run on the real Ticker page ... The verifier served the real ... components with Vite\" then \"## VERIFY PASS: LD-578\" (2026-11-16, after edit); no disposable DB attempt per test-engineer.md:132-140."
+  },
+  {
+   "id": "T058",
+   "session": "f449dd8d-1f78-4ec5-a30c-4fefc063ac2d",
+   "evidence": "\"**VERIFY PASS** за LD-226 (рунд 2), само с важните тестове. Пълният suite не е пускан\" at Deep; /ship later \"SHIP BLOCKED ... Рискът е Deep\". Owner ordered the cut."
+  },
+  {
+   "id": "T058",
+   "session": "5d6c5543-5a19-4976-9715-35be0d7e59b9",
+   "evidence": "Packet \"Risk · Depth: High · Deep by tier ... Do NOT run the full suite\" then \"## VERIFY PASS — LD-596, fixes only\". Owner ordered the cut; /test flagged STALE (depth)."
+  },
+  {
+   "id": "T060",
+   "session": "1ded7e46-0910-4bea-923b-1abe49ba7611",
+   "evidence": "\"Requirements: each of REQ-001 to REQ-015 has an executed evidence line.\" No per-REQ lines in the PASS report."
+  },
+  {
+   "id": "T060",
+   "session": "23e37867-5e8e-4330-9b9b-3790df81f7b5",
+   "evidence": "\"All 9 requirements (REQ-001 to REQ-009) have evidence.\" No per-REQ lines."
+  },
+  {
+   "id": "T060",
+   "session": "b1cce9c1-8ce9-4aba-82cb-0c12616b31f4",
+   "evidence": "\"## VERIFY PASS: LD-521 (High risk, Deep check) All nine requirements and every plan invariant...\" 0 per-REQ lines."
+  },
+  {
+   "id": "T060",
+   "session": "48eb39d3-867f-4918-8ab4-6fda99ef2e1b",
+   "evidence": "\"**VERIFY PASS** (High · Deep) at `f4462847`\" report with 0 per-REQ lines."
+  },
+  {
+   "id": "T060",
+   "session": "3c6ffef2-5ec6-4f67-997f-5e9f6d2f9a2a",
+   "evidence": "\"**VERIFY PASS: AD-312** at High risk, Deep depth.\" report with 0 per-REQ lines."
+  }
+ ]
+}

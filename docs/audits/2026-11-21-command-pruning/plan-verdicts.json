@@ -1,0 +1,142 @@
+{
+ "verdicts": [
+  {
+   "id": "L000",
+   "verdict": "USED",
+   "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"<command-name>/plan</command-name> … LD-593\" (raw) then \"Selected spec: `docs/specs/LD-593-SPEC.md`\"",
+   "note": "Frontmatter makes the command exist."
+  },
+  {
+   "id": "L001",
+   "verdict": "USED",
+   "evidence": "04cd7fbd raw: \"\\\"skill\\\":\\\"planning-and-task-breakdown\\\"\"; skill invoked in 36 of 37 sessions",
+   "note": "Required skill invoked."
+  },
+  {
+   "id": "L002",
+   "verdict": "USED",
+   "evidence": "eceb07e9-e8bf-4d99-a834-2724550c96f8: \"Planning against `docs/specs/LD-578-SPEC.md`.\"; 5d6c5543: \"Selected spec: `docs/specs/LD-225-SPEC.md` (approved, pinned at `0d4940a5`).\"",
+   "note": "Capability-map sentence restates SKILL.md:178-180; no capability map used since 09-30."
+  },
+  {
+   "id": "L003",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/skills/planning-and-task-breakdown/SKILL.md:29-33 (read spec, require Approved and stable REQ ids, committed with no edits, record pin per spec-pin.md)",
+   "note": "Used (04cd7fbd \"Spec revision: git-commit:5c0cfc28…\"); restates skill Preconditions 1-2."
+  },
+  {
+   "id": "L004",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/skills/planning-and-task-breakdown/SKILL.md:34-36 (\"Start from the spec's repository pointers; a fresh /plan does not see the spec's recon report (ADR 0084)\")",
+   "note": "Verbatim restatement of skill Precondition 3."
+  },
+  {
+   "id": "L005",
+   "verdict": "USED",
+   "evidence": "fe02f510-150f-44d5-a2a6-059548d06ebe: \"- Why the old step exists: `ef286888` (\\\"[#google_lower_price]\\\") sent area through the AI service\"; 41e679ab: \"Why the code exists: `b62b7100`\"",
+   "note": "Unique to the command. Reason recorded in packets."
+  },
+  {
+   "id": "L006",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/skills/planning-and-task-breakdown/SKILL.md:41-44 (spec self-contradiction or repo evidence → write bounded SPEC CONFLICT and stop; do not choose)",
+   "note": "Used (a2cea1f9 saved \"## SPEC CONFLICT … Planning stops here\"). Trigger lists drifted, see conflict."
+  },
+  {
+   "id": "L007",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/skills/planning-and-task-breakdown/SKILL.md:51-52 (templates), :200-204 (inspect target, revise same work only), :104 (stable ids), :197-198 (external tracker)",
+   "note": "Every sentence restates the skill."
+  },
+  {
+   "id": "L008",
+   "verdict": "USED",
+   "evidence": "dba9473b-141f-45e1-89b1-98c1147c0525: \"| Figma MCP (`HUpw1ZS21St0ExkHFgfFvv`) | read | `create_session` and `get_metadata 0:1` → \\\"you don't have edit access to this file\\\" | 2026-10-30 |\"",
+   "note": "Probe rule also in plan-quality-gates.md:97-99 and SKILL.md:167-168; cheap-probe and edit-seat detail unique."
+  },
+  {
+   "id": "L009",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/skills/planning-and-task-breakdown/SKILL.md:207-208, :218-222; /var/www/html/personal/harness/claude/references/plan-quality-gates.md:26-29 (material change sets Needs replan in the same edit)",
+   "note": "Used (41e679ab \"Status: Approved\\n → Status: Needs replan\"); restates skill and gates §1."
+  },
+  {
+   "id": "L010",
+   "verdict": "USED",
+   "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"python3 ~/.claude/skills/planning-and-task-breakdown/scripts/check-plan.py docs/tasks/LD-593-plan.md --todo\"",
+   "note": "First sentence restates SKILL.md:158; check-plan lead-in is unique."
+  },
+  {
+   "id": "L011",
+   "verdict": "USED",
+   "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"check-plan.py docs/tasks/LD-593-plan.md --todo docs/tasks/LD-593-todo.md --spec docs/specs/LD-593-SPEC.\"",
+   "note": "27 of 28 later sessions."
+  },
+  {
+   "id": "L012",
+   "verdict": "USED",
+   "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"The plan check passes with 0 FAIL and 0 warnings. It covers all eight spec requirements\"",
+   "note": "FAIL list matches check-plan.py; conflicts with verification-only coverage."
+  },
+  {
+   "id": "L013",
+   "verdict": "USED",
+   "evidence": "e61470ef-49cc-4af9-b6ed-e14ce13e7ee9: \"**Pre-authorizations** (one approval answers all four):\"",
+   "note": "24 of 28 later sessions. SKILL.md:169-170 also requires it."
+  },
+  {
+   "id": "L014",
+   "verdict": "USED",
+   "evidence": "7bb49947-701c-496a-98bf-84ca26d5bfe6: \"### TD-007 — Pre-authorized: Dedupe migration with backup, then UNIQUE index\"",
+   "note": "Also f449dd8d TD-006 schema change."
+  },
+  {
+   "id": "L015",
+   "verdict": "USED",
+   "evidence": "cb72aca5-40f5-41b0-bca1-5eaa122794da: \"### TD-006 — Pre-authorized: Figma MCP stays blocked\"",
+   "note": "Also dba9473b TD-008 Figma through the browser."
+  },
+  {
+   "id": "L016",
+   "verdict": "USED",
+   "evidence": "48eb39d3-867f-4918-8ab4-6fda99ef2e1b: \"### TD-028 — Pre-authorized: other stop conditions … any other stop in a packet or the executor's stop list\"",
+   "note": "Also 3c6ffef2 TD-004 test deletion."
+  },
+  {
+   "id": "L017",
+   "verdict": "USED",
+   "evidence": "cb72aca5-40f5-41b0-bca1-5eaa122794da: \"- Source: owner approval, 2026-10-30\\n- Affects: T001\"; 3c6ffef2 one python edit sets Status: Approved and TDs",
+   "note": "Recommended default and TD record restate SKILL.md:77-79, 169-170, 209-211."
+  },
+  {
+   "id": "L018",
+   "verdict": "USED",
+   "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"git add docs/tasks/LD-593-plan.md docs/tasks/LD-593-todo.md && git diff --cached --stat && git commit -q -m \\\"LD-593: approved implementation plan and task packet\\n\\nRefs: LD-593\" and \"**Next:** run `/clear`, then `/build LD-593`.\"",
+   "note": "Commit/Refs/stop restate SKILL.md:209-214; two-file staging and /clear unique. Slip 3c6ffef2."
+  }
+ ],
+ "conflicts": [
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/plan.md:66-67 (\"Fix every FAIL … a requirement with no task\") with check-plan.py:137-141 (FAILs any non-withdrawn REQ with no task)",
+   "b": "/var/www/html/personal/harness/claude/references/plan-quality-gates.md:63-65 (a REQ may map \"to explicit verification-only evidence when the requirement is already satisfied by existing behavior\")",
+   "situation": "A preserved-behaviour requirement that needs no delivery task. The gate allows verification-only coverage; the script and command force a task. a2cea1f9 worked around it: \"REQ-008 → T001, T006 → verification-only\"."
+  },
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/plan.md:34-36 (SPEC CONFLICT when the spec contradicts itself, repo evidence contradicts its behaviour, or planning needs new, weaker or stronger behaviour)",
+   "b": "/var/www/html/personal/harness/claude/skills/planning-and-task-breakdown/SKILL.md:41-44 (… or repo evidence makes a requirement contradictory, infeasible, or incomplete) and /var/www/html/personal/harness/claude/references/templates/plan.md:45-47 (\"what in the repository contradicts or blocks it\")",
+   "situation": "Three trigger lists for the same stop have drifted. \"Infeasible/incomplete\" exists only in the skill; \"needs new/weaker/stronger behaviour\" exists only in the command."
+  },
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/plan.md:84-86 (commit the plan and todo; stage only those two files)",
+   "b": "/var/www/html/personal/harness/claude/skills/planning-and-task-breakdown/SKILL.md:197-198 (task packets go to an external tracker when project rules say so, so there is no todo file)",
+   "situation": "A project with an external tracker. The command's fixed two-file commit and its check-plan --todo path (plan.md:62-63) have no todo to name. The case was not seen in the runs."
+  }
+ ],
+ "slips": [
+  {
+   "id": "L018",
+   "session": "3c6ffef2-5ec6-4f67-997f-5e9f6d2f9a2a",
+   "evidence": "Plan set to \"Approved by: human (this session) — pre-approved an unattended spec → plan → build run\" without an explicit plan approval. The owner had asked for an unattended run."
+  }
+ ]
+}

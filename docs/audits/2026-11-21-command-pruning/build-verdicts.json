@@ -1,0 +1,795 @@
+{
+ "verdicts": [
+  {
+   "id": "B000",
+   "verdict": "USED",
+   "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"{\"skill\": \"build\", \"args\": \"LD-593 review fixes\"",
+   "note": "Hint lists review fixes but not verify fixes; see conflicts."
+  },
+  {
+   "id": "B001",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"one workstream, one executor, run in sequence and resumed twice\"",
+   "note": ""
+  },
+  {
+   "id": "B002",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"**BUILD COMPLETE: LD-578.** All 3 tasks are implemented and committed\"",
+   "note": "One slip: orchestrator committed an implementation itself (8eb6a399)."
+  },
+  {
+   "id": "B003",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/references/target-selection.md:18-21 (announce \"Using: <target>\"); file says \"don't restate this in a command\" (:5-6)",
+   "note": "Used: 45/54 run segments print \"Using:\". Keep only the pointer, as the pilot ruled for R003."
+  },
+  {
+   "id": "B004",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"Task packet (authoritative, read it whole): `docs/tasks/LD-578-todo.md` § T004\"",
+   "note": "Missing-packet stop branch never triggered."
+  },
+  {
+   "id": "B005",
+   "verdict": "USED",
+   "evidence": "f49b01e3-42bc-41e2-a13a-c0ebd008713f: \"grep -m1 '^Status' docs/tasks/LD-487-plan.md; grep -m1 '^Status' docs/specs/LD-487-SPEC.md\"",
+   "note": "Lead-in; header checked in nearly every run."
+  },
+  {
+   "id": "B006",
+   "verdict": "USED",
+   "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"BUILD BLOCKED: LD-225 plan needs replan.\"",
+   "note": "Status grep run in nearly every run."
+  },
+  {
+   "id": "B007",
+   "verdict": "USED",
+   "evidence": "f449dd8d-1f78-4ec5-a30c-4fefc063ac2d: \"The plan and spec are both Approved, and the spec pin matches HEAD.\"",
+   "note": ""
+  },
+  {
+   "id": "B008",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"git show 715f9c2b:docs/specs/LD-580-SPEC.md | diff - docs/specs/LD-580-SPEC.md\"",
+   "note": "Pin diff in almost every planned run."
+  },
+  {
+   "id": "B009",
+   "verdict": "USED",
+   "evidence": "fe02f510-150f-44d5-a2a6-059548d06ebe: \"The spec change is editorial only, so the plan's spec pin moves to the new commit.\"",
+   "note": "Behavioral path also used (5d6c5543 set Needs replan). Drifted from spec-pin.md; see conflicts."
+  },
+  {
+   "id": "B010",
+   "verdict": "USED",
+   "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"All six tasks are Done at HEAD, so this run only does the integrated checks.\"",
+   "note": "git show HEAD:<todo> in most planned runs."
+  },
+  {
+   "id": "B011",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"**Handed on to `/test` (needs a real browser):**\"",
+   "note": "Only one post-edit run had a handed-on task."
+  },
+  {
+   "id": "B012",
+   "verdict": "USED",
+   "evidence": "23e37867-5e8e-4330-9b9b-3790df81f7b5: \"requirements: [REQ-003, REQ-004, REQ-005, REQ-006]\"",
+   "note": "Lead-in; fields appear in every packet."
+  },
+  {
+   "id": "B013",
+   "verdict": "USED",
+   "evidence": "23e37867-5e8e-4330-9b9b-3790df81f7b5: \"It holds the acceptance criteria, verification, context pointers\"",
+   "note": ""
+  },
+  {
+   "id": "B014",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"Workstream: ws-main. Dependencies: T003 is done (692c99be).\"",
+   "note": ""
+  },
+  {
+   "id": "B015",
+   "verdict": "USED",
+   "evidence": "23e37867-5e8e-4330-9b9b-3790df81f7b5: \"Workstream: ws-main.\"",
+   "note": ""
+  },
+  {
+   "id": "B016",
+   "verdict": "USED",
+   "evidence": "23e37867-5e8e-4330-9b9b-3790df81f7b5: \"Expected scope:\\n- Modules/Advertisers/app/Services/DataQuality/GoogleAddressResolver.php (new, pure, no I/O)\"",
+   "note": ""
+  },
+  {
+   "id": "B017",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"Verification:\\n- `yarn test resources/js/components/partials/PostPreviewModal`.\"",
+   "note": ""
+  },
+  {
+   "id": "B018",
+   "verdict": "USED",
+   "evidence": "23e37867-5e8e-4330-9b9b-3790df81f7b5: \"required_skills (beyond your preloaded baseline): module-architecture, pest-testing.\"",
+   "note": ""
+  },
+  {
+   "id": "B019",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"Task packet — LD-580 T003 (workstream ws-main), sequential, inherited checkout.\"",
+   "note": "Plan workstreams honored. Infer, conflict and ambiguity branches never seen."
+  },
+  {
+   "id": "B020",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"one workstream, one executor, run in sequence and resumed twice\"",
+   "note": ""
+  },
+  {
+   "id": "B021",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"\"name\": \"ld580-ws-main\"\"",
+   "note": "Named fresh executor per workstream."
+  },
+  {
+   "id": "B022",
+   "verdict": "USED",
+   "evidence": "1003c22b-a1cc-4f84-ac2b-dfd84c160443: \"The executor's context is now over 350k tokens, so T010 and T011 go to a fresh executor.\"",
+   "note": "Also 23e37867: \"Executor context ~229k, idle briefly → resuming it for T003.\""
+  },
+  {
+   "id": "B023",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"Previous work in this workstream (fresh executor, so here is the handoff):\\n- Commits: e8c9e895 (T001), 7c4ed833 (T002), 692c99be (T003).\"",
+   "note": ""
+  },
+  {
+   "id": "B024",
+   "verdict": "USED",
+   "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"Resuming the same executor for T002\"",
+   "note": ""
+  },
+  {
+   "id": "B025",
+   "verdict": "USED",
+   "evidence": "c67226f3-85ff-4674-90b5-ae8998bc0f05: \"continue the generation workstream with T002 and T003, and run checkpoint CP-001 before starting the feedback and email tasks.\"",
+   "note": ""
+  },
+  {
+   "id": "B026",
+   "verdict": "USED",
+   "evidence": "c67226f3-85ff-4674-90b5-ae8998bc0f05: \"\"subagent_type\": \"figma-executor\"\"",
+   "note": "Last sentence restates ADR 0118 context (docs/adr/0118:3-4)."
+  },
+  {
+   "id": "B027",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"the current executor has used much of its context, so I'm handing T003 to a fresh executor.\"",
+   "note": "Context half acted on; cache-cost half never cited. Rationale for B022, not in ADR 0116."
+  },
+  {
+   "id": "B028",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"Run sequentially in this checkout, with no isolation.\"",
+   "note": "No post-edit dispatch set isolation. Overlaps worktrees.md:20-23 and executor.md:31-33."
+  },
+  {
+   "id": "B029",
+   "verdict": "USED",
+   "evidence": "23e37867-5e8e-4330-9b9b-3790df81f7b5: \"Setup and `bin/worktree-doctor.sh --infrastructure` already passed\"",
+   "note": "Doctor mentioned in 51/54 run segments; e4548615 ran it before its run; a hook also enforces."
+  },
+  {
+   "id": "B030",
+   "verdict": "USED",
+   "evidence": "e4548615-bbd9-4dd0-8186-c13686318d44: \"bin/worktree-setup.sh fails (composer: roave/security-advisories conflicts with local PHP 8.5.4)\"",
+   "note": "Only post-edit setup failure. Agent did not replay steps."
+  },
+  {
+   "id": "B031",
+   "verdict": "USED",
+   "evidence": "e4548615-bbd9-4dd0-8186-c13686318d44: \"`composer install` rejects local PHP 8.5.4 because roave/security-advisories flags it, and the script has no override flag.\"",
+   "note": ""
+  },
+  {
+   "id": "B032",
+   "verdict": "USED",
+   "evidence": "e4548615-bbd9-4dd0-8186-c13686318d44: \"Look for documented overrides in setup script\"",
+   "note": "Searched for a documented override; none found."
+  },
+  {
+   "id": "B033",
+   "verdict": "NOT-FOLLOWED",
+   "evidence": "e4548615-bbd9-4dd0-8186-c13686318d44: \"The /build rules say: without a documented override, stop and ask the owner. How should I proceed?\"",
+   "note": "Only occurrence: no documented override, yet no BUILD BLOCKED. Agent asked, owner approved copied vendor, build continued."
+  },
+  {
+   "id": "B034",
+   "verdict": "USED",
+   "evidence": "e4548615-bbd9-4dd0-8186-c13686318d44: \"the copied `vendor` is approved for use\"",
+   "note": "The workaround did reach executor packets, but only after owner approval and labeled as such."
+  },
+  {
+   "id": "B035",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"composer test -- tests/Feature/Advertisers tests/Feature/Socials --log-junit $S/baseline.xml\"",
+   "note": "JUnit mentioned in 38/50 run segments; baseline usually covers the affected area, not the full suite (project rule)."
+  },
+  {
+   "id": "B036",
+   "verdict": "USED",
+   "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"python3 /home/stanimir/.claude/skills/executor-development-discipline/scripts/junit-diff.py\"",
+   "note": "Mentioned in 33/50 run segments."
+  },
+  {
+   "id": "B037",
+   "verdict": "USED",
+   "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"Baseline JUnit (full suite at 63c51d7e, 1696/0)\"",
+   "note": ""
+  },
+  {
+   "id": "B038",
+   "verdict": "USED",
+   "evidence": "d4a0b946-234b-4782-ac8e-a129f6688f07: \"Next I'll run checkpoint CP-001 myself, rather than relying on the executor's report.\"",
+   "note": "Also e15b7ac7: \"T009 ... waits for the backend contract checkpoint\"."
+  },
+  {
+   "id": "B039",
+   "verdict": "USED",
+   "evidence": "23e37867-5e8e-4330-9b9b-3790df81f7b5: \"You are the ws-main executor for ticket LD-546. Implement task T001 only\"",
+   "note": "Lead-in."
+  },
+  {
+   "id": "B040",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"Task: LD-578 T004. Add EN fallbacks to the remaining `trans()` calls\"",
+   "note": ""
+  },
+  {
+   "id": "B041",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"requirements: [REQ-004] (spec DEC-007)\"",
+   "note": "Mentioned in 43/54 run segments."
+  },
+  {
+   "id": "B042",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"It gives the acceptance criteria, verification, must-not-change list and files.\"",
+   "note": "By pointer to todo packet."
+  },
+  {
+   "id": "B043",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"Dependencies: T003 is done (692c99be).\"",
+   "note": ""
+  },
+  {
+   "id": "B044",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"Workstream: ws-main.\"",
+   "note": ""
+  },
+  {
+   "id": "B045",
+   "verdict": "USED",
+   "evidence": "23e37867-5e8e-4330-9b9b-3790df81f7b5: \"Execution mode: sequential, inherited checkout (no isolation).\"",
+   "note": ""
+  },
+  {
+   "id": "B046",
+   "verdict": "USED",
+   "evidence": "23e37867-5e8e-4330-9b9b-3790df81f7b5: \"Expected scope:\"",
+   "note": ""
+  },
+  {
+   "id": "B047",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"Verification:\\n- `yarn test resources/js/components/partials/PostPreviewModal`.\"",
+   "note": ""
+  },
+  {
+   "id": "B048",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"required_skills: executor-development-discipline, test-driven-development (preloaded).\"",
+   "note": ""
+  },
+  {
+   "id": "B049",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"is_last_selected_task_in_workstream: yes\"",
+   "note": "Mentioned in 45/54 run segments."
+  },
+  {
+   "id": "B050",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"In your completing commit, set the T004 `**Status:** Pending` to Done in `docs/tasks/LD-578-todo.md`.\"",
+   "note": ""
+  },
+  {
+   "id": "B051",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"Previous work in this workstream (fresh executor, so here is the handoff):\\n- Commits: e8c9e895 (T001)\"",
+   "note": ""
+  },
+  {
+   "id": "B052",
+   "verdict": "USED",
+   "evidence": "23e37867-5e8e-4330-9b9b-3790df81f7b5: \"Test baseline (JUnit, affected area, 133 passed / 3 deprecated / 0 failed)\"",
+   "note": ""
+  },
+  {
+   "id": "B053",
+   "verdict": "USED",
+   "evidence": "23e37867-5e8e-4330-9b9b-3790df81f7b5: \"Pre-authorizations from the plan: TD-012 — phpstan/deptrac failures outside the task are reported, not fixed. No external-tool blockers\"",
+   "note": ""
+  },
+  {
+   "id": "B054",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"This is the last task in the workstream. Run the full suite with `./node_modules/.bin/vitest run\"",
+   "note": ""
+  },
+  {
+   "id": "B055",
+   "verdict": "USED",
+   "evidence": "23e37867-5e8e-4330-9b9b-3790df81f7b5: \"Precedent: LocationNormalizer.php itself\"",
+   "note": "Overlaps AGENTS.md:184-185 (packet contents)."
+  },
+  {
+   "id": "B056",
+   "verdict": "USED",
+   "evidence": "fe02f510-150f-44d5-a2a6-059548d06ebe: \"REVIEW.md: `git show 357927e1:REVIEW.md`.\"",
+   "note": "One slip: working-tree REVIEW.md pointer (3bde1d32)."
+  },
+  {
+   "id": "B057",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"Task packet (authoritative, read it whole): `docs/tasks/LD-578-todo.md` § T004\"",
+   "note": "Pointer half overlaps AGENTS.md:185; handoff exception is unique."
+  },
+  {
+   "id": "B058",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"required_skills: executor-development-discipline, test-driven-development (preloaded).\"",
+   "note": "Lead-in."
+  },
+  {
+   "id": "B059",
+   "verdict": "USED",
+   "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"required_skills: executor-development-discipline, test-driven-development (preloaded), vitest.\"",
+   "note": ""
+  },
+  {
+   "id": "B060",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"required_skills: executor-development-discipline, test-driven-development (preloaded).\"",
+   "note": "Prohibition held: no executor Skill call for either baseline skill in 54 runs."
+  },
+  {
+   "id": "B061",
+   "verdict": "USED",
+   "evidence": "1003c22b-a1cc-4f84-ac2b-dfd84c160443: \"plus vitest, security-and-hardening (SEC-3/SEC-4 touch a cross-user data boundary).\"",
+   "note": "Lead-in; reasons given per skill."
+  },
+  {
+   "id": "B062",
+   "verdict": "USED",
+   "evidence": "b1cce9c1-8ce9-4aba-82cb-0c12616b31f4: \"Also activate `api-and-interface-design`\"",
+   "note": ""
+  },
+  {
+   "id": "B063",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"Use `deprecation-and-migration` for the rollback design.\"",
+   "note": ""
+  },
+  {
+   "id": "B064",
+   "verdict": "USED",
+   "evidence": "1003c22b-a1cc-4f84-ac2b-dfd84c160443: \"pest-testing, laravel-best-practices and security-and-hardening (session and history trust boundary)\"",
+   "note": ""
+  },
+  {
+   "id": "B065",
+   "verdict": "USED",
+   "evidence": "c67226f3-85ff-4674-90b5-ae8998bc0f05: \"required_skills (beyond your preloaded baseline): figma-design-to-code, vitest\"",
+   "note": ""
+  },
+  {
+   "id": "B066",
+   "verdict": "USED",
+   "evidence": "3c6ffef2-5ec6-4f67-997f-5e9f6d2f9a2a: \"required_skills (additional): vitest, vercel-composition-patterns\"",
+   "note": ""
+  },
+  {
+   "id": "B067",
+   "verdict": "USED",
+   "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"required_skills: executor-development-discipline, test-driven-development (preloaded), vitest.\"",
+   "note": "Vitest half used often; vite half never triggered (no vite.config edits found)."
+  },
+  {
+   "id": "B068",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"**Handed on to `/test` (needs a real browser):**\"",
+   "note": "Prohibition held: browser-testing-with-devtools in no executor packet. Second sentence restates ADR 0070."
+  },
+  {
+   "id": "B069",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/agents/executor.md:87 (\"Invoke only additional task-specific skills explicitly selected by `/build`.\")",
+   "note": "Executor-facing rule; the executor loads its own definition, not build.md."
+  },
+  {
+   "id": "B070",
+   "verdict": "USED",
+   "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"Execution mode: sequential, inherited checkout.\"",
+   "note": "All 16 post-edit runs sequential; parallel never requested."
+  },
+  {
+   "id": "B071",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/AGENTS.md:199-200 (\"Agent definitions own default models. Override upward only for materially high-risk ...\")",
+   "note": "Global rules restated with examples. Followed: \"no model override\" in reports."
+  },
+  {
+   "id": "B072",
+   "verdict": "USED",
+   "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"passed alone (7/7), in the directory run, and in a second full run, so I read it as a load flake.\"",
+   "note": "Reruns carried a hypothesis; 23e37867 ran a 20-run flake check."
+  },
+  {
+   "id": "B073",
+   "verdict": "USED",
+   "evidence": "1003c22b-a1cc-4f84-ac2b-dfd84c160443: \"The T003 executor had no `search-docs` tool, so this packet carries the relevant Inertia doc facts\"",
+   "note": "Overlaps AGENTS.md:188-189; scope, write authority and surfacing parts are unique."
+  },
+  {
+   "id": "B074",
+   "verdict": "USED",
+   "evidence": "b1cce9c1-8ce9-4aba-82cb-0c12616b31f4: \"The executor stopped T001 under TD-008, and nothing is committed.\"",
+   "note": "Lead-in."
+  },
+  {
+   "id": "B075",
+   "verdict": "USED",
+   "evidence": "b1cce9c1-8ce9-4aba-82cb-0c12616b31f4: \"T002–T005 all wait on CP-001, so I dispatched nothing else\"",
+   "note": ""
+  },
+  {
+   "id": "B076",
+   "verdict": "USED",
+   "evidence": "b1cce9c1-8ce9-4aba-82cb-0c12616b31f4: \"T002–T005 all wait on CP-001, so I dispatched nothing else.\"",
+   "note": ""
+  },
+  {
+   "id": "B077",
+   "verdict": "USED",
+   "evidence": "c67226f3-85ff-4674-90b5-ae8998bc0f05: \"under the harness rules, a behavior change after approval normally sends the plan back to `/plan`.\"",
+   "note": "Owner overrode inline; agent named it a deviation (also 8eb6a399)."
+  },
+  {
+   "id": "B078",
+   "verdict": "USED",
+   "evidence": "b1cce9c1-8ce9-4aba-82cb-0c12616b31f4: \"**Blockers (owner decision needed)**\"",
+   "note": ""
+  },
+  {
+   "id": "B079",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"**Integrated checks, run on HEAD:**\"",
+   "note": ""
+  },
+  {
+   "id": "B080",
+   "verdict": "UNKNOWN",
+   "evidence": "1003c22b (LD-414 /build 2026-11-15T19:40) edited bootstrap/app.php, an entrypoint. leadbuster defines no smoke check: bin/ has none; only .ai/skills/pest-testing/SKILL.md:128 explains writing smoke tests.",
+   "note": "Condition half-met: entrypoint changed, but no repository smoke check exists to run. Clause is silent on that case."
+  },
+  {
+   "id": "B081",
+   "verdict": "USED",
+   "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"**Needs real-browser check:**\"",
+   "note": "Mentioned in 16/32 post-edit run segments, listed or stated none."
+  },
+  {
+   "id": "B082",
+   "verdict": "USED",
+   "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"Run phpstan, deptrac, pint check and change-surface searches\"",
+   "note": "Mentioned in 36/54 run segments."
+  },
+  {
+   "id": "B083",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"## Item A: T003 evidence gap (REQ-015), a small fix\"",
+   "note": "Also f449dd8d: \"T002 accepted pending one evidence gap on REQ-002\"."
+  },
+  {
+   "id": "B084",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"Update the docs: the page speed lines in `ARCHITECTURE.md`\"",
+   "note": ""
+  },
+  {
+   "id": "B085",
+   "verdict": "USED",
+   "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"**BUILD BLOCKED: LD-225 plan needs replan.**\"",
+   "note": "Every run ends in one of the two reports."
+  },
+  {
+   "id": "B086",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"**BUILD COMPLETE: LD-578.** All 3 tasks are implemented and committed, and every integrated check passed.\"",
+   "note": "Lead-in."
+  },
+  {
+   "id": "B087",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"All 3 tasks are implemented and committed\"",
+   "note": ""
+  },
+  {
+   "id": "B088",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"one workstream, one executor, run in sequence\"",
+   "note": ""
+  },
+  {
+   "id": "B089",
+   "verdict": "USED",
+   "evidence": "1ded7e46-0910-4bea-923b-1abe49ba7611: \"- **Checkpoint:** CP-001 passed after T001.\"",
+   "note": ""
+  },
+  {
+   "id": "B090",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"7 new tests run with no translations loaded. They were red on the old code and are now green.\"",
+   "note": ""
+  },
+  {
+   "id": "B091",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"`vitest run` with JUnit output: 1421/1421 pass.\"",
+   "note": ""
+  },
+  {
+   "id": "B092",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"All 3 tasks are implemented and committed\"",
+   "note": "Uncommitted-result exception never requested by a user."
+  },
+  {
+   "id": "B093",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"The only uncommitted change is `.yarn/install-state.gz`. It was there before this build\"",
+   "note": ""
+  },
+  {
+   "id": "B094",
+   "verdict": "USED",
+   "evidence": "b1cce9c1-8ce9-4aba-82cb-0c12616b31f4: \"**BUILD BLOCKED.** T001 cannot finish: the local DB step it depends on fails.\"",
+   "note": ""
+  },
+  {
+   "id": "B095",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"**Candidate:**\"",
+   "note": "Lead-in."
+  },
+  {
+   "id": "B096",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"**Handed on to `/test` (needs a real browser):**\"",
+   "note": "Route names drift from B033 `owner`; see conflicts."
+  },
+  {
+   "id": "B097",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"- **Checkpoints:** the plan defines none.\"",
+   "note": ""
+  },
+  {
+   "id": "B098",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"| T001 | e8c9e895 | REQ-001, REQ-002 |\"",
+   "note": ""
+  },
+  {
+   "id": "B099",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"`tsc --noEmit`: exit 0.\"",
+   "note": ""
+  },
+  {
+   "id": "B100",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"**Scope changes:**\"",
+   "note": ""
+  },
+  {
+   "id": "B101",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"**Noticed but not changed:**\"",
+   "note": ""
+  },
+  {
+   "id": "B102",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"Repo `/var/www/html/leadbuster/.claude/worktrees/LD-578`, branch `worktree-LD-578`.\"",
+   "note": ""
+  },
+  {
+   "id": "B103",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"Base 7307596f, HEAD 692c99be, range `7307596f..692c99be` (3 commits).\"",
+   "note": "Pointer to target-selection.md §Gate handoffs; not a restatement."
+  },
+  {
+   "id": "B104",
+   "verdict": "USED",
+   "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"**Run metrics:** 1 fresh executor, 1 resume, no model override, no rework.\"",
+   "note": ""
+  },
+  {
+   "id": "B105",
+   "verdict": "USED",
+   "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"**Run metrics:** 2 fresh executors, no resumes, no rework.\"",
+   "note": "Prohibition held: no token, cost or time estimate found in any report."
+  },
+  {
+   "id": "B106",
+   "verdict": "USED",
+   "evidence": "3bde1d32-6ba9-4903-9f15-54631df6306d: \"Next: `/test LD-578`.\"",
+   "note": "No verifier or reviewer dispatched inside a /build run; 48eb39d3 ones followed a user \"run all\"."
+  },
+  {
+   "id": "B107",
+   "verdict": "USED",
+   "evidence": "f49b01e3-42bc-41e2-a13a-c0ebd008713f: \"git diff --name-only e017c797 HEAD; ls docs/reviews/LD-487-*.sarif | wc -l; grep -m1 '^Status' docs/tasks/LD-487-plan.md\"",
+   "note": "Plan checks ran in review-fix runs; 14 fix runs since edit."
+  },
+  {
+   "id": "B108",
+   "verdict": "UNKNOWN",
+   "evidence": "runs_since_edit = 0 (edited 2026-11-21)",
+   "note": "Earlier wording used: git diff --name-only <sha> HEAD in every fix run."
+  },
+  {
+   "id": "B109",
+   "verdict": "UNKNOWN",
+   "evidence": "runs_since_edit = 0 (edited 2026-11-21)",
+   "note": ""
+  },
+  {
+   "id": "B110",
+   "verdict": "USED",
+   "evidence": "3c6ffef2-5ec6-4f67-997f-5e9f6d2f9a2a: \"/build AD-312 review fixes — one workstream (ws-review-fe), fresh executor, sequential, inherited checkout.\"",
+   "note": "No fix run resumed a build executor. 1003c22b passed the commit log when no handoff existed."
+  },
+  {
+   "id": "B111",
+   "verdict": "UNKNOWN",
+   "evidence": "runs_since_edit = 0 (edited 2026-11-20)",
+   "note": "Its Task: trailer rule conflicts with the executor skill and hook; see conflicts."
+  },
+  {
+   "id": "B112",
+   "verdict": "NOT-FOLLOWED",
+   "evidence": "fe02f510-150f-44d5-a2a6-059548d06ebe: \"**Next:** `/test LD-546` at Deep, then `/review` round 2.\"",
+   "note": "11 of 14 fix runs named /test as next stage. Per-finding lines were used. Cause: conflict resolved only by ADR 0144."
+  },
+  {
+   "id": "B113",
+   "verdict": "NOT-FOLLOWED",
+   "evidence": "3c6ffef2-5ec6-4f67-997f-5e9f6d2f9a2a: \"/build AD-312 verify fixes. Fresh executor, sequential, inherited checkout\"",
+   "note": "Condition met 3 times; /build verify fixes invoked 0 times. No §1 plan checks before 2 dispatches (1003c22b 16:24, 3c6ffef2)."
+  },
+  {
+   "id": "B114",
+   "verdict": "USED",
+   "evidence": "3c6ffef2-5ec6-4f67-997f-5e9f6d2f9a2a: \"## Defect (VERIFY FAIL, reproduced)\"",
+   "note": "Followed in all 3 dispatches, all outside any /build run. BLOCKED branch never seen."
+  },
+  {
+   "id": "B115",
+   "verdict": "USED",
+   "evidence": "1003c22b-a1cc-4f84-ac2b-dfd84c160443: \"Context (workstream commit log): 9e01e698 feature\"",
+   "note": "Dispatched outside any /build run."
+  },
+  {
+   "id": "B116",
+   "verdict": "USED",
+   "evidence": "1003c22b-a1cc-4f84-ac2b-dfd84c160443: \"Commit trailers: `Task: REQ-002, CODE-1` (defect 1) / `Task: REQ-002` (defect 2), `Refs: LD-414`\"",
+   "note": "Dispatched outside any /build run. Contradicts the executor skill trailer rule; see conflicts."
+  },
+  {
+   "id": "B117",
+   "verdict": "USED",
+   "evidence": "1003c22b-a1cc-4f84-ac2b-dfd84c160443: \"Re-VERIFY LD-414 (fresh verifier) after verify fixes.\"",
+   "note": "Outside any /build run."
+  },
+  {
+   "id": "B118",
+   "verdict": "USED",
+   "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"ledger OPEN-001 records unplanned commit 47da2d35.\"",
+   "note": ""
+  },
+  {
+   "id": "B119",
+   "verdict": "USED",
+   "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"The ledger records it as OPEN-007, an unplanned commit, comment only.\"",
+   "note": "Both post-edit out-of-build code commits got ledger items."
+  },
+  {
+   "id": "B120",
+   "verdict": "USED",
+   "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"Spec set to Needs reapproval and plan to Needs replan for the amendment\"",
+   "note": "Also \"- Amends: DEC-008 (the option skipped every domain check).\""
+  },
+  {
+   "id": "B121",
+   "verdict": "USED",
+   "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"python3 ~/.claude/skills/spec-driven-development/scripts/check-ledger.py LD-225 | tail -3; git add docs/tasks/LD-225-open.md\"",
+   "note": ""
+  }
+ ],
+ "conflicts": [
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/build.md:372-373 (review-fix commits carry `Task: CODE-2, SEC-1`) and /var/www/html/personal/harness/claude/commands/build.md:402-403 (`Task: REQ-017`)",
+   "b": "/var/www/html/personal/harness/claude/skills/executor-development-discipline/SKILL.md:140,160-161 (\"Omit it for review fixes and other unplanned commits\") and /var/www/html/personal/harness/claude/hooks/require-commit-trailers.sh:13-14; /var/www/html/personal/harness/claude/skills/spec-driven-development/scripts/check-ledger.py:24-26,154-157 warns on commits with no task id",
+   "situation": "Commit message for a review or verify fix. The executor loads the skill, not build.md; packets followed build.md (04cd7fbd \"Task: CODE-1, BLIND-5\"; 1003c22b \"Task: REQ-001, REQ-002\")."
+  },
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/build.md:379-380 and :405-406 (fix runs report BUILD COMPLETE with lines \"blocked (why)\")",
+   "b": "/var/www/html/personal/harness/claude/commands/build.md:316-317 (\"Never report BUILD COMPLETE with open blockers\") and :393-394 (spec-unsettled defect → BUILD BLOCKED)",
+   "situation": "A review-fix or verify-fix run where one finding or defect stays blocked."
+  },
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/build.md:380-381 (after review fixes \"The next stage is `/review`\")",
+   "b": "/var/www/html/personal/harness/claude/references/target-selection.md:39-41 (later stages accept only the candidate plus test-only commits a VERIFY PASS declared); /var/www/html/personal/harness/claude/commands/test.md:226-227 (a production fix invalidates VERIFY)",
+   "situation": "Next stage after review fixes. review.md:63-70 resolved it on 2026-11-20 19:20 (ADR 0144), after every run; 11 of 14 fix reports said /test first. target-selection.md still lacks the exception."
+  },
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/build.md:35-42 (behavioral diff → plan Needs replan; unresolvable sha → Needs replan)",
+   "b": "/var/www/html/personal/harness/claude/references/spec-pin.md:47-49 (also set spec Needs reapproval) and :57-60 (re-pin after confirming with the human)",
+   "situation": "Pinned spec differs behaviorally, or the pin sha no longer resolves. build.md copy drops two steps; spec-pin.md read in 1 of 54 runs."
+  },
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/build.md:411-415 (any fix in conversation gets an `unplanned commit` item) and :418 (always run check-ledger before ending)",
+   "b": "/var/www/html/personal/harness/claude/references/ticket-ledger.md:24-26 (only commits that change more than the ticket docs) and :39 (\"Run it on request after any work outside the pipeline\")",
+   "situation": "A docs-only commit outside /build, and whether check-ledger runs unasked."
+  },
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/build.md:134-135 (setup failure → BUILD BLOCKED with route `owner`)",
+   "b": "/var/www/html/personal/harness/claude/commands/build.md:321-323 (routes are `/spec`, `/plan`, or human decision)",
+   "situation": "Route value in a BUILD BLOCKED report. b1cce9c1 wrote \"route=owner\" for a DB blocker."
+  },
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/build.md:3 (argument-hint: task numbers, description, or \"<TICKET> review fixes\")",
+   "b": "/var/www/html/personal/harness/claude/commands/build.md:385-388 (`/build <TICKET> verify fixes` mode); /var/www/html/personal/harness/claude/commands/test.md:212-215 names no mode for the handoff",
+   "situation": "Invoking a verify-fix run. All 3 verify-fix runs were dispatched from conversation; none invoked /build."
+  },
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/build.md:168-190 (17 packet fields)",
+   "b": "/var/www/html/personal/harness/claude/agents/executor.md:40-53 (Input list)",
+   "situation": "List drift: executor Input lacks todo path/task id, baseline JUnit path, TD-### ids and REVIEW.md path."
+  },
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/build.md:304-317 (BUILD COMPLETE allows tasks handed on to /test or a person)",
+   "b": "/var/www/html/personal/harness/claude/references/component-response-contracts.md:373-382 (\"every selected task is implemented\"; no handed-on item in report list)",
+   "situation": "List drift in the /build terminal-state contract. The contracts file is not loaded in /build runs (0/54)."
+  }
+ ],
+ "slips": [
+  {
+   "id": "B002",
+   "session": "8eb6a399-2acf-411a-a657-d9f680f754c7",
+   "evidence": "The executor stopped without committing the refresh. It is a mechanical number swap, so I am doing it myself"
+  },
+  {
+   "id": "B056",
+   "session": "3bde1d32-6ba9-4903-9f15-54631df6306d",
+   "evidence": "The review checklist is `REVIEW.md` at the repo root."
+  }
+ ]
+}

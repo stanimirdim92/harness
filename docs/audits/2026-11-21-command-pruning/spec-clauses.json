@@ -1,0 +1,258 @@
+[
+ {
+  "id": "P000",
+  "section": "",
+  "last_edited": "2026-09-23",
+  "runs_since_edit": 80,
+  "words": 21,
+  "text": "---\ndescription: Start spec-driven development — write a structured specification before writing code\nargument-hint: \"[ticket or feature description]\"\nmodel: opus[1m]\n---"
+ },
+ {
+  "id": "P001",
+  "section": "",
+  "last_edited": "2026-09-03",
+  "runs_since_edit": 81,
+  "words": 13,
+  "text": "Invoke the `spec-driven-development` skill before drafting; its methodology is\nrequired, not optional background."
+ },
+ {
+  "id": "P002",
+  "section": "",
+  "last_edited": "2026-09-05",
+  "runs_since_edit": 81,
+  "words": 42,
+  "text": "Resolve the requested ticket or feature from the argument and conversation.\nReuse the intake, user decisions, and current repository evidence; ask only for\nmaterial information still missing. Do not repeat a questionnaire or ask the\nuser to supply facts the repository establishes."
+ },
+ {
+  "id": "P003",
+  "section": "",
+  "last_edited": "2026-11-18",
+  "runs_since_edit": 17,
+  "words": 105,
+  "text": "For ticket-backed work, the intake always comes from the `jira-ticket` skill.\nReuse its output when it is complete and current for the requested scope, in\nthe current conversation or in `docs/specs/<TICKET>-intake.md`. Otherwise\ninvoke the `jira-ticket` skill now, before repository recon or drafting. Do not\nfetch Jira yourself, follow its steps inline, or rebuild intake from memory or\nan agent summary. Ticket contents the user pastes go through the skill too; it\ntakes them as its source when Jira is unavailable. When the skill returns,\ncontinue this `/spec` from the intake it saved. If it reports a blocker that\nstops intake, report that blocker and stop."
+ },
+ {
+  "id": "P004",
+  "section": "",
+  "last_edited": "2026-10-19",
+  "runs_since_edit": 75,
+  "words": 49,
+  "text": "An intake design reference marked partially read or unread is finished here,\nbefore drafting. Open each pinned Figma node with the available Figma tools:\n`get_metadata` and `get_screenshot` are enough, and no code is generated. A\nnode that still cannot be read stays an Assumption under the skill's\ndesign-backed rule."
+ },
+ {
+  "id": "P005",
+  "section": "",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 72,
+  "words": 60,
+  "text": "Design edits are out of `/spec` scope. Read designs with `get_metadata`,\n`get_screenshot` or `get_design_context`. Write tools such as `use_figma` need\nan edit seat. When the owner asks for a design edit, try it once. On a seat or\naccess error, stop and give paste-ready comment text for the designer. Ask the\nowner to re-authenticate only when the error names authentication."
+ },
+ {
+  "id": "P006",
+  "section": "Decision brief",
+  "last_edited": "2026-11-03",
+  "runs_since_edit": 54,
+  "words": 82,
+  "text": "Some questions decide whether a requirement exists at all: a ticket/design\nconflict, or a feature the design drops. When an intake Blocker or an\n`OPEN QUESTION` is of that kind, present a decision brief before drafting.\nThe brief holds the questions only, in the skill's question shape, on about\none page. Number them Q1, Q2, … and end with the `decisions:` line from\n§Approval state. Draft requirements only after the owner answers. All other\nspec content, checks and gates stay as written."
+ },
+ {
+  "id": "P007",
+  "section": "Repository evidence",
+  "last_edited": "2026-09-05",
+  "runs_since_edit": 81,
+  "words": 25,
+  "text": "Follow `../references/repository-precedent.md` §1 for reuse, bounded checks,\nor `repo-recon` dispatch. Keep repository-defined commands exact and distinguish\nfinding a command in source from executing it successfully."
+ },
+ {
+  "id": "P008",
+  "section": "Draft or revise",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 72,
+  "words": 73,
+  "text": "Use the skill's scope check, form selection, capability-map rules, and Output\nFiles rules, including project overrides. Read existing target artifacts before\nwriting. Revise in place only for the same work; ask if the target is ambiguous\nor belongs to different work rather than overwriting it. Revise an existing\nspec with targeted edits to the affected sections, not a whole-file rewrite.\nThe content rules and the skill's §Keeping the Spec Alive search still apply."
+ },
+ {
+  "id": "P009",
+  "section": "Draft or revise",
+  "last_edited": "2026-09-05",
+  "runs_since_edit": 81,
+  "words": 43,
+  "text": "The selected template owns the heading, header, and document shape. Keep the\nskill's requirement ids, source lines, and scenario forms. For an existing spec,\npreserve stable ids and use the status transitions in\n`../references/spec-quality-gates.md` §2; do not reset its header as if new."
+ },
+ {
+  "id": "P010",
+  "section": "Draft or revise",
+  "last_edited": "2026-09-05",
+  "runs_since_edit": 81,
+  "words": 33,
+  "text": "Before asking for approval, run the skill's Approval Check and the applicable\nchecks in `../references/spec-quality-gates.md`. A draft may expose questions\nfor discussion, but must not be presented as ready for approval while unresolved."
+ },
+ {
+  "id": "P011",
+  "section": "Draft or revise",
+  "last_edited": "2026-11-03",
+  "runs_since_edit": 54,
+  "words": 18,
+  "text": "In this conversation, decide some questions by default. Use the risk and\nrecommendation rules in §Deciding by default."
+ },
+ {
+  "id": "P012",
+  "section": "Draft or revise",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 72,
+  "words": 9,
+  "text": "- Low risk: decide it with the recommended option."
+ },
+ {
+  "id": "P013",
+  "section": "Draft or revise",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 72,
+  "words": 22,
+  "text": "- Low or Medium, and the ticket text or repository precedent already settles\n  it: decide it that way and cite the line."
+ },
+ {
+  "id": "P014",
+  "section": "Draft or revise",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 72,
+  "words": 19,
+  "text": "- Record each as a `DEC-###` with the alternative that lost and\n  `Decided by: default (interactive)`. Remove the block."
+ },
+ {
+  "id": "P015",
+  "section": "Draft or revise",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 72,
+  "words": 13,
+  "text": "- Medium questions nothing settles, and every High question, stay\n  `OPEN QUESTION` blocks."
+ },
+ {
+  "id": "P016",
+  "section": "Draft or revise",
+  "last_edited": "2026-11-03",
+  "runs_since_edit": 54,
+  "words": 32,
+  "text": "- List each default in the report, one line each, under\n  `Defaults taken (override by id)`, before the approval request. An override\n  rewrites that `DEC-###` as §Deciding by default's last paragraph describes."
+ },
+ {
+  "id": "P017",
+  "section": "Draft or revise",
+  "last_edited": "2026-11-21",
+  "runs_since_edit": 0,
+  "words": 64,
+  "text": "With the approval request, show one step-by-step example. Take a real record from\nthe ticket or the repository, preferably one the riskiest rule touches. Walk\nit step by step through the new behavior to the stored or shown result. A\nwrong rule is easier to see in an example than in a requirement: on LD-546,\nan example exposed one that 8 review rounds missed."
+ },
+ {
+  "id": "P018",
+  "section": "Approval state",
+  "last_edited": "2026-09-05",
+  "runs_since_edit": 81,
+  "words": 42,
+  "text": "New specs start as Draft. Only explicit human approval sets Approved and its\napproval metadata; passing the check, silence, or an instruction to continue\ndoes not grant approval. Editorial revisions retain existing approval;\nbehavioral revisions require reapproval under the shared transition rules."
+ },
+ {
+  "id": "P019",
+  "section": "Approval state",
+  "last_edited": "2026-10-06",
+  "runs_since_edit": 80,
+  "words": 7,
+  "text": "Save the spec, then check its shape:"
+ },
+ {
+  "id": "P020",
+  "section": "Approval state",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 72,
+  "words": 5,
+  "text": "```bash\npython3 ~/.claude/skills/spec-driven-development/scripts/check-spec.py docs/specs/<TICKET>-SPEC.md\n```"
+ },
+ {
+  "id": "P021",
+  "section": "Approval state",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 72,
+  "words": 49,
+  "text": "Fix every FAIL before presenting the spec. A FAIL means a form a later stage\nreads mechanically is missing: a `Source:` line, a scenario's THEN, an RFC 2119\nkeyword, or approval lines that disagree with Status. Read each warning and fix\nthe ones that are slips. Report the result."
+ },
+ {
+  "id": "P022",
+  "section": "Approval state",
+  "last_edited": "2026-10-19",
+  "runs_since_edit": 75,
+  "words": 60,
+  "text": "Report the spec's path, status, and remaining blockers. When `OPEN QUESTION`\nblocks remain, number them Q1, Q2, … in spec order and end the report with one\nline the user can fill in and send back:\n`/spec <TICKET> decisions: Q1=…, Q2=…`. A rerun with that line revises the\nsame spec in place with those decisions; it does not repeat recon."
+ },
+ {
+  "id": "P023",
+  "section": "Approval state",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 72,
+  "words": 88,
+  "text": "When the user approves in this conversation, set `Status: Approved`,\n`Approved by` and `Approved at` in one edit. Read the header back from disk and\nquote its Status and Approved lines in the report. Rerun the shape check, and\ncommit the spec file alone in the same turn. Approval is the user's; the commit\nonly stops an approved spec from staying uncommitted, which blocks `/plan`.\nOn the default branch of the main checkout, first warn in one line that ticket\nwork belongs in the ticket worktree (`AGENTS.md` §Worktrees)."
+ },
+ {
+  "id": "P024",
+  "section": "Approval state",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 72,
+  "words": 82,
+  "text": "On approval, draft a short decision-summary comment for the Jira ticket in the\nreport: the spec path, and each `DEC-###` in one line. The comment is visible\noutside the team. Post it only when the project's `CLAUDE.md` holds the exact\nline `Jira decision comments: on`. Otherwise leave it as a draft for the owner.\nAfter posting, record the comment id in the spec header as\n`Jira comment: <id>` before the commit. On reapproval, update that comment\ninstead of adding a new one."
+ },
+ {
+  "id": "P025",
+  "section": "Approval state",
+  "last_edited": "2026-10-19",
+  "runs_since_edit": 75,
+  "words": 53,
+  "text": "`/spec` ends here; it does not invoke `/plan` or implementation. After approval and commit,\nrecommend `/clear` before `/plan`: `/plan` reads the committed spec, and a fresh\ncontext stops every planning request from re-reading this stage's conversation\n(ADR 0084). Preserve the durable handoff described by the skill so `/plan`\nworks without the conversation transcript."
+ },
+ {
+  "id": "P026",
+  "section": "Deciding by default",
+  "last_edited": "2026-10-19",
+  "runs_since_edit": 75,
+  "words": 43,
+  "text": "- Write each choice that needs an `OPEN QUESTION` in the skill's format. Mark\n  the option you recommend `(recommended)`. Add a line `Risk: High`,\n  `Risk: Medium` or `Risk: Low` for the area the choice changes, from\n  `../references/risk-tiers.md`. When unsure, take the higher tier."
+ },
+ {
+  "id": "P027",
+  "section": "Deciding by default",
+  "last_edited": "2026-10-19",
+  "runs_since_edit": 75,
+  "words": 35,
+  "text": "- Recommend in this order. First, the option the repository already follows\n  (`../references/repository-precedent.md`). Next, the option that keeps\n  existing behavior and data and can be undone. Last, the smaller change.\n  Name the reason after `(recommended)`."
+ },
+ {
+  "id": "P028",
+  "section": "Deciding by default",
+  "last_edited": "2026-10-19",
+  "runs_since_edit": 75,
+  "words": 61,
+  "text": "- The owner already answered it for this ticket, in an earlier or archived\n  spec (`Decided by: owner`, or an Approved spec): reuse that answer as a\n  `DEC-###` with `Decided by: owner, <date>, <source>`. That answer is the\n  explicit approval a project rule asks for. Ask again only when a fact the\n  answer rests on has changed, and name that fact."
+ },
+ {
+  "id": "P029",
+  "section": "Deciding by default",
+  "last_edited": "2026-10-19",
+  "runs_since_edit": 75,
+  "words": 32,
+  "text": "- An earlier or archived spec for the ticket also carries fixes, such as a\n  scenario corrected after a `/plan` SPEC CONFLICT. Keep them; do not bring\n  back the wording they replaced."
+ },
+ {
+  "id": "P030",
+  "section": "Deciding by default",
+  "last_edited": "2026-10-19",
+  "runs_since_edit": 75,
+  "words": 20,
+  "text": "- A question only the owner can answer, such as domain history, is an\n  `OPEN QUESTION` too, with its risk."
+ },
+ {
+  "id": "P031",
+  "section": "Deciding by default",
+  "last_edited": "2026-11-03",
+  "runs_since_edit": 54,
+  "words": 32,
+  "text": "When the owner changes a default (\"the owner decides instead of the default:\n…\"), rewrite that `DEC-###` with the owner's choice, the default as the\nalternative that lost, and `Decided by: owner`."
+ }
+]

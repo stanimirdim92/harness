@@ -1,0 +1,154 @@
+[
+ {
+  "id": "L000",
+  "section": "",
+  "last_edited": "2026-09-23",
+  "runs_since_edit": 46,
+  "words": 21,
+  "text": "---\ndescription: Break approved requirements into ordered, verifiable implementation tasks\nargument-hint: \"[ticket, module, spec path, or feature description]\"\nmodel: opus[1m]\n---"
+ },
+ {
+  "id": "L001",
+  "section": "",
+  "last_edited": "2026-09-04",
+  "runs_since_edit": 47,
+  "words": 8,
+  "text": "Invoke `planning-and-task-breakdown` before drafting; its methodology is\nrequired."
+ },
+ {
+  "id": "L002",
+  "section": "Resolve the target",
+  "last_edited": "2026-09-30",
+  "runs_since_edit": 46,
+  "words": 71,
+  "text": "Use the explicit ticket, module, or spec path, then the conversation when no\nargument identifies it. Honor project-defined artifact locations. When the spec\ncarries a capability map, plan the module ids the argument names, or the whole\nspec when it names none (`planning-and-task-breakdown` §Capability map). If\nexactly one matching spec exists, select it; otherwise ask which candidate to\nuse. Announce the\nselected spec path before drafting; never guess among multiple specs."
+ },
+ {
+  "id": "L003",
+  "section": "Preconditions and evidence",
+  "last_edited": "2026-11-18",
+  "runs_since_edit": 8,
+  "words": 29,
+  "text": "Read the selected spec from disk. Apply the skill's Preconditions: approved\nstatus, stable requirement ids, and a committed spec with no uncommitted edits.\nRecord its commit pin under `../references/spec-pin.md`."
+ },
+ {
+  "id": "L004",
+  "section": "Preconditions and evidence",
+  "last_edited": "2026-10-09",
+  "runs_since_edit": 44,
+  "words": 30,
+  "text": "Start from the committed spec's repository pointers: `/plan` runs in a fresh\ncontext and does not see `/spec`'s recon report (ADR 0084). Follow\n`../references/repository-precedent.md` §1 for missing or stale evidence."
+ },
+ {
+  "id": "L005",
+  "section": "Preconditions and evidence",
+  "last_edited": "2026-11-13",
+  "runs_since_edit": 20,
+  "words": 42,
+  "text": "Before a task reverses or removes existing code, read why it was added:\n`git log --format='%h %s' -- <path>` and the commit message that added it. Record\nthe reason in the task. A deliberate fix needs a stated reason to undo it."
+ },
+ {
+  "id": "L006",
+  "section": "Preconditions and evidence",
+  "last_edited": "2026-09-06",
+  "runs_since_edit": 47,
+  "words": 40,
+  "text": "If the spec contradicts itself, repository evidence contradicts its behavior,\nor planning requires new, weaker, or stronger behavior, save the bounded\n`SPEC CONFLICT` from the plan template and stop. Do not choose an interpretation\nor repair the spec inside `/plan`."
+ },
+ {
+  "id": "L007",
+  "section": "Draft or revise",
+  "last_edited": "2026-09-06",
+  "runs_since_edit": 47,
+  "words": 42,
+  "text": "Follow the skill's form selection, task boundaries, coverage, and verification\nrules. The plan and task templates own document structure. Inspect existing\ntargets before writing; revise only the same work and preserve stable ids.\nHonor project-defined output locations and the skill's external-tracker rules."
+ },
+ {
+  "id": "L008",
+  "section": "Draft or revise",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 36,
+  "words": 65,
+  "text": "Probe each external tool the plan depends on before you claim access. Make\none cheap read call, for example one Figma read. Record the tool, the probe\nand its result in the plan's External Tool Access section. Read access does\nnot prove write access: Figma write tools (`use_figma`) need an edit seat.\nRecord write access as unproven until a probe or the owner confirms it."
+ },
+ {
+  "id": "L009",
+  "section": "Draft or revise",
+  "last_edited": "2026-09-06",
+  "runs_since_edit": 47,
+  "words": 25,
+  "text": "New plans start as Draft. For existing plans, apply\n`../references/plan-quality-gates.md` §1: editorial changes preserve approval;\nmaterial changes set Needs replan immediately and require renewed approval."
+ },
+ {
+  "id": "L010",
+  "section": "Draft or revise",
+  "last_edited": "2026-10-06",
+  "runs_since_edit": 46,
+  "words": 45,
+  "text": "Run the skill's Approval Check before presenting the result. Save the plan and\ntask packets, including decisions and context pointers needed by a fresh\n`/build` session; do not depend on chat-only conclusions. Then check that the\nplan covers the spec and every packet is complete:"
+ },
+ {
+  "id": "L011",
+  "section": "Draft or revise",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 36,
+  "words": 10,
+  "text": "```bash\npython3 ~/.claude/skills/planning-and-task-breakdown/scripts/check-plan.py \\\n    docs/tasks/<TICKET>-plan.md --todo docs/tasks/<TICKET>-todo.md --spec docs/specs/<TICKET>-SPEC.md\n```"
+ },
+ {
+  "id": "L012",
+  "section": "Draft or revise",
+  "last_edited": "2026-10-06",
+  "runs_since_edit": 46,
+  "words": 46,
+  "text": "Fix every FAIL before presenting the plan: a requirement with no task, a task\nnaming a requirement the spec lacks, a dependency on an undefined id, or a\npacket missing Status, Requirements, Acceptance criteria or Verification. Report their locations,\nplan status, remaining blockers, and handoff state."
+ },
+ {
+  "id": "L013",
+  "section": "Draft or revise",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 36,
+  "words": 19,
+  "text": "End the approval request with a short `Pre-authorizations` block. List each\nforeseeable stop condition the plan contains, for example:"
+ },
+ {
+  "id": "L014",
+  "section": "Draft or revise",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 36,
+  "words": 6,
+  "text": "- a schema or index change;"
+ },
+ {
+  "id": "L015",
+  "section": "Draft or revise",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 36,
+  "words": 10,
+  "text": "- an external design tool that fails or lacks access;"
+ },
+ {
+  "id": "L016",
+  "section": "Draft or revise",
+  "last_edited": "2026-10-23",
+  "runs_since_edit": 36,
+  "words": 13,
+  "text": "- a stop condition in a task packet or the executor's stop list."
+ },
+ {
+  "id": "L017",
+  "section": "Draft or revise",
+  "last_edited": "2026-11-03",
+  "runs_since_edit": 27,
+  "words": 54,
+  "text": "Give each one a recommended default, so one approval answers them all.\nRecord each answer as a `TD-###` in the same edit that records approval.\nAn answer that changes task scope, a dependency or a verification command is\na material change (`../references/plan-quality-gates.md` §1). A stop condition\nthe owner does not pre-authorize stays a stop."
+ },
+ {
+  "id": "L018",
+  "section": "Draft or revise",
+  "last_edited": "2026-11-07",
+  "runs_since_edit": 25,
+  "words": 69,
+  "text": "Only explicit human approval permits Approved and Ready for /build. After\napproval, commit the plan and todo in one scoped commit. Stage only those two\nfiles. End the message with the `Refs: <TICKET>` trailer\n(`executor-development-discipline` §Ticket trailers). Then stop and recommend\n`/clear` before `/build`, which resumes from the\nplan and task packets (ADR 0084). `/plan` authorizes planning only; it does not implement or invoke\n`/build`, `/test`, `/review`, or `/ship`."
+ }
+]

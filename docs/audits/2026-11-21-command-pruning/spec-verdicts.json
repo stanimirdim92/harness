@@ -1,0 +1,245 @@
+{
+ "verdicts": [
+  {
+   "id": "P000",
+   "verdict": "USED",
+   "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"{\\\"skill\\\": \\\"spec\\\", \\\"args\\\": \\\"LD-225\"",
+   "note": "Frontmatter makes the command exist; invoked with a ticket argument in every run."
+  },
+  {
+   "id": "P001",
+   "verdict": "USED",
+   "evidence": "2490b485-b89e-4ed7-860a-07487d6d2294: \"{\\\"skill\\\": \\\"spec-driven-development\\\", \\\"args\\\": \\\"LD-594\\\"}\"",
+   "note": "Skill invoked in 44 of 45 sessions."
+  },
+  {
+   "id": "P002",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/skills/spec-driven-development/SKILL.md:77-81 (\"Reuse the intake, user decisions, existing spec, and current repository evidence before asking questions\"); /var/www/html/personal/harness/claude/skills/spec-driven-development/SKILL.md:139-140 (\"not another questionnaire\")",
+   "note": "Near-verbatim restatement of skill Phase 1. Behaviour is used (04cd7fbd reused saved intake)."
+  },
+  {
+   "id": "P003",
+   "verdict": "USED",
+   "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"Intake for LD-593 is complete and saved to `docs/specs/LD-593-intake.md`\"; 2490b485: \"{\\\"skill\\\": \\\"jira-ticket\\\", \\\"args\\\": \\\"LD-594\\\"}\"",
+   "note": "Reuse and invoke paths both seen; Jira fetches occur inside the jira-ticket skill. Skill points here (SKILL.md:83)."
+  },
+  {
+   "id": "P004",
+   "verdict": "USED",
+   "evidence": "dba9473b-141f-45e1-89b1-98c1147c0525: \"Figma file `HUpw1ZS21St0ExkHFgfFvv` is not readable (access error), so design facts become Assumptions\" then \"Figma read (added by `/spec`, 2026-10-30)\"",
+   "note": "Agent finished the unread design in /spec; it fell back to the browser, not only an Assumption."
+  },
+  {
+   "id": "P005",
+   "verdict": "RARE-NEEDED",
+   "evidence": "Only use_figma calls are 42ba40fd (2026-10-23, before/at edit). Raw-transcript grep for use_figma / get_design_context in all later spec runs: 0.",
+   "note": "Guards writes to a shared external design file. Prohibition; cannot be DEAD."
+  },
+  {
+   "id": "P006",
+   "verdict": "USED",
+   "evidence": "2490b485-b89e-4ed7-860a-07487d6d2294: \"The open questions decide which requirements exist, so here is the decision brief before I draft anything.\"",
+   "note": "Also f449dd8d, 0f280f53, a82e0324, 450d20a3, acd2b333, 5d6c5543."
+  },
+  {
+   "id": "P007",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/skills/spec-driven-development/SKILL.md:144-147 (choose evidence path from repository-precedent.md: reuse report, bounded check, or repo-recon); /var/www/html/personal/harness/claude/skills/spec-driven-development/SKILL.md:189 (\"commands are exact and repository-defined\")",
+   "note": "Behaviour used (fe02f510 repo-recon dispatch); text restates the skill."
+  },
+  {
+   "id": "P008",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/skills/spec-driven-development/SKILL.md:235-239 (\"Read the existing target spec before writing. Revise the same work in place with targeted edits ... not a whole-file rewrite ... ask rather than overwriting\")",
+   "note": "Restates skill Output Files verbatim. Used (41e679ab targeted python edits); one slip listed."
+  },
+  {
+   "id": "P009",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/skills/spec-driven-development/SKILL.md:175-177 (REQ/Source/Scenario forms); /var/www/html/personal/harness/claude/skills/spec-driven-development/SKILL.md:236-239 (preserve stable ids, approval transitions, Draft header only for new specs); /var/www/html/personal/harness/claude/skills/spec-driven-development/SKILL.md:262-263",
+   "note": "Every sentence restates the skill."
+  },
+  {
+   "id": "P010",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/skills/spec-driven-development/SKILL.md:210-226 (Approval Check before presenting); /var/www/html/personal/harness/claude/skills/spec-driven-development/SKILL.md:110 (\"A spec containing any OPEN QUESTION block cannot be presented for approval\")",
+   "note": "Used (a82e0324 \"**Approval check:** passed\"), but restates skill."
+  },
+  {
+   "id": "P011",
+   "verdict": "USED",
+   "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"Risk: Low. Decided by: default (interactive).\"",
+   "note": "Defaults taken in 25 of 36 later sessions."
+  },
+  {
+   "id": "P012",
+   "verdict": "USED",
+   "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"Source: repository precedent, docs/specs/LD-387-SPEC.md DEC-032. Risk: Low. Decided by: default (interactive).\"",
+   "note": "Low tier is rare: risk-tiers.md makes Low nearly test-exempt changes only."
+  },
+  {
+   "id": "P013",
+   "verdict": "USED",
+   "evidence": "fe02f510-150f-44d5-a2a6-059548d06ebe: \"Source: default (interactive), settled by ticket AC-3.\"; 0f280f53: \"Risk: Medium, settled by the ticket title.\"",
+   "note": "No High question decided by default found (search: Risk: High near Decided by: default = 0)."
+  },
+  {
+   "id": "P014",
+   "verdict": "USED",
+   "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"- Decided by: default (interactive)\\n- Affects: REQ-001.\"",
+   "note": "Record line placement drifts: own line, inside Source:, or both (see conflict)."
+  },
+  {
+   "id": "P015",
+   "verdict": "USED",
+   "evidence": "7bb49947-701c-496a-98bf-84ca26d5bfe6: \"Risk: High.\\n- Decided by: owner, 2026-11-15, `/spec LD-491 decisions: Q1=A`.\"",
+   "note": "High questions went to the owner."
+  },
+  {
+   "id": "P016",
+   "verdict": "USED",
+   "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"**Defaults taken (override by id):**\"",
+   "note": "In 16 of 28 later sessions; three briefs used \"Defaults I'll take unless you override them\"."
+  },
+  {
+   "id": "P017",
+   "verdict": "UNKNOWN",
+   "evidence": "Added 2026-11-21; runs_since_edit = 0.",
+   "note": "No runs yet."
+  },
+  {
+   "id": "P018",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/references/spec-quality-gates.md:71-82 (only explicit human approval; check, silence, continue are not approval; editorial vs behavioral); /var/www/html/personal/harness/claude/skills/spec-driven-development/SKILL.md:225-226",
+   "note": "Restates gates §2. Slip in 3c6ffef2 (approved from unattended-run instruction)."
+  },
+  {
+   "id": "P019",
+   "verdict": "USED",
+   "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"python3 ~/.claude/skills/spec-driven-development/scripts/check-spec.py docs/specs/LD-593-SPEC.md\"",
+   "note": "Lead-in for P020; check-spec is not in the skill."
+  },
+  {
+   "id": "P020",
+   "verdict": "USED",
+   "evidence": "04cd7fbd-0866-42e6-b8a1-7677ad64f636: \"check-spec.py docs/specs/LD-593-SPEC.md\"",
+   "note": "Run in 30 of 36 later sessions."
+  },
+  {
+   "id": "P021",
+   "verdict": "USED",
+   "evidence": "41e679ab-d8f1-400f-92e2-663f195faccd: \"**Shape check:** 0 failures and 1 warning. The warning is a false alarm on the REQ-005 \\\"If … then\\\" sentence\"",
+   "note": "Warnings read and judged, as asked."
+  },
+  {
+   "id": "P022",
+   "verdict": "USED",
+   "evidence": "2490b485-b89e-4ed7-860a-07487d6d2294: \"`/spec LD-594 decisions: Q1=…, Q2=…, Q3=…`\"",
+   "note": "29 of 39 sessions. Some prefill answers (de33900f \"Q1=A, Q2=A…\")."
+  },
+  {
+   "id": "P023",
+   "verdict": "USED",
+   "evidence": "eceb07e9-e8bf-4d99-a834-2724550c96f8: \"Read the spec header back from disk\"; cb72aca5: \"git add docs/specs/LD-495-SPEC.md && git diff --cached --name-only && git commit\"; 04cd7fbd: \"The spec is on `main` in the main checkout. Ticket work normally belongs in the ticket worktree\"",
+   "note": "Readback partly restates SKILL.md:284-285. Slip: 3c6ffef2 committed spec with intake."
+  },
+  {
+   "id": "P024",
+   "verdict": "USED",
+   "evidence": "a82e0324-f51d-4204-bc52-66a3f2e4af70: \"**Draft Jira comment.** I did not post it, because `CLAUDE.md` has no `Jira decision comments: on` line.\"",
+   "note": "Opt-in line grep runs in 24 sessions. No unapproved decision comment posted."
+  },
+  {
+   "id": "P025",
+   "verdict": "DUPLICATE",
+   "evidence": "/var/www/html/personal/harness/claude/skills/spec-driven-development/SKILL.md:243-246 (stop for approval; user invokes /plan separately after /clear, ADR 0084); /var/www/html/personal/harness/claude/skills/spec-driven-development/SKILL.md:255-258 (do not invoke later stages)",
+   "note": "Used (04cd7fbd \"run `/clear`, then `/plan LD-593`\"); restates skill handoff and ADR 0084."
+  },
+  {
+   "id": "P026",
+   "verdict": "USED",
+   "evidence": "2490b485-b89e-4ed7-860a-07487d6d2294: \"- Risk: Medium\"",
+   "note": "Risk line in 35 of 39 sessions. \"(recommended)\" marking partly restates SKILL.md:104-105."
+  },
+  {
+   "id": "P027",
+   "verdict": "USED",
+   "evidence": "5d6c5543-5a19-4976-9715-35be0d7e59b9: \"**(recommended — new imports already use this rule)**\"; acd2b333: \"(recommended: keeps the ticket's gate and can be undone)\"",
+   "note": "Ranking order is unique here; skill defers to it."
+  },
+  {
+   "id": "P028",
+   "verdict": "UNKNOWN",
+   "evidence": "Searches for archived/earlier-spec reuse (\"archived spec|earlier spec|previous spec\", \"Decided by: owner … earlier|archiv\") found no reuse case; revisions in place keep DECs anyway.",
+   "note": "Cannot tell whether the condition occurred."
+  },
+  {
+   "id": "P029",
+   "verdict": "UNKNOWN",
+   "evidence": "a2cea1f9 amended a spec after a /plan SPEC CONFLICT, but no later re-draft of that spec was seen.",
+   "note": "No re-draft over a fixed spec observed."
+  },
+  {
+   "id": "P030",
+   "verdict": "UNKNOWN",
+   "evidence": "Searches for owner-only/domain-history OPEN QUESTIONs (\"only the owner\", \"domain knowledge\", \"OPEN QUESTION: …history\") found none.",
+   "note": "Condition unobservable from agent text alone."
+  },
+  {
+   "id": "P031",
+   "verdict": "DEAD",
+   "evidence": "Raw user turns in all 28 spec sessions after 2026-11-03: 0 messages naming a DEC id or \"overrid\". Corpus: \"Alternative … the default\" = 0; \"overrides? the default\" only in unrelated review text.",
+   "note": "No owner ever overrode a default. Not costly. P016 last sentence depends on it."
+  }
+ ],
+ "conflicts": [
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/spec.md:77-78 (record every default as DEC-### with \"Decided by: default (interactive)\")",
+   "b": "/var/www/html/personal/harness/claude/skills/spec-driven-development/SKILL.md:111-122 and /var/www/html/personal/harness/claude/references/templates/spec.md:104-115 (DEC only for material product/domain/contract/lifecycle choices; choices below the bar \"may be decided directly\"; template DEC block has Source: but no Decided by: field)",
+   "situation": "A low-stakes default below the materiality bar: the skill says no DEC is needed; the command says record one. The template has no Decided by: field, so agents put it in three places (5d6c5543 own line; 259ed286 \"Source: Decided by: default\"; fe02f510 both)."
+  },
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/spec.md:74-76 (Low, or Medium settled by ticket or precedent: decide by default)",
+   "b": "/var/www/html/personal/harness/claude/references/spec-quality-gates.md:18-23 and /var/www/html/personal/harness/claude/skills/spec-driven-development/SKILL.md:214-216 (every requested behaviour is retained or changed \"by an explicit human decision\"); /var/www/html/personal/harness/claude/references/spec-quality-gates.md:46-49 (propose changed behaviour as OPEN QUESTION until the human decides)",
+   "situation": "A default that narrows or excludes a ticket-requested behaviour. Per the command it is decided by default; per the gate it needs an explicit human decision before the Approval Check passes."
+  },
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/spec.md:43-44 (decision brief, sent before any spec exists, ends with the decisions: line)",
+   "b": "/var/www/html/personal/harness/claude/commands/spec.md:112-113 (\"A rerun with that line revises the same spec in place … it does not repeat recon\")",
+   "situation": "After a decision brief, no spec exists. The decisions: rerun cannot \"revise the same spec in place\". Seen in 2df7678a, 2490b485 and 04cd7fbd (LD-594 stopped at a brief with no spec)."
+  },
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/spec.md:26-27 (get_metadata and get_screenshot are enough; no code is generated)",
+   "b": "/var/www/html/personal/harness/claude/commands/spec.md:31-32 (read designs with get_metadata, get_screenshot or get_design_context)",
+   "situation": "Reading a Figma node in /spec. get_design_context is the code-generation tool (the Figma server requires the figma-design-to-code skill first). The two read-tool lists differ."
+  },
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/spec.md:93-95 (an instruction to continue does not grant approval) and /var/www/html/personal/harness/claude/references/spec-quality-gates.md:67,71-74 (Approved = the human approved this exact content)",
+   "b": "No rule covers an owner pre-approving an unattended run; /var/www/html/personal/harness/claude/commands/spec.md:147-150 accepts an earlier owner answer as explicit approval only for decisions",
+   "situation": "3c6ffef2: owner said \"run spec plan build unattended if no more questions\". The agent set Approved on both spec and plan and logged OPEN-001: \"the owner has not read either document\"."
+  },
+  {
+   "a": "/var/www/html/personal/harness/claude/commands/spec.md:22-23 (if jira-ticket reports a blocker that stops intake, report it and stop)",
+   "b": "/var/www/html/personal/harness/claude/commands/spec.md:39-41 (an intake Blocker that decides whether a requirement exists → decision brief before drafting)",
+   "situation": "An intake saved with a Blocker such as \"Figma design unreadable\" (cb72aca5). Nothing defines which intake blockers \"stop intake\" and which go to a decision brief."
+  }
+ ],
+ "slips": [
+  {
+   "id": "P008",
+   "session": "f449dd8d-1f78-4ec5-a30c-4fefc063ac2d",
+   "evidence": "Second whole-file Write of docs/specs/LD-226-SPEC.md (\"{\\\"file_path\\\": …LD-226-SPEC.md\\\", \\\"content\\\": \\\"# Spec: Reuse a recent Goo…\") after the owner answered, instead of targeted edits. It was the run's own Draft."
+  },
+  {
+   "id": "P018",
+   "session": "3c6ffef2-5ec6-4f67-997f-5e9f6d2f9a2a",
+   "evidence": "\"Approved by: human (this session) — pre-approved an unattended spec → plan → build run\"; OPEN-001: \"the owner has not read either document\". The owner did direct the run."
+  },
+  {
+   "id": "P023",
+   "session": "3c6ffef2-5ec6-4f67-997f-5e9f6d2f9a2a",
+   "evidence": "\"git commit -F …/msg-spec.txt\", \"description\": \"Commit spec and intake\". The spec was not committed alone."
+  }
+ ]
+}
