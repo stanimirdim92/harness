@@ -58,14 +58,16 @@ Resolve:
 Prefer the handoff and pointers over re-reading the full implementation in the
 main context. Detailed inspection belongs to the verifier.
 
-If the candidate or intended scope cannot be determined, return **VERIFY
-BLOCKED** rather than guessing.
+If the candidate or intended scope still cannot be determined after target
+selection, return **VERIFY BLOCKED** rather than guessing.
 
 ## 2. Dispatch one test-engineer
 
 Send `test-engineer` a bounded packet containing:
 
+- the ticket key, for the `Refs:` trailer of a test-only commit;
 - candidate identity, baseline tree changes, and selected scope;
+- the tasks BUILD handed on to `/test` (§1);
 - the Risk · Depth line from §1, always (`../references/risk-tiers.md`);
 - acceptance criteria;
 - implemented behavior;
@@ -92,7 +94,9 @@ When an in-scope claim is "matches the Figma design", also select
 `test-engineer`. Only it holds the Figma tools (ADR 0118). The verifier follows its Verification section: the
 Figma screenshot of each linked node is the target, the rendered screen is
 captured through Chrome DevTools, and every visible asset and its geometry is
-compared. A mismatch is a `VERIFY FAIL` with both screenshots named; a
+compared. A mismatch is a `VERIFY FAIL` with both screenshots named. The
+skill says to fix each mismatch; say in the packet that the verifier reports
+it and edits no production code. A
 missing Figma connection is `VERIFY BLOCKED`, never a visual judgement from
 memory.
 
@@ -174,7 +178,7 @@ tags are allowed but never pushed.
 
 If a new test proves a production defect:
 
-1. preserve the reproduction as a patch/report artifact when useful;
+1. preserve the reproduction as a patch/report artifact;
 2. restore only uncommitted test changes introduced by `/test`;
 3. decide where it goes: a production fix returns to `/build`, a behavior the
    spec does not settle routes to `/spec`, and a plan defect to `/plan`.

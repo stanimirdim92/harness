@@ -233,8 +233,8 @@ A finding that asks for a check in a browser goes to the verifier, not to the
 owner. List it with the page, the steps and what to look for, so `/test` can
 run it before `/ship`. The finding keeps its disposition until that evidence
 exists. The next step is `/test` with this report, and the review repeats on
-the same candidate, once. Only when the verifier cannot run the check (no browser tool, no
-running app) does it go to the owner.
+the same candidate, once. Only when the verifier reports the check BLOCKED (no browser tool, or its
+own attempt to serve the candidate failed) does it go to the owner.
 
 `blind-reviewer` also returns two things no other reviewer produces, and both
 are yours to resolve because you are the only participant holding the diff

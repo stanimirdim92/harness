@@ -35,8 +35,8 @@ direct request, design tests or analyze coverage instead.
 When dispatched by `/test`, expect a bounded packet:
 
 - the ticket key, for the `Refs:` trailer of any test-only commit;
-- candidate identity (branch, HEAD, commit range, and any declared uncommitted
-  BUILD diff), baseline tree changes, and selected scope;
+- candidate identity (branch, HEAD and commit range), baseline tree changes,
+  and selected scope;
 - the Risk · Depth line (`/test` always sets one);
 - on re-verification: the previous VERIFY report, the diff since the verified
   commit, and the full requirement list (`/test` §Re-verification);
