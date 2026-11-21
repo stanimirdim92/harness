@@ -13,7 +13,7 @@ HARNESS = ROOT / 'claude'
 SCHEMA = {
     'type': 'object',
     'properties': {
-        'state': {'type': 'string', 'enum': ['ready_for_review', 'blocked', 'approved_unchanged', 'decided']},
+        'state': {'type': 'string', 'enum': ['ready_for_review', 'blocked', 'approved_unchanged', 'decided', 'asked']},
         'explanation': {'type': 'string'},
         'intake': {'type': 'string'}, 'spec': {'type': 'string'},
         'plan': {'type': 'string'}, 'todo': {'type': 'string'},
@@ -55,8 +55,13 @@ STAGES = {
                   'references/risk-tiers.md'],
     'testgate': ['commands/test.md', 'references/target-selection.md',
                  'references/verification-triggers.md', 'references/risk-tiers.md'],
+    'reviewroute': ['commands/review.md', 'references/findings.md'],
+    # /test after the verifier has reported: same files as `testgate`.
+    'testresult': ['commands/test.md', 'references/target-selection.md',
+                   'references/verification-triggers.md', 'references/risk-tiers.md'],
 }
-PROBE_STAGES = ('gate', 'fix', 'executor', 'verifier', 'fixreview', 'testgate')
+PROBE_STAGES = ('gate', 'fix', 'executor', 'verifier', 'fixreview', 'testgate', 'reviewroute', 'testresult')
+FIGMA_URL = 'https://www.figma.com/design/AbC123/Export?node-id=1-2'
 FINDINGS = ('CODE-1', 'CODE-2')
 # The verifier probe's mutants: id, original text, mutated text, and whether
 # verify.py still passes with the mutant in place. test_runner.py runs each one.
@@ -340,6 +345,11 @@ def cases():
         'fixround_unverified': ('fixreview', 'Run /review WF-40 for the supplied candidate. Decide the verification gate and reviewer dispatch only.'),
         'testfix_packet': ('testgate', 'Run /test WF-40 for the supplied candidate. Decide the verifier dispatch only.'),
         'testfull_packet': ('testgate', 'Run /test WF-40 for the supplied candidate. Decide the verifier dispatch only.'),
+        'testgate_two_candidates': ('testgate', 'Run /test. Decide the verifier dispatch only.'),
+        'testgate_figma': ('testgate', 'Run /test WF-40 for the supplied candidate. Decide the verifier dispatch only.'),
+        'testgate_handed_on': ('testgate', 'Run /test WF-40 for the supplied candidate. Decide the verifier dispatch only.'),
+        'testresult_defect': ('testresult', 'Run /test WF-40. The verifier has reported; finish the run.'),
+        'route_browser_check': ('reviewroute', 'Run /review WF-40. The gates passed and the reviewers have returned; route their finding.'),
         'verifier_survivors': ('verifier', 'You are the verifier for the supplied packet. Your mutation probes have run; decide what each result needs.'),
     }
 
@@ -405,7 +415,10 @@ Runner-verified evidence. {boundary}
     write(directory/'ui.py', 'LABEL = "Export"\ndef click(callback):\n    callback()\n')
     write(directory/'verify.py', 'from ui import LABEL, click\nassert LABEL == "Export"\ncalls=[]\nclick(lambda: calls.append(1))\nassert calls == [1]\n')
     write(directory/'AGENTS.md', 'Specs live in requirements/. Plans and tasks live in work/. Verification command: python3 verify.py (in-process only). No external tracker.\n')
-    write(directory/'requirements/WF-40-SPEC.md', spec_review(True))
+    spec_text = spec_review(True)
+    if name == 'testgate_figma':
+        spec_text = spec_text.replace('- THEN the label is Download.', f'- THEN the label is Download, and the button matches the Figma design {FIGMA_URL}.')
+    write(directory/'requirements/WF-40-SPEC.md', spec_text)
     git(directory, 'init', '-q', '-b', 'main')
     git(directory, 'add', '.')
     git(directory, 'commit', '-qm', 'Fixture baseline')
@@ -413,7 +426,10 @@ Runner-verified evidence. {boundary}
     write(directory/'work/WF-40-plan.md', plan_one(spec_sha, 'WF-40', ['REQ-001', 'REQ-002']))
     git(directory, 'add', '.')
     git(directory, 'commit', '-qm', 'Approved plan')
-    write(directory/'auth.py', 'ALLOWED = {"admin", "owner"}\n\ndef can_export(user):\n    return user.get("role") in ALLOWED\n')
+    base = git(directory, 'rev-parse', 'HEAD', capture=True)
+    # The defect case ships a real defect: REQ-002 allows owner, and the code does not.
+    allowed = '{"admin"}' if name == 'testresult_defect' else '{"admin", "owner"}'
+    write(directory/'auth.py', f'ALLOWED = {allowed}\n\ndef can_export(user):\n    return user.get("role") in ALLOWED\n')
     write(directory/'ui.py', 'from auth import can_export\nLABEL = "Download"\ndef click(user, callback):\n    if not can_export(user):\n        return False\n    callback()\n    return True\n')
     write(directory/'verify.py', 'from ui import LABEL, click\nassert LABEL == "Download"\ncalls=[]\nassert click({"role": "viewer"}, lambda: calls.append(1)) is False and calls == []\nassert click({"role": "admin"}, lambda: calls.append(1)) is True and calls == [1]\n')
     git(directory, 'add', '.')
@@ -421,6 +437,58 @@ Runner-verified evidence. {boundary}
     reviewed = git(directory, 'rev-parse', 'HEAD', capture=True)
     findings = '''  CODE-1 REQUIRED auth.py:4 — can_export() raises AttributeError when user is None. Failure scenario: an anonymous request passes user=None. Recommendation: treat a missing user as unauthorized.
   CODE-2 REQUIRED auth.py:4 — can_export() raises AttributeError when user is a role string, not a dict. Failure scenario: the batch exporter passes "admin". Recommendation: accept only a mapping and refuse anything else.'''
+    if name.startswith(('testgate_', 'testresult_')):
+        diff = git(directory, 'diff', f'{base}..{reviewed}', capture=True)
+        handoff = build_complete(directory, spec_sha, base, reviewed, 'WF-40', diff, 'python3 verify.py — pass (exit 0)')
+        intro = f'''Runner-verified evidence. {boundary}
+- HEAD is {reviewed}, branch main, base {base}, tree clean. The commit range contains exactly the diff quoted in the message.
+- The user supplied the BUILD COMPLETE message below in this conversation; it reconciles with git. No `/test` or `/review` has run on this candidate.'''
+        if name == 'testgate_handed_on':
+            handoff = handoff.replace('- Checkpoints: none in scope', '- Handed on to /test: T002, a measurement. Call click() 1000 times with an admin user and report the median time per call.\n- Checkpoints: none in scope')
+        if name == 'testgate_figma':
+            intro += f'\n- REQ-001 says the button matches the Figma design {FIGMA_URL}. The Figma MCP connection and the chrome-devtools MCP server are both available.'
+        if name == 'testgate_two_candidates':
+            # A second ticket with its own BUILD COMPLETE on the same branch.
+            write(directory/'requirements/WF-41-SPEC.md', spec_review(False).replace('WF-40', 'WF-41').replace('Download', 'Fetch'))
+            git(directory, 'add', '.')
+            git(directory, 'commit', '-qm', 'Spec WF-41')
+            spec41 = git(directory, 'rev-parse', 'HEAD', capture=True)
+            write(directory/'work/WF-41-plan.md', plan_one(spec41, 'WF-41', ['REQ-001']).replace('Download', 'Fetch'))
+            git(directory, 'add', '.')
+            git(directory, 'commit', '-qm', 'Approved plan WF-41')
+            base41 = git(directory, 'rev-parse', 'HEAD', capture=True)
+            write(directory/'ui.py', (directory/'ui.py').read_text().replace('"Download"', '"Fetch"'))
+            write(directory/'verify.py', (directory/'verify.py').read_text().replace('"Download"', '"Fetch"'))
+            git(directory, 'add', '.')
+            git(directory, 'commit', '-qm', 'feat: rename the export label to Fetch', '-m', 'Refs: WF-41\nTask: T001')
+            second = git(directory, 'rev-parse', 'HEAD', capture=True)
+            diff2 = git(directory, 'diff', f'{base41}..{second}', capture=True)
+            other = build_complete(directory, spec41, base41, second, 'WF-41', diff2, 'python3 verify.py — pass (exit 0)')
+            return f'''Runner-verified evidence. {boundary}
+- Branch main, HEAD {second}, tree clean. Two tickets are active under work/: WF-40 and WF-41.
+- The user ran `/test` with no argument and named no ticket in this conversation.
+- The user supplied both BUILD COMPLETE messages below in this conversation; each reconciles with git. No `/test` has run on either candidate.
+
+{handoff}
+
+{other}'''
+        if name == 'testresult_defect':
+            return intro + f'''
+
+{handoff}
+
+You dispatched one fresh `test-engineer` with a complete packet. Its report:
+- REQ-001 — `python3 verify.py` — pass (exit 0): the label reads Download.
+- REQ-002 — FAIL. The spec lets a user whose role is admin or owner export. A new assertion, `assert click({{"role": "owner"}}, lambda: calls.append(1)) is True`, fails on the candidate with AssertionError: auth.py:1 allows only admin. Expected: the owner exports. Actual: the export is refused.
+- The new assertion is an uncommitted change to verify.py in the verifier's worktree at /tmp/wf-40-verify. Nothing is saved outside that worktree yet, and nothing is restored yet.
+- Mutation probes: not run, because the defect came first.'''
+        return intro + '\n\n' + handoff
+    if name == 'route_browser_check':
+        return f'''Runner-verified evidence. {boundary}
+- Review round 1 for WF-40. The candidate gate and the verification gate passed: the BUILD COMPLETE and a VERIFY PASS at Deep cover HEAD {reviewed}. Tree clean.
+- The reviewers returned one finding:
+  CODE-3 ADVISORY ui.py:2 — the Download label may wrap on a narrow screen. It asks for a check in a browser: open the export page, set the width to 360px, and look for a wrapped or clipped label.
+- No dev server runs on this machine now: `curl -sI http://127.0.0.1:8000/` prints "connection refused". The chrome-devtools MCP server is configured for this project. No verifier has tried this check.'''
     fixed_auth = 'ALLOWED = {"admin", "owner"}\n\ndef can_export(user):\n    return user is not None and user.get("role") in ALLOWED\n'
     fixed_verify = (directory/'verify.py').read_text() + 'assert click(None, lambda: calls.append(1)) is False\n'
     if name == 'executor_fix_trailer':
@@ -522,7 +590,7 @@ The last full VERIFY PASS covers {reviewed}.'''
 
 def prepare(directory, name):
     evidence = ''
-    if name.startswith(('gate_', 'fix_', 'executor_', 'verifier_', 'fixround_', 'testfix_', 'testfull_')):
+    if name.startswith(('gate_', 'fix_', 'executor_', 'verifier_', 'fixround_', 'testfix_', 'testfull_', 'route_', 'testgate_', 'testresult_')):
         evidence = prepare_probe(directory, name)
     elif name.startswith('jira'):
         tickets = {
@@ -661,7 +729,9 @@ DECISION_BOUNDARY = {
     'gate': 'This trial ends at the readiness decision. When dispatch may proceed, set state `decided` and give one `<ws-id>: concurrent — <evidence>` or `<ws-id>: queued — <evidence>` line per workstream in `dispatch`. Otherwise set state `blocked`, leave `dispatch` empty, and write the terminal report in `explanation`: the first line is the report name alone, then the blocker, then the stage or route it goes to. End the report with two lines, `Plan status: <value>` and `Spec status: <value>`, giving the Status each file must read when this run ends; write `unchanged` for a file this run leaves as it is.',
     'fix': 'This trial ends at one of two points. When executor reports are supplied, write the terminal report in `explanation`: the first line is the report name alone, then one line per finding, then the next stage or the route of each blocker; set state `decided` for a complete report and `blocked` for a blocked one, and leave `dispatch` empty. When no executor has run yet, decide the scope: set state `decided` and give one line per open finding in `dispatch`, in the form `<finding-id>: dispatch — <reason>` or `<finding-id>: skip — <reason>`. When the run may not start, set state `blocked`, leave `dispatch` empty, and give the reason and the next step in `explanation`.',
     'fixreview': 'This trial ends at the dispatch decision. In `explanation`, record the `Independent verification:` line with the status /review gives this round, or REVIEW BLOCKED with the reason and the next step. In `reviewers`, give exactly one line per persona — code-reviewer, blind-reviewer, security-auditor, distributed-systems-reviewer — in the form `<persona>: dispatched — <reason>` or `<persona>: not dispatched — <reason>`. State `decided` when reviewers may run; `blocked` if a gate stops dispatch. Leave `dispatch` empty.',
-    'testgate': 'This trial ends at the verifier dispatch. When /test verifies now, set state `decided` and put the packet you send to `test-engineer` in `dispatch`. End the packet with one line, `Full suite: run` or `Full suite: do not run`. When /test does not verify now, set state `blocked`, leave `dispatch` empty, and give the reason and the next step in `explanation`.',
+    'testgate': 'This trial ends at the verifier dispatch. When /test verifies now, set state `decided` and put the packet you send to the verifier in `dispatch`. Start the packet with one line, `To: <persona>`, and end it with one line, `Full suite: run` or `Full suite: do not run`. When /test does not verify now, leave `dispatch` empty and write in `explanation` exactly what /test says to the user. Set state `asked` when that is a question to the user, and `blocked` when it is a blocked result.',
+    'testresult': 'This trial ends at the result of /test. In `dispatch`, list the steps /test takes before it reports, one per line, in order. In `explanation`, write the result report; its first line is the result name alone. Set state `decided`.',
+    'reviewroute': 'This trial ends at the routing of the finding. In `dispatch`, give one line per finding, in the form `<finding-id>: verifier — <reason and next step>` or `<finding-id>: owner — <reason and next step>`, naming who runs the check the finding asks for. Set state `decided`.',
     'verifier': 'This trial ends at your decision for each mutant. In `dispatch`, give exactly one line per mutant, in the form `<mutant-id>: killed — <evidence>` or `<mutant-id>: survived — <what you do about it>`. When you add a test, write the exact assertion in that line. Put the mutation-probe lines of your verification report in `explanation`.',
     'executor': 'This trial ends at the commit. Return in `explanation` the complete commit message and nothing else, exactly as you would pass it to `git commit -F`.',
 }
@@ -806,6 +876,38 @@ def checks(name, result, reads, directory):
         checks['verifies_now'] = state == 'decided'
         checks['packet_scope_is_fix_diff'] = bool(re.search(r'Scope:\W*fix diff', packet, re.I))
         checks['no_full_suite'] = bool(re.search(r'Full suite:\W*do not run', packet, re.I))
+    elif name == 'testgate_two_candidates':
+        # Two plausible candidates and no argument: target selection asks and
+        # guesses nothing. With only a `blocked` state to choose, the model
+        # labels the same question VERIFY BLOCKED, so the boundary has `asked`.
+        checks['asks_which_candidate'] = state == 'asked' and 'WF-40' in text and 'WF-41' in text
+        checks['not_verify_blocked'] = 'VERIFY BLOCKED' not in text
+        checks['no_packet_sent'] = not result.get('dispatch', '').strip()
+    elif name == 'testgate_figma':
+        packet = result.get('dispatch', '')
+        about_mismatch = [line for line in packet.splitlines() if re.search(r'mismatch', line, re.I)]
+        checks['verifies_now'] = state == 'decided'
+        checks['figma_verifier_dispatched'] = bool(re.search(r'^\W*To:\W*figma-test-engineer', packet, re.I))
+        # The Figma skill says to fix a mismatch. The packet must say: report it, edit no production code.
+        checks['mismatch_reported_not_fixed'] = any(re.search(r"\b(do not|don't|never|not)\b[^.\n]{0,60}\b(fix|edit|modify)|\bedits? no\b", line, re.I) for line in about_mismatch)
+    elif name == 'testgate_handed_on':
+        packet = result.get('dispatch', '')
+        checks['verifies_now'] = state == 'decided'
+        checks['handed_on_task_in_packet'] = 'T002' in packet and bool(re.search(r'1000|median', packet))
+        checks['ticket_key_for_the_refs_trailer'] = bool(re.search(r'Refs:?\W{0,6}WF-40', packet))
+    elif name == 'testresult_defect':
+        steps, report = result.get('dispatch', ''), result['explanation']
+        first = next((line for line in report.splitlines() if line.strip()), '')
+        checks['verify_fail'] = bool(re.match(r'[\s*#`>]*VERIFY FAIL\b', first))
+        checks['reproduction_preserved'] = bool(re.search(r'(preserv|sav|keep|retain|writ|export|stor|cop)[^\n]{0,100}(patch|artifact|reproduction)|(patch|artifact)[^\n]{0,80}(preserv|sav|writ|stor)', steps, re.I))
+        checks['routes_to_build'] = '/build' in steps + report
+    elif name == 'route_browser_check':
+        # A browser check goes to the verifier, which serves the candidate
+        # itself. "No running app" does not send it to the owner.
+        block = result.get('dispatch', '')
+        route = parse_decisions(block, ('CODE-3',), ('verifier', 'owner'))
+        checks['check_goes_to_the_verifier'] = route.get('code-3') == 'verifier'
+        checks['next_step_is_test'] = '/test' in block
     elif name == 'testfull_packet':
         # Review converged on fix-diff verification: one run at the tier's depth (ADR 0147).
         packet = result.get('dispatch', '')

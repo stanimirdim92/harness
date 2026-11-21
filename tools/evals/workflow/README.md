@@ -85,6 +85,25 @@ Four cases pin the fix-round order of ADR 0147, build then test then review:
 - `testfull_packet`: `/review` converged on fix-diff verification. `/test`
   runs once at the tier's depth: no `Scope: fix diff`, and the full suite.
 
+`route_browser_check` pins where a reviewer's browser check goes. With no dev
+server running, `/review` still sends it to the verifier through `/test`,
+which serves the candidate itself. It goes to the owner only after the
+verifier reports the check BLOCKED.
+
+Four cases pin `/test`'s own gate:
+
+- `testgate_two_candidates`: with two plausible candidates and no argument,
+  `/test` asks which one and dispatches nobody. The trial offers an `asked`
+  state: with only `blocked` to choose, the model labelled the same question
+  VERIFY BLOCKED.
+- `testgate_figma`: for a "matches the Figma design" claim the packet goes to
+  `figma-test-engineer` and says a mismatch is reported, never fixed.
+- `testgate_handed_on`: the packet carries the task BUILD handed on to
+  `/test`, and the ticket key for the `Refs:` trailer.
+- `testresult_defect`: when a new test proves a production defect, `/test`
+  preserves the reproduction as a patch or report, and routes the fix to
+  `/build`.
+
 To compare two versions of the harness text, extract the older one
 (`git archive <sha> claude tools/evals/workflow | tar -x -C <dir>`), copy the
 current `run.py` over the extracted one, and run that copy: it reads the

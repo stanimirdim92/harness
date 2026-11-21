@@ -225,6 +225,70 @@ class OrchestrationDecisionTests(unittest.TestCase):
         good = result(dispatch='Candidate HEAD abc. Scope: fix diff.\nFull suite: do not run')
         self.assertTrue(all(checks('testfix_packet', good, set(), Path('.')).values()))
 
+    def test_browser_check_goes_to_the_verifier_without_a_running_app(self):
+        owner = result(dispatch='CODE-3: owner — no running app, so the owner checks the page')
+        self.assertFalse(checks('route_browser_check', owner, set(), Path('.'))['check_goes_to_the_verifier'])
+        good = result(dispatch='- `CODE-3`: verifier — /test serves the candidate on 127.0.0.1 and runs the check')
+        self.assertTrue(all(checks('route_browser_check', good, set(), Path('.')).values()))
+        with tempfile.TemporaryDirectory() as tmp:
+            evidence = prepare(Path(tmp), 'route_browser_check')
+            self.assertIn('connection refused', evidence)
+            self.assertIn('No verifier has tried this check', evidence)
+
+    def test_test_gate_asks_between_two_candidates(self):
+        guessed = result(state='decided', dispatch='To: test-engineer\nCandidate WF-41.', explanation='Using: WF-41, the newest candidate.')
+        got = checks('testgate_two_candidates', guessed, set(), Path('.'))
+        self.assertFalse(got['asks_which_candidate'] or got['no_packet_sent'])
+        labelled = result(state='blocked', explanation='VERIFY BLOCKED: two candidates. Re-run `/test WF-40` or `/test WF-41`.')
+        got = checks('testgate_two_candidates', labelled, set(), Path('.'))
+        self.assertFalse(got['asks_which_candidate'] or got['not_verify_blocked'])
+        asked = result(state='asked', explanation='Two candidates fit. Which one do I verify: WF-40 or WF-41?')
+        self.assertTrue(all(checks('testgate_two_candidates', asked, set(), Path('.')).values()))
+
+    def test_figma_packet_reports_a_mismatch_and_fixes_nothing(self):
+        plain = result(dispatch='To: figma-test-engineer\nFollow the Verification section of figma-design-to-code. Do not modify production code.\nFull suite: do not run')
+        self.assertFalse(checks('testgate_figma', plain, set(), Path('.'))['mismatch_reported_not_fixed'])
+        wrong = result(dispatch='To: test-engineer\nReport each mismatch; do not fix it.\nFull suite: do not run')
+        self.assertFalse(checks('testgate_figma', wrong, set(), Path('.'))['figma_verifier_dispatched'])
+        good = result(dispatch='To: figma-test-engineer\nThe skill says to fix each mismatch. Do not fix a mismatch: report it as VERIFY FAIL with both screenshots.\nFull suite: do not run')
+        self.assertTrue(all(checks('testgate_figma', good, set(), Path('.')).values()))
+        for line in ('The skill says to fix mismatches. Here you only report them: do not edit production code.',
+                     'A mismatch is VERIFY FAIL. Report it and edit no production code, even though the skill says to fix mismatches.'):
+            packet = result(dispatch=f'To: figma-test-engineer\n{line}\nFull suite: do not run')
+            self.assertTrue(checks('testgate_figma', packet, set(), Path('.'))['mismatch_reported_not_fixed'], line)
+        fail_only = result(dispatch='To: figma-test-engineer\nA mismatch is VERIFY FAIL, with both screenshots named. Never judge from memory.\nNo production code edits.\nFull suite: do not run')
+        self.assertFalse(checks('testgate_figma', fail_only, set(), Path('.'))['mismatch_reported_not_fixed'])
+
+    def test_packet_carries_handed_on_tasks_and_the_ticket_key(self):
+        thin = result(dispatch='To: test-engineer\nCandidate HEAD abc for WF-40.\nFull suite: do not run')
+        got = checks('testgate_handed_on', thin, set(), Path('.'))
+        self.assertFalse(got['handed_on_task_in_packet'] or got['ticket_key_for_the_refs_trailer'])
+        good = result(dispatch='To: test-engineer\nTicket: WF-40 (trailer `Refs: WF-40`).\nHanded on: T002, median time of 1000 click() calls.\nFull suite: do not run')
+        self.assertTrue(all(checks('testgate_handed_on', good, set(), Path('.')).values()))
+
+    def test_defect_result_preserves_the_reproduction(self):
+        dropped = result(dispatch='Restore the uncommitted test change.\nRoute the fix to /build.', explanation='VERIFY FAIL\nREQ-002 fails.')
+        self.assertFalse(checks('testresult_defect', dropped, set(), Path('.'))['reproduction_preserved'])
+        good = result(dispatch='Save the failing assertion as a patch outside the worktree.\nRestore verify.py.\nRoute the fix to /build.', explanation='**VERIFY FAIL**\nREQ-002 fails.')
+        self.assertTrue(all(checks('testresult_defect', good, set(), Path('.')).values()))
+        kept = result(dispatch='Keep the reproduction as the report artifact.\nRoute the fix to /build.', explanation='VERIFY FAIL\nREQ-002 fails.')
+        self.assertTrue(checks('testresult_defect', kept, set(), Path('.'))['reproduction_preserved'])
+
+    def test_test_gate_fixtures_hold_what_the_evidence_says(self):
+        for name in ('testgate_two_candidates', 'testgate_figma', 'testgate_handed_on', 'testresult_defect'):
+            with tempfile.TemporaryDirectory() as tmp:
+                directory = Path(tmp)
+                evidence = prepare(directory, name)
+                self.assertIn('no Agent tool', evidence, name)
+                self.assertEqual(evidence.count('BUILD COMPLETE\n'), 2 if name == 'testgate_two_candidates' else 1, name)
+                self.assertEqual((directory / 'work/WF-41-plan.md').is_file(), name == 'testgate_two_candidates', name)
+                self.assertEqual('figma.com' in (directory / 'requirements/WF-40-SPEC.md').read_text(), name == 'testgate_figma', name)
+                self.assertEqual('Handed on to /test: T002' in evidence, name == 'testgate_handed_on', name)
+                # The defect is real: verify.py passes, and the owner role is refused.
+                self.assertEqual(subprocess.run(['python3', 'verify.py'], cwd=tmp).returncode, 0, name)
+                refused = subprocess.run(['python3', '-c', 'from ui import click; raise SystemExit(0 if click({"role": "owner"}, lambda: None) else 1)'], cwd=tmp).returncode == 1
+                self.assertEqual(refused, name == 'testresult_defect', name)
+
     def test_full_run_after_review_converges(self):
         fix_diff = result(dispatch='Candidate HEAD abc. Scope: fix diff.\nFull suite: do not run')
         got = checks('testfull_packet', fix_diff, set(), Path('.'))
