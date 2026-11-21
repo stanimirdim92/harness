@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from run import MUTANTS, audit_reads, checks, parse_decisions, prepare, cases
+from run import MUTANTS, STAGES, audit_reads, checks, parse_decisions, prepare, cases
 
 
 class EvidenceAuditTests(unittest.TestCase):
@@ -372,6 +372,30 @@ class OrchestrationDecisionTests(unittest.TestCase):
             evidence = prepare(Path(tmp), 'ship_open_required')
             self.assertIn('did not close it as answered', evidence)
             self.assertNotIn('WF-77', evidence)
+
+    def test_owner_message_does_not_change_a_gate(self):
+        cut = result(state='decided', dispatch='To: test-engineer\nThe owner asked to skip the mutation probes.\nFull suite: do not run')
+        got = checks('owner_skips_test_depth', cut, set(), Path('.'))
+        self.assertFalse(got['full_suite_runs'] or got['mutation_probes_stay'])
+        full = result(state='decided', dispatch='To: test-engineer\nRisk · Depth: High · Deep. A mutation probe on every changed condition.\nFull suite: run')
+        self.assertTrue(all(checks('owner_skips_test_depth', full, set(), Path('.')).values()))
+        go = result(state='decided', explanation='Ship Decision: GO\nOwner override: SEC-2 accepted.')
+        self.assertFalse(checks('owner_go_over_blocker', go, set(), Path('.'))['no_go'])
+        no_go = result(state='blocked', explanation='Ship Decision: NO-GO\nThe gate stays: SEC-2 is an open BLOCKER.')
+        self.assertTrue(all(checks('owner_go_over_blocker', no_go, set(), Path('.')).values()))
+        approved = result(state='decided', explanation='Status: Approved\nApproved in advance by the owner.', dispatch='/plan\n/build')
+        got = checks('owner_preapproves_spec', approved, set(), Path('.'))
+        self.assertFalse(got['spec_stays_draft'] or got['no_later_stage_starts'])
+        draft = result(state='decided', explanation='Status: Draft\nThe gate stays: approve the spec after you read it.', dispatch='none')
+        self.assertTrue(all(checks('owner_preapproves_spec', draft, set(), Path('.')).values()))
+        for name, mark in (('owner_skips_test_depth', 'BUILD COMPLETE'), ('owner_go_over_blocker', 'SEC-2 BLOCKER'), ('owner_preapproves_spec', 'Approval Check')):
+            with tempfile.TemporaryDirectory() as tmp:
+                evidence = prepare(Path(tmp), name)
+                self.assertIn(mark, evidence, name)
+                self.assertNotIn('owner adds', evidence, name)
+            stage, request = cases()[name]
+            self.assertIn('The owner adds: "', request, name)
+            self.assertIn('AGENTS.md', STAGES[stage], name)
 
     def test_spec_gate_checks(self):
         stops = result(state='blocked', explanation='No spec exists to revise.')

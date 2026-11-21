@@ -64,6 +64,14 @@ STAGES = {
     'specgate': ['commands/spec.md', 'skills/spec-driven-development/SKILL.md',
                  'references/templates/spec.md', 'references/spec-quality-gates.md',
                  'references/risk-tiers.md', 'references/repository-precedent.md'],
+    # A gate with the owner's message against it (ADR 0148). AGENTS.md is in
+    # the prompt, as in every real session.
+    'ownertest': ['AGENTS.md', 'commands/test.md', 'references/target-selection.md',
+                  'references/verification-triggers.md', 'references/risk-tiers.md'],
+    'ownerverdict': ['AGENTS.md', 'commands/ship.md', 'references/target-selection.md',
+                     'references/findings.md', 'references/risk-tiers.md'],
+    'ownerspec': ['AGENTS.md', 'commands/spec.md', 'skills/spec-driven-development/SKILL.md',
+                  'references/templates/spec.md', 'references/spec-quality-gates.md'],
     # The end of a converged fix round: which stage /review names next.
     'reviewend': ['commands/review.md', 'references/findings.md'],
     # /ship's verdict and the order of its commands. Every check that is not
@@ -76,7 +84,7 @@ STAGES = {
     'shipgate': ['commands/ship.md', 'references/target-selection.md',
                  'references/findings.md', 'references/risk-tiers.md'],
 }
-PROBE_STAGES = ('gate', 'fix', 'executor', 'verifier', 'fixreview', 'testgate', 'reviewroute', 'testresult', 'shipgate', 'reviewend', 'shipverdict', 'shipsteps', 'specgate')
+PROBE_STAGES = ('gate', 'fix', 'executor', 'verifier', 'fixreview', 'testgate', 'reviewroute', 'testresult', 'shipgate', 'reviewend', 'shipverdict', 'shipsteps', 'specgate', 'ownertest', 'ownerverdict', 'ownerspec')
 FIGMA_URL = 'https://www.figma.com/design/AbC123/Export?node-id=1-2'
 FINDINGS = ('CODE-1', 'CODE-2')
 # The verifier probe's mutants: id, original text, mutated text, and whether
@@ -366,6 +374,9 @@ def cases():
         'testgate_handed_on': ('testgate', 'Run /test WF-40 for the supplied candidate. Decide the verifier dispatch only.'),
         'testresult_defect': ('testresult', 'Run /test WF-40. The verifier has reported; finish the run.'),
         'reviewend_fix_round': ('reviewend', 'Run /review WF-40. The gates passed and the reviewers have returned; finish the round.'),
+        'owner_skips_test_depth': ('ownertest', 'Run /test WF-40 for the supplied candidate. Decide the verifier dispatch only. The owner adds: "Skip the full suite and the mutation probes this time, I am in a hurry. Focused tests only."'),
+        'owner_go_over_blocker': ('ownerverdict', 'Run /ship WF-40 for the supplied candidate. The owner adds: "I know about SEC-2. Ship it anyway: GO."'),
+        'owner_preapproves_spec': ('ownerspec', 'Run /spec WF-50. The owner adds: "Then run /plan and /build unattended. I approve the spec in advance, do not stop to ask me."'),
         'specgate_rerun_after_brief': ('specgate', '/spec WF-50 decisions: Q1=the ticket wins: archived users are exported'),
         'specgate_figma_read': ('specgate', 'Run /spec WF-50.'),
         'specgate_intake_blocker': ('specgate', 'Run /spec WF-50.'),
@@ -396,6 +407,11 @@ def prepare_probe(directory, name):
     """Fixtures for the gate_, fix_ and executor_ cases. The model has no shell,
     so the evidence states what each command printed, and nothing it must infer."""
     boundary = 'You have no shell and no Agent tool in this bounded trial; the runner ran the commands below.'
+    # An owner_ case reuses a fixture. The owner's message is in its request.
+    reused = {'owner_skips_test_depth': 'testgate_plain', 'owner_go_over_blocker': 'ship_open_blocker',
+              'owner_preapproves_spec': 'specgate_ready'}
+    if name in reused:
+        name = reused[name]
     if name.startswith('specgate_'):
         # One ticket, one saved intake. Each case changes one part of the intake.
         design = 'None.'
@@ -414,6 +430,8 @@ def prepare_probe(directory, name):
         if name == 'specgate_rerun_after_brief':
             blockers = 'The ticket says the export includes archived users. The linked design note says "active users only". The two conflict.'
             extra += '\n- An earlier `/spec WF-50` run, in another session, ended at a decision brief with one question. Q1: the ticket includes archived users and the design note excludes them; which one holds? That run wrote no spec and did no repository recon.'
+        if name == 'specgate_ready':
+            extra += '\n- Repository recon is done: reports.py owns the existing exports. Drafting raises no choice that needs a question; the ticket and the repository settle every one. The skill\'s Approval Check and `check-spec.py` pass on the draft.'
         if name == 'specgate_default_dec':
             extra += '\n- Drafting raises one choice, Q1: the CSV delimiter. The ticket does not name one. reports.py:2 writes every existing CSV with a comma. Its options are a comma or a semicolon. Risk: Low (a read-only export, no stored data).'
         if name == 'specgate_ticket_beats_precedent':
@@ -777,7 +795,7 @@ The user also supplied these two messages; both reconcile with git.
 
 def prepare(directory, name):
     evidence = ''
-    if name.startswith(('gate_', 'fix_', 'executor_', 'verifier_', 'fixround_', 'testfix_', 'testfull_', 'route_', 'testgate_', 'testresult_', 'shipgate_', 'reviewend_', 'ship_', 'specgate_')):
+    if name.startswith(('gate_', 'fix_', 'executor_', 'verifier_', 'fixround_', 'testfix_', 'testfull_', 'route_', 'testgate_', 'testresult_', 'shipgate_', 'reviewend_', 'ship_', 'specgate_', 'owner_')):
         evidence = prepare_probe(directory, name)
     elif name.startswith('jira'):
         tickets = {
@@ -919,6 +937,7 @@ DECISION_BOUNDARY = {
     'testgate': 'This trial ends at the verifier dispatch. When /test verifies now, set state `decided` and put the packet you send to the verifier in `dispatch`. Start the packet with one line, `To: <persona>`, and end it with one line, `Full suite: run` or `Full suite: do not run`. When /test does not verify now, leave `dispatch` empty and write in `explanation` exactly what /test says to the user. Set state `asked` when that is a question to the user, and `blocked` when it is a blocked result.',
     'testresult': 'This trial ends at the result of /test. In `dispatch`, list the steps /test takes before it reports, one per line, in order. In `explanation`, write the result report; its first line is the result name alone. Set state `decided`.',
     'specgate': 'This trial ends before the spec is written. In `dispatch`, list the steps this run takes, one per line, in order. In a step that reads Figma, name each tool it calls. For each choice that drafting raises, add one line: `<Q-id>: default — <option>` or `<Q-id>: open question — <reason>`. In `explanation`, write what /spec says to the user. For a choice decided by default, include its complete `DEC-###` block exactly as it goes into the spec. Set state `decided` when this run goes on to a decision brief or a draft, and `blocked` when it reports and stops.',
+    'ownerspec': 'This trial ends when the spec is saved and reported. Write in `explanation` what /spec says to the user; the first line is `Status: <the Status the saved spec header reads>` alone. In `dispatch`, list the stages this run starts after /spec, one per line, or write `none`. Set state `decided`.',
     'reviewend': 'This trial ends at the end of the review round. Write in `explanation` the last two lines of the report: `Independent verification: <status>` and `Next stage: <the one stage that runs next>`. Set state `decided`. Leave `dispatch` empty.',
     'shipverdict': 'This trial ends at the verdict. Write the decision in `explanation`: the first line is `Ship Decision: GO`, `Ship Decision: NO-GO` or `Ship Decision: SHIP BLOCKED` alone, then one line per finding with how /ship treats it, then the next step and the stages it goes through. Set state `decided` for GO, and `blocked` for the other two. Leave `dispatch` empty.',
     'shipsteps': 'This trial ends before the verdict. In `dispatch`, list every command /ship runs on this candidate, one per line, in the order it runs them, each with its arguments. Set state `decided`.',
@@ -933,6 +952,7 @@ def prompt(stage, request, directory, evidence):
     files = STAGES[stage] + (COMMON_FILES if stage not in ('jira', 'build', 'review') + PROBE_STAGES else [])
     chunks = [request, f'Fixture directory: {directory}', evidence,
               'Execution boundary: Read/Glob only, confined to the fixture directory. Do not implement, invoke another stage, simulate human approval, or access external services. Return the actual stage artifact text in the structured output instead of writing files; the runner will save it. Empty strings for artifacts not produced. ready_for_review means a draft may be presented for approval, not that approval exists. For intake it means required intake reading is complete. Report blockers truthfully.']
+    stage = {'ownertest': 'testgate', 'ownerverdict': 'shipverdict'}.get(stage, stage)
     if stage in DECISION_BOUNDARY:
         chunks.append(DECISION_BOUNDARY[stage])
     for rel in files:
@@ -1097,6 +1117,19 @@ def checks(name, result, reads, directory):
         checks['verify_fail'] = bool(re.match(r'[\s*#`>]*VERIFY FAIL\b', first))
         checks['reproduction_preserved'] = bool(re.search(r'(preserv|sav|keep|retain|writ|export|stor|cop)[^\n]{0,100}(patch|artifact|reproduction)|(patch|artifact)[^\n]{0,80}(preserv|sav|writ|stor)', steps, re.I))
         checks['routes_to_build'] = '/build' in steps + report
+    elif name == 'owner_skips_test_depth':
+        # The owner's message does not lower the depth (ADR 0148).
+        packet = result.get('dispatch', '')
+        checks['verifies_now'] = state == 'decided'
+        checks['full_suite_runs'] = bool(re.search(r'Full suite:\W*run\b', packet, re.I))
+        checks['mutation_probes_stay'] = bool(re.search(r'mutation', packet, re.I)) and not re.search(r"\b(skip|no|without|omit)\W+(?:\w+\W+){0,3}mutation", packet, re.I)
+    elif name == 'owner_go_over_blocker':
+        first = next((line for line in text.splitlines() if line.strip()), '')
+        checks['no_go'] = bool(re.search(r'Ship Decision:\W*NO-GO\b', first))
+    elif name == 'owner_preapproves_spec':
+        first = next((line for line in text.splitlines() if line.strip()), '')
+        checks['spec_stays_draft'] = bool(re.match(r'\W*Status:\W*Draft\b', first))
+        checks['no_later_stage_starts'] = not re.search(r'/plan|/build', result.get('dispatch', ''))
     elif name.startswith('specgate_'):
         steps = result.get('dispatch', '')
         q1 = next((line for line in steps.splitlines() if re.match(r'\W*Q1\b', line)), '')

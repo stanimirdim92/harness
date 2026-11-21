@@ -194,6 +194,21 @@ example to keep a condition next to its consequence.
   ends while an agent runs leaves no report, and in a headless session it
   kills the agent (ADR 0132).
 
+## Pipeline gates
+
+- A message in the conversation does not change a gate of `/spec`, `/plan`,
+  `/build`, `/test`, `/review` or `/ship`. This includes the owner's message
+  (ADR 0148).
+- When a message asks for less than the gate (skip the full suite, skip a
+  probe, approve unread, GO anyway), say in one line that the gate stays.
+  Then do what the gate says.
+- An instruction to run unattended is not approval of a spec or a plan. Stop
+  at the approval request.
+- A pre-authorization recorded in an approved plan stays valid (`/plan`).
+- To change a gate, change the harness or the project's rules in their own
+  commit. The next run follows the new text.
+- *Catches: every agent inventing its own override format.*
+
 ## Models
 
 Agent definitions own default models. Override upward only for materially

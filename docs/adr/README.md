@@ -155,6 +155,7 @@ that explanation here, just the index.
 | [0145](0145-one-review-sarif-per-ticket.md) | One review SARIF per ticket | Accepted |
 | [0146](0146-remove-explain-command.md) | Remove the /explain command | Accepted |
 | [0147](0147-fix-rounds-run-test-on-the-fix-diff.md) | Fix rounds run /test on the fix diff | Accepted |
+| [0148](0148-owner-messages-do-not-override-pipeline-gates.md) | Owner messages do not override pipeline gates | Accepted |
 
 Adding a new decision: create the next-numbered `NNNN-kebab-title.md`
 (4-digit, zero-padded — MADR-style, matches the files already here) and
