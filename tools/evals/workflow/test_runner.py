@@ -316,6 +316,73 @@ class OrchestrationDecisionTests(unittest.TestCase):
             self.assertNotIn('Next step', evidence)
             self.assertNotIn('/ship', evidence)
 
+    def test_ship_verdicts(self):
+        go = result(state='decided', explanation='Ship Decision: GO\nSEC-1: follow-up.')
+        no_go = result(state='blocked', explanation='Ship Decision: NO-GO\nNext: `/build`, then `/test` and `/review`.')
+        blocked = result(state='blocked', explanation='Ship Decision: SHIP BLOCKED\nAsk the owner.')
+        self.assertFalse(checks('ship_preexisting_blocker', go, set(), Path('.'))['not_go'])
+        self.assertTrue(all(checks('ship_preexisting_blocker', no_go, set(), Path('.')).values()))
+        got = checks('ship_preexisting_blocker', blocked, set(), Path('.'))
+        self.assertTrue(got['not_go'] and not got['no_go'])
+        self.assertTrue(all(checks('ship_answered_required', go, set(), Path('.')).values()))
+        self.assertFalse(checks('ship_answered_required', no_go, set(), Path('.'))['go'])
+        self.assertTrue(all(checks('ship_base_check_failed', no_go, set(), Path('.')).values()))
+        short = result(state='blocked', explanation='Ship Decision: NO-GO\nNext: `/build` and `/review`.')
+        self.assertFalse(checks('ship_base_check_failed', short, set(), Path('.'))['fix_goes_through_test'])
+
+    def test_three_gate_cases_that_must_stop(self):
+        go = result(state='decided', explanation='Ship Decision: GO\nCODE-4: the spec answers it.')
+        self.assertFalse(checks('ship_open_required', go, set(), Path('.'))['not_go'])
+        no_go = result(state='blocked', explanation='Ship Decision: NO-GO\nCODE-4 is an open REQUIRED finding.')
+        self.assertTrue(all(checks('ship_open_required', no_go, set(), Path('.')).values()))
+        started = result(state='decided', dispatch='CODE-1: dispatch — open', explanation='The notes file is review material.')
+        self.assertFalse(checks('fix_other_review_file', started, set(), Path('.'))['run_does_not_start'])
+        stopped = result(state='blocked', explanation='The candidate changed after the review. Run `/review` again first.')
+        self.assertTrue(all(checks('fix_other_review_file', stopped, set(), Path('.')).values()))
+        passed = result(state='decided', explanation='Verification: satisfied')
+        self.assertFalse(checks('shipgate_full_run_added_tests', passed, set(), Path('.'))['ship_blocked_pending_closing_round'])
+        closing = result(state='blocked', explanation='SHIP BLOCKED\nThe full run added a test commit. Next: the closing `/review` round.')
+        self.assertTrue(all(checks('shipgate_full_run_added_tests', closing, set(), Path('.')).values()))
+        with tempfile.TemporaryDirectory() as tmp:
+            evidence = prepare(Path(tmp), 'fix_other_review_file')
+            changed = subprocess.check_output(['git', '-C', tmp, 'diff', '--name-only', 'HEAD~1', 'HEAD'], text=True).split()
+            self.assertEqual(changed, ['docs/reviews/WF-40-notes.md'])
+            self.assertIn('CODE-1 REQUIRED', evidence)
+            self.assertNotIn('CODE-2', evidence)
+            self.assertNotIn('user is not None', (Path(tmp) / 'auth.py').read_text())
+        with tempfile.TemporaryDirectory() as tmp:
+            evidence = prepare(Path(tmp), 'shipgate_full_run_added_tests')
+            head = subprocess.check_output(['git', '-C', tmp, 'rev-parse', 'HEAD'], text=True).strip()
+            self.assertEqual(subprocess.check_output(['git', '-C', tmp, 'log', '-1', '--format=%s'], text=True).strip(), 'test: the owner role exports')
+            self.assertIn(f'Final tree: clean at {head}', evidence)
+            self.assertIn('test: the owner role exports" (verify.py only)', evidence)
+            self.assertNotIn('Test-only commits: none', evidence.split('VERIFY PASS\n')[1])
+            self.assertEqual(subprocess.run(['python3', 'verify.py'], cwd=tmp).returncode, 0)
+        with tempfile.TemporaryDirectory() as tmp:
+            evidence = prepare(Path(tmp), 'ship_open_required')
+            self.assertIn('did not close it as answered', evidence)
+            self.assertNotIn('WF-77', evidence)
+
+    def test_ship_stats_run_after_the_resolutions(self):
+        early = result(dispatch='check-ledger.py WF-40 --ship\nticket-stats.py WF-40\nreview-sarif.py resolve WF-40 CODE-5=follow-up')
+        self.assertFalse(checks('ship_stats_order', early, set(), Path('.'))['stats_after_resolutions'])
+        late = result(dispatch='check-ledger.py WF-40 --ship\nreview-sarif.py resolve WF-40 CODE-5=follow-up CODE-6=declined\nticket-stats.py WF-40')
+        self.assertTrue(all(checks('ship_stats_order', late, set(), Path('.')).values()))
+
+    def test_ship_fixtures_state_what_each_case_needs(self):
+        for name in ('ship_preexisting_blocker', 'ship_answered_required', 'ship_base_check_failed', 'ship_stats_order'):
+            with tempfile.TemporaryDirectory() as tmp:
+                evidence = prepare(Path(tmp), name)
+                self.assertIn('Independent verification: PASS (a VERIFY PASS at Deep', evidence, name)
+                self.assertEqual('SEC-1 BLOCKER' in evidence, name == 'ship_preexisting_blocker', name)
+                self.assertEqual('WF-77' in evidence, name in ('ship_answered_required', 'ship_stats_order'), name)
+                self.assertEqual('exit 1' in evidence, name == 'ship_base_check_failed', name)
+                # The pre-existing finding points at code that is in the tree and at the base.
+                self.assertIn('session.token', (Path(tmp) / 'export.py').read_text(), name)
+                changed = subprocess.check_output(['git', '-C', tmp, 'diff', '--name-only', 'HEAD~1', 'HEAD'], text=True)
+                self.assertNotIn('export.py', changed, name)
+                self.assertEqual(subprocess.check_output(['git', '-C', tmp, 'status', '--short'], text=True), '', name)
+
     def test_ship_fixtures_differ_only_in_the_full_run(self):
         with tempfile.TemporaryDirectory() as one, tempfile.TemporaryDirectory() as two:
             full, none = prepare(Path(one), 'shipgate_full_run'), prepare(Path(two), 'shipgate_no_full_run')

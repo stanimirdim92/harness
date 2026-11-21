@@ -115,6 +115,29 @@ The review recorded `PASS (fix diff)`:
 - `shipgate_no_full_run`: no full run exists. `/ship` is SHIP BLOCKED and
   names `/test`.
 
+Four cases pin `/ship`'s verdict. The trial states every other check as
+passed:
+
+- `ship_preexisting_blocker`: a pre-existing BLOCKER with no tracked
+  follow-up is NO-GO (ADR 0090).
+- `ship_answered_required`: a REQUIRED finding `/review` closed as answered,
+  and a pre-existing one tracked in a ticket, do not block GO.
+- `ship_base_check_failed`: a failing base check is NO-GO, and the fix goes
+  through `/build`, `/test` and `/review`.
+- `ship_stats_order`: `ticket-stats.py` runs after `review-sarif.py resolve`
+  wrote the resolutions, so the row counts them.
+- `ship_open_required`: a REQUIRED finding that `/review` left open is not
+  GO, even when the spec seems to answer it. Only `/review` closes a finding
+  as answered.
+
+Two more cases pin gates that must stop:
+
+- `shipgate_full_run_added_tests`: the full-depth `/test` added a test
+  commit. `/ship` is SHIP BLOCKED until the closing review round.
+- `fix_other_review_file`: after the review, a commit adds a file under
+  `docs/reviews/` that is not the ticket's SARIF. `/build <TICKET> review
+  fixes` does not start; the candidate goes to `/review` first.
+
 To compare two versions of the harness text, extract the older one
 (`git archive <sha> claude tools/evals/workflow | tar -x -C <dir>`), copy the
 current `run.py` over the extracted one, and run that copy: it reads the
