@@ -70,6 +70,8 @@ list-price dollars from the ticket's transcripts:
 python3 ~/.claude/skills/spec-driven-development/scripts/ticket-stats.py <TICKET>
 ```
 
+Run it after §2 has written the resolutions, so the row counts them.
+
 Print the header and the row exactly as `ticket-stats.py` outputs them, in
 one table. Below it, add one plain sentence that says what the numbers mean
 for this ticket, such as where the owner's time went. The owner adds the row
@@ -120,7 +122,7 @@ setup command from the project's `CLAUDE.md` when a fresh worktree needs one
 
 - Exit 0: record the result line ("Base: current" or every check passing).
 - Exit 1: a merge conflict or a failing check is **NO-GO**. The fix is a new
-  candidate through `/build` and `/review`. A failure listed in the project's
+  candidate through `/build`, `/test` and `/review`. A failure listed in the project's
   known-failures file is pre-existing; say so.
 - Exit 2: **SHIP BLOCKED** with the error; the check did not run.
 
@@ -163,7 +165,8 @@ the id; pass `--round <n>` for an earlier one. The resolutions are `fixed`,
 pre-existing finding, or `open`.
 ADVISORY findings the author declined are `declined`. Never write `refuted`
 for an `answered` finding: `refuted` means the claim is false, and
-`answered` means the spec or the owner already settled it. `review-noise.py`
+`answered` means the spec or the owner already settled it. `answered` comes
+from `/review` only; `/ship` never gives it to a finding itself. `review-noise.py`
 counts these to show which reviewers raise findings that end as fixes and
 which raise noise (ADR 0093). It counts `answered` apart, as neither. Commit
 the file, with any ledger change, as a ledger-only commit (ADR 0120).
@@ -250,8 +253,9 @@ GO requires:
 - no unresolved BLOCKER, except a pre-existing one tracked as a follow-up;
 - `check-ledger.py --ship` passing;
 - every spec requirement carrying both implementation and verification evidence;
-- every REQUIRED finding resolved (fixed or refuted), explicitly risk-accepted,
-  or deferred with a concrete reason;
+- every REQUIRED finding resolved (fixed, refuted or answered), explicitly
+  risk-accepted, or deferred with a concrete reason; a pre-existing one is a
+  follow-up;
 - release-readiness attestations passed;
 - concrete rollback plan;
 - explained working-tree state.
@@ -277,7 +281,7 @@ Return:
 - [id] [disposition] — tracked in [ticket or observation-log row]
 
 ### Fix at the source
-- [class] — [N] tickets; [lint rule | REVIEW.md line | CLAUDE.md line | Do not report]: "[proposed text]" (or: none)
+- [class] — [N] tickets; [lint rule | shared test | REVIEW.md line | CLAUDE.md line | Do not report]: "[proposed text]" (or: none)
 
 ### Human time
 [ticket-stats.py header and row, exactly as printed]

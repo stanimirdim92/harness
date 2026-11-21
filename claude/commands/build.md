@@ -348,7 +348,7 @@ The plan checks in §1 still apply; task resume does not.
 
 1. Run `review-sarif.py latest <TICKET> --open` (`/review` §1). It prints the
    newest round's `reviewedCommit` and its open findings. After that commit,
-   HEAD may add only commits that touch `docs/reviews/` or
+   HEAD may add only commits that touch `docs/reviews/<TICKET>.sarif` or
    `docs/tasks/<TICKET>-open.md` (`git diff --name-only <sha> HEAD`). Any
    other change means the candidate changed after the review: review it again
    first, never fix it blind. After a BUILD BLOCKED fix run, a rerun also

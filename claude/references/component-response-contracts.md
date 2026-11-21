@@ -471,7 +471,8 @@ property are defined in `findings.md` §Review SARIF.
 ```
 
 GO requires an unchanged reviewed candidate, a passing current-base check
-(ADR 0095), independent verification
+or an unchanged base (ADR 0095), a passing `check-ledger.py --ship`,
+independent verification
 satisfied exactly as REVIEW required, no unresolved BLOCKER (a pre-existing one
 tracked as a follow-up does not count), every requirement
 carrying both implementation and verification evidence, every REQUIRED finding

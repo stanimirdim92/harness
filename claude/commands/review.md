@@ -364,7 +364,7 @@ Report, starting with one count line before anything else (ADR 0099):
   bears on when it bears on one, in the form below;
 - **requirement evidence**: one line per `REQ-###` in the spec — the change that
   implements it and the verification that proves it, or an explicit statement
-  that one of those is missing. `/ship` blocks on a missing entry, so report the
+  that one of those is missing. `/ship` returns NO-GO on a missing entry, so report the
   gap rather than leaving the requirement off the list.
 
 Write the findings so the owner can act on them without the code open:

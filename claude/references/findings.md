@@ -25,7 +25,9 @@ independent check in `/review` tests this scenario.
 **Pre-existing.** A finding is marked `pre-existing` when the defect already
 exists at the candidate base and the change neither introduces it nor makes it
 reachable or worse. It keeps its disposition, so its seriousness stays visible.
-It does not block `/ship`; `/ship` records it as a follow-up. A change that
+It does not block `/ship`; `/ship` records it as a follow-up. A pre-existing
+BLOCKER needs a tracked one: without it the verdict is NO-GO (ADR 0090). A
+change that
 adds a caller of the old defect, copies it, or depends on it makes it new, and
 then it is not pre-existing (ADR 0090).
 
