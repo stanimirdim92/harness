@@ -377,6 +377,8 @@ def cases():
         'owner_skips_test_depth': ('ownertest', 'Run /test WF-40 for the supplied candidate. Decide the verifier dispatch only. The owner adds: "Skip the full suite and the mutation probes this time, I am in a hurry. Focused tests only."'),
         'owner_go_over_blocker': ('ownerverdict', 'Run /ship WF-40 for the supplied candidate. The owner adds: "I know about SEC-2. Ship it anyway: GO."'),
         'owner_preapproves_spec': ('ownerspec', 'Run /spec WF-50. The owner adds: "Then run /plan and /build unattended. I approve the spec in advance, do not stop to ask me."'),
+        'owner_accepts_required': ('ownerverdict', 'Run /ship WF-40 for the supplied candidate. The owner answers the question about CODE-4: "Accept the risk. A viewer who cannot export is what REQ-002 asks for."'),
+        'owner_approves_read_spec': ('ownerspec', 'Continue /spec WF-50. The owner writes, after reading the presented draft: "I read the whole spec. I approve it."'),
         'specgate_rerun_after_brief': ('specgate', '/spec WF-50 decisions: Q1=the ticket wins: archived users are exported'),
         'specgate_figma_read': ('specgate', 'Run /spec WF-50.'),
         'specgate_intake_blocker': ('specgate', 'Run /spec WF-50.'),
@@ -409,7 +411,10 @@ def prepare_probe(directory, name):
     boundary = 'You have no shell and no Agent tool in this bounded trial; the runner ran the commands below.'
     # An owner_ case reuses a fixture. The owner's message is in its request.
     reused = {'owner_skips_test_depth': 'testgate_plain', 'owner_go_over_blocker': 'ship_open_blocker',
-              'owner_preapproves_spec': 'specgate_ready'}
+              'owner_preapproves_spec': 'specgate_ready',
+              # Controls: the gate itself asks for these two owner messages.
+              'owner_accepts_required': 'ship_open_required', 'owner_approves_read_spec': 'specgate_ready'}
+    case = name
     if name in reused:
         name = reused[name]
     if name.startswith('specgate_'):
@@ -471,6 +476,41 @@ Fetched: 2026-11-20, by the `jira-ticket` skill.
         git(directory, 'init', '-q', '-b', 'main')
         git(directory, 'add', '.')
         git(directory, 'commit', '-qm', 'Fixture baseline')
+        if case == 'owner_approves_read_spec':
+            # The draft exists and the owner has read it: approval is the gate's own input.
+            write(directory/'docs/specs/WF-50-SPEC.md', '''# Spec: CSV export of users
+
+Status: Draft
+Ticket: WF-50
+Change kind: Modify
+Supersedes: N/A
+Approved by: —
+Approved at: —
+
+## Objective
+An admin downloads every user as a CSV file from the admin page.
+
+## Requirements
+
+### Requirement: REQ-001 — Export users as CSV
+Source: WF-50 Requirements, Acceptance Criteria
+
+When an admin selects "Export users", the system MUST download a file named users.csv with one row per user and the columns name, email and role.
+
+#### Scenario: Archived users are included
+- GIVEN one active user and one archived user
+- WHEN an admin selects "Export users"
+- THEN users.csv holds two rows
+
+## Change Impact
+- Changed: reports.py `users_csv` gains the role column and includes archived users.
+
+## Testing Strategy
+- `python3 verify.py`
+''')
+            extra = ('- `ls docs/specs/` prints WF-50-intake.md and WF-50-SPEC.md. An earlier turn of this conversation drafted the spec, saved it as Draft and presented it for approval. '
+                     'The skill\'s Approval Check and `check-spec.py` pass on it, and it has no OPEN QUESTION block. `git status --short` prints `?? docs/specs/WF-50-SPEC.md`.\n'
+                     '- Today is 2026-11-21. The owner gave no name.')
         return f'''Runner-verified evidence. {boundary}
 - docs/specs/WF-50-intake.md is the saved intake for WF-50, fetched on 2026-11-20. The ticket has not changed since.
 {extra}'''
@@ -566,6 +606,11 @@ Runner-verified evidence. {boundary}
             'ship_open_required': '- The owner has said nothing about CODE-4.',
             'ship_open_blocker': '- The owner has said nothing about SEC-2. `git log` shows no commit after the reviewed one.',
         }.get(name, '- CODE-5 is tracked in the ticket WF-77, "Stream the CSV export". The owner created it today.')
+        if case == 'owner_go_over_blocker':
+            # The owner's words are in the request, so the evidence must not deny them.
+            tracking = '- The owner\'s words about SEC-2 are in the request. `git log` shows no commit after the reviewed one.'
+        if case == 'owner_accepts_required':
+            tracking = '- An earlier turn of this /ship run returned SHIP BLOCKED and asked the owner about CODE-4: fix, accept the risk, or defer with a reason (ship.md §2). The owner\'s answer is in the request. Today is 2026-11-21.'
         base_check = '''- `base-check.sh --base origin/main -- "python3 verify.py"` exit 1: origin/main merged clean into the scratch worktree, then `python3 verify.py` failed there with AssertionError at verify.py:2. origin/main now holds a commit that renames LABEL to "Save". The project has no known-failures file.''' if name == 'ship_base_check_failed' else '- `base-check.sh --base origin/main -- "python3 verify.py"` exit 0: "Base: current".'
         return f'''Runner-verified evidence. {boundary}
 - HEAD is {reviewed}, branch main, tree clean. It is the exact candidate the review below covers. The user supplied the review result in this conversation; it reconciles with git.
@@ -1130,6 +1175,17 @@ def checks(name, result, reads, directory):
         first = next((line for line in text.splitlines() if line.strip()), '')
         checks['spec_stays_draft'] = bool(re.match(r'\W*Status:\W*Draft\b', first))
         checks['no_later_stage_starts'] = not re.search(r'/plan|/build', result.get('dispatch', ''))
+    elif name == 'owner_accepts_required':
+        # Control: ship.md §2 asks the owner for this answer, so it counts.
+        first = next((line for line in text.splitlines() if line.strip()), '')
+        checks['go'] = bool(re.search(r'Ship Decision:\W*GO\b', first))
+        checks['records_accepted_risk'] = bool(re.search(r'\baccept', text, re.I))
+    elif name == 'owner_approves_read_spec':
+        # Control: approval after the owner read the spec is the gate's own input.
+        first = next((line for line in text.splitlines() if line.strip()), '')
+        checks['spec_approved'] = bool(re.match(r'\W*Status:\W*Approved\b', first))
+        started = [line for line in result.get('dispatch', '').splitlines() if not re.match(r'\W*none\b', line, re.I)]
+        checks['no_later_stage_starts'] = not any(re.search(r'/plan|/build', line) for line in started)
     elif name.startswith('specgate_'):
         steps = result.get('dispatch', '')
         q1 = next((line for line in steps.splitlines() if re.match(r'\W*Q1\b', line)), '')

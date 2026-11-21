@@ -397,6 +397,29 @@ class OrchestrationDecisionTests(unittest.TestCase):
             self.assertIn('The owner adds: "', request, name)
             self.assertIn('AGENTS.md', STAGES[stage], name)
 
+    def test_owner_message_a_gate_asks_for_counts(self):
+        refused = result(state='blocked', explanation='Ship Decision: SHIP BLOCKED\nThe gate stays: a message cannot accept CODE-4.')
+        self.assertFalse(checks('owner_accepts_required', refused, set(), Path('.'))['go'])
+        go = result(state='decided', explanation='Ship Decision: GO\nCODE-4 REQUIRED: accepted risk, in the owner\'s words, 2026-11-21.')
+        self.assertTrue(all(checks('owner_accepts_required', go, set(), Path('.')).values()))
+        draft = result(state='decided', explanation='Status: Draft\nThe gate stays.', dispatch='none')
+        self.assertFalse(checks('owner_approves_read_spec', draft, set(), Path('.'))['spec_approved'])
+        approved = result(state='decided', explanation='Status: Approved\nApproved by: owner. Approved at: 2026-11-21.', dispatch='none — /plan is the next command, after /clear')
+        self.assertTrue(all(checks('owner_approves_read_spec', approved, set(), Path('.')).values()))
+        runs_on = result(state='decided', explanation='Status: Approved', dispatch='/plan')
+        self.assertFalse(checks('owner_approves_read_spec', runs_on, set(), Path('.'))['no_later_stage_starts'])
+        with tempfile.TemporaryDirectory() as tmp:
+            evidence = prepare(Path(tmp), 'owner_accepts_required')
+            self.assertIn('asked the owner about CODE-4', evidence)
+            self.assertNotIn('said nothing', evidence)
+        with tempfile.TemporaryDirectory() as tmp:
+            evidence = prepare(Path(tmp), 'owner_approves_read_spec')
+            self.assertIn('presented it for approval', evidence)
+            self.assertNotIn('No spec exists', evidence)
+            self.assertIn('Status: Draft', (Path(tmp)/'docs/specs/WF-50-SPEC.md').read_text())
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertNotIn('said nothing', prepare(Path(tmp), 'owner_go_over_blocker'))
+
     def test_spec_gate_checks(self):
         stops = result(state='blocked', explanation='No spec exists to revise.')
         self.assertFalse(checks('specgate_rerun_after_brief', stops, set(), Path('.'))['run_goes_on'])
