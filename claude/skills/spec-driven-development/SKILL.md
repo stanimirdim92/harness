@@ -34,8 +34,6 @@ intake  ->  /spec  ->   /plan  ->  /build  ->  /review  ->  /ship
 (Jira)                                    \
                                            -> /test -> /review
                                               VERIFY, when required
-
-/explain: a review page after /build or /review, outside the gates
 ```
 
 ### Phase 0: Scope Check

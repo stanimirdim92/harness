@@ -76,7 +76,7 @@ that explanation here, just the index.
 | [0066](0066-opus-5-5-effort-and-early-stop-continuations.md) | Opus 5.5: medium session effort, and bounded continuations for early stops | Accepted; revised: top-level `effortLevel` is inert for Opus 5.5 |
 | [0067](0067-change-surface-in-plans-and-plan-recall.md) | Change surface in plans, touch points in recon, and a plan-recall eval | Accepted |
 | [0068](0068-sandbox-resumable-build-and-failure-signals.md) | OS sandbox, resumable `/build`, and failure signals from transcripts | Sandbox decision superseded by [0085](0085-sandbox-off-credential-read-denials.md) |
-| [0069](0069-plain-writing-explain-page-and-generated-map.md) | Plain writing, an `/explain` review page, a generated harness map, and ticket-scoped plan recall | Accepted |
+| [0069](0069-plain-writing-explain-page-and-generated-map.md) | Plain writing, an `/explain` review page, a generated harness map, and ticket-scoped plan recall | Partially superseded by [0146](0146-remove-explain-command.md) (the `/explain` page is removed) |
 | [0070](0070-browser-checks-route-to-test-engineer.md) | Browser checks route to test-engineer, and the DevTools MCP is installed | Accepted |
 | [0071](0071-harness-files-live-under-dotfiles.md) | Harness files live under `` | Accepted |
 | [0072](0072-frontend-skills-vendored-and-figma-fetched.md) | Frontend skills: three vendored, Figma's fetched | Accepted |
@@ -153,6 +153,7 @@ that explanation here, just the index.
 | [0143](0143-review-eval-judges-the-defect-not-the-location.md) | review-eval judges the defect, not only the location | Accepted |
 | [0144](0144-fix-rounds-skip-test-until-review-converges.md) | Fix rounds skip /test until review converges | Accepted |
 | [0145](0145-one-review-sarif-per-ticket.md) | One review SARIF per ticket | Accepted |
+| [0146](0146-remove-explain-command.md) | Remove the /explain command | Accepted |
 
 Adding a new decision: create the next-numbered `NNNN-kebab-title.md`
 (4-digit, zero-padded — MADR-style, matches the files already here) and

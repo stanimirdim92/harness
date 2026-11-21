@@ -351,11 +351,11 @@ instead, but the response shape each role produces is identical either way.
 
 ## 5. Command stage-gate contracts
 
-Seven commands live in `../../claude/commands/`; six own the pipeline
+Six commands live in `../../claude/commands/` and own the pipeline
 (`docs/harness-map.html` §Pipeline): `/spec -> /plan -> /build -> /test -> /review -> /ship`.
 `/test` runs on every production change; only the exempt kinds in
 `verification-triggers.md` skip it (ADR 0104). Jira intake (`jira-ticket` skill) comes
-before `/spec`; `/explain` sits outside the gates. Each ends in exactly one named terminal
+before `/spec`. Each ends in exactly one named terminal
 state and, except `/ship`, writes an artifact to a fixed path.
 
 | Command | Artifact | Terminal states |
@@ -366,7 +366,6 @@ state and, except `/ship`, writes an artifact to a fixed path.
 | `/test` | test-only commits | **VERIFY PASS** \| **VERIFY FAIL** \| **VERIFY BLOCKED** |
 | `/review` | the review SARIF `docs/reviews/[TICKET].sarif`, one per ticket, committed | count line, or **REVIEW BLOCKED** |
 | `/ship` | — (a decision only) | **GO** \| **NO-GO** \| **SHIP BLOCKED** |
-| `/explain` | one HTML page under `<git-common-dir>/explain/` | — (not a gate) |
 
 ### `/build` → BUILD COMPLETE / BUILD BLOCKED
 

@@ -34,7 +34,7 @@ class ContractsDoc(unittest.TestCase):
     def test_the_counts_in_the_prose_match(self):
         # Derived from the directories, so a new file fails here until the prose
         # is updated, rather than the test pinning a stale number.
-        words = {7: 'Seven', 10: 'Ten', 13: 'Thirteen', 14: 'Fourteen', 15: 'Fifteen', 16: 'Sixteen'}
+        words = {6: 'Six', 7: 'Seven', 10: 'Ten', 13: 'Thirteen', 14: 'Fourteen', 15: 'Fifteen', 16: 'Sixteen'}
         hooks = len(list((CLAUDE / 'hooks').glob('*.sh')))
         self.assertIn(f'{words[hooks]} files live in `../hooks/`', DOC)
         self.assertIn(f'{words[len(list((CLAUDE / "agents").glob("*.md")))]} personas live in', DOC)

@@ -829,7 +829,6 @@ CONVENTIONS = [
     ('Flags', '`Handoff:`', 'The last line of a stage, naming the next one', 'each stage', 'references/templates/plan.md', 'Handoff:'),
     ('Paths', '`docs/specs/[TICKET]-SPEC.md`', 'The one spec per ticket; any other spelling fails CI', '/spec', 'references/templates/plan.md', 'docs/specs/[TICKET]-SPEC.md'),
     ('Paths', '`docs/tasks/[TICKET]-plan.md`, `-todo.md`', 'The plan and its task packets', '/plan', 'references/templates/plan.md', 'docs/tasks/[TICKET]-'),
-    ('Paths', '`.git/explain/<TICKET>-<sha>.html`', 'An /explain review page, outside the working tree', '/explain', 'commands/explain.md', 'git-common-dir)/explain/'),
     ('Paths', '`docs/reviews/<TICKET>.sarif`', 'The review findings as SARIF 2.1.0, one file per ticket; disposition decides the level (error / warning / note)', '/review', 'commands/review.md', 'docs/reviews/<TICKET>.sarif'),
 ]
 # Where a convention comes from, when it is an outside standard rather than
