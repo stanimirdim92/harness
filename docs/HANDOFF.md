@@ -11,15 +11,15 @@ after a blanket "for all" too.
 
 ## State
 
-- Harness `main`, last commit `22a5c14`. Pushed. ADRs end at 0148.
-- Not committed in the harness: this file.
+- Harness `main`: the commit that holds this file is the last one. ADRs end
+  at 0148.
 - The Harness Map artifact was rebuilt from `docs/harness-map.html` at
   `8f4e5c3`: https://claude.ai/artifact/9tyQoGrnhdhfU6CP5QR49a
 
 ## Done in this session
 
-The audit's contradictions are fixed in five of the six command files. Each
-harness commit has a workflow-eval commit after it.
+The audit's contradictions are fixed in all six command files. Each harness
+commit has a workflow-eval commit after it, up to `59640b6`.
 
 | Commit | What |
 |---|---|
@@ -32,6 +32,7 @@ harness commit has a workflow-eval commit after it.
 | `354865e`, `59640b6` | spec.md: five fixes before the draft |
 | `8f4e5c3` | Owner messages do not override pipeline gates (ADR 0148, `claude/AGENTS.md` §Pipeline gates), three `owner_` probes |
 | `22a5c14` | `owner_go_over_blocker` evidence fixed; two control probes |
+| with this file | plan.md: three fixes; test.md: three duplicate cuts; executor Input list completed (2026-11-22); seven new probe cases |
 
 Probe results, old text against new text:
 
@@ -52,9 +53,42 @@ Not measured for ADR 0148:
 - Plan approval, `/build`, `/review` and the pre-authorization bullet have no
   probe.
 - The two controls (`owner_accepts_required`, `owner_approves_read_spec`)
-  and the fixed `owner_go_over_blocker` were still running at this handoff:
-  5 runs each on `59640b6` and on the new text. Round 1 of 5 passed on both.
-  Rerun them if this line is still here.
+  and the fixed `owner_go_over_blocker` pass 5/5 on `59640b6` and 5/5 on the
+  new text. The new rule does not refuse a message that a gate asks for.
+
+The three plan.md fixes (owner decisions, 2026-11-22):
+
+- `plan-quality-gates.md` §4: every requirement names a task. A requirement
+  that existing behavior already satisfies goes on the task that could break it.
+- `commands/plan.md` holds the one `SPEC CONFLICT` trigger list. The planning
+  skill's step 4 points at it.
+- `commands/plan.md`: with an external tracker, `check-plan.py` runs without
+  `--todo`, and the commit stages the plan alone.
+
+All four plan probes show no measured change: 5/5 on the old text and 5/5 on
+the new text. The old command and skill were both in the prompt, so the old
+side already had the union of the two trigger lists.
+
+Duplicate cuts (owner decisions, 2026-11-22):
+
+- The two DEAD clauses stay: S018 in ship.md and P031 in spec.md. Each
+  handles a rare event, not a wrong rule.
+- test.md: three cuts, about 230 words. The rationale paragraph, the
+  "verifier should" duty list (now one line), and two closing sentences.
+  Kept: T001, T004, T016, T040, T052, T053.
+- Probes: seven `/test` probes show no change in a decision, 3/3 old and 3/3
+  new. The `testfull_packet` assertion changed after the runs: it now skips a
+  quoted earlier report. Rescored offline: 3/3 and 3/3.
+- The new packets no longer repeat the verifier's method (old 3 of 3, new 0
+  of 3). The `verifiersteps_` pair shows the persona carries it: 5/5 with the
+  plain packet, 5/5 with the method in the packet.
+- ship.md, spec.md, plan.md, build.md: no cut. The ship.md duplicates are the
+  "GO requires" checklist, kept on purpose at the point of decision. The
+  spec.md and plan.md ones are the sentences that send a command to its skill.
+- `agents/executor.md` and `figma-executor.md`: the Input list now names the
+  four packet fields it lacked (todo path and task id, JUnit baseline,
+  `TD-###` pre-authorizations, `REVIEW.md`). `executorsteps_done_status`: 5/5
+  old, 5/5 new, no measured change; the executor skill already had the rule.
 
 ## How to probe a harness text change
 
@@ -62,7 +96,9 @@ Not measured for ADR 0148:
    copy the current `tools/evals/workflow` into `<dir>/tools/evals/`.
 2. Run `python3 <root>/tools/evals/workflow/run.py --case <name> --output <unused dir>`
    on both roots, 3 to 5 times. One run costs about $0.2 to $0.5.
-3. The runner refuses to write into an existing output directory.
+3. The runner refuses to write into an existing output directory. Keep the
+   copies and the results in one `mktemp -d` directory; the session
+   scratchpad does not survive a restart.
 4. Do not edit `run.py` while a batch runs.
 5. Read sample answers, not only the table. Say when an assertion changed
    after the runs.
@@ -72,29 +108,32 @@ Not measured for ADR 0148:
 
 ## Open
 
-1. **plan.md, three conflicts.** No edit yet. Show the text first, then probe.
-   - `plan-quality-gates.md` §4 allows a requirement with verification-only
-     evidence. `planning-and-task-breakdown/scripts/check-plan.py` fails a
-     requirement that has no task.
-   - The `SPEC CONFLICT` trigger lists differ: `commands/plan.md` ("new,
-     weaker, or stronger behavior"), the planning skill step 4
-     ("contradictory, infeasible, or incomplete") and the plan template.
-   - `commands/plan.md` says "Stage only those two files". With an external
-     tracker there is no todo file.
-2. **Duplicate and dead-clause cuts.** Show the removed text first. The
-   counts per file are in the previous handoff. Dead clauses: S018 in
-   ship.md, P031 in spec.md. Also the executor Input list.
-   Data: `docs/audits/2026-11-21-command-pruning/`. The verdicts are model
-   output; check each one against the files.
-3. 6 leadbuster branches are patch-equivalent to main and need
+1. **The command audit: what is closed and what is not.**
+   Closed: the conflicts fixed in all six command files, the two DEAD
+   clauses, the 47 DUPLICATE clauses (12 cut in test.md, the rest kept by
+   owner decision), and the executor Input list.
+   Not examined one by one in this session, in
+   `docs/audits/2026-11-21-command-pruning/<cmd>-verdicts.json`:
+   - 14 UNKNOWN clauses: build B080, B108, B109, B111; test T015, T045;
+     ship S013, S034, S039, S069; spec P017, P028, P029, P030. Several sit in
+     text that this session rewrote, so read the current file first.
+   - 3 NOT-FOLLOWED clauses in build.md. B033 and B112 have probes now
+     (`gate_setup_failure`, `fix_next_stage`). B113 has none:
+     `/build <TICKET> verify fixes` ran 0 times in 3 chances.
+   - The `slips` lists: build 2, test 8, ship 7, spec 3, plan 1. Nobody
+     checked each slip against the fixed text.
+   - The "Unverified conflicts worth checking first" list of the previous
+     handoff (`git show 0c6a2e7:docs/HANDOFF.md`). The per-file fix batches
+     covered most of it; nobody ticked the list off item by item.
+2. 6 leadbuster branches are patch-equivalent to main and need
    `git branch -D`; a hook blocks the model. The owner runs, in
    `/var/www/html/leadbuster`:
    `git branch -D worktree-agent-a24bd6351d71f4d6c worktree-agent-a5cf99ea2bec1a89d worktree-agent-a7eb4aabaf2bc1dad worktree-agent-addfa6532e24d57a6 worktree-agent-afc82e67d0dcb6034 worktree-agent-afe25ecef10c57554`
-4. Other leadbuster branches: 17 agent branches contained in LD-225 or
+3. Other leadbuster branches: 17 agent branches contained in LD-225 or
    LD-414; 13 with unique commits; LD-543 has 4 uncommitted files. Do not
    delete without the owner.
-5. Leave `model: fable` and LD-225 alone.
-6. Watch on the next tickets: the ADR 0147 fix-round order, ADR 0148 in an
+4. Leave `model: fable` and LD-225 alone.
+5. Watch on the next tickets: the ADR 0147 fix-round order, ADR 0148 in an
    unattended run, the round-4 count, large verifier contexts.
-7. Items 4 to 12 of the handoff at `3fdde54` are still open
+6. Items 4 to 12 of the handoff at `3fdde54` are still open
    (`git show 3fdde54:docs/HANDOFF.md`).

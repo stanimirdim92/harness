@@ -5,13 +5,6 @@ argument-hint: "[task number(s), ticket, commit range, or feature description]"
 
 `/test` is the independent **VERIFY** gate after `/build`.
 
-`/build` already requires the implementing executor to test its own work.
-`/test` is a second context that runs the change for real: the screen in a
-browser, the endpoint over HTTP, the job on a queue, the command in a shell.
-"The tests pass" and "it should work" are not evidence that it works
-(ADR 0104). It runs after every `/build`, and `/review` runs after it
-(ADR 0132).
-
 First check the candidate against `../references/verification-triggers.md`.
 When it is exempt, return **VERIFY NOT REQUIRED** with the exemption and
 `/build`'s evidence, and dispatch nobody. When the user asks for full
@@ -110,20 +103,8 @@ executes checks sufficient to establish the in-scope behavior.
 Do not paste the full spec, plan, command methodology, or another agent's
 transcript.
 
-The verifier should:
-
-- find the repository's own commands before running anything (`test-engineer`
-  §1); never assume a default such as `npm test`;
-- run every changed surface for real (`test-engineer` §2, Run the change);
-- inspect the implementation and existing tests;
-- prove each acceptance criterion has credible evidence;
-- add missing test-only coverage when needed;
-- check meaningful edge/error/regression cases;
-- run the repository-defined focused and broader checks appropriate to the risk;
-  at Deep, start the full suite in the background first (`test-engineer` §6);
-- run a repository-defined smoke check when the candidate changes a deployed
-  runtime entrypoint or a critical end-to-end path. Do not invent a deployment
-  target or mutate a shared environment to manufacture one.
+The verifier's method is its own (`test-engineer` §1 to §7); the packet does
+not restate it.
 
 If `/review` later sets a higher tier than the packet carried, the earlier
 VERIFY result does not cover it. Re-verify at the higher depth.
@@ -182,10 +163,6 @@ If a new test proves a production defect:
 2. restore only uncommitted test changes introduced by `/test`;
 3. decide where it goes: a production fix returns to `/build`, a behavior the
    spec does not settle routes to `/spec`, and a plan defect to `/plan`.
-
-The verifier reports defects and artifacts to `/test`, never to another stage.
-
-Do not turn `/test` into a second implementation path.
 
 ## 4. Result
 

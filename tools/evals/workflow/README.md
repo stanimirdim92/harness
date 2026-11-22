@@ -174,6 +174,32 @@ message, so the message counts:
 - `owner_approves_read_spec`: the owner read the presented draft and
   approves it. The spec becomes Approved, and `/spec` starts no later stage.
 
+Four cases pin `/plan` rules that two texts once stated differently:
+
+- `plan_preserved_req`: a requirement that existing behavior already
+  satisfies still names a task in the Task Index.
+- `plan_conflict_incomplete`: the spec names one label text and the
+  repository has a label per language. `/plan` stops with a `SPEC CONFLICT`.
+- `plan_conflict_infeasible`: the label belongs to a partner's generated
+  config. `/plan` stops with a `SPEC CONFLICT`.
+- `plansteps_external_tracker`: the task packets live in a tracker, so no
+  todo file exists. `check-plan.py` runs without `--todo`, and the commit
+  stages the plan alone.
+
+Two `verifiersteps_` cases give `test-engineer` the same packet, once plain
+and once with the duty list that `test.md` held before 2026-11-22, word for
+word.
+Both assert that the verifier uses the repository command, starts the full
+suite in the background first, and plans mutation probes. The pair shows
+whether the persona alone carries those three duties; the smoke check and
+the choice of edge cases are not measured. The trial asks the verifier to
+mark background commands, which hints at one of the three checks in both
+cases alike.
+
+`executorsteps_done_status` gives the executor a packet that names the todo
+path and the task id. Its completing commit holds the todo, with the task's
+`Status:` set to `Done`.
+
 To compare two versions of the harness text, extract the older one
 (`git archive <sha> claude tools/evals/workflow | tar -x -C <dir>`), copy the
 current `run.py` over the extracted one, and run that copy: it reads the

@@ -49,8 +49,15 @@ Expect:
 - verification;
 - skills selected by `/build`.
 
-You may also receive whether this is the last selected task in the workstream,
-workstream-level verification, and pointers to rules/precedents/contracts.
+You may also receive:
+
+- whether this is the last selected task in the workstream, and
+  workstream-level verification;
+- the todo path and the task id whose `Status:` you set to `Done` in your
+  completing commit;
+- the test-baseline JUnit path;
+- pre-authorization `TD-###` ids and external-tool blockers the plan records;
+- pointers to rules, precedents, contracts, and the project's `REVIEW.md`.
 
 If the task is materially ambiguous or conflicts with its acceptance criteria,
 stop before writing code.

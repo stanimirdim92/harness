@@ -31,10 +31,14 @@ Before a task reverses or removes existing code, read why it was added:
 `git log --format='%h %s' -- <path>` and the commit message that added it. Record
 the reason in the task. A deliberate fix needs a stated reason to undo it.
 
-If the spec contradicts itself, repository evidence contradicts its behavior,
-or planning requires new, weaker, or stronger behavior, save the bounded
-`SPEC CONFLICT` from the plan template and stop. Do not choose an interpretation
-or repair the spec inside `/plan`.
+Save the bounded `SPEC CONFLICT` from the plan template and stop when one of
+these holds:
+
+- the spec contradicts itself;
+- repository evidence contradicts a requirement, or makes it infeasible;
+- planning needs behavior the spec does not state: new, weaker or stronger.
+
+Do not choose an interpretation or repair the spec inside `/plan`.
 
 ## Draft or revise
 
@@ -63,6 +67,9 @@ python3 ~/.claude/skills/planning-and-task-breakdown/scripts/check-plan.py \
     docs/tasks/<TICKET>-plan.md --todo docs/tasks/<TICKET>-todo.md --spec docs/specs/<TICKET>-SPEC.md
 ```
 
+Leave out `--todo` when project rules keep the task packets in an external
+tracker.
+
 Fix every FAIL before presenting the plan: a requirement with no task, a task
 naming a requirement the spec lacks, a dependency on an undefined id, or a
 packet missing Status, Requirements, Acceptance criteria or Verification. Report their locations,
@@ -83,7 +90,8 @@ the owner does not pre-authorize stays a stop.
 
 Only explicit human approval permits Approved and Ready for /build. After
 approval, commit the plan and todo in one scoped commit. Stage only those two
-files. End the message with the `Refs: <TICKET>` trailer
+files, or the plan alone when the packets live in an external tracker. End the
+message with the `Refs: <TICKET>` trailer
 (`executor-development-discipline` §Ticket trailers). Then stop and recommend
 `/clear` before `/build`, which resumes from the
 plan and task packets (ADR 0084). `/plan` authorizes planning only; it does not implement or invoke

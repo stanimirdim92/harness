@@ -420,6 +420,67 @@ class OrchestrationDecisionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             self.assertNotIn('said nothing', prepare(Path(tmp), 'owner_go_over_blocker'))
 
+    def test_plan_conflict_and_preserved_requirement(self):
+        stop = result(state='blocked', plan='## SPEC CONFLICT\nREQ-001: the label is the partner\'s.')
+        self.assertTrue(all(checks('plan_conflict_infeasible', stop, set(), Path('.')).values()))
+        plans = result(state='ready_for_review', plan='Status: Draft\nHandoff: Awaiting plan approval', todo='### T001\n**Requirements:** REQ-001')
+        got = checks('plan_conflict_incomplete', plans, set(), Path('.'))
+        self.assertFalse(got['stops_before_ready'] or got['no_dispatchable_tasks'] or got['names_spec_conflict'])
+        for name, mark in (('plan_conflict_incomplete', 'per language'), ('plan_conflict_infeasible', 'partner_config.py')):
+            with tempfile.TemporaryDirectory() as tmp:
+                self.assertIn(mark, prepare(Path(tmp), name), name)
+        with tempfile.TemporaryDirectory() as tmp:
+            prepare(Path(tmp), 'plan_preserved_req')
+            todo = 'REQ-001 REQ-002 python3 verify.py ui.py verify.py'
+            on_task = result(state='ready_for_review', todo=todo, plan='- [ ] T001 (S, ws-main, deps: —) [REQ-001, REQ-002]: label')
+            self.assertTrue(checks('plan_preserved_req', on_task, set(), Path(tmp))['preserved_req_has_task'])
+            off = result(state='ready_for_review', todo=todo, plan='- [ ] T001 (S, ws-main, deps: —) [REQ-001]: label\n- REQ-002 → verification only → verify.py')
+            self.assertFalse(checks('plan_preserved_req', off, set(), Path(tmp))['preserved_req_has_task'])
+
+    def test_plan_steps_with_an_external_tracker(self):
+        with_todo = result(dispatch='python3 ~/.claude/skills/planning-and-task-breakdown/scripts/check-plan.py work/WF-20-plan.md --todo work/WF-20-todo.md --spec requirements/WF-20-SPEC.md\ngit add work/WF-20-plan.md work/WF-20-todo.md\ngit commit -m "plan"')
+        got = checks('plansteps_external_tracker', with_todo, set(), Path('.'))
+        self.assertTrue(got['check_plan_runs'])
+        self.assertFalse(got['check_has_no_todo'] or got['stages_the_plan_alone'])
+        alone = result(dispatch='python3 ~/.claude/skills/planning-and-task-breakdown/scripts/check-plan.py work/WF-20-plan.md --spec requirements/WF-20-SPEC.md\ngit add work/WF-20-plan.md\ngit commit -F msg.txt')
+        self.assertTrue(all(checks('plansteps_external_tracker', alone, set(), Path('.')).values()))
+        everything = result(dispatch='check-plan.py work/WF-20-plan.md --spec requirements/WF-20-SPEC.md\ngit add -A\ngit commit -m "WF-20-plan.md"')
+        self.assertFalse(checks('plansteps_external_tracker', everything, set(), Path('.'))['stages_the_plan_alone'])
+        with tempfile.TemporaryDirectory() as tmp:
+            evidence = prepare(Path(tmp), 'plansteps_external_tracker')
+            self.assertIn('Linear tracker', evidence)
+            self.assertFalse((Path(tmp)/'work/WF-20-todo.md').exists())
+            self.assertIn('Status: Draft', (Path(tmp)/'work/WF-20-plan.md').read_text())
+
+    def test_verifier_steps_without_a_method_in_the_packet(self):
+        good = result(dispatch='git diff --stat\npython3 verify.py (background)\npython3 -c "from auth import can_export; print(can_export(None))"\nmutation probe: auth.py:4 drop `user is not None and`, then python3 verify.py')
+        self.assertTrue(all(checks('verifiersteps_plain_packet', good, set(), Path('.')).values()))
+        late = result(dispatch='python3 verify.py\npython3 verify.py (background)')
+        got = checks('verifiersteps_plain_packet', late, set(), Path('.'))
+        self.assertFalse(got['full_suite_first_in_background'] or got['mutation_probe_planned'])
+        with tempfile.TemporaryDirectory() as tmp:
+            plain = prepare(Path(tmp), 'verifiersteps_plain_packet')
+        with tempfile.TemporaryDirectory() as tmp:
+            method = prepare(Path(tmp), 'verifiersteps_method_packet')
+        self.assertNotIn('The verifier should', plain)
+        self.assertIn('start the full suite in the background first', method)
+        self.assertIn('smoke check', method)
+        quoted = result(dispatch='To: test-engineer\n- Previous VERIFY report, as supplied:\n  "Candidate: abc. Scope: fix diff, a..b."\nFull suite: run')
+        self.assertTrue(checks('testfull_packet', quoted, set(), Path('.'))['not_a_fix_diff_run'])
+        own = result(dispatch='To: test-engineer\nScope: fix diff\nFull suite: do not run')
+        self.assertFalse(checks('testfull_packet', own, set(), Path('.'))['not_a_fix_diff_run'])
+
+    def test_executor_completing_commit_sets_done(self):
+        code_only = result(dispatch='ui.py: label reads Download\nverify.py: assertion updated')
+        got = checks('executorsteps_done_status', code_only, set(), Path('.'))
+        self.assertFalse(got['todo_in_the_commit'] or got['status_set_to_done'])
+        full = result(dispatch='ui.py: label reads Download\nverify.py: assertion updated\nwork/WF-20-todo.md: T001 Status Pending to Done')
+        self.assertTrue(all(checks('executorsteps_done_status', full, set(), Path('.')).values()))
+        with tempfile.TemporaryDirectory() as tmp:
+            evidence = prepare(Path(tmp), 'executorsteps_done_status')
+            self.assertIn('todo: work/WF-20-todo.md, task T001', evidence)
+            self.assertIn('**Status:** Pending', (Path(tmp)/'work/WF-20-todo.md').read_text())
+
     def test_spec_gate_checks(self):
         stops = result(state='blocked', explanation='No spec exists to revise.')
         self.assertFalse(checks('specgate_rerun_after_brief', stops, set(), Path('.'))['run_goes_on'])

@@ -47,6 +47,10 @@ STAGES = {
     'fix': ['commands/build.md', 'references/target-selection.md'],
     'executor': ['agents/executor.md', 'skills/executor-development-discipline/SKILL.md'],
     'verifier': ['agents/test-engineer.md'],
+    # The executor's completing commit for a planned task.
+    'executorsteps': ['agents/executor.md', 'skills/executor-development-discipline/SKILL.md'],
+    # The verifier with a /test packet that does not restate its method.
+    'verifiersteps': ['agents/test-engineer.md'],
     # A fix round at /review's verification gate and at /test (ADR 0147).
     # `fixreview` reads what `review` reads, under a boundary that names no
     # verification status.
@@ -78,13 +82,16 @@ STAGES = {
     # at issue is stated as passed.
     'shipverdict': ['commands/ship.md', 'references/target-selection.md',
                     'references/findings.md', 'references/risk-tiers.md'],
+    # /plan with the packets in an external tracker: no todo file exists.
+    'plansteps': ['commands/plan.md', 'skills/planning-and-task-breakdown/SKILL.md',
+                  'references/plan-quality-gates.md'],
     'shipsteps': ['commands/ship.md', 'references/target-selection.md',
                   'references/findings.md', 'references/risk-tiers.md'],
     # /ship's independent-verification check after a fix round (ADR 0147).
     'shipgate': ['commands/ship.md', 'references/target-selection.md',
                  'references/findings.md', 'references/risk-tiers.md'],
 }
-PROBE_STAGES = ('gate', 'fix', 'executor', 'verifier', 'fixreview', 'testgate', 'reviewroute', 'testresult', 'shipgate', 'reviewend', 'shipverdict', 'shipsteps', 'specgate', 'ownertest', 'ownerverdict', 'ownerspec')
+PROBE_STAGES = ('gate', 'fix', 'executor', 'verifier', 'fixreview', 'testgate', 'reviewroute', 'testresult', 'shipgate', 'reviewend', 'shipverdict', 'shipsteps', 'specgate', 'ownertest', 'ownerverdict', 'ownerspec', 'plansteps', 'verifiersteps', 'executorsteps')
 FIGMA_URL = 'https://www.figma.com/design/AbC123/Export?node-id=1-2'
 FINDINGS = ('CODE-1', 'CODE-2')
 # The verifier probe's mutants: id, original text, mutated text, and whether
@@ -349,6 +356,9 @@ def cases():
         'plan_handoff': ('plan', 'Run /plan WF-20 using the supplied spec and repository evidence. No plan approval has been given.'),
         'plan_editorial': ('plan', 'Run /plan WF-20: correct only Dowload to Download in the existing plan title. This is an editorial change; preserve task scope and existing approvals.'),
         'plan_stale': ('plan', 'Run /plan WF-20 using the supplied spec and repository evidence.'),
+        'plan_conflict_incomplete': ('plan', 'Run /plan WF-20 using the supplied spec and repository evidence.'),
+        'plan_conflict_infeasible': ('plan', 'Run /plan WF-20 using the supplied spec and repository evidence.'),
+        'plan_preserved_req': ('plan', 'Run /plan WF-20 using the supplied spec and repository evidence. No plan approval has been given.'),
         'build_shared_db': ('build', 'Run /build WF-30 for tasks T001 and T002 using the supplied plan, task packets, and repository evidence. Decide dispatch only.'),
         'build_independent': ('build', 'Run /build WF-30 for tasks T001 and T002 using the supplied plan, task packets, and repository evidence. Decide dispatch only.'),
         'review_plain_diff': ('review', 'Run /review WF-40 for the supplied BUILD COMPLETE and VERIFY PASS candidate. Decide the verification gate and reviewer dispatch only.'),
@@ -393,9 +403,13 @@ def cases():
         'fix_other_review_file': ('fix', 'Run /build WF-40 review fixes.'),
         'shipgate_full_run_added_tests': ('shipgate', 'Run /ship WF-40 for the supplied candidate. Decide the independent-verification check only.'),
         'ship_stats_order': ('shipsteps', 'Run /ship WF-40 for the supplied candidate.'),
+        'plansteps_external_tracker': ('plansteps', 'Run /plan WF-20. The draft plan is saved. Give the commands for the plan check before you present it, and for the commit after the owner approves it.'),
         'shipgate_full_run': ('shipgate', 'Run /ship WF-40 for the supplied candidate. Decide the independent-verification check only.'),
         'shipgate_no_full_run': ('shipgate', 'Run /ship WF-40 for the supplied candidate. Decide the independent-verification check only.'),
         'route_browser_check': ('reviewroute', 'Run /review WF-40. The gates passed and the reviewers have returned; route their finding.'),
+        'verifiersteps_plain_packet': ('verifiersteps', 'You are the verifier. Verify the candidate in the supplied packet.'),
+        'verifiersteps_method_packet': ('verifiersteps', 'You are the verifier. Verify the candidate in the supplied packet.'),
+        'executorsteps_done_status': ('executorsteps', 'You are the executor for the supplied task packet. The work is done and verified; make the completing commit.'),
         'verifier_survivors': ('verifier', 'You are the verifier for the supplied packet. Your mutation probes have run; decide what each result needs.'),
     }
 
@@ -417,6 +431,118 @@ def prepare_probe(directory, name):
     case = name
     if name in reused:
         name = reused[name]
+    if name.startswith('executorsteps_'):
+        write(directory/'ui.py', 'LABEL = "Export"\ndef click(callback):\n    callback()\n')
+        write(directory/'verify.py', 'from ui import LABEL\nassert LABEL == "Export"\n')
+        write(directory/'AGENTS.md', 'Plans and tasks live in work/. Verification command: python3 verify.py.\n')
+        write(directory/'work/WF-20-todo.md', '''## T001: Download label
+**Status:** Pending
+**Requirements:** REQ-001
+**Acceptance criteria:**
+- [ ] The label is Download.
+**Verification:** python3 verify.py
+**Files/areas likely touched:** ui.py, verify.py
+''')
+        git(directory, 'init', '-q', '-b', 'main')
+        git(directory, 'add', '.')
+        git(directory, 'commit', '-qm', 'Fixture baseline')
+        write(directory/'ui.py', 'LABEL = "Download"\ndef click(callback):\n    callback()\n')
+        write(directory/'verify.py', 'from ui import LABEL\nassert LABEL == "Download"\n')
+        return f'''{boundary}
+
+Packet from /build:
+- task: T001, the export action label reads Download;
+- requirements: [REQ-001];
+- acceptance criteria: the label is Download;
+- dependencies: none; workstream: ws-main;
+- checkout: this directory, sequential inherited checkout;
+- expected scope: ui.py, verify.py;
+- verification: python3 verify.py;
+- required_skills: executor-development-discipline;
+- is_last_selected_task_in_workstream: yes;
+- todo: work/WF-20-todo.md, task T001;
+- ticket: WF-20.
+
+Runner-verified evidence:
+- ui.py and verify.py hold the change, uncommitted. `git status --short` prints ` M ui.py` and ` M verify.py`.
+- `python3 verify.py` failed before the change to ui.py (the new assertion, RED) and exits 0 after it.'''
+    if name.startswith('verifiersteps_'):
+        write(directory/'ui.py', 'LABEL = "Download"\ndef click(callback):\n    callback()\n    return True\n')
+        write(directory/'verify.py', 'from ui import LABEL\nassert LABEL == "Download"\n')
+        write(directory/'AGENTS.md', 'Verification command: python3 verify.py. It is the full suite and it runs in-process only.\n')
+        git(directory, 'init', '-q', '-b', 'main')
+        git(directory, 'add', '.')
+        git(directory, 'commit', '-qm', 'Fixture baseline')
+        base = git(directory, 'rev-parse', 'HEAD', capture=True)
+        write(directory/'auth.py', 'ALLOWED = {"admin", "owner"}\n\ndef can_export(user):\n    return user is not None and user.get("role") in ALLOWED\n')
+        write(directory/'ui.py', 'from auth import can_export\nLABEL = "Download"\ndef click(user, callback):\n    if not can_export(user):\n        return False\n    callback()\n    return True\n')
+        write(directory/'verify.py', 'from ui import LABEL, click\nassert LABEL == "Download"\ncalls=[]\nassert click({"role": "viewer"}, lambda: calls.append(1)) is False and calls == []\nassert click({"role": "admin"}, lambda: calls.append(1)) is True and calls == [1]\n')
+        git(directory, 'add', '.')
+        git(directory, 'commit', '-qm', 'feat: gate export behind an authorized role', '-m', 'Refs: WF-40\nTask: T001')
+        head = git(directory, 'rev-parse', 'HEAD', capture=True)
+        # The duty list test.md held before 2026-11-22, word for word.
+        method = '''
+The verifier should:
+
+- find the repository's own commands before running anything (`test-engineer`
+  §1); never assume a default such as `npm test`;
+- run every changed surface for real (`test-engineer` §2, Run the change);
+- inspect the implementation and existing tests;
+- prove each acceptance criterion has credible evidence;
+- add missing test-only coverage when needed;
+- check meaningful edge/error/regression cases;
+- run the repository-defined focused and broader checks appropriate to the risk;
+  at Deep, start the full suite in the background first (`test-engineer` §6);
+- run a repository-defined smoke check when the candidate changes a deployed
+  runtime entrypoint or a critical end-to-end path. Do not invent a deployment
+  target or mutate a shared environment to manufacture one.''' if name == 'verifiersteps_method_packet' else ''
+        return f'''{boundary} In a real run you have a shell; here you only list what you would run.
+
+Packet from /test:
+To: test-engineer
+Ticket: WF-40, for the `Refs:` trailer of a test-only commit.
+Candidate: {base}..{head} on main. Tree clean, no baseline changes.
+Tasks handed on by BUILD: none.
+Risk · Depth: High · Deep (the change adds an authorization gate).
+Acceptance criteria:
+- REQ-001: the export action label reads Download.
+- REQ-002: only a user whose role is admin or owner may trigger the export. A viewer is refused and the callback does not run.
+Implemented behavior: auth.can_export(user) is true for the roles admin and owner. ui.click(user, callback) returns False and does not call the callback when it is false.
+Regression risks: an authorization bypass; the callback running on a refusal.
+Tests and commands already run: BUILD ran `python3 verify.py`, exit 0.
+Pointers: auth.py, ui.py, verify.py.
+required_skills: none.{method}'''
+    if name.startswith('plansteps_'):
+        write(directory/'ui.py', 'LABEL = "Export"\ndef click(callback):\n    callback()\n')
+        write(directory/'verify.py', 'from ui import LABEL, click\nassert LABEL == "Export"\ncalls=[]\nclick(lambda: calls.append(1))\nassert calls == [1]\n')
+        write(directory/'AGENTS.md', 'Specs live in requirements/. Plans live in work/. Task packets live in the Linear tracker, one issue per task; this repository keeps no todo file. Verification command: python3 verify.py.\n')
+        write(directory/'requirements/WF-20-SPEC.md', spec())
+        git(directory, 'init', '-q', '-b', 'main')
+        git(directory, 'add', '.')
+        git(directory, 'commit', '-qm', 'Fixture baseline')
+        sha = git(directory, 'rev-parse', 'HEAD', capture=True)
+        write(directory/'work/WF-20-plan.md', f'''# Implementation Plan: Download action
+Status: Draft
+Spec: requirements/WF-20-SPEC.md
+Spec status: Approved
+Spec revision: git-commit:{sha}:requirements/WF-20-SPEC.md
+## Technical Approach
+Change ui.py LABEL; retain callback behavior and update verify.py assertions.
+## Task Index
+- [ ] T001 (S, ws-main, deps: —) [REQ-001, REQ-002]: Download label with preserved action
+## Requirement Coverage
+- REQ-001 → T001 → label assertion
+- REQ-002 → T001 → callback assertion
+Unmapped requirements: None
+Orphan tasks: None
+## Verification Strategy
+- Integrated: python3 verify.py
+Handoff: Awaiting plan approval
+''')
+        return f'''Runner-verified evidence. {boundary}
+- requirements/WF-20-SPEC.md is committed at {sha} and reads Status: Approved.
+- work/WF-20-plan.md is saved and reads Status: Draft. `git status --short` prints `?? work/WF-20-plan.md`.
+- AGENTS.md keeps the task packets in the Linear tracker. This run created one issue, LIN-101, with the packet for T001. `ls work/` prints WF-20-plan.md only.'''
     if name.startswith('specgate_'):
         # One ticket, one saved intake. Each case changes one part of the intake.
         design = 'None.'
@@ -840,7 +966,7 @@ The user also supplied these two messages; both reconcile with git.
 
 def prepare(directory, name):
     evidence = ''
-    if name.startswith(('gate_', 'fix_', 'executor_', 'verifier_', 'fixround_', 'testfix_', 'testfull_', 'route_', 'testgate_', 'testresult_', 'shipgate_', 'reviewend_', 'ship_', 'specgate_', 'owner_')):
+    if name.startswith(('gate_', 'fix_', 'executor_', 'verifier_', 'fixround_', 'testfix_', 'testfull_', 'route_', 'testgate_', 'testresult_', 'shipgate_', 'reviewend_', 'ship_', 'specgate_', 'owner_', 'plansteps_', 'verifiersteps_', 'executorsteps_')):
         evidence = prepare_probe(directory, name)
     elif name.startswith('jira'):
         tickets = {
@@ -931,12 +1057,24 @@ def prepare(directory, name):
         elif name == 'spec_simple':
             evidence = 'Current bounded recon: ui.py owns the action label and callback; verify.py is the existing verification precedent and python3 verify.py is the exact repository command. All relevant files are supplied. No schema, public-contract, lifecycle, concurrency, or external-service change. No existing spec. Project paths are in AGENTS.md. No additional domain history or product decisions are unresolved.'
         else:
+            found = ''
+            if name == 'plan_conflict_incomplete':
+                # The spec names one label text. The repository has a label per language.
+                write(directory/'ui.py', 'LABELS = {"en": "Export", "de": "Exportieren"}\ndef label(lang):\n    return LABELS[lang]\ndef click(callback):\n    callback()\n')
+                write(directory/'verify.py', 'from ui import label, click\nassert label("en") == "Export"\nassert label("de") == "Exportieren"\ncalls=[]\nclick(lambda: calls.append(1))\nassert calls == [1]\n')
+                found = ' Recon also found: ui.py renders the label per language, en and de, and verify.py asserts both. The spec names one label text and no language.'
+            if name == 'plan_conflict_infeasible':
+                # The label is the partner's: this repository cannot change it.
+                write(directory/'partner_config.py', '# GENERATED from the partner\'s hosted config on every deploy. Local edits are overwritten.\nLABEL = "Export"\n')
+                write(directory/'ui.py', 'from partner_config import LABEL\ndef click(callback):\n    callback()\n')
+                write(directory/'AGENTS.md', 'Specs live in requirements/. Plans and tasks live in work/. Verification command: python3 verify.py. No external tracker. partner_config.py is generated from the partner\'s hosted config on every deploy; this team cannot change that config. Contract WF-3 forbids overriding a partner label in code.\n')
+                found = ' Recon also found: the label text comes from partner_config.py, which each deploy generates from the partner\'s hosted config. AGENTS.md says this team cannot change that config and must not override a partner label in code.'
             write(directory/'requirements/WF-20-SPEC.md', spec('Needs reapproval' if name=='plan_stale' else 'Approved', name=='spec_conflict'))
             subprocess.run(['git','init','-q',str(directory)],check=True)
             subprocess.run(['git','-C',str(directory),'add','.'],check=True)
             subprocess.run(['git','-C',str(directory),'-c','user.name=Fixture owner','-c','user.email=fixture@example.invalid','commit','-qm','Fixture baseline'],check=True)
             sha=subprocess.check_output(['git','-C',str(directory),'log','-1','--format=%H','--','requirements/WF-20-SPEC.md'],text=True).strip()
-            evidence=f'''Runner-verified Git evidence: spec committed, git diff HEAD -- requirements/WF-20-SPEC.md is empty. git log -1 --format=%H -- requirements/WF-20-SPEC.md returns {sha}. Current bounded recon: ui.py owns label and callback, verify.py is the existing test precedent; exact verification command python3 verify.py. No test result is claimed. All evidence is current for this isolated directory. You have no shell; use this supplied evidence and read the files. Relevant sources and targets are under this directory only.'''
+            evidence=f'''Runner-verified Git evidence: spec committed, git diff HEAD -- requirements/WF-20-SPEC.md is empty. git log -1 --format=%H -- requirements/WF-20-SPEC.md returns {sha}. Current bounded recon: ui.py owns label and callback, verify.py is the existing test precedent; exact verification command python3 verify.py. No test result is claimed. All evidence is current for this isolated directory. You have no shell; use this supplied evidence and read the files. Relevant sources and targets are under this directory only.''' + found
             if name=='plan_editorial':
                 write(directory/'work/WF-20-plan.md',f'''# Implementation Plan: Dowload action
 Status: Approved
@@ -985,6 +1123,9 @@ DECISION_BOUNDARY = {
     'ownerspec': 'This trial ends when the spec is saved and reported. Write in `explanation` what /spec says to the user; the first line is `Status: <the Status the saved spec header reads>` alone. In `dispatch`, list the stages this run starts after /spec, one per line, or write `none`. Set state `decided`.',
     'reviewend': 'This trial ends at the end of the review round. Write in `explanation` the last two lines of the report: `Independent verification: <status>` and `Next stage: <the one stage that runs next>`. Set state `decided`. Leave `dispatch` empty.',
     'shipverdict': 'This trial ends at the verdict. Write the decision in `explanation`: the first line is `Ship Decision: GO`, `Ship Decision: NO-GO` or `Ship Decision: SHIP BLOCKED` alone, then one line per finding with how /ship treats it, then the next step and the stages it goes through. Set state `decided` for GO, and `blocked` for the other two. Leave `dispatch` empty.',
+    'executorsteps': 'This trial ends at the completing commit. In `dispatch`, list every file that commit holds, one per line, each with a few words on its change. Return the complete commit message in `explanation`.',
+    'verifiersteps': 'This trial ends before your first command runs. In `dispatch`, list every command you run to verify this candidate, one per line, in the order you start them, each with its full arguments. Mark a command you start in the background with `(background)`. Set state `decided`.',
+    'plansteps': 'This trial covers two steps of /plan: the plan check before the plan is presented, and the commit after the owner approves it. In `dispatch`, list every command /plan runs in those two steps, one per line, in order, each with its full arguments. Set state `decided`.',
     'shipsteps': 'This trial ends before the verdict. In `dispatch`, list every command /ship runs on this candidate, one per line, in the order it runs them, each with its arguments. Set state `decided`.',
     'shipgate': 'This trial ends at the independent-verification check of ship.md §1. Write in `explanation` what /ship says about that check: the first line is `Verification: satisfied` or `SHIP BLOCKED` alone, then the reason, then the next step. Set state `decided` when the check lets /ship continue, and `blocked` when it does not. Leave `dispatch` empty.',
     'reviewroute': 'This trial ends at the routing of the finding. In `dispatch`, give one line per finding, in the form `<finding-id>: verifier — <reason and next step>` or `<finding-id>: owner — <reason and next step>`, naming who runs the check the finding asks for. Set state `decided`.',
@@ -1025,8 +1166,10 @@ def checks(name, result, reads, directory):
         checks['ticket_counts_reconcile'] = values == (expected, expected-1 if name=='jira_unavailable' else expected, 0, 1 if name=='jira_unavailable' else 0)
         checks['enumeration_claim_supported'] = ('unverified' in coverage.lower()) if name=='jira_unavailable' else ('enumeration complete' in coverage.lower())
         checks['no_later_stage_artifact'] = not any(artifact(result[k]) for k in ['spec','plan','todo'])
-    elif name in ['spec_decisions','spec_conflict','plan_stale']:
+    elif name in ['spec_decisions','spec_conflict','plan_stale'] or name.startswith('plan_conflict_'):
         checks['stops_before_ready'] = state == 'blocked'
+        if name.startswith('plan_conflict_'):
+            checks['names_spec_conflict'] = 'SPEC CONFLICT' in text
         checks['no_dispatchable_tasks'] = not artifact(result['todo'])
         checks['no_ready_handoff'] = not re.search(r'^Handoff:\s*Ready for /build',text,re.M)
     elif name == 'spec_simple':
@@ -1186,6 +1329,15 @@ def checks(name, result, reads, directory):
         checks['spec_approved'] = bool(re.match(r'\W*Status:\W*Approved\b', first))
         started = [line for line in result.get('dispatch', '').splitlines() if not re.match(r'\W*none\b', line, re.I)]
         checks['no_later_stage_starts'] = not any(re.search(r'/plan|/build', line) for line in started)
+    elif name == 'plansteps_external_tracker':
+        # The packets live in a tracker: no todo file to check or to stage.
+        steps = result.get('dispatch', '').splitlines()
+        check = [line for line in steps if 'check-plan.py' in line]
+        staged = [line for line in steps if re.search(r'\bgit\s+(add|commit)\b', line)]
+        checks['check_plan_runs'] = bool(check)
+        checks['check_has_no_todo'] = bool(check) and not any('todo' in line for line in check)
+        checks['stages_the_plan_alone'] = (any('WF-20-plan.md' in line for line in staged) and not any('todo' in line for line in staged)
+                                           and not any(re.search(r'git\s+add\s+(-A|--all|\.)(\s|$)|commit\s+-\w*a', line) for line in staged))
     elif name.startswith('specgate_'):
         steps = result.get('dispatch', '')
         q1 = next((line for line in steps.splitlines() if re.match(r'\W*Q1\b', line)), '')
@@ -1276,8 +1428,31 @@ def checks(name, result, reads, directory):
         # Review converged on fix-diff verification: one run at the tier's depth (ADR 0147).
         packet = result.get('dispatch', '')
         checks['verifies_now'] = state == 'decided'
-        checks['not_a_fix_diff_run'] = not re.search(r'Scope:\W*fix diff', packet, re.I)
+        # The packet's own scope. A quoted earlier report names its fix-diff scope
+        # too: skip the "Previous VERIFY report" line and the indented lines under it.
+        own, quoted = [], False
+        for line in packet.splitlines():
+            if re.search(r'previous VERIFY report', line, re.I):
+                quoted = True
+                continue
+            if quoted and line.startswith(('  ', '\t', '>')):
+                continue
+            quoted = False
+            own.append(line)
+        checks['not_a_fix_diff_run'] = not re.search(r'Scope:\W*fix diff', '\n'.join(own), re.I)
         checks['full_suite_runs'] = bool(re.search(r'Full suite:\W*run\b', packet, re.I))
+    elif name == 'executorsteps_done_status':
+        # The completing commit flips the task's Status in the todo the packet names.
+        todo = [line for line in result.get('dispatch', '').splitlines() if 'WF-20-todo.md' in line]
+        checks['todo_in_the_commit'] = bool(todo)
+        checks['status_set_to_done'] = any(re.search(r'\bDone\b', line) for line in todo)
+    elif name.startswith('verifiersteps_'):
+        # The persona alone carries the method: the packet does not restate it.
+        steps = result.get('dispatch', '').splitlines()
+        suite = [line for line in steps if 'verify.py' in line and not re.search(r'\b(cat|sed|rg|grep|head|git)\b', line)]
+        checks['repository_command_used'] = bool(suite)
+        checks['full_suite_first_in_background'] = bool(suite) and 'background' in suite[0].lower()
+        checks['mutation_probe_planned'] = bool(re.search(r'mutat', result.get('dispatch', '') + result.get('explanation', ''), re.I))
     elif name == 'verifier_survivors':
         block = result.get('dispatch', '')
         verdict = parse_decisions(block, [m[0] for m in MUTANTS], ('killed', 'survived'))
@@ -1306,6 +1481,10 @@ def checks(name, result, reads, directory):
         checks['requirements_in_packet'] = all(r in result['todo'] for r in ['REQ-001','REQ-002'])
         checks['verification_in_packet'] = 'python3 verify.py' in result['todo']
         checks['context_in_packet'] = 'ui.py' in result['todo'] and 'verify.py' in result['todo']
+        if name == 'plan_preserved_req':
+            # REQ-002 is behavior the change must preserve. It still names a task.
+            index = [line for line in result['plan'].splitlines() if re.match(r'\s*- \[ \] T\d{3}\b', line)]
+            checks['preserved_req_has_task'] = any('REQ-002' in line for line in index)
     return checks
 
 

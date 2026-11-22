@@ -38,9 +38,8 @@ required by the `/build` pipeline.
    an unchanged survey. Evidence order is `spec-driven-development`'s
    (Repository Evidence); a plan does not re-rank the order `/spec` already
    applied.
-4. Reconcile the plan against the approved behavior. If the spec contradicts
-   itself, or repository evidence makes a requirement contradictory, infeasible,
-   or incomplete, write the bounded `SPEC CONFLICT` described by the plan
+4. Reconcile the plan against the approved behavior. On a conflict (`/plan`
+   lists the triggers), write the bounded `SPEC CONFLICT` described by the plan
    template and stop; do not choose which conflicting behavior to implement.
 
 Planning is read-only with respect to production code. It produces plan and task
