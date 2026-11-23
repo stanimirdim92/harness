@@ -238,3 +238,7 @@ test('user can create and complete a task', async ({ page }) => {
 | Using `test.skip` permanently | Dead code | Remove or fix it |
 | Overly broad assertions | Doesn't catch regressions | Be specific |
 | No async error handling | Swallowed errors, false passes | Always `await` async tests |
+| Only the populated render is tested | Loading, empty, error and failed-request states break unseen | Test each state, including a rejected request and `response.ok === false` |
+| Asserting a mock call or CSS class instead of the screen | Passes while the user sees nothing | Assert visible text, role, `disabled` state or URL |
+| One invalid input that breaks every rule | No single rule is tested | One case per validation rule |
+| Dates read in local time | Fails in another time zone or months later | Fake timers, `vi.setSystemTime()`, dates with an explicit offset |

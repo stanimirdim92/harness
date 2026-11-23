@@ -312,6 +312,37 @@ describe('TaskService', () => {
 });
 ```
 
+## Cover Every Decision, Not Only the Success Path
+
+A test file that covers only success cases tests nothing. Before you write tests, read the code under test and list its decisions. Give each decision a test that fails when the decision breaks:
+
+- each validation rule, with values just inside and just outside the limit (`max 255`: 255 passes, 256 fails; `>` vs `>=`);
+- each authorization and tenant rule: an anonymous user, a user without the role, a user of another tenant, and an allowed user as the control;
+- not found, empty, null and malformed input;
+- each early return, skip and fallback branch;
+- each exception path and each failure of an external call (error status, timeout, lock timeout);
+- for UI code: loading, empty, error, disabled and stale-response states, and each rule of a multi-rule validator on its own.
+
+### Make Each Case Discriminating
+
+A case must fail when its branch is removed. Check that the input does not satisfy another rule too: ids that are equal by chance, two inputs with the same hash, a row inserted in the order that makes a loop a no-op, or a value that passes two thresholds at once.
+
+### Assert the Effect
+
+A status code, "a redirect happened", "not null", "is an array" or "some job was queued" alone proves almost nothing. Assert what the action changed: the stored row, the response field, the redirect target, the error key, the message and its recipient. A negative assertion ("X was not sent") needs a control that shows the wrong behaviour would produce X.
+
+### Never Encode a Known Defect
+
+A test that asserts a leak, data loss or wrong status as the expected result goes green on the defect and red on the fix. A permanently skipped test is not coverage. Test the correct behaviour; if the owner has not decided what correct is, ask.
+
+### Independent of Order, Date and Time Zone
+
+Each test passes alone and in any order. Freeze time when the code compares with now or a window. Give dates with an explicit offset. A fixed date inside a "last N months" window is a time bomb.
+
+### Prove the Test Can Fail
+
+Break the code the test covers and run the test. It must go red. Use mutation testing where the project has it. For an architecture rule, add a probe that breaks the rule. In a shell test under `set -e`, a command that starts with `!` can never fail the script.
+
 ## Test Anti-Patterns to Avoid
 
 | Anti-Pattern | Problem | Fix |
@@ -322,6 +353,11 @@ describe('TaskService', () => {
 | Snapshot abuse | Large snapshots nobody reviews, break on any change | Use snapshots sparingly and review every change |
 | No test isolation | Tests pass individually but fail together | Each test sets up and tears down its own state |
 | Mocking everything | Tests pass but production breaks | Prefer real implementations > fakes > stubs > mocks. Mock only at boundaries where real deps are slow or non-deterministic |
+| Happy-path-only test file | Passes while every rejection, limit and error branch is broken | List the code's decisions; one failing-when-broken test per decision |
+| Weak assertion (status only, not-null, count only) | Passes on wrong data | Assert the stored or returned values and the side effects |
+| Tautology or mirror of the code | Asserts the setup or re-declares the implementation's calls | Assert observable outcomes through the public entry point |
+| Test that asserts a known defect | Green on the bug, red on the fix | Test the correct behaviour; ask the owner when unsure |
+| Coincidental input | Equal ids or hash collisions hide the branch under test | Choose inputs that only the intended branch satisfies |
 
 ## Writing the Reproduction Test Independently
 
@@ -367,6 +403,7 @@ After completing any implementation:
 - [ ] Coverage hasn't decreased (if tracked)
 - [ ] The change introduces no new errors or warnings in test/build output (pre-existing ones unrelated to the change are reported, not silently fixed — that's scope expansion)
 - [ ] Test doubles follow the preference order (real > fake > stub > mock); mocks appear only at boundaries that are slow, non-deterministic, or side-effecting
-- [ ] Edge cases and errors covered
+- [ ] Edge cases and errors covered: every decision of the code under test has a test that fails when the decision breaks
+- [ ] Each new test was seen failing against broken code
 
 **Note:** Run each test command after a change that could affect the result. After a clean run, don't repeat the same command unless the code has changed since — re-running on unchanged code adds no confidence.
