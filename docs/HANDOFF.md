@@ -106,6 +106,25 @@ Duplicate cuts (owner decisions, 2026-11-22):
 7. After a change to `claude/AGENTS.md`, a command, a persona or an ADR, run
    `python3 tools/checks/harness-map.py`; CI fails on a stale map.
 
+## Next session (owner's choice, 2026-11-22)
+
+Do these two first. Data: `docs/audits/2026-11-21-command-pruning/<cmd>-verdicts.json`
+(`verdicts` and `slips`) and `<cmd>-clauses.json`.
+
+1. **The 14 UNKNOWN clauses.** build B080, B108, B109, B111; test T015,
+   T045; ship S013, S034, S039, S069; spec P017, P028, P029, P030.
+   - Read the clause in the current file first. This session rewrote several
+     of them, and the audit's line numbers are stale.
+   - Give each one result: closed by a commit (name it), still unknown, or a
+     gap that needs a fix.
+   - A fix needs the text shown to the owner first, then an old-against-new
+     probe.
+2. **The 21 recorded slips.** build 2, test 8, ship 7, spec 3, plan 1.
+   - For each slip, name the rule in the current text that prevents it, and
+     the probe that pins that rule.
+   - A slip with no rule or no probe goes on a list for the owner. Ask one
+     question at a time.
+
 ## Open
 
 1. **The command audit: what is closed and what is not.**

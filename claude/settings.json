@@ -287,5 +287,6 @@
       "$defaults",
       "Worktree Hook Path Repair: in a git worktree under a repository's `.claude/worktrees/`, setting `core.hooksPath` with `git config --worktree` to a hooks directory inside that same repository or worktree, so the repository's own commit hooks run, is not Logging/Audit Tampering. Setting it to an empty, missing or outside path, or committing with `--no-verify`, still is."
     ]
-  }
+  },
+  "skipWorkflowUsageWarning": true
 }
