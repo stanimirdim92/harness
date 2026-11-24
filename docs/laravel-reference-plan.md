@@ -26,8 +26,8 @@ Two uses:
 
 ## Owner decisions
 
-- **Verbatim copy in the public harness** (2026-11-24). The owner accepts that
-  company detail becomes public: module names, database names, provider names.
+- **Verbatim copy in the harness** (2026-11-24). The harness was public then
+  and is private since 2026-11-25 (ADR 0150).
   Secrets stay out. Step 4 enforces that.
 - **`.ai/rules/*` are output of the `infer-conventions` skill.** The kit carries
   the skill and how to run it. The rules are copied only as an example.

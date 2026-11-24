@@ -67,6 +67,8 @@ include agent-docs TESTING.md
 include agent-docs CONVENTIONS.md
 include agent-docs COMMANDS.md
 include agent-docs REVIEW.md
+include agent-docs SECURITY.md
+include agent-docs ARCHITECTURE.md
 include agent-docs bin/README.md
 include agent-docs boost.json
 include agent-docs .aiignore
@@ -96,8 +98,6 @@ skip yarn.lock                       generated
 skip artisan                         Laravel default
 skip README.md                       product readme
 skip DESIGN.md                       product design system
-skip SECURITY.md                     attack surface of a private system; not for a public repo
-skip ARCHITECTURE.md                 deployment and roadmap of a private system; not for a public repo
 skip .gitattributes                  repository settings
 skip .gitignore                      repository settings
 skip .npmrc                          package manager settings

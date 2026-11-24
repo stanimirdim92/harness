@@ -156,7 +156,8 @@ that explanation here, just the index.
 | [0146](0146-remove-explain-command.md) | Remove the /explain command | Accepted |
 | [0147](0147-fix-rounds-run-test-on-the-fix-diff.md) | Fix rounds run /test on the fix diff | Accepted |
 | [0148](0148-owner-messages-do-not-override-pipeline-gates.md) | Owner messages do not override pipeline gates | Accepted |
-| [0149](0149-laravel-kit-mirrors-leadbuster-verbatim.md) | The Laravel kit mirrors Leadbuster verbatim | Accepted |
+| [0149](0149-laravel-kit-mirrors-leadbuster-verbatim.md) | The Laravel kit mirrors Leadbuster verbatim | Partially superseded by [0150](0150-harness-private-laravel-kit-complete.md) (repository visibility, SECURITY.md and ARCHITECTURE.md) |
+| [0150](0150-harness-private-laravel-kit-complete.md) | The harness is private; the Laravel kit mirrors the security and architecture docs | Accepted |
 
 Adding a new decision: create the next-numbered `NNNN-kebab-title.md`
 (4-digit, zero-padded — MADR-style, matches the files already here) and

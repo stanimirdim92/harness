@@ -102,6 +102,8 @@ its own Redis block, so worktrees can test in parallel.
 | `CONVENTIONS.md` | Conventions summary; the path-scoped detail is in `.ai/rules`. |
 | `COMMANDS.md`, `bin/README.md` | Every command and script. |
 | `REVIEW.md` | What a review reports, skips and always sends to a person. |
+| `SECURITY.md` | Authentication, invitations, roles, tenant isolation, unauthenticated endpoints, rate limits, the destructive-command guard. Project-specific; use as a shape. |
+| `ARCHITECTURE.md` | Structure, system diagram, modules and the Deptrac layer chain, data stores, integrations, deployment, roadmap. Project-specific; use as a shape. |
 | `boost.json`, `.mcp.json`, `.ai/mcp/mcp.json` | Laravel Boost and MCP servers. |
 | `.aiignore` | Paths agents do not read. |
 | `.claude/settings.json`, `.claude/hooks/*` | Claude Code project hooks: test database cleanup at start, skill reminder. |
@@ -140,7 +142,7 @@ into a new project: run the skill there.
    the symlinks. Adapt `AGENTS.md`, `TESTING.md` and `COMMANDS.md`. Run
    `infer-conventions` to write `.ai/rules`.
    Write `ARCHITECTURE.md` and `SECURITY.md` with the harness `project-docs`
-   skill. Leadbuster's are not mirrored: they describe a private system.
+   skill; Leadbuster's show the expected shape.
 9. **Check.** PHPStan, Deptrac, Pint, the hooks and `composer test` all pass
    on a clean checkout.
 
