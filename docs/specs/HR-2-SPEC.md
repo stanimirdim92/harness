@@ -4,7 +4,7 @@ Status: Approved
 Ticket: N/A (harness work; key HR-2 for the eval rebuild)
 Change kind: Modify
 Supersedes: N/A (ADR 0079's comparison rules are superseded in part by the ADR in REQ-028)
-Approved by: the owner (reply "approved, commit on main" in the Claude Code session, 2026-11-24)
+Approved by: the owner (reply "approved, commit on main" in the Claude Code session, 2026-11-24; reapproved after the REQ-031 revision, same reply, 2026-11-24)
 Approved at: 2026-11-24
 
 Index: [Objective](#objective) · [Capability Map](#capability-map) ·
@@ -590,22 +590,33 @@ that a change of one trial is not proof of a gain.
 - WHEN CI runs
 - THEN the reference still scores 49/49 and the seed still fails
 
-### Requirement: REQ-031 — Task trials cannot read the harness repository
-Source: owner decision 2026-11-24 (Q1 = B, "detect and prevent"); DEC-011
+### Requirement: REQ-031 — Task trials cannot read the eval content
+Source: owner decision 2026-11-24 (Q1 = B, "detect and prevent"); owner decision 2026-11-24 (`/plan` SPEC CONFLICT, "REQ-031=1"); DEC-011, DEC-012
 
 Before the first real task trial, a probe MUST establish whether Claude
 Code's sandbox settings, written into the sandbox's `settings.local.json`,
 deny a headless `claude -p` session, and its subagents, a Bash read of a file
-under the harness repository. The probe result MUST be recorded in
+under `claude/evals/`. The deny MUST cover that folder by its repository path
+and by every `~/.claude/...` path that resolves into it. The deny MUST NOT
+cover the rest of the harness repository, because the stages call harness
+scripts through `~/.claude/` links into it (for example
+`python3 ~/.claude/skills/spec-driven-development/scripts/check-spec.py`).
+If both eval reads are refused and that `check-spec.py` call still runs, then
+the probe MUST record `pass`; otherwise it MUST record `fail`. The probe result MUST be recorded in
 `tools/evals/README.md` with the date and the Claude Code version. Where the
 probe passed, every task trial MUST run with that setting. If the probe
 failed, then task trials MUST run with detection only (REQ-009), and every
 `tasks` report MUST state "prevention off: detection only".
 
 #### Scenario: Probe passes
-- GIVEN the sandbox setting denies reads of the harness repository path
-- WHEN the probe session and a subagent each run `cat <harness>/claude/evals/add-business/ticket.md`
-- THEN both commands are refused, and the probe records "pass" with the date and version
+- GIVEN the sandbox setting denies reads under `claude/evals/`
+- WHEN the probe session and a subagent each run `cat <harness>/claude/evals/add-business/ticket.md`, and the session runs `python3 ~/.claude/skills/spec-driven-development/scripts/check-spec.py <a sample spec>`
+- THEN both `cat` commands are refused, `check-spec.py` runs and prints its result, and the probe records "pass" with the date and version
+
+#### Scenario: Stage scripts blocked
+- GIVEN a setting that refuses the `cat` commands and also refuses `check-spec.py`
+- WHEN the probe runs
+- THEN it records "fail", because the stages would lose their own checks
 
 #### Scenario: Probe fails
 - GIVEN the setting does not refuse a subagent's Bash read
@@ -903,12 +914,20 @@ the session beyond that limit.
 - Affects: REQ-029, REQ-030
 
 ### DEC-011 — Prevent and detect hidden-file reads
-- Decision: Copy the harness (REQ-008), deny Bash reads of the harness repository through Claude Code's sandbox once a probe shows it works headless and in subagents (REQ-031), and audit every trace (REQ-009).
+- Decision: Copy the harness (REQ-008), deny Bash reads of the eval content through Claude Code's sandbox once a probe shows it works headless and in subagents (REQ-031, scope narrowed by DEC-012), and audit every trace (REQ-009).
 - Alternatives: detect only; run each task trial in a container.
 - Reason: a task score is worthless if the agent saw the hidden tests; prevention closes the Bash path that detection can only catch afterwards. The container was too heavy for the gain.
 - Source: owner, 2026-11-24, Claude Code session (Q1 = B)
 - Decided by: owner, 2026-11-24, Claude Code session
 - Affects: REQ-008, REQ-009, REQ-031
+
+### DEC-012 — The sandbox denies only the eval content
+- Decision: The Bash sandbox denies reads under `claude/evals/`, by its repository path and by any `~/.claude/...` path into it; the probe passes only if the stage scripts still run.
+- Alternatives: deny the whole harness repository and require the stage scripts to run (fails on this machine, so prevention would be off); copy the stage scripts into the session too and rewrite the `~/.claude/...` paths in the copied commands, then deny the whole repository (larger change to the copied harness).
+- Reason: `~/.claude/skills`, `commands`, `hooks`, `references` and `agents` link into this repository, and `/spec` and `/plan` run `check-spec.py` and `check-plan.py` through them. A whole-repository deny would block those checks in every trial (REQ-031, REQ-018).
+- Source: `/plan HR-2` SPEC CONFLICT, 2026-11-24; owner decision "REQ-031=1"
+- Decided by: owner, 2026-11-24, `/spec HR-2 decisions: REQ-031=1`
+- Affects: REQ-031
 
 ## Tech Stack
 
@@ -968,7 +987,7 @@ docstring that states usage and exit codes (see `check-rescore.py`), tests in
 | REQ-012 | replay test over every case, no model: maps old vs new, true-and-false coverage per check, fixture trees; stored expected maps | `workflow/test_migration.py`, `workflow/replay/` |
 | REQ-014 | the measurement run's README entry; the baseline folder; observation-log rows | manual run, recorded |
 | REQ-015–REQ-017 | unit tests: staleness; trailer line format; check cases (missing, bare not run, reason, result, unwatched, both trailers, zero range) | `tools/tests/test-check-eval-trailer.py` |
-| REQ-031 | probe record in the README; one real probe session plus subagent, recorded; a unit test that the driver writes the setting only when the record says pass | manual probe, `tools/evals/tasks` tests |
+| REQ-031 | probe record in the README; one real probe session plus subagent, recorded, showing both eval reads refused and `check-spec.py` run; a unit test that the probe records `fail` when the stage script is refused; a unit test that the driver writes the setting only when the record says pass | manual probe, `tools/evals/tasks` tests |
 | REQ-018–REQ-020 | unit tests with a stubbed `claude`: approval only after draft, each stop rule; one real trial run, recorded | `tools/evals/tasks` tests (path is a plan TD) |
 | REQ-021, REQ-022 | `test_review_eval.py` unchanged and passing; row parser test; `test-check-rescore.py` unchanged | existing + new unit tests |
 | REQ-023, REQ-027 | `rg` searches named in the requirements | command output |
@@ -986,9 +1005,10 @@ CI runs every unit test. No test drives a real model.
 Invariant: a task trial that read a hidden-test or reference file does not
 count as a pass.
 
-Decided (DEC-011): detect and prevent. The copy (REQ-008) removes every
-pointer to `claude/`. The Bash sandbox (REQ-031) denies reads of the harness
-repository when the probe shows it works. The audit (REQ-009) fails any trial
+Decided (DEC-011, DEC-012): detect and prevent. The copy (REQ-008) removes
+every pointer to `claude/`. The Bash sandbox (REQ-031) denies reads of
+`claude/evals/` when the probe shows it works, and leaves the rest of the
+repository readable so the stages' own scripts still run. The audit (REQ-009) fails any trial
 whose trace names a hidden path. If the probe fails, prevention is off, the
 report says so, and the guarantee is "no leaked trial is scored".
 
