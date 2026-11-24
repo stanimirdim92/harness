@@ -1,0 +1,125 @@
+# Which Leadbuster files laravel/files/ mirrors. Read by tools/laravel/sync.py.
+#
+# include <group> <pattern>   copy every committed file the pattern matches
+# skip    <pattern> <reason>  a watched file we deliberately do not copy
+# watch   <pattern>           every file here must match an include or a skip
+#
+# Patterns: `*` stays inside one folder, `**` crosses folders.
+# A pattern on an `include` line that matches nothing is an error.
+
+# --- static analysis and formatting ---
+include static-analysis phpstan.neon
+include static-analysis phpstan.ci.neon
+include static-analysis deptrac.php
+include static-analysis pint.json
+include static-analysis phpunit.xml
+include static-analysis qodana.yaml
+include static-analysis .editorconfig
+include static-analysis composer.json
+
+# --- frontend quality ---
+include frontend-quality package.json
+include frontend-quality eslint.config.js
+include frontend-quality eslint.compat.js
+include frontend-quality .prettierrc
+include frontend-quality .prettierignore
+include frontend-quality tsconfig.json
+include frontend-quality vitest.config.ts
+
+# --- CI ---
+include ci .github/workflows/*.yml
+include ci .github/dependabot.yml
+include ci .github/pull_request_template.md
+include ci .github/ISSUE_TEMPLATE/*
+include ci .coderabbit.yaml
+include ci bin/ci-*.py
+include ci tests/ci_*_test.py
+
+# --- commit hooks ---
+include hooks .pre-commit-config.yaml
+include hooks .githooks/pre-commit
+include hooks bin/pre-commit.py
+include hooks bin/setup-quality.sh
+include hooks bin/check-file-size.py
+include hooks tests/quality_hooks_test.py
+
+# --- isolated test runner (per-checkout databases, Redis blocks) ---
+include test-runner bin/worktree-*
+include test-runner bin/schema-*
+include test-runner config/database.php
+include test-runner .worktreeinclude
+include test-runner tests/TestCase.php
+include test-runner tests/Pest.php
+include test-runner tests/bootstrap.php
+include test-runner tests/Shell/*
+include test-runner tests/Support/*
+include test-runner tests/Unit/ArchitectureTest.php
+include test-runner tests/Unit/Worktree*Test.php
+include test-runner tests/Unit/TestSchemaTemplateNameTest.php
+include test-runner tests/Feature/WorktreeIsolationTest.php
+include test-runner tests/Feature/WorkerDatabaseResetTest.php
+include test-runner tests/Feature/TestSchemaTemplateTest.php
+include test-runner tests/Feature/RedisConnectionHostTest.php
+
+# --- agent instructions and wiring ---
+include agent-docs AGENTS.md
+include agent-docs TESTING.md
+include agent-docs CONVENTIONS.md
+include agent-docs COMMANDS.md
+include agent-docs REVIEW.md
+include agent-docs bin/README.md
+include agent-docs boost.json
+include agent-docs .aiignore
+include agent-docs .mcp.json
+include agent-docs .ai/mcp/mcp.json
+include agent-docs .ai/workflows/README.md
+include agent-docs .claude/settings.json
+include agent-docs .claude/hooks/*
+
+# --- agent skills (.agents and .claude hold symlinks into .ai/skills) ---
+include agent-skills .ai/skills/**
+include agent-skills .ai/guidelines/**
+include agent-skills .agents/skills/**
+include agent-skills .claude/skills/**
+
+# --- rules written by the infer-conventions skill: an example, not a template ---
+include rules-example .ai/rules/*
+include rules-example .ai/repo-map.md
+
+# --- watched files we do not copy ---
+skip .env.example                    environment values; each project has its own
+skip .gitleaksignore                 fingerprints of this repository's findings
+skip .claude/settings.local.json     machine-local permissions
+skip phpstan-baseline.neon           Leadbuster's own debt; a new project starts at zero
+skip composer.lock                   generated
+skip yarn.lock                       generated
+skip artisan                         Laravel default
+skip README.md                       product readme
+skip DESIGN.md                       product design system
+skip SECURITY.md                     attack surface of a private system; not for a public repo
+skip ARCHITECTURE.md                 deployment and roadmap of a private system; not for a public repo
+skip .gitattributes                  repository settings
+skip .gitignore                      repository settings
+skip .npmrc                          package manager settings
+skip .yarnrc.yml                     package manager settings
+skip components.json                 UI component registry
+skip modules_statuses.json           module switches
+skip tailwind.config.js              product styling
+skip vite.config.js                  product build
+skip vite-module-loader.js           product build
+skip websites.php                    product data
+skip bin/brightdata-goto-test.php    one-off script that calls a paid service
+skip bin/extract-meta-page-ids.py    one-off script that calls a paid service
+skip tests/.pest/**                  timings and snapshots of this test suite
+
+# --- watched areas ---
+watch *
+watch bin/**
+watch .github/**
+watch .githooks/**
+watch .ai/**
+watch .agents/**
+watch .claude/**
+watch tests/*
+watch tests/Shell/**
+watch tests/Support/**

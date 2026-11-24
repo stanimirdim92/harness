@@ -1,0 +1,83 @@
+name: Architecture
+
+# Deptrac runs in its own workflow, so a failing PHPStan or test job never hides
+# the architecture result. Run the same check locally with `composer deptrac`.
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deptrac-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  PHP_VERSION: '8.5'
+  PHP_EXTENSIONS: bcmath, calendar, curl, dom, fileinfo, gd, gmp, iconv, igbinary, imagick, intl, mbstring, openssl, pdo_mysql, redis, simplexml, xml, zip, zlib
+
+jobs:
+  deptrac:
+    name: Deptrac
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # bin/ci-report.py diffs against the base commit to annotate changed lines.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          tools: composer:v2
+          coverage: none
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/composer/files
+          key: composer-v2-${{ runner.os }}-php85-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-v2-${{ runner.os }}-php85-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist --no-scripts
+
+      # GitHub shows only 10 error annotations per step, so bin/ci-report.py annotates the
+      # violations on changed lines and puts the full breakdown in the run summary. It
+      # fails the step on any violation or uncovered dependency.
+      - name: Deptrac
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          composer deptrac -- --formatter=json --output=deptrac.json || test -s deptrac.json
+          python3 bin/ci-report.py deptrac deptrac.json --base "$BASE"
+
+      # The layer graph of this commit: Mermaid in the run summary, and an SVG
+      # (violations in red) as an artifact. Deptrac exits 1 on violations, so a step
+      # fails only when it wrote no graph.
+      - name: Dependency graph
+        if: ${{ !cancelled() }}
+        run: |
+          sudo apt-get install -y -qq --no-install-recommends graphviz
+          mkdir -p deptrac-graph
+          vendor/bin/deptrac analyse --config-file=deptrac.php --no-progress --formatter=mermaidjs --output=deptrac-graph/layers.mmd || test -s deptrac-graph/layers.mmd
+          vendor/bin/deptrac analyse --config-file=deptrac.php --no-progress --formatter=graphviz-image --output=deptrac-graph/layers.svg || test -s deptrac-graph/layers.svg
+          {
+            echo '### Layer dependencies (counts per edge)'
+            echo '```mermaid'
+            cat deptrac-graph/layers.mmd
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload dependency graph
+        if: ${{ !cancelled() && hashFiles('deptrac-graph/layers.svg') != '' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: deptrac-graph
+          path: deptrac-graph
+          retention-days: 14

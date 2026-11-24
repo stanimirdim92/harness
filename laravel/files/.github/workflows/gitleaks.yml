@@ -1,0 +1,45 @@
+name: Secret scan
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_ref:
+        description: Commit or ref from which to scan new commits
+        required: true
+        type: string
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: secrets-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  gitleaks:
+    name: ${{ github.event_name == 'workflow_dispatch' && 'Gitleaks (manual)' || 'Gitleaks (new commits)' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Resolve comparison refs
+        id: refs
+        run: python3 bin/ci-refs.py >> "$GITHUB_OUTPUT"
+
+      # Scan only the commits this PR or push adds. Older history has known
+      # findings that need rotation, not a CI failure on every run.
+      - name: Scan
+        env:
+          FROM: ${{ steps.refs.outputs.from_ref }}
+          TO: ${{ steps.refs.outputs.scan_to_ref }}
+        run: |
+          docker run --rm -v "$PWD:/repo" \
+            ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f \
+            git /repo --redact --no-banner --log-opts="$FROM..$TO"

@@ -1,0 +1,63 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - vendor/nesbot/carbon/extension.neon
+    - vendor/phpstan/phpstan-strict-rules/rules.neon
+    - vendor/phpstan/phpstan-deprecation-rules/rules.neon
+    - vendor/pestphp/pest-plugin-phpstan/extension.neon
+    - phpstan-baseline.neon
+
+
+parameters:
+    tmpDir: storage/framework/cache/phpstan
+    additionalConstructors:
+        - PHPUnit\Framework\TestCase::setUp
+    parallel:
+        buffer: 268435456 # 256MB
+        jobSize: 20
+        maximumNumberOfProcesses: 10
+        minimumNumberOfJobsPerProcess: 2
+        processTimeout: 900.0
+    paths:
+        - app
+        - bootstrap
+        - config
+        - Modules
+        - tests
+    level: 8
+
+    excludePaths:
+        - ./vendor
+
+    reportUnmatchedIgnoredErrors: true
+    # Each @phpstan-ignore names its identifiers and gives a reason: @phpstan-ignore id (why).
+    reportIgnoresWithoutComments: true
+    resultCacheSkipIfOlderThanDays: 1
+    checkMissingOverrideMethodAttribute: true
+    checkMissingCallableSignature: true
+    checkBenevolentUnionTypes: true
+    checkTooWideReturnTypesInProtectedAndPublicMethods: true
+    checkTooWideParameterOutInProtectedAndPublicMethods: true
+    checkOctaneCompatibility: true
+    noUnnecessaryEnumerableToArrayCalls: true
+    checkAuthCallsWhenInRequestScope: true
+    strictRules:
+        dynamicCallOnStaticMethod: false
+    checkConfigTypes: true
+    # Module config files are merged into the app config, so config:cache reads their env() calls.
+    configDirectories:
+        - %currentWorkingDirectory%/config
+        - %currentWorkingDirectory%/Modules/Advertisers/config
+        - %currentWorkingDirectory%/Modules/Core/config
+        - %currentWorkingDirectory%/Modules/Socials/config
+    ignoreErrors:
+        # Tests never disable console mocking, so artisan() returns PendingCommand, never int.
+        -
+            message: '#^Cannot (call method|access property) \w+(\(\))? on Illuminate\\Testing\\PendingCommand\|int\.$#'
+            path: tests/*
+        # Larastan types argument() and option() from the command signature, but Artisan::call()
+        # and tests pass values of any type, so a cast of them is a real conversion.
+        -
+            identifier: cast.useless
+            path: Modules/*/app/Console/Commands/*
+#    reportPossiblyNonexistentGeneralArrayOffset: true  https://phpstan.org/config-reference#reportpossiblynonexistentgeneralarrayoffset
+

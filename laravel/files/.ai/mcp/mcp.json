@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "laravel-boost": {
+      "command": "/usr/bin/php8.4",
+      "args": [
+        "/var/www/html/leadbuster/artisan",
+        "boost:mcp"
+      ]
+    },
+      "structurizr": {
+      "type": "http",
+      "url": "https://mcp.structurizr.com/mcp"
+    },
+    "atlassian-mcp-server": {
+      "type": "http",
+      "url": "https://mcp.atlassian.com/v1/mcp/authv2"
+    }
+  }
+}

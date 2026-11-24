@@ -1,0 +1,45 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(php artisan *)",
+      "Bash(yarn eslint *)",
+      "Bash(mkdir -p /tmp/scratch_lint)",
+      "Bash(git show *)",
+      "Read(//tmp/scratch_lint/**)",
+      "Bash(git stash *)",
+      "Bash(vendor/bin/pint --dirty --format agent)",
+      "Bash(xargs ls)",
+      "Bash(grep -n 'function index\\\\|Request $request\\\\|use Modules' -A 30 /usr/local/www/zori/Modules/Advertisers/app/Http/Controllers/Web/AdvertiserController.php)",
+      "Bash(yarn prettier *)",
+      "Bash(yarn lint *)",
+      "Bash(vendor/bin/phpstan analyse *)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "php /var/www/html/leadbuster/bin/worktree-databases.php --apply --report",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "php \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/skill-reminder.php",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

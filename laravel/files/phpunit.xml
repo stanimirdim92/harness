@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         backupGlobals="false"
+         bootstrap="tests/bootstrap.php"
+         colors="true"
+         defaultTestSuite="Unit,Feature"
+         failOnEmptyTestSuite="false"
+         processIsolation="false"
+         stopOnFailure="false">
+    <testsuites>
+        <testsuite name="Unit">
+            <directory suffix="Test.php">./tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory suffix="Test.php">./tests/Feature</directory>
+        </testsuite>
+        <!-- Real-browser tests need Playwright and a Vite build; run them with testsuite=Browser. -->
+        <testsuite name="Browser">
+            <directory suffix="Test.php">./tests/Browser</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory suffix=".php">app</directory>
+            <directory suffix=".php">Modules/Advertisers/app</directory>
+            <directory suffix=".php">Modules/Core/app</directory>
+            <directory suffix=".php">Modules/Socials/app</directory>
+        </include>
+    </source>
+    <coverage includeUncoveredFiles="true"/>
+    <php>
+        <env name="APP_ENV" value="testing"/>
+        <env name="APP_MAINTENANCE_DRIVER" value="file"/>
+        <env name="BCRYPT_ROUNDS" value="12"/>
+        <env name="CACHE_STORE" value="array"/>
+        <env name="MAIL_MAILER" value="array"/>
+        <env name="PULSE_ENABLED" value="false"/>
+        <env name="QUEUE_CONNECTION" value="redis"/>
+        <env name="REQUIRE_API_AUTH" value="true" force="true"/>
+        <env name="SESSION_DRIVER" value="array"/>
+        <env name="TELESCOPE_ENABLED" value="false"/>
+    </php>
+</phpunit>

@@ -1,0 +1,62 @@
+# See docs/adr/0008-shared-quality-hooks-and-ci-gate.md
+minimum_pre_commit_version: '4.7.0'
+default_stages: [pre-commit, manual]
+repos:
+  - repo: local
+    hooks:
+      - id: pint
+        name: Pint (check)
+        entry: vendor/bin/pint --test --
+        language: unsupported
+        types: [php]
+        exclude: ^(\.claude|lang)/
+        require_serial: true
+      - id: eslint
+        name: ESLint (check)
+        entry: yarn eslint --quiet --
+        language: unsupported
+        files: ^resources/js/.*\.(js|jsx|ts|tsx)$
+        require_serial: true
+      - id: prettier
+        name: Prettier (check)
+        entry: yarn prettier --check --ignore-unknown --
+        language: unsupported
+        types: [text]
+        require_serial: true
+      # A reference to a class that does not exist is always a bug, never a false positive:
+      # it must be fixed, not recorded in the PHPStan baseline.
+      - id: phpstan-baseline-missing-class
+        name: PHPStan baseline hides no missing class (fix the reference instead)
+        entry: bash -c '! grep -n -B3 class.notFound phpstan-baseline.neon'
+        language: unsupported
+        files: ^phpstan-baseline\.neon$
+        pass_filenames: false
+      # Temporarily disabled. Restore this block to enable the file-size limit.
+      # - id: file-size
+      #   name: File size ratchet
+      #   entry: python3 bin/check-file-size.py
+      #   language: unsupported
+      #   pass_filenames: false
+      #   always_run: true
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c # v6.0.0
+    hooks:
+      - id: check-merge-conflict
+        args: [--assume-in-merge, --]
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: 83d9cd684c87d95d656c1458ef04895a7f1cbd8e # v8.30.1; match gitleaks.yml
+    hooks:
+      - id: gitleaks
+        stages: [pre-commit]
+        always_run: true
+  - repo: https://github.com/rhysd/actionlint
+    rev: 914e7df21a07ef503a81201c76d2b11c789d3fca # v1.7.12
+    hooks:
+      - id: actionlint
+        # ShellCheck is a separate pinned hook. Do not depend on ambient binaries.
+        args: [-shellcheck=, -pyflakes=, --]
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: 745eface02aef23e168a8afb6b5737818efbea95 # v0.11.0.1
+    hooks:
+      - id: shellcheck
+        args: [--]

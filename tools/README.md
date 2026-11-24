@@ -5,6 +5,7 @@ Grouped by what you do with them. Paths below are from the repository root. Each
 | Folder | What it is | When you use it |
 | --- | --- | --- |
 | `setup/` | `link_dotfiles.sh` — links `claude` and `codex` into `$HOME` | Once per machine, and after adding a synced file |
+| `laravel/` | `sync.py` — mirrors the Leadbuster quality setup into `../laravel/` | After a quality change in Leadbuster, or when a session warns |
 | `run/` | Tools you use during ticket work | When you need them |
 | `checks/` | Validators that read the harness files and fail on drift | CI runs them; run one after editing what it guards |
 | `tests/` | Self-tests for the hooks, the checks, and the `run/` and `setup/` scripts | CI runs them; run the one for what you changed |
@@ -38,6 +39,7 @@ Grouped by what you do with them. Paths below are from the repository root. Each
 | `test-install-skills.py`, `test-codex-harness.py`, `test-codex-worktree.py` | The Codex installer, roles, hook adapter and worktree launcher |
 | `test-link-dotfiles.sh` | `setup/link_dotfiles.sh` |
 | `test-run-metrics.sh` | `run/run-metrics.sh` |
+| `test-laravel-sync.py` | `laravel/sync.py` |
 | `test-weakened-tests.py` | `/review`'s weakened-test guard, shipped in the `code-review-and-quality` skill |
 
 Run everything CI runs:

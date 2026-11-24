@@ -1,0 +1,134 @@
+{
+    "name": "smartico/leadbuster",
+    "type": "project",
+    "description": "",
+    "keywords": [],
+    "license": "proprietary",
+    "require": {
+        "php": "^8.5|^8.6",
+        "ext-bcmath": "*",
+        "ext-calendar": "*",
+        "ext-curl": "*",
+        "ext-dom": "*",
+        "ext-fileinfo": "*",
+        "ext-gd": "*",
+        "ext-gmp": "*",
+        "ext-iconv": "*",
+        "ext-imagick": "*",
+        "ext-intl": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "ext-openssl": "*",
+        "ext-pdo": "*",
+        "ext-redis": "*",
+        "ext-simplexml": "*",
+        "ext-xml": "*",
+        "ext-zip": "*",
+        "ext-zlib": "*",
+        "amnuts/opcache-gui": "^3",
+        "barryvdh/laravel-translation-manager": "^0",
+        "inertiajs/inertia-laravel": "^3",
+        "laravel/framework": "^13",
+        "laravel/horizon": "^5",
+        "laravel/sanctum": "^4",
+        "maatwebsite/excel": "^4",
+        "nwidart/laravel-modules": "^13",
+        "opcodesio/log-viewer": "^3",
+        "psr/log": "^3",
+        "psr/simple-cache": "^3",
+        "spatie/cpu-load-health-check": "^1.0",
+        "spatie/laravel-collection-macros": "^8",
+        "spatie/laravel-data": "^4",
+        "spatie/laravel-health": "^1",
+        "tanmuhittin/laravel-google-translate": "^2",
+        "tightenco/ziggy": "^2"
+    },
+    "require-dev": {
+        "barryvdh/laravel-ide-helper": "^3",
+        "composer/composer": "^2",
+        "deptrac/deptrac": "^4",
+        "fakerphp/faker": "^1",
+        "larastan/larastan": "^3",
+        "laravel/boost": "^2",
+        "laravel/breeze": "*",
+        "laravel/pint": "^1",
+        "laravel/telescope": "^5",
+        "laravel/tinker": "^3",
+        "mockery/mockery": "^1",
+        "nunomaduro/collision": "^8",
+        "orchestra/pest-plugin-testbench": "^5",
+        "orchestra/testbench": "^11",
+        "pestphp/pest": "^5",
+        "pestphp/pest-plugin-browser": "^5.2",
+        "pestphp/pest-plugin-laravel": "^5",
+        "pestphp/pest-plugin-phpstan": "^5.3",
+        "pestphp/pest-plugin-type-coverage": "^5.1",
+        "phpstan/phpstan": "^2",
+        "phpstan/phpstan-deprecation-rules": "^2.0",
+        "phpstan/phpstan-strict-rules": "^2.0",
+        "roave/security-advisories": "dev-latest",
+        "spatie/laravel-ignition": "^2",
+        "tomasvotruba/type-coverage": "^2"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Database\\Factories\\": "database/factories/",
+            "Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php artisan package:discover --ansi"
+        ],
+        "post-update-cmd": [
+            "Illuminate\\Foundation\\ComposerScripts::postUpdate"
+        ],
+        "post-root-package-install": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+        ],
+        "post-create-project-cmd": [
+            "@php artisan key:generate --ansi",
+            "@php artisan migrate --graceful --ansi"
+        ],
+        "dev": [
+            "Composer\\Config::disableProcessTimeout",
+            "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite"
+        ],
+        "test": [
+            "Composer\\Config::disableProcessTimeout",
+            "bin/worktree-test.sh"
+        ],
+        "deptrac": "deptrac analyse --config-file=deptrac.php --no-progress --report-uncovered --fail-on-uncovered"
+    },
+    "extra": {
+        "laravel": {
+            "dont-discover": [
+                "laravel/telescope"
+            ]
+        },
+        "merge-plugin": {
+            "include": [
+                "Modules/*/composer.json"
+            ]
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "php-http/discovery": true,
+            "wikimedia/composer-merge-plugin": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

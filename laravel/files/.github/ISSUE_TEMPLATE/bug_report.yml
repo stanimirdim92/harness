@@ -1,0 +1,38 @@
+name: Bug report
+description: Something does not work as expected
+labels: [bug]
+body:
+  - type: input
+    id: ticket
+    attributes:
+      label: Jira ticket
+      placeholder: LD-123
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you saw, and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to ...
+        2. Click ...
+        3. See ...
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      options: [Production, Staging, Local]
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Screenshots, log lines, request IDs, advertiser UUIDs. Do not paste secrets or customer personal data.

@@ -1,0 +1,3 @@
+# Read by gitleaks when it scans this folder mounted at /scan (see .github/workflows/ci.yml).
+# Fake STRIPE_SECRET in the "Incorrect" example of the Laravel Boost best-practices skill.
+/scan/files/.ai/skills/laravel-best-practices/rules/config.md:generic-api-key:30

@@ -1,0 +1,7 @@
+includes:
+    - phpstan.neon
+
+# Larastan boots the container, so a few inferred types depend on the local .env.
+# CI runs with .env.example; unmatched baseline entries must not fail it there.
+parameters:
+    reportUnmatchedIgnoredErrors: false

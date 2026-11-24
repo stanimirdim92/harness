@@ -1,0 +1,453 @@
+name: CI
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_ref:
+        description: Commit or ref to compare with the selected branch
+        required: true
+        type: string
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  PHP_VERSION: '8.5'
+  NODE_VERSION: '26'
+  PHP_EXTENSIONS: bcmath, calendar, curl, dom, fileinfo, gd, gmp, iconv, igbinary, imagick, intl, mbstring, openssl, pdo_mysql, redis, simplexml, xml, zip, zlib
+
+jobs:
+  quality:
+    name: Quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+
+      # Node 25+ no longer bundles Corepack; package.json pins Yarn 4.
+      - name: Enable Corepack
+        run: |
+          npm install --global corepack@0.36.0
+          corepack enable
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.yarn/berry/cache
+          key: yarn-v2-${{ runner.os }}-node26-${{ hashFiles('yarn.lock') }}
+          restore-keys: yarn-v2-${{ runner.os }}-node26-
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          tools: composer:v2
+          coverage: none
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/composer/files
+          key: composer-v2-${{ runner.os }}-php85-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-v2-${{ runner.os }}-php85-
+
+      - name: Install dependencies
+        run: |
+          cp .env.example .env
+          composer install --no-interaction --no-progress --prefer-dist --no-scripts
+
+      - name: Resolve comparison refs
+        id: refs
+        run: python3 bin/ci-refs.py >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/pre-commit
+            ~/.cache/leadbuster
+          key: hooks-v1-${{ runner.os }}-python312-${{ hashFiles('.pre-commit-config.yaml', 'bin/pre-commit.py') }}
+      - name: Prepare pinned hooks
+        run: python3 bin/pre-commit.py --setup
+      - name: Quality tools regression tests
+        run: |
+          python3 -m unittest discover -s tests -p ci_tools_test.py
+          python3 -m unittest discover -s tests -p quality_hooks_test.py
+          python3 -m unittest discover -s tests -p ci_report_test.py
+      - name: Check changed files
+        env:
+          PRE_COMMIT_FROM_REF: ${{ steps.refs.outputs.from_ref }}
+          PRE_COMMIT_TO_REF: ${{ steps.refs.outputs.to_ref }}
+        run: python3 bin/ci-quality.py
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+
+      # Node 25+ no longer bundles Corepack; package.json pins Yarn 4.
+      - name: Enable Corepack
+        run: |
+          npm install --global corepack@0.36.0
+          corepack enable
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.yarn/berry/cache
+          key: yarn-v2-${{ runner.os }}-node26-${{ hashFiles('yarn.lock') }}
+          restore-keys: yarn-v2-${{ runner.os }}-node26-
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Vitest with coverage
+        run: |
+          yarn test:coverage --reporter=default --reporter=junit --outputFile=test-results/vitest.xml
+          test -s test-results/coverage/frontend/lcov.info
+          test -s test-results/coverage/frontend/index.html
+          test -s test-results/coverage/frontend/summary.txt
+          test -s test-results/coverage/frontend/coverage-summary.json
+      - name: Summarize frontend coverage
+        if: ${{ !cancelled() && hashFiles('test-results/coverage/frontend/summary.txt') != '' }}
+        run: |
+          echo '### Frontend coverage' >> "$GITHUB_STEP_SUMMARY"
+          echo '```text' >> "$GITHUB_STEP_SUMMARY"
+          cat test-results/coverage/frontend/summary.txt >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload frontend coverage
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: frontend-coverage
+          path: test-results/coverage/frontend
+          if-no-files-found: error
+          retention-days: 7
+      # The build runs when Vitest fails, so the backend tests still get their Vite manifest.
+      - name: Type check and build
+        if: ${{ !cancelled() }}
+        run: yarn build
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ !cancelled() }}
+        with:
+          name: vite-build
+          path: public/build
+          if-no-files-found: error
+          retention-days: 1
+      - name: Upload frontend test report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: vitest-results
+          path: test-results/vitest.xml
+          retention-days: 3
+
+  backend-static:
+    name: Backend static
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          tools: composer:v2
+          coverage: none
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/composer/files
+          key: composer-v2-${{ runner.os }}-php85-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-v2-${{ runner.os }}-php85-
+
+      - name: Install dependencies
+        run: |
+          cp .env.example .env
+          composer install --no-interaction --no-progress --prefer-dist --no-scripts
+
+      # PHPStan reanalyses only files whose dependencies changed since the restored result cache.
+      - name: Restore PHPStan result cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: storage/framework/cache/phpstan
+          key: phpstan-result-cache-${{ github.run_id }}
+          restore-keys: phpstan-result-cache-
+
+      - name: PHPStan
+        run: vendor/bin/phpstan analyse --configuration=phpstan.ci.neon --no-progress --memory-limit=2G --error-format=github
+
+      - name: Save PHPStan result cache
+        if: ${{ !cancelled() }}
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: storage/framework/cache/phpstan
+          key: phpstan-result-cache-${{ github.run_id }}
+
+  dependency-audit:
+    name: Dependency audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+
+      # Node 25+ no longer bundles Corepack; package.json pins Yarn 4.
+      - name: Enable Corepack
+        run: |
+          npm install --global corepack@0.36.0
+          corepack enable
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.yarn/berry/cache
+          key: yarn-v2-${{ runner.os }}-node26-${{ hashFiles('yarn.lock') }}
+          restore-keys: yarn-v2-${{ runner.os }}-node26-
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          tools: composer:v2
+          coverage: none
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/composer/files
+          key: composer-v2-${{ runner.os }}-php85-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-v2-${{ runner.os }}-php85-
+
+      - name: Install dependencies
+        run: |
+          cp .env.example .env
+          composer install --no-interaction --no-progress --prefer-dist --no-scripts
+
+      - name: Composer audit
+        run: composer audit --locked --no-interaction
+      - name: Audit transitive production JavaScript dependencies
+        run: yarn npm audit --all --recursive --environment production --severity high
+      - name: Audit transitive development JavaScript dependencies
+        run: yarn npm audit --all --recursive --environment development --severity high
+
+  backend-tests:
+    name: Backend tests (Pest)
+    # Waits for the frontend job only for its vite-build artifact. A failed Vitest step must not skip these tests.
+    needs: frontend
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    services:
+      # Match the MySQL major that produced database/schema/mysql-schema.fingerprint:
+      # the fingerprint hashes information_schema output, which differs across versions.
+      mysql:
+        image: mysql:9.7@sha256:b055723a00649bde974d2e3d3ba486725f279c4a4bb4d24d69f36b11fafa7b79
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      # bin/worktree-doctor.sh compares the runtime version against local main.
+      - name: Create local main ref
+        run: git show-ref --verify --quiet refs/heads/main || git branch main origin/main
+
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          tools: composer:v2
+          coverage: pcov
+          # PCOV defaults to app/, which would omit the module classes.
+          ini-values: pcov.directory=${{ github.workspace }}, pcov.exclude="~/(vendor|tests)/~"
+
+      # Tests use the local Redis server of .env.testing. Each test process leases 8
+      # database indexes from 32 up (app/Support/WorktreeTesting.php), so the default
+      # of 16 databases fails every test.
+      - name: Install test runtime binaries
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends redis-server ffmpeg
+          sudo sed -i 's/^databases .*/databases 512/' /etc/redis/redis.conf
+          sudo systemctl restart redis-server
+          test "$(redis-cli config get databases | tail -1)" = 512
+          ffmpeg -version
+
+      # Test data is disposable: skip the fsync per commit, as the dev machines do
+      # (zz-dev-speed.cnf). A service container takes no server options, so only the
+      # dynamic settings apply; skip-log-bin and innodb_doublewrite=OFF need a restart.
+      - name: Tune MySQL for disposable test data
+        run: |
+          mysql -h 127.0.0.1 -uroot -proot -e "SET GLOBAL innodb_flush_log_at_trx_commit = 2; SET GLOBAL sync_binlog = 0;"
+          test "$(mysql -h 127.0.0.1 -uroot -proot -Nse 'SELECT @@innodb_flush_log_at_trx_commit, @@sync_binlog')" = "$(printf '2\t0')"
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/composer/files
+          key: composer-v2-${{ runner.os }}-php85-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-v2-${{ runner.os }}-php85-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist --no-scripts
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: vite-build
+          path: public/build
+
+      - name: Write env files
+        run: |
+          set_env() {
+            if grep -q "^$2=" "$1"; then sed -i "s|^$2=.*|$2=$3|" "$1"; else echo "$2=$3" >> "$1"; fi
+          }
+          key="base64:$(openssl rand -base64 32)"
+          cp .env.example .env
+          cp .env.example .env.testing
+          for file in .env .env.testing; do
+            set_env "$file" APP_KEY "$key"
+            set_env "$file" DB_HOST 127.0.0.1
+            set_env "$file" DB_PORT 3306
+            set_env "$file" DB_USERNAME root
+            set_env "$file" DB_PASSWORD root
+          done
+          set_env .env DB_DATABASE leadbuster
+          set_env .env.testing APP_ENV testing
+          set_env .env.testing DB_DATABASE leadbuster_test
+
+      - name: Pest type coverage
+        run: |
+          mkdir -p test-results/coverage/backend
+          composer test -- --type-coverage --compact --min=90 --type-coverage-json=test-results/coverage/backend/types.json
+          jq -er '.total | numbers | "Backend PHP type coverage: \(.)%"' test-results/coverage/backend/types.json >> "$GITHUB_STEP_SUMMARY"
+
+      # "sheet" (spreadsheet) and "bbc" are false positives of the word list.
+      - name: Pest profanity
+        run: composer test -- --profanity --compact --exclude=sheet,bbc
+
+      # The wrapper provisions disposable templates from the committed snapshot.
+      - name: Pest with coverage
+        run: |
+          mkdir -p test-results
+          composer test -- --ci --processes=2 --colors=never --log-junit=test-results/pest.xml \
+            --coverage-clover=test-results/coverage/backend/clover.xml \
+            --coverage-html=test-results/coverage/backend/html \
+            --coverage-text=test-results/coverage/backend/summary.txt --only-summary-for-coverage-text
+          test -s test-results/coverage/backend/clover.xml
+          test -s test-results/coverage/backend/html/index.html
+          test -s test-results/coverage/backend/summary.txt
+          cat test-results/coverage/backend/summary.txt
+      # Coverage per module and folder in the run summary; a warning on each changed line
+      # that no test runs (pull requests and pushes).
+      - name: Summarize backend coverage
+        if: ${{ !cancelled() && hashFiles('test-results/coverage/backend/clover.xml') != '' }}
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || inputs.base_ref || github.event.before }}
+        run: python3 bin/ci-report.py coverage test-results/coverage/backend/clover.xml --base "$BASE"
+      - name: Summarize slowest Pest tests
+        if: ${{ !cancelled() && hashFiles('test-results/pest.xml') != '' }}
+        run: python3 bin/ci-pest-timings.py test-results/pest.xml >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload backend coverage
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: backend-coverage
+          path: test-results/coverage/backend
+          if-no-files-found: error
+          retention-days: 7
+      - name: Upload backend test report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: pest-results
+          path: test-results/pest.xml
+          if-no-files-found: error
+          retention-days: 3
+
+      # Browser smoke tests (tests/Browser) need Node, Playwright and the vite-build artifact.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        if: ${{ !cancelled() }}
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+      - name: Install Playwright
+        if: ${{ !cancelled() }}
+        run: |
+          npm install --global corepack@0.36.0
+          corepack enable
+          yarn install --immutable
+          yarn playwright install --with-deps chromium
+      - name: Pest browser tests
+        if: ${{ !cancelled() }}
+        run: composer test -- --ci --processes=2 --colors=never --testsuite=Browser
+      - name: Upload browser screenshots
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: browser-screenshots
+          path: tests/Browser/Screenshots
+          if-no-files-found: ignore
+          retention-days: 3
+
+  ci-gate:
+    name: ${{ github.event_name == 'workflow_dispatch' && 'CI gate (manual)' || 'CI gate' }}
+    if: ${{ always() }}
+    needs: [quality, frontend, backend-static, dependency-audit, backend-tests]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require every job to succeed
+        env:
+          JOB_RESULTS: ${{ toJSON(needs) }}
+        run: |
+          python3 - <<'PYTHON'
+          import json, os, sys
+          results = json.loads(os.environ['JOB_RESULTS'])
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write('| Job | Result |\n| --- | --- |\n')
+              for name, job in results.items():
+                  summary.write(f"| {name} | {job['result']} |\n")
+          failed = [name for name, job in results.items() if job['result'] != 'success']
+          if failed:
+              sys.exit('Required jobs did not succeed: ' + ', '.join(failed))
+          PYTHON

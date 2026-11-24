@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# pre-commit hides unstaged changes while checking the staged candidate.
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+exec python3 bin/pre-commit.py run --hook-stage pre-commit

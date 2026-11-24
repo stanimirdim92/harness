@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: en-US
+
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  in_progress_fortune: false
+  auto_review:
+    enabled: true
+    drafts: false
+  path_filters:
+    - '!phpstan-baseline.neon'
+    - '!database/schema/**'
+    - '!composer.lock'
+    - '!yarn.lock'
+    - '!_ide_helper.php'
+    - '!.phpstorm.meta.php'
+  path_instructions:
+    - path: 'Modules/**/*.php'
+      instructions: >-
+        Check the layering Controller -> FormRequest -> Service -> RepositoryInterface -> Repository -> Builder -> Model.
+        Flag any import of another module's internals instead of its published contract.
+        Follow the rule files mapped in .ai/rules/index.md for this path.
+    - path: 'resources/js/**'
+      instructions: >-
+        Use lb-* design tokens, never hardcoded hex colours, radii, shadows or font sizes.
+        Flag any removed or hidden existing UI control, route or permission check.
+        EN and DE translation keys must change together.
+    - path: 'tests/**'
+      instructions: >-
+        Tests run only through composer test (bin/worktree-test.sh). Flag tests that write to the leadbuster
+        or leadbuster_test databases, create raw Redis clients, or call FLUSHALL.
+
+knowledge_base:
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - AGENTS.md
+      - .ai/rules/**/*.md

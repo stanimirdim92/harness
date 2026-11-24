@@ -68,6 +68,12 @@ Check the `scored commits` list before trusting the number, then record it in
 `docs/observation-log.md` §Plan recall. Options and how to read the
 result: `tools/evals/plan-recall/README.md`.
 
+`laravel/` mirrors the Leadbuster quality setup (PHPStan, Deptrac, CI,
+hooks, the isolated test runner, agent docs and skills) for reuse in new
+Laravel projects. It is not linked into `$HOME`. `tools/laravel/sync.py check`
+reports drift from Leadbuster and `apply` copies it; see `laravel/README.md`
+and [ADR 0149](docs/adr/0149-laravel-kit-mirrors-leadbuster-verbatim.md).
+
 `tools/README.md` lists every tool by folder. `.github/workflows/ci.yml` runs every deterministic check in `tools/` on each
 push to `main` and each pull request — hooks, handoff gate, persona frontmatter and settings pins, artifact
 paths, workflow-runner logic, the Codex installer, and the metrics script. The

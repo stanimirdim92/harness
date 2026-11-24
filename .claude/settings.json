@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/tools/laravel/sync.py check >/dev/null 2>&1; case $? in 1) echo 'laravel/files differs from Leadbuster main. Run tools/laravel/sync.py check.' ;; 2) echo 'laravel/MANIFEST no longer matches Leadbuster main. Run tools/laravel/sync.py check.' ;; esac; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}

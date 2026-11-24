@@ -1,0 +1,10 @@
+# Gitignored files copied into every Claude Code / Codex managed worktree.
+# Gitignore syntax; only files that are BOTH matched here and gitignored are copied.
+# Hosts that do not support this file need an explicit env-copy setup step.
+.env
+.env.testing
+vendor
+/node_modules
+node_modules/.bin/*
+# A manifest alone references missing assets; copy the complete build.
+/public/build
