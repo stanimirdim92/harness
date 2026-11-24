@@ -4,7 +4,7 @@ Plan: docs/tasks/HR-2-plan.md · Spec: docs/specs/HR-2-SPEC.md
 
 ## T001: Measure one full gate run with the current runner
 
-**Status:** Pending
+**Status:** Done
 
 **Requirements:** REQ-014
 
