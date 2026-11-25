@@ -315,7 +315,7 @@ proven equal by replay. Record this in the commit body.
 
 ## T009: `eval.py gates` runs trials in parallel and rolls them up
 
-**Status:** Pending
+**Status:** Done
 
 **Requirements:** REQ-003, REQ-007, REQ-013, TD-005
 
@@ -325,11 +325,11 @@ proven equal by replay. Record this in the commit body.
 - [ ] Case state PASS / FLAKY / FAIL from scored trials (REQ-013)
 - [ ] `instruction_hashes` per case are recorded as today (REQ-002)
 - [ ] `eval.py gates` with `--case`, `--tag`, `--split`, `--trials`, `--jobs` works (REQ-007)
-- [ ] One real run: `eval.py gates --case ship_open_blocker --case fix_rerun --case testgate_figma --trials 3` prints a report
+- [x] One real run: `eval.py gates --case ship_open_blocker --case fix_rerun --case testgate_figma --trials 3` prints a report (run `2026-11-25-115004-d59b9f6`: 9/9 trials pass, all three cases PASS 3/3, $2.04, 1.5 min; spend approved by the owner 2026-11-25)
 
 **Verification:**
 - [ ] Tests pass: `cd tools/evals/workflow && python3 -m unittest -q test_runner test_migration`
-- [ ] Manual check: the three-case real run's report
+- [x] Manual check: the three-case real run's report
 
 **Dependencies:** T008
 
