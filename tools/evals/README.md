@@ -29,6 +29,39 @@ better average. Each folder's README has the commands.
 Real tickets are private. `spec-eval` keeps its fixtures and run output in
 folders git ignores, and this repository is public. Do not commit them.
 
+## Headless sessions get a copy of the harness
+
+`sandbox.py` builds the project a headless `claude -p` session runs in.
+`install_harness()` copies `commands`, `agents`, `skills`, `references`, `docs`
+and `hooks` into the project's `.claude/`. It copies no `evals` folder. The
+session gets no `--add-dir`, so it cannot read `claude/evals/`. `audit()` reads
+the stream-json trace and marks a trial LEAKED when a tool call, a subagent's
+call included, names `evals/add-business/hidden`, `evals/add-business/reference`
+or a path under `claude/evals/`. `test_sandbox.py` tests all of this without
+running `claude`.
+
+One real turn proved the copy works. It ran once, by hand, on 2026-11-25.
+
+| Item | Value |
+| --- | --- |
+| Command | `claude -p <prompt> --setting-sources project,local --permission-mode acceptEdits --allowedTools Read Glob Grep Write Edit Task Agent TodoWrite Skill 'Bash(python3 *check-spec.py*)' --max-budget-usd 5 --output-format stream-json --verbose`, with the project as the working directory |
+| Prompt | `/spec EX-1` with the `spec-eval/fixtures/example/intake.md` intake, plus one line that asks for a `repo-recon` subagent before the decision brief |
+| Project | a README, an empty `docs/specs/`, and the output of `install_harness()` |
+| Claude CLI version | 2.1.331 |
+| Cost | $0.6123 (5 turns, 54.9 s, `stop_reason` `end_turn`) |
+| Trace | `tools/evals/results/hr2-t002-real-spec-turn/trace.jsonl` (git ignores it; the folder also holds `command.txt` and `prompt.txt`) |
+
+What the trace shows:
+
+- The `spec-driven-development` skill loaded from `<project>/.claude/skills/`.
+- The `/spec` command loaded from `<project>/.claude/commands/`. A slash
+  command is expanded by Claude Code, so the trace has no `Read` call for
+  `spec.md`. The `repo-recon` subagent did search that file by path.
+- There was no permission denial, no `is_error` tool result, and no `--add-dir`.
+- The subagent's 12 tool calls appear in the trace, each with a
+  `parent_tool_use_id` that is the id of the main session's `Agent` call.
+- `audit()` on this trace returns `LEAKED` false.
+
 ## Measured
 
 One full run of every `workflow/` case with the runner as it stood before the

@@ -41,7 +41,7 @@ replay set (T007). The figures go in the eval README.
 
 ## T002: Headless sessions get a copied harness, and leaks are detected
 
-**Status:** Pending
+**Status:** Done
 
 **Requirements:** REQ-008, REQ-009
 
