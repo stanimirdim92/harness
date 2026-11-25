@@ -281,7 +281,7 @@
    "73b9b613ad962d1b11d21763d2a1c7833a04c232 Approved plan",
    "476b405fa1698d8fb468ad5658e1d82b4cb55b70 feat: gate export behind an authorized role"
   ],
-  "evidence": "5fd334fee67e26ca79580bb10cb184ce847b63023fcabf5d2bcb1481490324b8",
+  "evidence": "536f7dc617ac918394bf8d146a4d72f10dca75f2f384833fe25a891be54289f0",
   "files": {
    "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
    "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
@@ -315,7 +315,7 @@
    "73b9b613ad962d1b11d21763d2a1c7833a04c232 Approved plan",
    "476b405fa1698d8fb468ad5658e1d82b4cb55b70 feat: gate export behind an authorized role"
   ],
-  "evidence": "e21cbab7ebcf332f4b26a2f5bd05225ee58db9964bcf4e89b106e5dfcfffaf26",
+  "evidence": "ed6b13f4a497745b1f02f9718080899b370084281f80a11619781f233efd1ed4",
   "files": {
    "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
    "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
@@ -549,7 +549,7 @@
    "73b9b613ad962d1b11d21763d2a1c7833a04c232 Approved plan",
    "476b405fa1698d8fb468ad5658e1d82b4cb55b70 feat: gate export behind an authorized role"
   ],
-  "evidence": "af51a3797c4995e0c462eb4bc9099b77482c4a5631eb0c2d5864d2d5b594de7f",
+  "evidence": "3a4a24f7ab05a047b501a22b7824f5317dfe9ff622171846a538a3bc8fa71dd5",
   "files": {
    "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
    "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
@@ -567,7 +567,7 @@
    "73b9b613ad962d1b11d21763d2a1c7833a04c232 Approved plan",
    "476b405fa1698d8fb468ad5658e1d82b4cb55b70 feat: gate export behind an authorized role"
   ],
-  "evidence": "027b9034ee08f48f87004fae5f6115259c42c585948a64549434db9321a40ff7",
+  "evidence": "50ba8de1cd2e3ce40816b451db47151f5a04b99091a8e0f92cc7cc437c7528be",
   "files": {
    "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
    "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
@@ -585,7 +585,7 @@
    "73b9b613ad962d1b11d21763d2a1c7833a04c232 Approved plan",
    "476b405fa1698d8fb468ad5658e1d82b4cb55b70 feat: gate export behind an authorized role"
   ],
-  "evidence": "a55ea2ba9ddec63e36f46abae6c01ce922842f5e6b0b1d00a1a8366ff1ed13fa",
+  "evidence": "4f116ef0a789372a7ffd043482914ccedb370fdc1326066639bcf52d70cddfb6",
   "files": {
    "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
    "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
@@ -603,7 +603,7 @@
    "73b9b613ad962d1b11d21763d2a1c7833a04c232 Approved plan",
    "476b405fa1698d8fb468ad5658e1d82b4cb55b70 feat: gate export behind an authorized role"
   ],
-  "evidence": "d152c5487012122ac72540b8f0dfaea0608a3b1c1ec020fecc8002a6ba046829",
+  "evidence": "47f83c1dc245f6c5366634beb798dce7ad5d7fdc25b9a5c26e50cb36bca27c05",
   "files": {
    "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
    "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
@@ -621,7 +621,7 @@
    "73b9b613ad962d1b11d21763d2a1c7833a04c232 Approved plan",
    "476b405fa1698d8fb468ad5658e1d82b4cb55b70 feat: gate export behind an authorized role"
   ],
-  "evidence": "662b02849defd2bb64e220531af6eb2cecba29d58b44adf6e92d7811a11df9de",
+  "evidence": "1f47be3ea98e0065352d29041d40a90ecdb27011dcaab816f675dea651488e0e",
   "files": {
    "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
    "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
@@ -639,7 +639,7 @@
    "73b9b613ad962d1b11d21763d2a1c7833a04c232 Approved plan",
    "476b405fa1698d8fb468ad5658e1d82b4cb55b70 feat: gate export behind an authorized role"
   ],
-  "evidence": "af51a3797c4995e0c462eb4bc9099b77482c4a5631eb0c2d5864d2d5b594de7f",
+  "evidence": "3a4a24f7ab05a047b501a22b7824f5317dfe9ff622171846a538a3bc8fa71dd5",
   "files": {
    "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
    "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
@@ -659,7 +659,7 @@
    "c85a9415d7007a31cabed1ffce42ab205fff3f42 fix: refuse the export when no user is given",
    "5d01396422f204c4a6669121b75accf3923199bf test: refuse a user with no role"
   ],
-  "evidence": "284e41e32e07ced27ea84a9e289c808627e3f441ea5b7a3905e705c7461b273b",
+  "evidence": "a37491591f171a69a45bd58c654e4b310f0105942c7038e35b4f95cfb8f5721a",
   "files": {
    "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
    "auth.py": "8dab9bc1c6aec678cb16c815d8a50f4d9b7a9cb7162c6201e55f71f116481396",
@@ -679,7 +679,7 @@
    "5d01396422f204c4a6669121b75accf3923199bf test: refuse a user with no role",
    "6ad1f9858060549a7cf921b9e6afc16840e3d1ca test: the owner role exports"
   ],
-  "evidence": "2764cb9121b6166dbd8032dcc4083bb1f78bda4998f6aeb0edbc35cb98512f33",
+  "evidence": "33adfde187dc5e64492873adf07e2c9c513401170d47335e77438c61370dca13",
   "files": {
    "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
    "auth.py": "8dab9bc1c6aec678cb16c815d8a50f4d9b7a9cb7162c6201e55f71f116481396",
@@ -698,7 +698,7 @@
    "c85a9415d7007a31cabed1ffce42ab205fff3f42 fix: refuse the export when no user is given",
    "5d01396422f204c4a6669121b75accf3923199bf test: refuse a user with no role"
   ],
-  "evidence": "ee723c906c3bf29275eeab0ad8254b1c04d24ef94743f5833c1be7387b2b2730",
+  "evidence": "6d7e9092e67e918693d212b20b59d03ad394c843c5bc049b4cbf272a2e1ff384",
   "files": {
    "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
    "auth.py": "8dab9bc1c6aec678cb16c815d8a50f4d9b7a9cb7162c6201e55f71f116481396",
