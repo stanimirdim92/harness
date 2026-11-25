@@ -198,6 +198,17 @@ jobs:
         working-directory: tools/evals/workflow
         run: python3 -m unittest -q test_runner test_migration
 
+      # Eval core, sandbox and the todo list: the shared logic of every suite.
+      # NOT the live runs — those spend tokens and stay manual.
+      - name: Eval core, sandbox and todo
+        working-directory: tools/evals
+        run: python3 -m unittest -q test_core test_sandbox test_todo
+
+      # Tasks suite: its runner and checks, without running the real pipeline.
+      - name: Tasks eval logic
+        working-directory: tools/evals/tasks
+        run: python3 -m unittest -q test_tasks
+
       # Installation: preflight conflict detection and injected-failure rollback.
       - name: Codex skill installer
         run: python3 tools/tests/test-install-skills.py
