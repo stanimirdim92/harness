@@ -169,7 +169,7 @@ Send only what is needed to start correctly:
 
 - task/outcome;
 - `requirements: [REQ-###, ...]` — copied from the task packet. The executor
-  needs to know which requirement its work answers, and `/review` and `/ship`
+  needs to know which requirement its work answers, and `/review` and `/release`
   trace evidence against these ids;
 - acceptance criteria;
 - dependencies;

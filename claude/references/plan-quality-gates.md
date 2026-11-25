@@ -2,7 +2,7 @@
 
 The plan-side counterpart to `spec-quality-gates.md`: what makes a plan
 approvable, how its approval and its spec pin are recorded, and the id rules
-that let `/build`, `/review` and `/ship` address the same units of work.
+that let `/build`, `/review` and `/release` address the same units of work.
 
 Requirement-id rules and the `REQ-###` chain live in `spec-quality-gates.md` §3
 and are not repeated here.
@@ -53,7 +53,7 @@ Three id spaces, one owner each, none reused:
 ambiguous exactly when someone is trying to trace a decision.
 
 Ids are **stable after approval and never renumbered.** `/build`, `/review` and
-`/ship` all address work by these ids, so renumbering silently invalidates every
+`/release` all address work by these ids, so renumbering silently invalidates every
 report that referenced the old numbers. A task that is dropped or replaced keeps
 its id and is marked superseded (`~~T003~~ superseded by T007`); the next task
 takes the next unused number.

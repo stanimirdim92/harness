@@ -64,7 +64,7 @@ Disposition (`../references/findings.md` §Dispositions):
 - **REQUIRED** — release-relevant reliability/consistency defect.
 - **ADVISORY** — non-blocking resilience improvement.
 
-When uncertain which severity applies, choose the lower one — `/review` maps severity straight to release disposition, so an inflated finding becomes a false blocker at `/ship`, and a real one earns its tier through evidence.
+When uncertain which severity applies, choose the lower one — `/review` maps severity straight to release disposition, so an inflated finding becomes a false blocker at `/release`, and a real one earns its tier through evidence.
 
 When a defect is one instance of a pattern, name the pattern and list every
 instance in the diff.

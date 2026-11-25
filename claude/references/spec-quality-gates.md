@@ -6,7 +6,7 @@ approvable, how approval is recorded, and how a requirement id is traced from
 spec to release.
 
 Single-sourced here for the same reason as `reviewer-triggers.md` — five
-consumers (`/spec`, `/plan`, `/test`, `/review`, `/ship`) enforcing
+consumers (`/spec`, `/plan`, `/test`, `/review`, `/release`) enforcing
 copy-pasted versions of one rule set is how the copies start disagreeing.
 
 ## 1. Requirements quality — approval-check assertions
@@ -104,7 +104,7 @@ The chain each id carries:
 | `/build` | Carries the ids in each task packet, so an executor knows which requirement its work answers. |
 | `/test` | Reports verification evidence per requirement id, not per file. |
 | `/review` | Records findings and evidence against requirement ids. |
-| `/ship` | Blocks GO while any requirement lacks both implementation and verification evidence. |
+| `/release` | Blocks GO while any requirement lacks both implementation and verification evidence. |
 
 Two failure modes this catches, which prose-reading does not:
 

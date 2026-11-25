@@ -39,8 +39,8 @@ OUT = ROOT / 'docs/harness-map.html'
 # The gate order is design, not data: no file states it as a list. Everything
 # else on a stage card is read from the command file. Intake is a skill, not
 # a command, so its card is read from the skill file instead.
-PIPELINE = ['intake', 'spec', 'plan', 'build', 'test', 'review', 'ship']
-HUMAN_GATE_AFTER = {'spec': 'approve spec', 'plan': 'approve plan', 'ship': 'push / merge'}
+PIPELINE = ['intake', 'spec', 'plan', 'build', 'test', 'review', 'release']
+HUMAN_GATE_AFTER = {'spec': 'approve spec', 'plan': 'approve plan', 'release': 'push / merge'}
 # Every stage runs on every ticket. /test runs on every production change and
 # skips only the exempt kinds in verification-triggers.md (ADR 0104).
 STAGE_NOTE = {'test': 'skipped only for docs, test-only, formatting and generated changes'}
@@ -55,8 +55,8 @@ LOOPS = [
     ('test', 'spec', 'the spec does not settle it', 'commands/test.md', 'spec does not settle routes to `/spec`'),
     ('review', 'build', 'BLOCKER / REQUIRED: fix, 3 rounds max', 'commands/review.md',
      '`counted=4` means three rounds did not converge'),
-    ('ship', 'build', 'NO-GO: fix, then /test and /review', 'commands/ship.md', 'A production fix returns to `/build`'),
-    ('ship', 'spec', 'withdraw a requirement', 'commands/ship.md',
+    ('release', 'build', 'NO-GO: fix, then /test and /review', 'commands/release.md', 'A production fix returns to `/build`'),
+    ('release', 'spec', 'withdraw a requirement', 'commands/release.md',
      'withdrawn from the spec through `/spec` with re-approval'),
 ]
 ROUND_CAP_NOTE = 'After three review rounds /review stops, and you rethink the approach (ADR 0089).'
@@ -69,7 +69,7 @@ STAGE_OUTPUT = {
     'build': 'local commits, task Status: Done',
     'review': 'findings: BLOCKER / REQUIRED / ADVISORY',
     'test': 'VERIFY PASS / NOT REQUIRED / FAIL / BLOCKED',
-    'ship': 'GO / NO-GO with a rollback plan',
+    'release': 'GO / NO-GO with a rollback plan',
 }
 INTAKE_SKILL = 'jira-ticket'
 RUN = ROOT / 'tools/run'
@@ -731,8 +731,8 @@ def pipeline_flow(cmds, writers):
 
     cx = X + W / 2
     edge_label = {'intake': 'intake summary', 'spec': 'draft spec', 'plan': 'draft plan', 'build': 'candidate commits',
-                  'test': 'VERIFY PASS', 'review': 'clean review and evidence', 'ship': 'GO and rollback plan'}
-    after_gate = {'spec': 'approved spec', 'plan': 'approved plan', 'ship': None}
+                  'test': 'VERIFY PASS', 'review': 'clean review and evidence', 'release': 'GO and rollback plan'}
+    after_gate = {'spec': 'approved spec', 'plan': 'approved plan', 'release': None}
     main = [n for n in PIPELINE if n in cmds]
     boxes = {}
     for i, name in enumerate(main):
@@ -773,7 +773,7 @@ def pipeline_flow(cmds, writers):
         out.append(f'<path d="M{right},{sy} H{lx} V{ty} H{right + 2}" class="f-back" marker-end="url(#f-arw)"/>')
         out.append(f'<text x="{right + 10}" y="{sy - 6}" class="f-edge-label">{e(label)}</text>')
     height = y + 16
-    svg = (f'<svg viewBox="0 0 {SVGW} {height}" role="img" aria-label="The pipeline from Jira intake to /ship: each '
+    svg = (f'<svg viewBox="0 0 {SVGW} {height}" role="img" aria-label="The pipeline from Jira intake to /release: each '
            'stage, who runs it and what it leaves behind, the three human decisions, and the routes back to an '
            'earlier stage.">'
            '<defs><marker id="f-arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" '
@@ -815,10 +815,10 @@ CONVENTIONS = [
     ('Status words', 'Pending / Done', 'Task status in the todo; flipped to Done in the commit that finishes it', 'executor', 'references/templates/task.md', '**Status:** Pending'),
     ('Status words', 'BUILD COMPLETE / BUILD BLOCKED', 'The /build result', '/build', 'commands/build.md', 'BUILD COMPLETE'),
     ('Status words', 'VERIFY PASS / NOT REQUIRED / FAIL / BLOCKED', 'The /test result', '/test', 'commands/test.md', 'VERIFY BLOCKED'),
-    ('Status words', 'BLOCKER / REQUIRED / ADVISORY', 'How serious a review finding is: the reviewer sets it, /ship decides on it', 'reviewers', 'references/findings.md', '## Dispositions'),
+    ('Status words', 'BLOCKER / REQUIRED / ADVISORY', 'How serious a review finding is: the reviewer sets it, /release decides on it', 'reviewers', 'references/findings.md', '## Dispositions'),
     ('Status words', 'killed / survived', 'A mutation probe: a surviving mutant is a missing test', 'test-engineer', 'agents/test-engineer.md', 'has survived'),
     ('Status words', 'Weakened tests: none found / Not verified', 'The /review result of the weakened-test guard', '/review', 'commands/review.md', 'Weakened tests: none found'),
-    ('Status words', 'GO / NO-GO / SHIP BLOCKED', 'The /ship decision', '/ship', 'commands/ship.md', 'SHIP BLOCKED'),
+    ('Status words', 'GO / NO-GO / SHIP BLOCKED', 'The /release decision', '/release', 'commands/release.md', 'SHIP BLOCKED'),
     ('Status words', 'Open / Mitigated / Fixed — <check>', 'A failure row in the observation log; Fixed names the check that catches it', 'you', '../docs/observation-log.md', 'Fixed — <check>'),
     ('Flags', '`OPEN QUESTION:` block', 'A choice that is yours; the spec cannot be approved while one remains', '/spec', 'skills/spec-driven-development/SKILL.md', 'OPEN QUESTION:'),
     ('Flags', '`SPEC CONFLICT`', 'The spec promises what the code or plan cannot deliver; back to /spec', '/plan, /build', 'commands/plan.md', 'SPEC CONFLICT'),

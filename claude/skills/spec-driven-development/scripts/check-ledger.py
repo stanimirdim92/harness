@@ -4,7 +4,7 @@
 check-spec and check-plan run once, when /spec and /plan write their files.
 Work after that — decisions added in conversation, commits made outside
 /build, gaps deferred "for /review" — changed nothing they look at, so the
-records drifted with no gate noticing (LD-365, ADR 0088). /review and /ship
+records drifted with no gate noticing (LD-365, ADR 0088). /review and /release
 run this; any session can run it on request.
 
 Failures (exit 1):

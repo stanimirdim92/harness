@@ -163,4 +163,4 @@ Evidence is an executed check, not confidence.
 
 Never invoke another agent or slash command. `/build` owns orchestration and
 integration; `/test` independently runs the change; `/review` owns
-independent review; `/ship` owns the final verdict.
+independent review; `/release` owns the final verdict.

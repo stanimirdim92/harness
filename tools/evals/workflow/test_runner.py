@@ -303,7 +303,7 @@ class GatesRunTests(unittest.TestCase):
     def test_the_run_records_the_hash_of_each_instruction_file_the_cases_read(self):
         _, _, doc, _ = self.run_gates(StubClaude(self.answer), trials=1)
         hashes = doc['instruction_hashes']
-        self.assertEqual(sorted(hashes), sorted(['commands/ship.md', 'references/target-selection.md',
+        self.assertEqual(sorted(hashes), sorted(['commands/release.md', 'references/target-selection.md',
                                                   'references/findings.md', 'references/risk-tiers.md']))
         for rel, digest in hashes.items():
             self.assertEqual(digest, hashlib.sha256((HARNESS / rel).read_bytes()).hexdigest())
@@ -371,7 +371,7 @@ def make_case(root, case_id, files=None, check_py=None, templates=None, **fields
     """Write `<root>/<case_id>/case.json` and its files, and return the folder."""
     folder = Path(root) / case_id
     folder.mkdir(parents=True)
-    doc = dict(stage='shipverdict', request='Run /ship WF-40.', split='optimization', tags=['t'],
+    doc = dict(stage='shipverdict', request='Run /release WF-40.', split='optimization', tags=['t'],
                checks={'is_decided': {'state': 'decided'}})
     doc.update(fields)
     doc = {k: v for k, v in doc.items() if v is not None}
@@ -409,7 +409,7 @@ class CaseFieldTests(CaseFolderTestCase):
     def test_a_complete_case_loads(self):
         case = self.load(setup=[{'step': 'git_init'}], evidence='note')
         self.assertEqual((case['id'], case['stage'], case['split'], case['tags']), ('c1', 'shipverdict', 'optimization', ['t']))
-        self.assertEqual((case['request'], case['evidence']), ('Run /ship WF-40.', 'note'))
+        self.assertEqual((case['request'], case['evidence']), ('Run /release WF-40.', 'note'))
 
     def test_setup_and_evidence_are_optional(self):
         case = self.load()

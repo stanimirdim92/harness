@@ -2,7 +2,7 @@
 """Count how review findings ended, per reviewer, from the review SARIF files.
 
 /review appends each round to one SARIF file per ticket, docs/reviews/<TICKET>.sarif
-(ADR 0145; older tickets have one file per round, ADR 0120), and /ship writes each finding's resolution into it (ADR 0093). A finding that
+(ADR 0145; older tickets have one file per round, ADR 0120), and /release writes each finding's resolution into it (ADR 0093). A finding that
 ends `fixed` was worth raising. One that ends `refuted` was noise: the code was
 already right. `answered` is a question the approved spec already answers, or
 a restatement of the owner's own request: neither a bug found nor a false
@@ -118,7 +118,7 @@ ACTIONS = {
            'else a REVIEW.md "Always check" line if it is a project convention; '
            'else a CLAUDE.md line if it is how the code gets written.',
     'silence': 'mostly refuted: add it to REVIEW.md "Do not report", or narrow the reviewer prompt.',
-    'watch': 'nothing judged yet (open or answered): decide after /ship resolves them.',
+    'watch': 'nothing judged yet (open or answered): decide after /release resolves them.',
 }
 
 

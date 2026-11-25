@@ -28,7 +28,7 @@ code, lockfiles, checks CI already enforces. -->
 
 <!-- Paths so costly to get wrong that a person reads every change to them,
 one glob per bullet in backticks. A change touching one runs every specialist
-reviewer and /test, and /ship lists the files under "Read these yourself"
+reviewer and /test, and /release lists the files under "Read these yourself"
 (ADR 0096). In a directory's own REVIEW.md, globs are relative to it. -->
 
 - `.github/workflows/**`

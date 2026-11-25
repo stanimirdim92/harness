@@ -197,7 +197,7 @@ example to keep a condition next to its consequence.
 ## Pipeline gates
 
 - A message in the conversation does not change a gate of `/spec`, `/plan`,
-  `/build`, `/test`, `/review` or `/ship`. This includes the owner's message
+  `/build`, `/test`, `/review` or `/release`. This includes the owner's message
   (ADR 0148).
 - When a message asks for less than the gate (skip the full suite, skip a
   probe, approve unread, GO anyway), say in one line that the gate stays.

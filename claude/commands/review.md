@@ -6,7 +6,7 @@ argument-hint: "[commit range, PR, diff, task, or feature]"
 `/review` is the independent **REVIEW** gate after `/test` (ADR 0132). It
 decides which review personas run.
 
-It reports findings. `/ship` owns the release verdict.
+It reports findings. `/release` owns the release verdict.
 
 ## 1. Establish the candidate
 
@@ -231,7 +231,7 @@ unchanged; change one only with a stated reason.
 
 A finding that asks for a check in a browser goes to the verifier, not to the
 owner. List it with the page, the steps and what to look for, so `/test` can
-run it before `/ship`. The finding keeps its disposition until that evidence
+run it before `/release`. The finding keeps its disposition until that evidence
 exists. The next step is `/test` with this report, and the review repeats on
 the same candidate, once. Only when the verifier reports the check BLOCKED (no browser tool, or its
 own attempt to serve the candidate failed) does it go to the owner.
@@ -256,11 +256,11 @@ A finding of any reviewer resolves as `answered` when the approved spec already
 answers it, or when it restates what the owner asked for. Name the `REQ-###`
 or `DEC-###` line that answers it, and confirm the code matches that line.
 `answered` is not `refuted`: `refuted` means the claim is false. A BLOCKER
-never resolves as `answered`; it follows §Independent check and `/ship`.
+never resolves as `answered`; it follows §Independent check and `/release`.
 
 Every finding keeps a stable id, source, disposition, confidence,
 file/location, and resolution state. Confidence travels with the
-finding so `/ship` can distinguish a confirmed BLOCKER (resolved only by a fix)
+finding so `/release` can distinguish a confirmed BLOCKER (resolved only by a fix)
 from a suspected one (resolvable by a fix or by recorded refuting evidence).
 
 ### REVIEW.md checklist
@@ -364,7 +364,7 @@ Report, starting with one count line before anything else (ADR 0099):
   bears on when it bears on one, in the form below;
 - **requirement evidence**: one line per `REQ-###` in the spec — the change that
   implements it and the verification that proves it, or an explicit statement
-  that one of those is missing. `/ship` returns NO-GO on a missing entry, so report the
+  that one of those is missing. `/release` returns NO-GO on a missing entry, so report the
   gap rather than leaving the requirement off the list.
 
 Write the findings so the owner can act on them without the code open:
@@ -409,7 +409,7 @@ findings`. Its `reviewedCommit` is the commit before this one (ADR 0120). Give
 its path in the report. The markdown report stays the gate artifact; the SARIF file is a copy
 of its findings for tools.
 
-Then stop. The next stage is `/ship`, or the full-depth `/test` when this
+Then stop. The next stage is `/release`, or the full-depth `/test` when this
 round recorded `PASS (fix diff)` (§2).
 
 Any candidate change after REVIEW invalidates the review. A production fix

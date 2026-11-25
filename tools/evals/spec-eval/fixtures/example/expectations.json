@@ -30,7 +30,7 @@
     },
     {
       "id": "requirement-ids",
-      "why": "REQ-### ids are grepped by /plan, /build and /ship. Losing them breaks the trace.",
+      "why": "REQ-### ids are grepped by /plan, /build and /release. Losing them breaks the trace.",
       "regex": "^### Requirement: REQ-\\d{3}"
     },
     {

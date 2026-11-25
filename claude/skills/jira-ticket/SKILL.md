@@ -172,7 +172,7 @@ fresh context. Every request re-reads the whole context, so raw Jira payloads
 left in it are paid for on each `/spec` turn (ADR 0084).
 
 For implementation or fixes, the expected pipeline is `/jira-ticket` → `/spec`
-→ `/plan` → `/build` → `/test` → `/review` → `/ship`. `/test` runs on every
+→ `/plan` → `/build` → `/test` → `/review` → `/release`. `/test` runs on every
 production change (ADR 0104). Do not skip phases. Return the summary
 and stop; the user invokes the next stage. When `/spec` invoked this skill,
 return to `/spec` instead.

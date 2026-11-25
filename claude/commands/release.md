@@ -3,7 +3,7 @@ description: Final release gate — synthesize review evidence into a GO/NO-GO d
 argument-hint: "[release/change under consideration, or commit range]"
 ---
 
-`/ship` is the final **SHIP** gate. It synthesizes; it does not dispatch agents
+`/release` is the final **SHIP** gate. It synthesizes; it does not dispatch agents
 or implement fixes.
 
 ## 1. Require the REVIEW handoff
@@ -45,7 +45,7 @@ Any FAIL is **SHIP BLOCKED**: an `Open` item, a `Pending` task that is not
 superseded, a spec that changed after the plan pin, or untracked deferred work.
 Exit 2 is **SHIP BLOCKED** too. Warnings go into the report.
 
-`/ship` never decides an open item itself. It may set an `OPEN-###`
+`/release` never decides an open item itself. It may set an `OPEN-###`
 disposition only when a recorded owner decision backs it. That is a `DEC-###`
 in the approved spec, or the owner's answer to the question below. Quote the
 `DEC-###` id, or the owner's words with the date, in the disposition. Put every
@@ -75,7 +75,7 @@ Run it after §2 has written the resolutions, so the row counts them.
 Print the header and the row exactly as `ticket-stats.py` outputs them, in
 one table. Below it, add one plain sentence that says what the numbers mean
 for this ticket, such as where the owner's time went. The owner adds the row
-to the harness repository; `/ship` does not write it. It never affects GO.
+to the harness repository; `/release` does not write it. It never affects GO.
 
 ### Shipped-bug record
 
@@ -85,7 +85,7 @@ row for the harness's `observation-log.md` "Shipped bugs" table (found, the
 ticket that shipped it, the bug, this fix's commit, the layer, why it
 missed). Also print the eval command for the fix:
 `python3 tools/evals/review-eval/run.py --new <short-name> --repo <project> --fix <fix sha>`.
-The owner adds both to the harness repository; `/ship` does not write them.
+The owner adds both to the harness repository; `/release` does not write them.
 
 ### Risk
 
@@ -136,14 +136,14 @@ in `../references/findings.md` §Dispositions.
   that addresses its specific failure scenario. Low confidence alone never
   waives a BLOCKER, and refutation evidence comes from the resolution loop
   (`/build` or the user) or from `/review`'s independent verification
-  (a REFUTED verdict with `file:line` evidence), not from `/ship` itself;
+  (a REFUTED verdict with `file:line` evidence), not from `/release` itself;
 - every **REQUIRED** finding must be fixed, refuted with recorded evidence that
   addresses its specific claim, explicitly accepted as risk, or deferred with a
   concrete reason. Refutation is the resolution for a false positive; do not
   record one as an accepted risk, which attributes to the release a risk it
   does not carry. Unlike a BLOCKER, a REQUIRED finding may be refuted at any
   confidence, but the evidence — not the reviewer's own uncertainty — is what
-  resolves it, and it comes from the resolution loop, not from `/ship` itself;
+  resolves it, and it comes from the resolution loop, not from `/release` itself;
 - a finding `/review` closed as **answered** keeps that resolution: the
   approved spec already answers it, or it restates the owner's own request.
   It needs the `REQ-###` or `DEC-###` line that answers it, and code that
@@ -172,7 +172,7 @@ pre-existing finding, or `open`.
 ADVISORY findings the author declined are `declined`. Never write `refuted`
 for an `answered` finding: `refuted` means the claim is false, and
 `answered` means the spec or the owner already settled it. `answered` comes
-from `/review` only; `/ship` never gives it to a finding itself. `review-noise.py`
+from `/review` only; `/release` never gives it to a finding itself. `review-noise.py`
 counts these to show which reviewers raise findings that end as fixes and
 which raise noise (ADR 0093). It counts `answered` apart, as neither. Commit
 the file, with any ledger change, as a ledger-only commit (ADR 0120).
@@ -199,7 +199,7 @@ For each listed class that this ticket also raised, propose one change under
 5. a REVIEW.md "Do not report" line, when the class is mostly refuted.
 
 The owner accepts or declines it. Never edit REVIEW.md, CLAUDE.md or the lint
-config from `/ship`; an accepted change is its own ticket or commit. A
+config from `/release`; an accepted change is its own ticket or commit. A
 proposal never blocks GO.
 
 A production fix returns to `/build`, then the new candidate goes through

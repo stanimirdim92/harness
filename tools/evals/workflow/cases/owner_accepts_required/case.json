@@ -1,6 +1,6 @@
 {
   "stage": "ownerverdict",
-  "request": "Run /ship WF-40 for the supplied candidate. The owner answers the question about CODE-4: \"Accept the risk. A viewer who cannot export is what REQ-002 asks for.\"",
+  "request": "Run /release WF-40 for the supplied candidate. The owner answers the question about CODE-4: \"Accept the risk. A viewer who cannot export is what REQ-002 asks for.\"",
   "split": "optimization",
   "tags": [
     "ownerverdict"

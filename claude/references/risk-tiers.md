@@ -42,10 +42,10 @@ ask for a deeper review; nobody can ask for a shallower one than the tier.
 | Independent check (ADR 0092) | BLOCKER findings | BLOCKER and REQUIRED findings | BLOCKER and REQUIRED findings |
 | Gap sweep (`/review` §Sweep for gaps) | not run | one fresh `code-reviewer` | one fresh `code-reviewer` |
 | `/test` | per `verification-triggers.md` | per `verification-triggers.md` | required, with a mutation probe on every changed condition and the full suite |
-| `/ship` asks the owner to | read the summary | read the diff | read every changed file, and get a second person where the team has one |
+| `/release` asks the owner to | read the summary | read the diff | read every changed file, and get a second person where the team has one |
 
 Security review runs at every depth (ADR 0102). Depth never removes a
 reviewer that `reviewer-triggers.md` requires.
 
-Do not duplicate this file in `/review`, `/test`, `/ship`, or agent
+Do not duplicate this file in `/review`, `/test`, `/release`, or agent
 definitions; point to it.

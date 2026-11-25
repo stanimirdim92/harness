@@ -17,7 +17,7 @@ Objective states purpose and scope; Change Impact points to changed/preserved
 requirement ids; Testing Strategy names evidence and commands. Do not restate
 the scenarios across those sections. The `### Requirement:` / `#### Scenario:`
 heading forms and `REQ-###` ids stay mandatory in both forms — `/plan`, `/test`,
-`/review` and `/ship` enumerate them mechanically.
+`/review` and `/release` enumerate them mechanically.
 
 For a bug fix, use `bugfix-spec.md` instead: same header and id rules, but it
 leads with reproduction evidence and carries an explicit preserved-behavior
@@ -67,7 +67,7 @@ enough. Name the affected `REQ-###` or contract, not just the area.]
 ## Requirements
 [One `### Requirement:` per behavior the change must provide, each with
 `#### Scenario:` blocks for its cases. These exact heading forms are
-load-bearing: `/plan`, `/test`, `/review` and `/ship` enumerate them
+load-bearing: `/plan`, `/test`, `/review` and `/release` enumerate them
 mechanically (grep `### Requirement:`) to map coverage and evidence
 requirement-by-requirement instead of interpreting prose.]
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Guard the spec -> plan -> build -> review -> ship pipeline against artifact-path drift.
 
-`/spec` and `/plan` write artifacts that `/build`, `/test`, `/review`, `/ship`,
+`/spec` and `/plan` write artifacts that `/build`, `/test`, `/review`, `/release`,
 the two pipeline skills, and the quality gates read back by path. When one side
 renames or moves an artifact and the other keeps the old spelling, the pipeline
 breaks silently -- a stage reports "no spec found" against a spec that exists.
@@ -45,7 +45,7 @@ ALLOWED = [re.compile(p + r'\Z') for p in (
 GUARDED = [
     'AGENTS.md',
     'commands/spec.md', 'commands/plan.md', 'commands/build.md',
-    'commands/test.md', 'commands/review.md', 'commands/ship.md',
+    'commands/test.md', 'commands/review.md', 'commands/release.md',
     'skills/spec-driven-development/SKILL.md',
     'skills/planning-and-task-breakdown/SKILL.md',
     'references/spec-quality-gates.md', 'references/plan-quality-gates.md',

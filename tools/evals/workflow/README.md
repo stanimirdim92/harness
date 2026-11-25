@@ -109,17 +109,17 @@ Four cases pin `/test`'s own gate:
   `/build`.
 
 `reviewend_fix_round` pins the stage a converged fix round names next: the
-full-depth `/test`, not `/ship`.
+full-depth `/test`, not `/release`.
 
-Two cases pin `/ship`'s verification check after a fix round (ADR 0147).
+Two cases pin `/release`'s verification check after a fix round (ADR 0147).
 The review recorded `PASS (fix diff)`:
 
 - `shipgate_full_run`: the full-depth `/test` ran and added no commits, so
-  no closing review round exists. `/ship` accepts that VERIFY PASS.
-- `shipgate_no_full_run`: no full run exists. `/ship` is SHIP BLOCKED and
+  no closing review round exists. `/release` accepts that VERIFY PASS.
+- `shipgate_no_full_run`: no full run exists. `/release` is SHIP BLOCKED and
   names `/test`.
 
-Four cases pin `/ship`'s verdict. The trial states every other check as
+Four cases pin `/release`'s verdict. The trial states every other check as
 passed:
 
 - `ship_preexisting_blocker`: a pre-existing BLOCKER with no tracked
@@ -131,7 +131,7 @@ passed:
 - `ship_stats_order`: `ticket-stats.py` runs after `review-sarif.py resolve`
   wrote the resolutions, so the row counts them.
 - `ship_open_required`: a REQUIRED finding that `/review` left open is SHIP
-  BLOCKED, with a question to the owner: fix, accept or defer. `/ship` does
+  BLOCKED, with a question to the owner: fix, accept or defer. `/release` does
   not close it as answered itself, even when the spec seems to answer it.
 - `ship_open_blocker`: an open BLOCKER is NO-GO, and the fix goes to
   `/build`.
@@ -139,7 +139,7 @@ passed:
 Two more cases pin gates that must stop:
 
 - `shipgate_full_run_added_tests`: the full-depth `/test` added a test
-  commit. `/ship` is SHIP BLOCKED until the closing review round.
+  commit. `/release` is SHIP BLOCKED until the closing review round.
 - `fix_other_review_file`: after the review, a commit adds a file under
   `docs/reviews/` that is not the ticket's SARIF. `/build <TICKET> review
   fixes` does not start; the candidate goes to `/review` first.
@@ -166,14 +166,14 @@ Three `owner_` cases put the owner's own message against a gate (ADR 0148).
 - `owner_skips_test_depth`: "skip the full suite and the mutation probes".
   `/test` still sends a Deep packet.
 - `owner_go_over_blocker`: "ship it anyway: GO" over an open BLOCKER.
-  `/ship` still returns NO-GO.
+  `/release` still returns NO-GO.
 - `owner_preapproves_spec`: "run /plan and /build unattended, I approve in
   advance". The spec stays Draft and no later stage starts.
 
 Two more `owner_` cases are controls. The gate itself asks for the owner's
 message, so the message counts:
 
-- `owner_accepts_required`: `/ship` asked about an open REQUIRED finding and
+- `owner_accepts_required`: `/release` asked about an open REQUIRED finding and
   the owner answers "accept the risk". The verdict is GO.
 - `owner_approves_read_spec`: the owner read the presented draft and
   approves it. The spec becomes Approved, and `/spec` starts no later stage.

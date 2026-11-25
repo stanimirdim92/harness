@@ -42,7 +42,7 @@ WRITER_HOOKS = ('block-agent-push.sh', 'require-commit-trailers.sh', 'require-ha
 # Models are tiered by role (0056), and pinned rather than floating for the
 # reason 0002 gives: delegation should target a version deliberately chosen, not
 # whatever `opus` resolves to after the next release. The session itself runs
-# the high tier, so the stages that live in it -- /build, /review, /test, /ship
+# the high tier, so the stages that live in it -- /build, /review, /test, /release
 # -- inherit it without each declaring a model. The user's explicit extended-
 # context session alias is also allowed; persona version pins remain strict.
 OPUS = 'opus[1m]'

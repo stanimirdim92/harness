@@ -22,7 +22,7 @@ affected paths, without mandatory subheadings); Task Index; Requirement
 Coverage; a Verification Strategy containing the focused command only when it
 differs from the integrated command; and Handoff. Do not add empty Decisions,
 Workstreams, Boundaries, Risks, or other sections. The metadata header and ids
-are never optional — `/build`, `/review` and `/ship` read them.
+are never optional — `/build`, `/review` and `/release` read them.
 
 The todo file holds each full task packet; the plan only indexes it. For one
 coherent behavior, implementation and its proving tests are one task, not an

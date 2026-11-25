@@ -350,7 +350,7 @@ def new_fixture(ticket, repo, reference, intake=None, jira=None, at=None, budget
     terms = reference_terms(spec)
     expectations = [
         {'id': 'draft-only', 'why': 'Only a human sets Approved.', 'regex': r'^\**Status:?\**:?\s*Draft'},
-        {'id': 'requirement-ids', 'why': 'REQ-### ids are what /plan, /build and /ship trace.',
+        {'id': 'requirement-ids', 'why': 'REQ-### ids are what /plan, /build and /release trace.',
          'regex': r'REQ-\d{3}'},
     ] + [{'id': f'term:{term}', 'severity': 'should', 'reference_term': True,
           'why': 'The deployed spec names this; a fresh spec that does not may have missed it.',

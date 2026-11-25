@@ -1,13 +1,13 @@
 # Review findings
 
 The single definition of a review finding's disposition and of the review
-SARIF. Reviewers, `/review` and `/ship` read this file. It is short on purpose:
+SARIF. Reviewers, `/review` and `/release` read this file. It is short on purpose:
 read it whole. The other output contracts are catalogued in
 `component-response-contracts.md`, which maintainers read and no stage loads.
 
 ## Dispositions
 
-| Disposition | Means | `/ship` resolves it by | SARIF level |
+| Disposition | Means | `/release` resolves it by | SARIF level |
 |---|---|---|---|
 | BLOCKER | Incorrect behavior, data loss, a security exposure, or a broken contract | a fix; a suspected (low-confidence) one also by recorded refuting evidence | `error` |
 | REQUIRED | A defect to fix before merge: an unhandled path, a missing test, a weak contract | a fix, refuting evidence, accepted risk, or a deferral with a reason | `warning` |
@@ -15,7 +15,7 @@ read it whole. The other output contracts are catalogued in
 
 `blind-reviewer` also returns intent-dependent findings with no disposition
 yet; `/review` gives each one a disposition or closes it. This table is the
-only definition: personas, `/review` and `/ship` point here.
+only definition: personas, `/review` and `/release` point here.
 
 **Failure scenario.** Every BLOCKER and REQUIRED finding names one: the
 input, state or timing, and the wrong result it produces. A claim with no
@@ -25,7 +25,7 @@ independent check in `/review` tests this scenario.
 **Pre-existing.** A finding is marked `pre-existing` when the defect already
 exists at the candidate base and the change neither introduces it nor makes it
 reachable or worse. It keeps its disposition, so its seriousness stays visible.
-It does not block `/ship`; `/ship` records it as a follow-up. A pre-existing
+It does not block `/release`; `/release` records it as a follow-up. A pre-existing
 BLOCKER needs a tracked one: without it the verdict is NO-GO (ADR 0090). A
 change that
 adds a caller of the old defect, copies it, or depends on it makes it new, and
@@ -73,7 +73,7 @@ other findings omit it.
 `resolution` is `open`, `fixed`, `refuted` (the claim is false), `answered`
 (the approved spec answers it, or it restates the owner's request; never a
 BLOCKER), `accepted`, `deferred`, `follow-up` or `declined`. `/review` sets
-`answered`; `/ship` sets the rest. `review-noise.py` counts `answered` as
+`answered`; `/release` sets the rest. `review-noise.py` counts `answered` as
 neither a finding fixed nor noise.
 `aliases` lists the other ids of a duplicate group (`["BLIND-7"]`). Each id
 stays its own result.

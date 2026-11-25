@@ -352,11 +352,11 @@ instead, but the response shape each role produces is identical either way.
 ## 5. Command stage-gate contracts
 
 Six commands live in `../../claude/commands/` and own the pipeline
-(`docs/harness-map.html` §Pipeline): `/spec -> /plan -> /build -> /test -> /review -> /ship`.
+(`docs/harness-map.html` §Pipeline): `/spec -> /plan -> /build -> /test -> /review -> /release`.
 `/test` runs on every production change; only the exempt kinds in
 `verification-triggers.md` skip it (ADR 0104). Jira intake (`jira-ticket` skill) comes
 before `/spec`. Each ends in exactly one named terminal
-state and, except `/ship`, writes an artifact to a fixed path.
+state and, except `/release`, writes an artifact to a fixed path.
 
 | Command | Artifact | Terminal states |
 |---|---|---|
@@ -365,7 +365,7 @@ state and, except `/ship`, writes an artifact to a fixed path.
 | `/build` | scoped local commits | **BUILD COMPLETE** \| **BUILD BLOCKED** |
 | `/test` | test-only commits | **VERIFY PASS** \| **VERIFY FAIL** \| **VERIFY BLOCKED** |
 | `/review` | the review SARIF `docs/reviews/[TICKET].sarif`, one per ticket, committed | count line, or **REVIEW BLOCKED** |
-| `/ship` | — (a decision only) | **GO** \| **NO-GO** \| **SHIP BLOCKED** |
+| `/release` | — (a decision only) | **GO** \| **NO-GO** \| **SHIP BLOCKED** |
 
 ### `/build` → BUILD COMPLETE / BUILD BLOCKED
 
@@ -397,7 +397,7 @@ production-code fix invalidates a prior VERIFY result.
 ### `/review` → disposition table + requirement evidence
 
 Every reviewer labels each finding with one of three dispositions. The
-label is set once, by the reviewer, and carried unchanged to `/ship`.
+label is set once, by the reviewer, and carried unchanged to `/release`.
 
 The dispositions and the `pre-existing` mark are defined once, in
 `findings.md` §Dispositions.
@@ -408,8 +408,8 @@ post-BUILD test-only commits, the **Risk · Depth** line (`risk-tiers.md`),
 STALE (depth)**, required-reviewer list and trigger decisions, each reviewer's result,
 every finding with disposition and its `REQ-###` where applicable, and one
 requirement-evidence line per spec `REQ-###` (implementation + verification, or
-an explicit gap — `/ship` blocks on a missing entry). Confidence travels with
-each finding so `/ship` can tell a confirmed BLOCKER from a suspected one.
+an explicit gap — `/release` blocks on a missing entry). Confidence travels with
+each finding so `/release` can tell a confirmed BLOCKER from a suspected one.
 Every id stays in the report. Duplicates across reviewers are grouped under
 one primary id with aliases (`CODE-5 = BLIND-7`) at the group's highest
 disposition. Answered findings share one `Answered:` line with their ids.
@@ -419,7 +419,7 @@ disposition. Answered findings share one `Answered:` line with their ids.
 `/review` also writes its findings as SARIF 2.1.0. The shape and every
 property are defined in `findings.md` §Review SARIF.
 
-### `/ship` → GO / NO-GO / SHIP BLOCKED
+### `/release` → GO / NO-GO / SHIP BLOCKED
 
 ```markdown
 ## Ship Decision: GO | NO-GO | SHIP BLOCKED
@@ -479,7 +479,7 @@ carrying both implementation and verification evidence, every REQUIRED finding
 resolved/risk-accepted/deferred with a reason, passed release-readiness
 attestations, a concrete rollback plan, and an explained tree state. **GO is a
 readiness verdict only — it does not authorize push, tag, deploy, release,
-protected-branch mutation, or history rewriting.** `/ship` sets an open
+protected-branch mutation, or history rewriting.** `/release` sets an open
 item's disposition only from a recorded owner decision, and quotes it. After
 the verdict it asks one multi-select question: send selected ADVISORY
 findings to `/build`, post the summary to Jira. Nothing runs unselected.

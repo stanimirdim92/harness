@@ -95,4 +95,4 @@ message with the `Refs: <TICKET>` trailer
 (`executor-development-discipline` §Ticket trailers). Then stop and recommend
 `/clear` before `/build`, which resumes from the
 plan and task packets (ADR 0084). `/plan` authorizes planning only; it does not implement or invoke
-`/build`, `/test`, `/review`, or `/ship`.
+`/build`, `/test`, `/review`, or `/release`.

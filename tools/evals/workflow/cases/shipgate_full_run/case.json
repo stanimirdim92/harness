@@ -1,6 +1,6 @@
 {
   "stage": "shipgate",
-  "request": "Run /ship WF-40 for the supplied candidate. Decide the independent-verification check only.",
+  "request": "Run /release WF-40 for the supplied candidate. Decide the independent-verification check only.",
   "split": "optimization",
   "tags": [
     "shipgate"

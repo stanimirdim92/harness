@@ -2,7 +2,7 @@
 
 How a gate command resolves *what it operates on* — the ticket, task set,
 change, or candidate — when the invocation's argument is missing or ambiguous.
-Single source for `/build`, `/test`, `/review`, and `/ship`; don't restate this
+Single source for `/build`, `/test`, `/review`, and `/release`; don't restate this
 in a command.
 
 1. **Explicit argument wins.** Use it verbatim.
@@ -22,7 +22,7 @@ the user can't see.
 
 ## Gate handoffs
 
-`/test`, `/review`, and `/ship` accept a predecessor completion message only
+`/test`, `/review`, and `/release` accept a predecessor completion message only
 when either:
 
 - the complete message appears in the current conversation;

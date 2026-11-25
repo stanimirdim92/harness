@@ -26,9 +26,9 @@ commit has a workflow-eval commit after it, up to `59640b6`.
 | `41db53f`, `9582184` | build.md: the confirmed contradictions, five probes |
 | `0ff4308`, `1e54bc5` | Fix rounds run `/test` on the fix diff (ADR 0147), two audit fixes |
 | `5c7bbaf`, `d256f6f` | test.md: six fixes to the `/test` gate and the browser-check route |
-| `634ecca`, `d40d88b` | ship.md: accept the full-depth VERIFY PASS after a fix round |
-| `0a8bac0`, `e514503` | ship.md: nine fixes to the release gate |
-| `6cf47b4`, `0cf01ed` | ship.md: the verdict for an unresolved finding |
+| `634ecca`, `d40d88b` | release.md: accept the full-depth VERIFY PASS after a fix round |
+| `0a8bac0`, `e514503` | release.md: nine fixes to the release gate |
+| `6cf47b4`, `0cf01ed` | release.md: the verdict for an unresolved finding |
 | `354865e`, `59640b6` | spec.md: five fixes before the draft |
 | `8f4e5c3` | Owner messages do not override pipeline gates (ADR 0148, `claude/AGENTS.md` §Pipeline gates), three `owner_` probes |
 | `22a5c14` | `owner_go_over_blocker` evidence fixed; two control probes |
@@ -71,7 +71,7 @@ side already had the union of the two trigger lists.
 
 Duplicate cuts (owner decisions, 2026-11-22):
 
-- The two DEAD clauses stay: S018 in ship.md and P031 in spec.md. Each
+- The two DEAD clauses stay: S018 in release.md and P031 in spec.md. Each
   handles a rare event, not a wrong rule.
 - test.md: three cuts, about 230 words. The rationale paragraph, the
   "verifier should" duty list (now one line), and two closing sentences.
@@ -82,7 +82,7 @@ Duplicate cuts (owner decisions, 2026-11-22):
 - The new packets no longer repeat the verifier's method (old 3 of 3, new 0
   of 3). The `verifiersteps_` pair shows the persona carries it: 5/5 with the
   plain packet, 5/5 with the method in the packet.
-- ship.md, spec.md, plan.md, build.md: no cut. The ship.md duplicates are the
+- release.md, spec.md, plan.md, build.md: no cut. The release.md duplicates are the
   "GO requires" checklist, kept on purpose at the point of decision. The
   spec.md and plan.md ones are the sentences that send a command to its skill.
 - `agents/executor.md` and `figma-executor.md`: the Input list now names the

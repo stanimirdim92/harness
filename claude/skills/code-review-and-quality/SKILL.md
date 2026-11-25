@@ -221,7 +221,7 @@ finding standard is ADVISORY. Low confidence lowers certainty, not
 severity — a low-confidence possible race condition is still BLOCKER, marked
 low-confidence, not ADVISORY.
 
-When uncertain which disposition applies, choose the lower one. `/ship` acts on
+When uncertain which disposition applies, choose the lower one. `/release` acts on
 the disposition as written, so an inflated finding becomes a false blocker at
 release, while a real one earns its tier through evidence. This is
 severity, not the finding standard: still record the finding; just tier it
@@ -248,7 +248,7 @@ REQUIRED when the change actively makes structure worse than before:
 This prevents authors from treating all feedback as mandatory and wasting time on optional suggestions.
 
 Use exactly these three labels. They are also the release dispositions
-`/review` reports and `/ship` decides on, so a finding keeps one label from
+`/review` reports and `/release` decides on, so a finding keeps one label from
 review to release. Splitting optional work across more labels makes the
 blocking set ambiguous.
 
@@ -276,7 +276,7 @@ verdict.
 
 This skill is the full standalone review method. The `/review` pipeline uses the
 compact `code-reviewer` and `blind-reviewer` personas instead and maps their
-findings before `/ship`. Inside `/review` the persona's rubric governs; do not
+findings before `/release`. Inside `/review` the persona's rubric governs; do not
 also load this skill for the same review.
 
 **Lead with what matters — by ordering, never by omission.** Within each
@@ -325,7 +325,7 @@ When resolving review disputes, apply this hierarchy:
 3. **Software design** must be evaluated on engineering principles, not personal preference
 4. **Codebase consistency** is acceptable if it doesn't degrade overall health
 
-**Don't accept a bare "I'll clean it up later."** Experience shows deferred cleanup rarely happens. Require cleanup before submission unless it's a genuine emergency. The only valid deferral is a filed ticket, self-assigned by the author, linked from the review — that is what "explicitly deferred with justification" means in the Verification checklist. Inside the pipeline, `/ship`'s resolution rules apply instead: fixed, refuted, accepted as risk, or deferred with a concrete reason.
+**Don't accept a bare "I'll clean it up later."** Experience shows deferred cleanup rarely happens. Require cleanup before submission unless it's a genuine emergency. The only valid deferral is a filed ticket, self-assigned by the author, linked from the review — that is what "explicitly deferred with justification" means in the Verification checklist. Inside the pipeline, `/release`'s resolution rules apply instead: fixed, refuted, accepted as risk, or deferred with a concrete reason.
 
 ## Honesty in Review
 
@@ -406,7 +406,7 @@ For triaging `npm|yarn audit` findings and supply-chain risk (typosquatting, com
 ```
 
 When invoked standalone, pair this checklist with the Output Contract's review
-recommendation. In the pipeline, `/review` reports review findings and `/ship`
+recommendation. In the pipeline, `/review` reports review findings and `/release`
 owns the separate GO/NO-GO release verdict.
 
 ## See Also
@@ -437,7 +437,7 @@ After review is complete:
 
 - [ ] Every finding from Step 3 appears in the output with an id, label, and confidence — none were silently dropped
 - [ ] All BLOCKER findings are resolved
-- [ ] All REQUIRED findings are resolved or deferred via a filed, self-assigned, linked ticket (inside the pipeline, `/ship`'s resolution rules apply)
+- [ ] All REQUIRED findings are resolved or deferred via a filed, self-assigned, linked ticket (inside the pipeline, `/release`'s resolution rules apply)
 - [ ] Tests pass
 - [ ] Build succeeds
 - [ ] The verification story is documented (what changed, how it was verified)

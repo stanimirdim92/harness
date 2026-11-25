@@ -79,7 +79,7 @@ certainty, not severity — a low-confidence possible data-loss path stays
 BLOCKER and marked low-confidence, with the evidence that would confirm or
 refute it named so the resolution loop can settle it.
 
-Label each finding with one of the release dispositions `/review` and `/ship`
+Label each finding with one of the release dispositions `/review` and `/release`
 use (`../references/findings.md` §Dispositions):
 
 - **BLOCKER** — incorrect behavior, data loss, security exposure, broken contract.

@@ -93,10 +93,10 @@ doing, not just what it is.
   ticket in and a reviewed candidate out, with nobody waiting between stages.
   ADRs 0109, 0114 and 0115 built this as Python runners. ADR 0119 removed
   them on 2026-11-03. They needed unattended modes in `/spec`, `/plan` and
-  `/ship`, and a `HANDOFF:` line only the runners read.
+  `/release`, and a `HANDOFF:` line only the runners read.
 
   **Shape.**
-  - `/spec`, `/plan` and `/ship` stay interactive; they hold the owner's
+  - `/spec`, `/plan` and `/release` stay interactive; they hold the owner's
     judgment.
   - A `workflows/pipeline.js` (`/pipeline <TICKET>`) runs `/build` → `/test`
     → `/review` in fixed steps. Each stage's result line is the handoff:
@@ -153,7 +153,7 @@ doing, not just what it is.
   **Logging (built 2026-11-14).** `log-failure-event.sh` appends each
   `StopFailure` and `PermissionDenied` event to `~/.claude/logs/failures.jsonl`.
   Nothing reads it yet: open it by hand to see why a run stopped. A reader
-  in `/ship` or `run-metrics.sh` is still to be built.
+  in `/release` or `run-metrics.sh` is still to be built.
 
   **Ready when** the next 3–5 tickets go `/build` → `/test` → `/review`
   interactively with no owner answer mid-run.
@@ -260,13 +260,13 @@ doing, not just what it is.
 - **Delta specs merged into living per-capability specs** (from
   Fission-AI/openspec): per-ticket specs become deltas
   (ADDED/MODIFIED/REMOVED/RENAMED requirements) against a living
-  `docs/specs/<capability>/spec.md`, and `/ship` owns merging the delta —
+  `docs/specs/<capability>/spec.md`, and `/release` owns merging the delta —
   fixes specs going stale after shipping, since nothing currently owns
   updating them. The `### Requirement:`/`#### Scenario:` anchors adopted in
   0040 are the prerequisite that makes the merge mechanical. Scope: ~3
-  harness edits (`spec-driven-development`, `templates/spec.md`, `ship.md`)
+  harness edits (`spec-driven-development`, `templates/spec.md`, `release.md`)
   plus an ADR; artifacts live per project; no new skill — fold the sync into
-  `/ship`'s Documentation attestation. Open decisions before adopting:
+  `/release`'s Documentation attestation. Open decisions before adopting:
   (a) capability taxonomy — who names/bounds capabilities (proposed default:
   `/spec` proposes the capability name, approved with the spec);
   (b) bootstrap — lazy founding, where the first delta in an area *is* the

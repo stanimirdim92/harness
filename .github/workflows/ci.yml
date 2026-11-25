@@ -52,7 +52,7 @@ jobs:
       # Writers' commits carry a Refs: trailer (adr/0081).
       - name: Hooks — commit trailers
         run: bash tools/tests/test-commit-trailers.sh
-      # /ship's current-base check: merge the base into a scratch worktree
+      # /release's current-base check: merge the base into a scratch worktree
       # and re-run the checks (adr/0095).
       - name: Current-base check
         run: bash tools/tests/test-base-check.sh
@@ -117,7 +117,7 @@ jobs:
         run: python3 tools/tests/test-weakened-tests.py
 
       # /spec and /plan check their own output: spec shape, and a plan that
-      # covers its spec with complete packets (adr/0081). /review and /ship
+      # covers its spec with complete packets (adr/0081). /review and /release
       # check that spec, plan, todo and open items still agree (adr/0088).
       - name: Spec and plan checks
         run: |

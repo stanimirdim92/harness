@@ -29,8 +29,8 @@ independently planned behavior wins over file count.
 The harness has these user-invoked stages:
 
 ```text
-INTAKE      DEFINE      PLAN       BUILD       REVIEW       SHIP
-intake  ->  /spec  ->   /plan  ->  /build  ->  /review  ->  /ship
+INTAKE      DEFINE      PLAN       BUILD       REVIEW       RELEASE
+intake  ->  /spec  ->   /plan  ->  /build  ->  /review  ->  /release
 (Jira)                                    \
                                            -> /test -> /review
                                               VERIFY, when required

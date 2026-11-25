@@ -206,7 +206,7 @@ Small, focused changes are easier to review and safer to deploy:
 ## Severity labels
 
 Use exactly these three. They are the release dispositions `/review` reports
-and `/ship` decides on (`../references/findings.md`
+and `/release` decides on (`../references/findings.md`
 §Dispositions). These definitions set the bar:
 
 **BLOCKER** — blocks merge (security vulnerability, data loss risk, broken
@@ -222,7 +222,7 @@ behavior, a test failure, a security exposure, data loss, or a misleading result
 for a future reader; everything else that survives the finding standard is a
 ADVISORY.
 
-When uncertain which severity applies, choose the lower one: `/ship` acts on the
+When uncertain which severity applies, choose the lower one: `/release` acts on the
 disposition as written, so an inflated finding becomes a false blocker. Still
 record the finding.
 

@@ -1,7 +1,7 @@
 # Open items and the ticket ledger
 
 The register for work the spec, plan and todo do not track, and the check that
-keeps the four files in agreement. `/review` and `/ship` run the check; every
+keeps the four files in agreement. `/review` and `/release` run the check; every
 session writes to the register.
 
 The spec, plan and todo are checked when `/spec` and `/plan` write them. Work
@@ -34,6 +34,6 @@ and the branch's commits:
 python3 ~/.claude/skills/spec-driven-development/scripts/check-ledger.py <TICKET>
 ```
 
-`/review` runs it, and `/ship` runs it with `--ship`, which also fails on an
+`/review` runs it, and `/release` runs it with `--ship`, which also fails on an
 `Open` item and on a `Pending` task the plan index does not mark superseded.
 Run it after any work outside the pipeline, before the session ends.

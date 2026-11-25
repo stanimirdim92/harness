@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check a spec's shape: the forms /plan, /build, /review and /ship read mechanically.
+"""Check a spec's shape: the forms /plan, /build, /review and /release read mechanically.
 
 A spec is prose, and its rules (spec-driven-development, the spec template)
 were text only. Text rules drift: a requirement loses its `Source:` line, a

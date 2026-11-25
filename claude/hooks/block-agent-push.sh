@@ -3,7 +3,7 @@
 # frontmatter `hooks:` — executor and test-engineer. Hard-denies anything that
 # moves work off the machine: `git push` in every spelling, and the `gh`
 # commands that push or publish for you. Local commits and local tags stay
-# allowed — they are what /review and /ship inspect; nothing reaches a remote
+# allowed — they are what /review and /release inspect; nothing reaches a remote
 # until a human pushes. Exit 0 always; the decision is JSON on stdout, per
 # https://code.claude.com/docs/en/hooks.
 set -euo pipefail

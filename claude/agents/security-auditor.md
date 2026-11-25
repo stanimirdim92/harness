@@ -59,7 +59,7 @@ categories when useful.
 
 ## Severity
 
-Label each finding with one of the release dispositions `/review` and `/ship`
+Label each finding with one of the release dispositions `/review` and `/release`
 use (`../references/findings.md` §Dispositions):
 
 - **BLOCKER** — a practical exploit with significant impact: broad compromise,
@@ -68,7 +68,7 @@ use (`../references/findings.md` §Dispositions):
 - **ADVISORY** — a defense-in-depth improvement or best practice.
 
 When uncertain which applies, choose the lower one. The label is the release
-disposition, so an inflated finding becomes a false blocker at `/ship`, and a
+disposition, so an inflated finding becomes a false blocker at `/release`, and a
 real one earns its tier through evidence.
 
 ## Confidence

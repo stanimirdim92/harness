@@ -3,7 +3,7 @@
 #
 # Two changes can each pass on their own and break the base together. A merge
 # queue catches that by re-running the checks on the latest base with the
-# change applied. This is the same check, for /ship, before GO:
+# change applied. This is the same check, for /release, before GO:
 #   1. fetch the base;
 #   2. when the base has not moved past the candidate's merge base, report
 #      "base current" and stop;

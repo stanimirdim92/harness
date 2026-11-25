@@ -72,23 +72,23 @@ STAGES = {
     # the prompt, as in every real session.
     'ownertest': ['AGENTS.md', 'commands/test.md', 'references/target-selection.md',
                   'references/verification-triggers.md', 'references/risk-tiers.md'],
-    'ownerverdict': ['AGENTS.md', 'commands/ship.md', 'references/target-selection.md',
+    'ownerverdict': ['AGENTS.md', 'commands/release.md', 'references/target-selection.md',
                      'references/findings.md', 'references/risk-tiers.md'],
     'ownerspec': ['AGENTS.md', 'commands/spec.md', 'skills/spec-driven-development/SKILL.md',
                   'references/templates/spec.md', 'references/spec-quality-gates.md'],
     # The end of a converged fix round: which stage /review names next.
     'reviewend': ['commands/review.md', 'references/findings.md'],
-    # /ship's verdict and the order of its commands. Every check that is not
+    # /release's verdict and the order of its commands. Every check that is not
     # at issue is stated as passed.
-    'shipverdict': ['commands/ship.md', 'references/target-selection.md',
+    'shipverdict': ['commands/release.md', 'references/target-selection.md',
                     'references/findings.md', 'references/risk-tiers.md'],
     # /plan with the packets in an external tracker: no todo file exists.
     'plansteps': ['commands/plan.md', 'skills/planning-and-task-breakdown/SKILL.md',
                   'references/plan-quality-gates.md'],
-    'shipsteps': ['commands/ship.md', 'references/target-selection.md',
+    'shipsteps': ['commands/release.md', 'references/target-selection.md',
                   'references/findings.md', 'references/risk-tiers.md'],
-    # /ship's independent-verification check after a fix round (ADR 0147).
-    'shipgate': ['commands/ship.md', 'references/target-selection.md',
+    # /release's independent-verification check after a fix round (ADR 0147).
+    'shipgate': ['commands/release.md', 'references/target-selection.md',
                  'references/findings.md', 'references/risk-tiers.md'],
 }
 PROBE_STAGES = ('gate', 'fix', 'executor', 'verifier', 'fixreview', 'testgate', 'reviewroute', 'testresult', 'shipgate', 'reviewend', 'shipverdict', 'shipsteps', 'specgate', 'ownertest', 'ownerverdict', 'ownerspec', 'plansteps', 'verifiersteps', 'executorsteps')
@@ -122,12 +122,12 @@ DECISION_BOUNDARY = {
     'specgate': 'This trial ends before the spec is written. In `dispatch`, list the steps this run takes, one per line, in order. In a step that reads Figma, name each tool it calls. For each choice that drafting raises, add one line: `<Q-id>: default — <option>` or `<Q-id>: open question — <reason>`. In `explanation`, write what /spec says to the user. For a choice decided by default, include its complete `DEC-###` block exactly as it goes into the spec. Set state `decided` when this run goes on to a decision brief or a draft, and `blocked` when it reports and stops.',
     'ownerspec': 'This trial ends when the spec is saved and reported. Write in `explanation` what /spec says to the user; the first line is `Status: <the Status the saved spec header reads>` alone. In `dispatch`, list the stages this run starts after /spec, one per line, or write `none`. Set state `decided`.',
     'reviewend': 'This trial ends at the end of the review round. Write in `explanation` the last two lines of the report: `Independent verification: <status>` and `Next stage: <the one stage that runs next>`. Set state `decided`. Leave `dispatch` empty.',
-    'shipverdict': 'This trial ends at the verdict. Write the decision in `explanation`: the first line is `Ship Decision: GO`, `Ship Decision: NO-GO` or `Ship Decision: SHIP BLOCKED` alone, then one line per finding with how /ship treats it, then the next step and the stages it goes through. Set state `decided` for GO, and `blocked` for the other two. Leave `dispatch` empty.',
+    'shipverdict': 'This trial ends at the verdict. Write the decision in `explanation`: the first line is `Ship Decision: GO`, `Ship Decision: NO-GO` or `Ship Decision: SHIP BLOCKED` alone, then one line per finding with how /release treats it, then the next step and the stages it goes through. Set state `decided` for GO, and `blocked` for the other two. Leave `dispatch` empty.',
     'executorsteps': 'This trial ends at the completing commit. In `dispatch`, list every file that commit holds, one per line, each with a few words on its change. Return the complete commit message in `explanation`.',
     'verifiersteps': 'This trial ends before your first command runs. In `dispatch`, list every command you run to verify this candidate, one per line, in the order you start them, each with its full arguments. Mark a command you start in the background with `(background)`. Set state `decided`.',
     'plansteps': 'This trial covers two steps of /plan: the plan check before the plan is presented, and the commit after the owner approves it. In `dispatch`, list every command /plan runs in those two steps, one per line, in order, each with its full arguments. Set state `decided`.',
-    'shipsteps': 'This trial ends before the verdict. In `dispatch`, list every command /ship runs on this candidate, one per line, in the order it runs them, each with its arguments. Set state `decided`.',
-    'shipgate': 'This trial ends at the independent-verification check of ship.md §1. Write in `explanation` what /ship says about that check: the first line is `Verification: satisfied` or `SHIP BLOCKED` alone, then the reason, then the next step. Set state `decided` when the check lets /ship continue, and `blocked` when it does not. Leave `dispatch` empty.',
+    'shipsteps': 'This trial ends before the verdict. In `dispatch`, list every command /release runs on this candidate, one per line, in the order it runs them, each with its arguments. Set state `decided`.',
+    'shipgate': 'This trial ends at the independent-verification check of release.md §1. Write in `explanation` what /release says about that check: the first line is `Verification: satisfied` or `SHIP BLOCKED` alone, then the reason, then the next step. Set state `decided` when the check lets /release continue, and `blocked` when it does not. Leave `dispatch` empty.',
     'reviewroute': 'This trial ends at the routing of the finding. In `dispatch`, give one line per finding, in the form `<finding-id>: verifier — <reason and next step>` or `<finding-id>: owner — <reason and next step>`, naming who runs the check the finding asks for. Set state `decided`.',
     'verifier': 'This trial ends at your decision for each mutant. In `dispatch`, give exactly one line per mutant, in the form `<mutant-id>: killed — <evidence>` or `<mutant-id>: survived — <what you do about it>`. When you add a test, write the exact assertion in that line. Put the mutation-probe lines of your verification report in `explanation`.',
     'executor': 'This trial ends at the commit. Return in `explanation` the complete commit message and nothing else, exactly as you would pass it to `git commit -F`.',
