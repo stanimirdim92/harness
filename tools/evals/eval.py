@@ -3,7 +3,7 @@
 
     eval.py                                  print the suites
     eval.py gates|tasks|bugs [--case ID] [--tag TAG] [--split S] [--trials N] [--jobs N]
-    eval.py recall
+    eval.py recall <recall.py flags>         plan-recall, flags passed on unchanged
     eval.py baseline <suite> [<run>]         make a run the suite's baseline
     eval.py report [<suite>]                 print the last run's report again
     eval.py review <run> <case> ok|bad "<note>"
@@ -13,7 +13,8 @@ a function that returns the suite. A suite whose `build` is None is not built
 yet: naming it prints that and exits 2. A built suite has the interface in
 `core.py` and one more method, `all_cases()`, which lists every case as
 `{'id', 'split', 'tags'}`. The core never lists the cases itself. A built
-`recall` suite has `run() -> int` instead.
+`recall` suite has `run(argv) -> int` instead: `argv` is everything after
+`recall`, and the return value is the exit code.
 
 `--case` and `--tag` repeat. A case is selected when its id is any `--case`
 or it carries any `--tag`; with neither flag every case is selected.
@@ -21,6 +22,7 @@ or it carries any `--tag`; with neither flag every case is selected.
 """
 import argparse
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -36,6 +38,17 @@ def build_gates():
     return GatesSuite()
 
 
+class RecallSuite:
+    """plan-recall's `recall.py`, run as it is. It reads git and the plan: no model, no trials."""
+
+    def run(self, argv):
+        return subprocess.run([sys.executable, str(HERE / 'plan-recall' / 'recall.py'), *argv]).returncode
+
+
+def build_recall():
+    return RecallSuite()
+
+
 SUITES = {
     'gates': {'question': 'Does the pipeline make the right calls on small made-up cases?',
               'when': 'after you change a command, agent, skill or reference',
@@ -48,7 +61,7 @@ SUITES = {
              'cost': None, 'build': None},
     'recall': {'question': 'Did the plan name the files that really changed?',
                'when': 'after a ticket ships',
-               'cost': 'free', 'build': None},
+               'cost': 'free', 'build': build_recall},
 }
 RUNNABLE = ('gates', 'tasks', 'bugs')
 
@@ -129,6 +142,10 @@ def build(suites, name):
 
 def main(argv=None, suites=None, root=core.ROOT, readme=README):
     suites = SUITES if suites is None else suites
+    argv = sys.argv[1:] if argv is None else list(argv)
+    if argv[:1] == ['recall']:  # argparse cannot pass on a leading flag such as `--repo`
+        suite = build(suites, 'recall')
+        return 2 if suite is None else suite.run(argv[1:])
     parser = parser_for(suites)
     try:
         args = parser.parse_args(argv)
@@ -146,8 +163,6 @@ def main(argv=None, suites=None, root=core.ROOT, readme=README):
         return 2
     if args.command == 'baseline':
         return core.baseline(args.suite, [c['id'] for c in suite.all_cases()], run=args.run, root=root)
-    if args.command == 'recall':
-        return suite.run()
     try:
         cases = select(suite.all_cases(), args.case, args.tag, args.split)
     except ValueError as why:

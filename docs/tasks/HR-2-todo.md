@@ -645,7 +645,7 @@ then `/spec`, `/plan`, `/build`, `/test`, `/review` with `claude -p` and
 
 ## T018: `eval.py recall` passes through to `recall.py`
 
-**Status:** Pending
+**Status:** Done
 
 **Requirements:** REQ-007, REQ-024
 

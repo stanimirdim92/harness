@@ -3,6 +3,7 @@
 import io
 import json
 import subprocess
+import sys
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
@@ -648,6 +649,17 @@ class BuiltSuite(FakeSuite):
         return self.listed
 
 
+class RecallStub:
+    """A recall suite that records the arguments it was handed."""
+
+    def __init__(self, code):
+        self.code, self.argv = code, None
+
+    def run(self, argv):
+        self.argv = argv
+        return self.code
+
+
 CASES = [case('a', 'optimization', ['ship']), case('b', 'holdout', ['ship', 'fix']), case('c', 'optimization', ['fix'])]
 README_TEXT = """# evals
 
@@ -706,9 +718,11 @@ class EvalEntry(CoreCase):
         text = eval_cli.suite_table(eval_cli.SUITES, eval_cli.README.read_text())
         self.assertRegex(text, r'gates\n.*\n.*\n  last measured cost: \$\d+\.\d\d')
 
-    def test_the_real_registry_lists_four_suites_and_only_gates_is_built(self):
+    def test_the_real_registry_lists_four_suites_and_gates_and_recall_are_built(self):
         self.assertEqual(list(eval_cli.SUITES), ['gates', 'tasks', 'bugs', 'recall'])
-        self.assertEqual([name for name, entry in eval_cli.SUITES.items() if entry['build'] is not None], ['gates'])
+        self.assertEqual([name for name, entry in eval_cli.SUITES.items() if entry['build'] is not None],
+                         ['gates', 'recall'])
+        self.assertEqual(eval_cli.SUITES['recall']['cost'], 'free')
 
     def test_a_suite_not_built_yet_says_so_and_exits_2(self):
         for argv in (('gates',), ('baseline', 'gates'), ('recall',)):
@@ -776,8 +790,20 @@ class EvalEntry(CoreCase):
         self.assertEqual(self.cli('gates', '--trials', '0')[0], 2)
         self.assertEqual(self.cli('gates', '--jobs', 'x')[0], 2)
 
-    def test_recall_does_not_take_run_flags(self):
-        self.assertEqual(self.cli('recall', '--case', 'a')[0], 2)
+    def test_recall_hands_every_argument_to_the_recall_suite(self):
+        argv = ['--repo', 'r', '--ticket', 'LD-380', '--subject-only', '--min-recall', '0.5', '--json', '-h']
+        suite = RecallStub(7)
+        code, _, _ = self.cli('recall', *argv, built=('recall',), suite=suite)
+        self.assertEqual((code, suite.argv), (7, argv))
+
+    def test_recall_takes_no_run_flags_of_its_own(self):
+        suite = RecallStub(0)
+        self.cli('recall', '--case', 'a', '--trials', '2', built=('recall',), suite=suite)
+        self.assertEqual(suite.argv, ['--case', 'a', '--trials', '2'])
+
+    def test_recall_writes_no_run_folder(self):
+        self.cli('recall', '--plan', 'p', built=('recall',), suite=RecallStub(0))
+        self.assertFalse((self.root / 'tools/evals/results').exists())
 
     def test_baseline_refuses_a_subset_run_using_the_suites_full_case_list(self):
         suite = BuiltSuite(CASES, name='gates')
@@ -831,6 +857,62 @@ class EvalEntry(CoreCase):
         code, out, _ = self.cli('gates', suite=suite)
         self.assertEqual(code, 1)
         self.assertIn('Verdict: WORSE', out)
+
+
+class RecallPassthrough(unittest.TestCase):
+    """`eval.py recall` and `recall.py` run for real on a temp git repo. Recall reads git and the plan only."""
+
+    EVAL = Path(eval_cli.__file__).resolve()
+    RECALL = EVAL.parent / 'plan-recall' / 'recall.py'
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.repo = Path(self.tmp.name)
+        git(self.repo, 'init', '-q')
+        (self.repo / 'a.php').write_text('a\n')
+        (self.repo / 'b.php').write_text('b\n')
+        git(self.repo, 'add', '-A')
+        git(self.repo, 'commit', '-qm', 'base')
+        self.base = git(self.repo, 'rev-parse', 'HEAD')
+        (self.repo / 'a.php').write_text('a2\n')
+        (self.repo / 'b.php').write_text('b2\n')
+        git(self.repo, 'commit', '-qam', 'LD-380 T001: change both')
+        (self.repo / 'plan.md').write_text('**Files/areas likely touched:**\n- `a.php`\n')
+
+    def both(self, *flags):
+        args = ['--repo', str(self.repo), '--plan', 'plan.md', '--range', f'{self.base}..HEAD', *flags]
+        run = lambda *command: subprocess.run([sys.executable, *command, *args], capture_output=True, text=True)
+        return run(str(self.RECALL)), run(str(self.EVAL), 'recall')
+
+    def test_same_figures_and_exit_code(self):
+        direct, through = self.both('--ticket', 'LD-380', '--subject-only', '--show-commits')
+        self.assertEqual((through.returncode, through.stdout), (direct.returncode, direct.stdout))
+        self.assertIn('recall (existing files)  : 50%', through.stdout)
+        self.assertIn('scored commits (1):', through.stdout)
+
+    def test_the_gate_exit_code_passes_through(self):
+        direct, through = self.both('--min-recall', '0.9')
+        self.assertEqual((direct.returncode, through.returncode), (1, 1))
+        direct, through = self.both('--min-recall', '0.5')
+        self.assertEqual((direct.returncode, through.returncode), (0, 0))
+
+    def test_json_output_is_identical(self):
+        direct, through = self.both('--json')
+        self.assertEqual(through.stdout, direct.stdout)
+        self.assertEqual(json.loads(through.stdout)['missed'], ['b.php'])
+
+    def test_a_bad_argument_gives_recalls_own_error_and_code(self):
+        direct, through = self.both('--no-such-flag')
+        self.assertEqual((through.returncode, through.stderr.split('error:')[-1]),
+                         (direct.returncode, direct.stderr.split('error:')[-1]))
+        self.assertEqual(through.returncode, 2)
+
+    def test_no_run_folder_is_written(self):
+        before = set((self.EVAL.parent / 'results').rglob('*')) if (self.EVAL.parent / 'results').exists() else set()
+        self.both()
+        after = set((self.EVAL.parent / 'results').rglob('*')) if (self.EVAL.parent / 'results').exists() else set()
+        self.assertEqual(after, before)
 
 
 class RunName(unittest.TestCase):
