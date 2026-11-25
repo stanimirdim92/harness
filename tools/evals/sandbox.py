@@ -19,6 +19,7 @@ import subprocess
 from pathlib import Path
 
 HARNESS = Path(__file__).resolve().parents[2] / 'claude'
+RULES_MARK = '<!-- harness rules, copied by install_harness() -->'
 HARNESS_DIRS = ('commands', 'agents', 'skills', 'references', 'docs', 'hooks')
 ALLOWED_TOOLS = ('Read', 'Glob', 'Grep', 'Write', 'Edit', 'Task', 'Agent', 'TodoWrite', 'Skill',
                  # /spec runs its shape check before presenting (commands/spec.md).
@@ -54,10 +55,15 @@ def install_harness(project, harness=HARNESS):
     for name in HARNESS_DIRS:
         if (harness / name).is_dir():
             _copy_tree(claude / name, harness / name)
-    # The harness rules load as project memory. A project keeps its own
-    # CLAUDE.md / AGENTS.md; the harness copy goes beside them, not over them.
-    has_own = any(path.exists() for path in (project / 'CLAUDE.md', project / 'AGENTS.md', claude / 'CLAUDE.md'))
-    shutil.copy2(harness / 'AGENTS.md', claude / ('AGENTS.md' if has_own else 'CLAUDE.md'))
+    # `.claude/CLAUDE.md` loads beside the project's own root CLAUDE.md. A
+    # `.claude/AGENTS.md` does not load. A project's own `.claude/CLAUDE.md`
+    # keeps its text and the harness rules follow it.
+    rules = claude / 'CLAUDE.md'
+    harness_rules = (harness / 'AGENTS.md').read_text()
+    if rules.exists():
+        rules.write_text(rules.read_text().rstrip('\n') + f'\n\n{RULES_MARK}\n{harness_rules}')
+    else:
+        rules.write_text(harness_rules)
     settings = json.loads((harness / 'settings.json').read_text())
     # settings.local.json, so a project's own .claude/settings.json still applies.
     (claude / 'settings.local.json').write_text(json.dumps({

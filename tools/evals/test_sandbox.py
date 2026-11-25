@@ -65,12 +65,27 @@ class InstallHarness(unittest.TestCase):
         sandbox.install_harness(self.project, harness=self.src)
         self.assertEqual((self.project / '.claude/CLAUDE.md').read_text(), 'harness rules\n')
 
-    def test_project_rules_stay_and_harness_rules_go_beside_them(self):
+    def test_project_rules_stay_and_harness_rules_go_to_dot_claude_claude_md(self):
         (self.project / 'CLAUDE.md').write_text('project rules\n')
+        (self.project / 'AGENTS.md').write_text('project agents rules\n')
         sandbox.install_harness(self.project, harness=self.src)
         self.assertEqual((self.project / 'CLAUDE.md').read_text(), 'project rules\n')
-        self.assertFalse((self.project / '.claude/CLAUDE.md').exists())
-        self.assertEqual((self.project / '.claude/AGENTS.md').read_text(), 'harness rules\n')
+        self.assertEqual((self.project / 'AGENTS.md').read_text(), 'project agents rules\n')
+        self.assertEqual((self.project / '.claude/CLAUDE.md').read_text(), 'harness rules\n')
+        self.assertFalse((self.project / '.claude/AGENTS.md').exists())
+
+    def test_a_project_dot_claude_claude_md_keeps_its_text_and_the_harness_rules_follow(self):
+        (self.project / '.claude').mkdir()
+        (self.project / '.claude/CLAUDE.md').write_text('own text\n')
+        sandbox.install_harness(self.project, harness=self.src)
+        self.assertEqual((self.project / '.claude/CLAUDE.md').read_text(),
+                         'own text\n\n<!-- harness rules, copied by install_harness() -->\nharness rules\n')
+
+    def test_a_project_dot_claude_claude_md_without_a_final_newline_still_gets_a_blank_line(self):
+        (self.project / '.claude').mkdir()
+        (self.project / '.claude/CLAUDE.md').write_text('own text')
+        sandbox.install_harness(self.project, harness=self.src)
+        self.assertTrue((self.project / '.claude/CLAUDE.md').read_text().startswith('own text\n\n<!--'))
 
     def test_project_agents_survive_and_harness_agents_join_them(self):
         (self.project / '.claude/agents').mkdir(parents=True)
@@ -165,7 +180,7 @@ class RepoProject(unittest.TestCase):
         self.assertEqual((agents / 'local-helper.md').read_text(), 'project agent\n')
         self.assertEqual((agents / 'executor.md').read_text(), 'harness agent\n')
         self.assertEqual((self.project / 'CLAUDE.md').read_text(), 'project rules\n')
-        self.assertEqual((self.project / '.claude/AGENTS.md').read_text(), 'harness rules\n')
+        self.assertEqual((self.project / '.claude/CLAUDE.md').read_text(), 'harness rules\n')
         self.assertTrue((self.project / '.claude/settings.local.json').is_file())
 
     def test_the_baseline_commit_holds_the_installed_harness(self):

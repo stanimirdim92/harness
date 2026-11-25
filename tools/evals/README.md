@@ -62,6 +62,27 @@ What the trace shows:
   `parent_tool_use_id` that is the id of the main session's `Agent` call.
 - `audit()` on this trace returns `LEAKED` false.
 
+## Harness rules loading
+
+`install_harness()` writes the harness rules to `<project>/.claude/CLAUDE.md`.
+It used to write them to `.claude/AGENTS.md` when the project had its own
+`CLAUDE.md` or `AGENTS.md`. A probe on 2026-11-25 (Claude CLI 2.1.331, $0.2216,
+`--setting-sources project,local`, a project with its own root `CLAUDE.md`)
+showed that file never loaded. The session had no harness rules, and the
+user-level `~/.claude/CLAUDE.md` did not load either. With the rules in
+`.claude/CLAUDE.md`, the session had them beside the project's own `CLAUDE.md`.
+A project that already has a `.claude/CLAUDE.md` keeps its text, and the
+harness rules follow it after a comment line. The trace is in
+`tools/evals/results/open001-probe/` (git ignores it).
+
+Runs before this change may have run without the harness rules when the
+project at the fixture's commit held a `CLAUDE.md` or `AGENTS.md`. These
+fixtures did: the `review-eval` cases `ld-585` and `ld-585-builder` (change
+`11c44ce9`) and the `spec-eval` fixture `LD-380`. The `review-eval` cases
+`ld-585-filter` and `ld-585-order`, and the `spec-eval` `example` fixture, have
+neither file, so they ran with the rules. Score those three again before you
+compare them with an older run.
+
 ## Bash sandbox probe
 
 `tasks/probe_sandbox.py` asks whether Claude Code's Bash sandbox can stop a
