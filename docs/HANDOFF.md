@@ -92,17 +92,19 @@ Duplicate cuts (owner decisions, 2026-11-22):
 
 ## How to probe a harness text change
 
-1. Extract the old text: `git archive <sha> claude | tar -x -C <dir>`, then
-   copy the current `tools/evals/workflow` into `<dir>/tools/evals/`.
-2. Run `python3 <root>/tools/evals/workflow/run.py --case <name> --output <unused dir>`
-   on both roots, 3 to 5 times. One run costs about $0.2 to $0.5.
-3. The runner refuses to write into an existing output directory. Keep the
-   copies and the results in one `mktemp -d` directory; the session
-   scratchpad does not survive a restart.
-4. Do not edit `run.py` while a batch runs.
-5. Read sample answers, not only the table. Say when an assertion changed
-   after the runs.
-6. Unit tests: `cd tools/evals/workflow && python3 -m unittest -q test_runner`.
+1. The gates baseline holds the old text's results, 3 trials per case. Check
+   that it exists: `python3 tools/evals/eval.py report gates` says "This run is
+   the gates baseline".
+2. Edit the text. Run the cases that read it:
+   `python3 tools/evals/eval.py gates --tag <stage>`. The core runs 3 trials
+   per case and compares them with the baseline. A case costs $0.80 on average
+   for its three trials. `python3 tools/evals/eval.py` prints the full-suite cost.
+3. A case that was FLAKY at the baseline can show as lost by chance. Rerun it
+   with `--case <name>` before you blame the text.
+4. Do not edit the case folders or `run.py` while a batch runs.
+5. Read the "Read these" trial folders, not only the verdict. Say when a
+   check changed after the runs.
+6. Unit tests: `cd tools/evals/workflow && python3 -m unittest -q test_runner test_migration`.
 7. After a change to `claude/AGENTS.md`, a command, a persona or an ADR, run
    `python3 tools/checks/harness-map.py`; CI fails on a stale map.
 

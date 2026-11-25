@@ -1,6 +1,11 @@
 # Plan-localization recall
 
-Scores a plan against the change that actually shipped: of the files the merged
+Run it through `python3 tools/evals/eval.py recall <flags>`. The flags go to
+`recall.py` unchanged, and so do its figures and exit code.
+[The evals README](../README.md) says when to run it. `python3 tools/evals/eval.py todo`
+lists the tickets that still need a row.
+
+Scores a plan against the change that actually shipped. Of the files the merged
 change touched, how many did the plan's tasks name under `Files/areas likely
 touched`?
 
@@ -61,11 +66,11 @@ recall table of `docs/observation-log.md`.
 - `--min-recall 0.8` exits 1 below that recall over pre-existing files.
 - `--json` for the raw figures.
 
-It reports recall over every changed file and over pre-existing files (the
-paper's measure: a new file has no location to find), precision over the
-planned edits, the changed files nobody planned, and the planned files the
-change never touched. An entry marked `unchanged — reason` counts as found but
-is not expected in the diff.
+It reports recall over every changed file and over pre-existing files. The
+paper measures the second: a new file has no location to find. It also reports
+precision over the planned edits, the changed files nobody planned, and the
+planned files the change never touched. An entry marked `unchanged — reason`
+counts as found but is not expected in the diff.
 
 Costs nothing and drives no model. Run it after a ticket ships, and record the
 existing-file recall in `docs/observation-log.md`. A missed file is worth a

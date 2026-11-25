@@ -828,7 +828,7 @@ same rule applies to the `/plan` Draft.
 
 ## T022: One README explains the evals; no live file names an old command
 
-**Status:** Pending
+**Status:** Done
 
 **Requirements:** REQ-025, REQ-027
 

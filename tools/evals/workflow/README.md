@@ -1,13 +1,17 @@
 # Jira → spec → plan → build → review behavioral checks
 
-Run `python3 tools/evals/workflow/run.py` from the repository root. Requires an
-authenticated Claude CLI. These calls consume normal account usage. Use
-`--case NAME` for a focused rerun and `--output DIRECTORY` to retain evidence.
-No model override is applied. Each case starts a new session.
+Run these cases with `python3 tools/evals/eval.py gates` from the repository
+root. [The evals README](../README.md) says when to run it and how to read the
+report. This page covers the cases themselves.
 
-`python3 tools/evals/eval.py gates` runs the same cases with trials, `--jobs`
-(default 4) and a PASS, FLAKY or FAIL result per case. Each trial builds its own
-fixture in `<case>/t<n>/fixture/`. `run.py` stays as the single-trial runner.
+`eval.py gates` runs each case with trials (3 by default), `--jobs` (default 4)
+and a PASS, FLAKY or FAIL result per case. Use `--case NAME` or `--tag STAGE`
+for a focused rerun. It requires an authenticated Claude CLI. These calls
+consume normal account usage. No model override is applied. Each case starts a
+new session, and each trial builds its own fixture in `<case>/t<n>/fixture/`.
+
+`python3 tools/evals/workflow/run.py --case NAME --output DIRECTORY` stays as
+the single-trial runner. It gives no verdict.
 
 `watched.txt` lists the harness files that the gate cases read, as
 `claude/<path>`. A commit that touches one of them carries an `Eval:` trailer.

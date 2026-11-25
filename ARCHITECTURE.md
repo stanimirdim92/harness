@@ -149,29 +149,32 @@ repository with no prior specs, no branches and no stale worktrees.
   spec/capability-map/plan/todo artifact path differently from the canonical
   set (the drift class fixed in c4584dd); `tools/tests/validate-artifact-paths-test.py`
   covers the allow and deny cases.
-- [Spec eval](tools/evals/archive/spec-eval/README.md) re-runs `/spec` against a ticket
-  whose right answer is known from a human reading its spec against what
-  shipped, and checks the known findings survive. It is the only check here
-  that can tell whether a harness change moved spec *quality* rather than
-  shape. Its judging half is deterministic and runs in CI; producing a spec
-  costs tokens and is run deliberately. Fixtures carry real ticket content and
-  are gitignored.
+- [The evals](tools/evals/README.md) answer whether a harness change made its
+  work better or worse, which no shape check can. `python3 tools/evals/eval.py`
+  is the one entry point: `gates`, `tasks`, `bugs` and `recall`. Each model
+  suite runs cases in trials, compares with a promoted baseline, and prints one
+  verdict. The README says when to run each and how to read the report.
 - [Plan recall](tools/evals/plan-recall/README.md) scores a shipped ticket's
   plan against its merged change: the share of changed files the plan's tasks
   named. It measures the plan's change surface (`plan-quality-gates.md` §4),
-  costs no tokens, and its scoring logic runs in CI. Score with `--ticket`
-  when the range carries other work.
-- [Workflow checks](tools/evals/workflow/README.md) document the isolated
-  Jira/spec/plan/build/review runner, its invocation, and what its evidence
-  does not cover.
+  costs no tokens, and its scoring logic runs in CI. Run it with
+  `eval.py recall`, and score with `--ticket` when the range carries other work.
+- [Workflow checks](tools/evals/workflow/README.md) document the gate cases
+  that `eval.py gates` runs: the isolated Jira/spec/plan/build/review runner,
+  and what its evidence does not cover.
+- [Spec eval](tools/evals/archive/spec-eval/README.md) re-runs `/spec` against a
+  ticket whose right answer is known. It is frozen under `tools/evals/archive/`
+  and `eval.py` does not run it. Its judging half still runs in CI. Fixtures
+  carry real ticket content and are gitignored.
 - `tools/checks/check-references.py` resolves every relative cross-reference between
   harness files and fails on one that no longer exists; `tools/tests/check-references-test.py`
   covers the resolution and the placeholder/URL cases it must not flag. It is the
   static half of the reference problem — a reference refused at runtime because
   it resolves outside the session's working directory is not visible to it.
-- `.github/workflows/ci.yml` runs every check above on each push to `main` and each pull request. The live
-  workflow runner is excluded on purpose: it drives the real model and spends
-  tokens, so it stays a deliberate manual run.
+- `.github/workflows/ci.yml` runs every check above on each push to `main` and each pull request. The
+  real-model eval suites (`eval.py gates`, `tasks` and `bugs`) are excluded on
+  purpose: they drive the real model and spend tokens, so they stay deliberate
+  manual runs.
 - `docs/observation-log.md` records what real runs actually cost and where they
   failed. It is the evidence the uncalibrated numbers — `maxTurns` above all —
   are waiting on, and the input the ADRs are meant to be argued from.

@@ -53,12 +53,12 @@ caps, repeated commands) — with `--since`/`--until` to scope a single `/build`
 and `--row` to print a ready observation-log row. See
 `claude/references/agent-run-metrics.md`.
 
-`tools/evals/plan-recall/recall.py` scores a shipped ticket's plan
+`python3 tools/evals/eval.py recall` scores a shipped ticket's plan
 against what changed: the share of changed files its tasks named. Run it from
 the project checkout:
 
 ```bash
-python3 ./tools/evals/plan-recall/recall.py --repo ./ \
+python3 ./tools/evals/eval.py recall --repo ./ \
     --ticket LD-380 --subject-only --show-commits \
     --plan docs/tasks/LD-380-plan.md --plan docs/tasks/LD-380-todo.md \
     --range <commit before the ticket>..<last commit of the ticket>
@@ -67,6 +67,10 @@ python3 ./tools/evals/plan-recall/recall.py --repo ./ \
 Check the `scored commits` list before trusting the number, then record it in
 `docs/observation-log.md` §Plan recall. Options and how to read the
 result: `tools/evals/plan-recall/README.md`.
+
+`python3 tools/evals/eval.py` is the one command for every eval: the gate
+cases, the add-business pipeline run, the shipped-bug cases, and plan recall.
+`tools/evals/README.md` says when to run each one and how to read its report.
 
 `laravel/` mirrors the Leadbuster quality setup (PHPStan, Deptrac, CI,
 hooks, the isolated test runner, agent docs and skills) for reuse in new
@@ -77,7 +81,7 @@ and [ADR 0149](docs/adr/0149-laravel-kit-mirrors-leadbuster-verbatim.md).
 `tools/README.md` lists every tool by folder. `.github/workflows/ci.yml` runs every deterministic check in `tools/` on each
 push to `main` and each pull request — hooks, handoff gate, persona frontmatter and settings pins, artifact
 paths, workflow-runner logic, the Codex installer, and the metrics script. The
-live workflow runner is excluded; it spends tokens and stays a manual run.
+real-model eval suites are excluded; they spend tokens and stay manual runs.
 Real-run evidence — failures, cost, turns — goes in `docs/observation-log.md`.
 
 This repo's own build decisions (why an agent is configured one way and

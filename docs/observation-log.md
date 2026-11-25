@@ -39,16 +39,16 @@ a gate that should have fired and did not).
 | 2026-11-25 | HR-2 | gate case `review_auth_diff` (`/review`) | FAIL 0/3. In all three trials the answer state is `blocked`. Five checks failed each time: `decided`, `code_reviewer_always`, `blind_reviewer_always`, `verification_pass_recorded` and `security_auditor_triggered`. In t1 the answer reads "REVIEW BLOCKED — Independent verification: STALE (depth)", so it dispatches no reviewer. Trial folders: `tools/evals/results/gates/2026-11-25-121253-d81b0f9/review_auth_diff/t1`, `.../t2`, `.../t3`. | $0.98, 117 s (3 trials) | Yes: also failed in the 2026-11-24 one-trial run | Open |
 | 2026-11-25 | HR-2 | gate case `review_plain_diff` (`/review`) | FAIL 0/3. In all three trials the answer state is `blocked`. Checks `decided`, `code_reviewer_always`, `blind_reviewer_always` and `security_auditor_always` failed each time. `verification_pass_recorded` failed in t2 and t3. In t1 the answer says the supplied VERIFY PASS names REQ-002, but the approved spec has only REQ-001, so it reports REVIEW BLOCKED and dispatches no reviewer. t2 was retried once by the core. Trial folders: `tools/evals/results/gates/2026-11-25-121253-d81b0f9/review_plain_diff/t1`, `.../t2`, `.../t3`. | $1.16, 166 s (3 trials) | Yes: also failed in the 2026-11-24 one-trial run | Open |
 
-- **Stage / persona** — `/spec`, `/plan`, `/build`, `/review`, `/ship`, `/test`,
+- **Stage / persona** — `/spec`, `/plan`, `/build`, `/review`, `/release`, `/test`,
   or the persona name when it is a subagent failure.
 - **Cost** — what the failure cost: wasted turns, rework loops, tokens, or
   wall-clock. Measured, never estimated (`references/agent-run-metrics.md`).
 - **Repeated?** — first time, or a recurrence of a row already here. A
   recurrence is the signal that turns an observation into an ADR.
 - **Fix or status** — `Open`, or `Fixed — <check>` where `<check>` names what
-  now catches a recurrence: a hook or validator test case, a spec-eval or
-  plan-recall expectation, a workflow-runner case, or a `run-metrics.sh`
-  failure signal. An edit to prose alone is `Mitigated`, not `Fixed` — a rule
+  now catches a recurrence: a hook or validator test case, a plan-recall
+  expectation, a gate case (`eval.py gates`), a shipped-bug case
+  (`eval.py bugs`), or a `run-metrics.sh` failure signal. An edit to prose alone is `Mitigated`, not `Fixed` — a rule
   sentence with no check behind it is exactly what failed the first time. This
   is the regression set: every fixed failure leaves a test behind.
 
@@ -212,7 +212,8 @@ caps, repeated commands — each a candidate failure row to record or dismiss.
 
 ## Plan recall
 
-One row per shipped ticket, from `tools/evals/plan-recall/recall.py`.
+One row per shipped ticket, from `python3 tools/evals/eval.py recall`.
+`eval.py todo` lists the tickets that have no row yet.
 Score each ticket against its own plan with `--ticket <id> --subject-only`,
 and check `--show-commits` before trusting the number.
 
@@ -233,7 +234,7 @@ the `SocialPostType` refactor to LD-441 as misses (10% instead of 100%).
 One row per bug found after merge (ADR 0100). The bug is raised as a bug
 ticket and goes through the pipeline like any other work (ADR 0110). Its
 bugfix spec's "Escaped From" section names the layer that should have caught
-it, and `/ship` prints this row when the fix ships. Every row becomes a review-eval case, so
+it, and `/release` prints this row when the fix ships. Every row becomes a review-eval case, so
 the next reviewer change is scored against the bugs that really shipped:
 
 ```bash
@@ -254,7 +255,7 @@ Layers: 1 verification before review ·
 
 ## Per ticket
 
-One row per shipped ticket, from `ticket-stats.py` at `/ship` (ADR 0112).
+One row per shipped ticket, from `ticket-stats.py` at `/release` (ADR 0112).
 Fewer person stops is the goal of automation (ADR 0109). The four times,
 tokens and cost come from the ticket's transcripts (ADR 0113):
 
@@ -282,7 +283,7 @@ Per `references/agent-run-metrics.md`, after roughly 10–20 comparable tickets:
 - recon — how often `/spec` and `/plan` dispatch rather than bounded-check, and
   whether the bounded checks were adequate in hindsight (ADR 0051's revisit
   condition)
-- plan recall — `tools/evals/plan-recall/recall.py` on each shipped ticket:
+- plan recall — `python3 tools/evals/eval.py recall` on each shipped ticket:
   existing-file recall, and whether each missed file was a consumer or
   registration the change-surface search should have found
 - large reads — main-session whole-file reads in areas a bounded check or recon

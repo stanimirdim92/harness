@@ -1,5 +1,8 @@
 # Spec reproducibility eval
 
+Frozen: `python3 tools/evals/eval.py` does not run it. See
+[the evals README](../../README.md) and [the archive note](../README.md).
+
 Re-run `/spec` against a ticket whose right answer is known, and check it still
 finds it.
 

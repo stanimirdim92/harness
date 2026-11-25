@@ -1,5 +1,10 @@
 # Add-business pipeline eval
 
+Run it with `python3 tools/evals/eval.py tasks`. The driver builds the sandbox,
+plays the owner, runs the stages and grades the result with `hidden/`.
+[The evals README](../../../tools/evals/README.md) says when to run it and how
+to read the report. This page covers the ticket, the grader and the manual run.
+
 This eval runs the whole harness on one realistic full-stack ticket. The
 pipeline is `/spec` → `/plan` → `/build` → `/test` → `/review`. It runs in a
 fresh sandbox project. Hidden tests then score the result. The agent under
@@ -113,4 +118,5 @@ Each run takes about 10 to 25 seconds after the one-time setup.
 
 ## Cost
 
-Unmeasured. One run is a full pipeline on a medium ticket.
+A full pipeline run is not measured yet. The two real trials stopped early
+and cost $2.02 and $4.05. The evals README records both.

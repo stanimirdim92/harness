@@ -1,10 +1,10 @@
 # Every deterministic check in this repo, on pushes to main and on pull requests.
 #
 # These suites cost nothing and run in seconds, and until now they ran only
-# when someone remembered. The one suite deliberately absent is
-# tools/evals/workflow/run.py: it drives the real model and spends tokens, so
-# it stays a manual run (tools/evals/workflow/README.md). Its assertion logic
-# is covered here through test_runner.py.
+# when someone remembered. The suites deliberately absent are the real-model
+# runs of tools/evals/eval.py (gates, tasks, bugs): they spend tokens, so they
+# stay manual runs (tools/evals/README.md). The gates assertion logic is
+# covered here through test_runner.py and test_migration.py.
 #
 # Runner deps: bash, git, jq and python3 are all preinstalled on ubuntu-latest.
 # The preflight step fails loudly if that ever stops being true, so a missing

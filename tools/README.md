@@ -51,16 +51,21 @@ grep -E '^\s+(run: )?(bash|python3) (tools|codex)' .github/workflows/ci.yml \
 
 ## `evals/`
 
+`python3 tools/evals/eval.py` is the one entry point. It runs the suites
+`gates`, `tasks`, `bugs` and `recall`. Read `evals/README.md` first: it says
+when to run each suite and how to read its report.
+
 | Folder | Measures | Costs |
 | --- | --- | --- |
-| `plan-recall/` | How many of the files a ticket changed its plan named | Free |
+| `plan-recall/` | How many of the files a ticket changed its plan named (`eval.py recall`) | Free |
+| `review-eval/` | Whether `/review` catches bugs that really shipped (`eval.py bugs`) | One real `/review` per case and trial |
+| `workflow/` | The pipeline's decisions on small made-up cases (`eval.py gates`) | Real model runs |
 | `archive/spec-eval/` | How close a fresh `/spec` gets to a deployed spec. Frozen: `eval.py` does not run it | One real `/spec` run per ticket |
-| `workflow/` | The pipeline end to end in a throwaway project | Real model runs |
 
-Each folder's README has the commands. Their own logic tests (`test_*.py`) run in CI.
+Their own logic tests (`test_*.py`) run in CI.
 
 One more eval lives in `../claude/evals/`, because it is public and self-contained:
 
 | Folder | Measures | Costs |
 | --- | --- | --- |
-| `../claude/evals/add-business/` | The whole pipeline on one full-stack ticket in a sandbox, scored by hidden tests | One full pipeline run; its grader self-test runs in CI |
+| `../claude/evals/add-business/` | The whole pipeline on one full-stack ticket in a sandbox, scored by hidden tests (`eval.py tasks`) | One full pipeline run; its grader self-test runs in CI |

@@ -1,33 +1,518 @@
 # evals — does the harness do good work?
 
 Checks and tests only show that the harness is put together correctly. They
-cannot show whether a change made its specs or plans better or worse. That
-needs a ticket whose right answer is already known: one that shipped.
+cannot show whether a change made the harness better or worse. An eval runs
+the harness, or part of it, and measures the result against a known answer.
 
-An eval runs the harness, or part of it, on such a ticket and measures how
-close it gets to what really happened. Two of them run a real model and cost
-money, so you run them by hand, after a ticket ships or after you change the
-harness. Their scoring code has its own tests (`test_*.py`), which CI runs for
-free.
+You use one command for all of them:
 
-| Folder | The question it answers | Cost |
+```bash
+python3 tools/evals/eval.py
+```
+
+It prints the suites, the question each one answers, when to run it, and the
+last measured cost. Run it from the repository root. It uses the Python
+standard library only. The paid suites need an authenticated Claude CLI.
+
+## The suites
+
+| Suite | The question it answers | Run it when | Last measured cost and time |
+| --- | --- | --- | --- |
+| `gates` | Does the pipeline make the right calls on small made-up cases? | After you change a command, agent, skill or reference | $48.08, 26.8 min (60 cases, 3 trials each) |
+| `tasks` | Does the pipeline build a working feature from a ticket? | After you change how build, review or test behave | $4.05, 11.5 min (one trial that stopped at `/plan`) |
+| `bugs` | Does `/review` catch bugs that really shipped? | After you change `/review` or a reviewer | $28.74, 44.4 min (4 cases, 1 trial each) |
+| `recall` | Did the plan name the files that really changed? | After a ticket ships | Free: it reads git and the plan |
+
+The figures come from real runs on 2026-11-25. The "Records" sections below
+give each run's date, commit and folder. No `tasks` run has built the whole
+feature yet, so a full run will cost more than $4.05. The `bugs` figure is one
+trial per case. The default is three trials, so expect about three times as much.
+
+What each suite is, and what it does not prove:
+
+- **`gates`.** 60 case folders in `tools/evals/workflow/cases/`. Each case
+  gives one stage of the harness a small made-up ticket, and asks the model for
+  the decision it would make. Declared rules check the answer. The model has
+  only the Read and Glob tools, so no case runs an executor or a reviewer.
+  A pass shows that a decision rule held. It does not show that a real
+  pipeline run is correct. All 60 cases are `optimization` cases. There is no
+  holdout case.
+- **`tasks`.** One case, `add-business` (`claude/evals/add-business/`). A driver
+  builds a sandbox project, copies the harness into it, and runs `/spec`,
+  `/plan`, `/build`, `/test` and `/review` headless. It plays the owner with
+  scripted turns. Hidden tests then grade the project (49 checks). The result
+  is one data point. The first two trials stopped at `/spec` and at `/plan`, so
+  `/build`, `/test` and `/review` are not measured yet.
+- **`bugs`.** Cases of bugs that really shipped, in
+  `tools/evals/review-eval/fixtures/`. Each case runs one real `/review` on the
+  commit before the fix. A trial is CAUGHT when a BLOCKER or REQUIRED finding
+  sits near the fixed lines and names the defect. It is LOCATED when the finding
+  is near but names no defect term. It is MISSED otherwise. The four current
+  cases have no defect terms, so they can reach LOCATED at best (OPEN-007).
+- **`recall`.** Scores a shipped ticket's plan against the files its commits
+  changed. It counts file names. It does not say that the changes there were
+  correct. `/review` and the tests judge that.
+
+## How a run works
+
+1. Each case runs `--trials N` times. The default is 3. Each trial runs in
+   its own folder.
+2. A trial that times out, errors or returns nothing is ERRORED. The core
+   retries it once. A second failure stays ERRORED. The core never scores an
+   ERRORED trial as a pass or a fail.
+3. A case is PASS when every scored trial passed, FLAKY when some passed, and
+   FAIL when none passed. Three trials measure consistency. They do not prove
+   significance, and a change of one trial is not proof of a gain.
+4. The core writes the run to
+   `tools/evals/results/<suite>/<YYYY-MM-DD-HHMMSS>-<sha7>/`. `<sha7>` is the
+   harness commit. Git ignores that folder, because the runs hold private text.
+   The core exits 2 and writes nothing when the folder is not ignored.
+5. The core prints a report and saves it as `report.md` in the run folder.
+   `python3 tools/evals/eval.py report` prints the last report again. Add the
+   suite name to see the last report of that suite.
+6. When the suite has a baseline, the report ends with a verdict.
+
+### The baseline and the verdict
+
+A baseline is a full run that you promoted on purpose. The core never
+promotes one for you.
+
+The core compares each item of the run with the same item in the baseline.
+An item is a case for `gates` and `bugs`. It is a hidden check for `tasks`.
+The states rank FAIL, then FLAKY, then PASS. An item is gained when its state
+moved up and lost when it moved down. The verdict is the first rule that applies:
+
+| Verdict | When | Exit code |
 | --- | --- | --- |
-| `plan-recall/` | Did the plan name the files that really changed? Before coding, a plan lists the files it expects to touch. After the ticket ships, this compares that list with the real diff. 18 of 20 files named is 90%. | Free: it reads git and the plan |
-| `spec-eval/` | How close does today's harness get to the spec you approved? It writes a fresh spec for a shipped ticket, on the code as it was before the work began, then compares it with the approved one. | One real `/spec` run, about $1.40. Scoring a spec you already have is free |
-| `review-eval/` | Does `/review` catch bugs that really shipped? A bugfix commit points, through blame, at the commit that wrote the bug; `/review` runs on that commit and must flag those lines. Clean commits count noise. Run it with `eval.py bugs --repo <project>`. | One real `/review` per case and trial, about $7 each |
-| `workflow/` | Does the pipeline make the right calls on small made-up cases: which reviewers run, and whether `/test` is needed? | Real model runs |
+| WORSE | For `gates`, any case lost. For any suite, a holdout case that was PASS is no longer PASS. | 1 |
+| NOT BETTER | As many items lost as gained, or more. | 1 |
+| BETTER | More items gained than lost. | 0 |
+| SAME | No item changed. | 0 |
 
-## Did my harness change help?
+`gates` never prints NOT BETTER, because any loss is WORSE there. `tasks`
+checks are not holdout items, so a lost check gives NOT BETTER at worst. The
+exit code is 2 when the run could not finish. A case that is new since the
+baseline is listed under New. It counts as neither gained nor lost.
 
-Score before the change and save the result, then score after it and compare
-the two item by item. Both `plan-recall` and `spec-eval` take `--baseline`.
-They list what was gained and what was lost, so a loss cannot hide behind a
-better average. Each folder's README has the commands.
+A run on a subset (`--case`, `--tag`) compares only the cases it ran. A subset
+run can never become a baseline.
+
+### Reading a report
+
+This is the report that `python3 tools/evals/eval.py report gates` prints for
+the current baseline. The report shortens the lists here.
+
+```text
+# gates run 2026-11-25-121253-d81b0f9
+Harness commit d81b0f9, 3 trials per case, 60 cases.
+This run is the gates baseline.
+Cost: $48.08
+Duration: 26.8 min
+Flaky: build_independent (1/3), jira_complete (2/3), jira_paginated (2/3), jira_unavailable (1/3), specgate_figma_read (2/3), verifier_survivors (2/3)
+Retries: 1 retry
+semantic review pending: build_independent, build_pressure_fan_out, ...
+Read these:
+- build_independent: tools/evals/results/gates/2026-11-25-121253-d81b0f9/build_independent/t1, ...
+Eval: gates 51/60 PASS, flaky 6; tools/evals/results/gates/2026-11-25-121253-d81b0f9
+```
+
+Read it from the top:
+
+- **Verdict line.** A run with a baseline prints `Verdict: <word>: <reason>` and a
+  `Baseline:` line with the commit and date. A baseline run has neither.
+- **Noise line.** When no harness file changed since the baseline, the report
+  says "harness unchanged since baseline: this run measures noise". Use such a
+  run to see how much the cases move on their own.
+- **Cost and Duration.** The baseline's figures follow in brackets. They are
+  the figures of the whole baseline run, even when your run was a subset.
+- **Lost, Gained, Flaky, New.** Each name carries its trial count, such as
+  `(2/3)`.
+- **Read these.** The trial folder of every case that changed state, and of
+  every FLAKY or FAIL case. Open these folders first.
+- **semantic review pending.** The checks are rules. A rule can pass an answer
+  that a person would reject. After you read a case, record it with
+  `python3 tools/evals/eval.py review <run> <case> ok "<note>"`. Use `bad`
+  when the answer is wrong. The verdict never waits for this review.
+- **Last line.** For `gates` it is the `Eval:` line. For `bugs` it is the
+  `Review-eval:` line. Paste it into the commit that changed the harness
+  (see "The Eval line in commits").
+
+A trial folder holds `trial.json` (each check true or false, cost, answer),
+`prompt.txt`, `trace.jsonl`, `stderr.txt` and the model's output files. A gate
+trial also keeps its `fixture/` folder.
+
+## Worked examples
+
+Each example gives the time to run it, the exact command, what the output
+means, and what to do next. The outcomes in the example output are invented.
+The baseline figures are real: 51 PASS, 6 FLAKY and 3 FAIL, $48.08, 26.8
+minutes, run `2026-11-25-121253-d81b0f9`.
+
+### After editing a command, agent or skill
+
+**When.** You edited a file listed in `tools/evals/workflow/watched.txt`, for
+example `claude/commands/release.md`. Run the cases of the stage that reads it.
+
+**Command.**
+
+```bash
+python3 tools/evals/eval.py gates --tag shipverdict --tag shipgate --tag shipsteps
+```
+
+This runs 9 cases with 3 trials each. At the baseline they cost about $5.25
+and all 9 were PASS 3/3. Expect a few minutes. The tag of a case is its stage
+name. To list the tags and how many cases each has:
+
+```bash
+rg -U --no-filename -o '"tags": \[\s*"[a-z]+"' tools/evals/workflow/cases | sort | uniq -c
+```
+
+A file can feed several stages. When you are unsure which, run every case with
+`python3 tools/evals/eval.py gates` ($48, about 27 minutes).
+
+**What the output means.** Example output where one case got worse:
+
+```text
+# gates run 2026-12-01-101500-abc1234
+Harness commit abc1234 (dirty), 3 trials per case, 9 cases.
+Verdict: WORSE: a case the baseline had higher is now lower
+Baseline: d81b0f9, 2026-11-25 (2026-11-25-121253-d81b0f9)
+Cost: $5.40 (baseline $48.08)
+Duration: 3.1 min (baseline 26.8 min)
+Lost: ship_open_blocker (2/3)
+Gained: none
+Flaky: ship_open_blocker (2/3)
+Read these:
+- ship_open_blocker: tools/evals/results/gates/2026-12-01-101500-abc1234/ship_open_blocker/t2
+Eval: gates [--tag shipverdict --tag shipgate --tag shipsteps] 9/9 PASS -> 8/9 PASS, flaky 0 -> 1 (WORSE); tools/evals/results/gates/2026-12-01-101500-abc1234
+```
+
+- **WORSE.** One case went from PASS 3/3 to FLAKY 2/3. For `gates` any lost
+  case is WORSE, even if other cases were gained.
+- **BETTER.** At least one case gained and none lost.
+- **SAME.** No case changed. For a wording-only edit this is the result you want.
+
+**What to do next.**
+
+1. Open the trial folder in "Read these". Find the failed check in `trial.json`.
+2. Decide whether your edit caused it. A case that was FLAKY at the baseline
+   can fall to FAIL by chance. Rerun that one case first:
+   `python3 tools/evals/eval.py gates --case ship_open_blocker`.
+3. If your edit caused it, fix the text and run the tags again.
+4. When the verdict is BETTER or SAME, copy the last line into the commit
+   message. A WORSE run is a trade you must name in the commit body.
+
+### After a ticket ships
+
+**When.** A ticket you planned with `/plan` has merged. Run this each time, or
+when the session-start hint says that tickets wait.
+
+**Command.** From the project checkout (or add `--repo <project>`):
+
+```bash
+python3 tools/evals/eval.py todo
+```
+
+It reads git and `docs/observation-log.md`, and costs nothing. For each shipped
+ticket with no row in the "Plan recall" table, it prints a ready command:
+
+```text
+Shipped tickets without a Plan recall row (1):
+  LD-600
+    python3 /path/to/harness/tools/evals/eval.py recall --repo /path/to/project --plan docs/tasks/LD-600-plan.md --plan docs/tasks/LD-600-todo.md --range <first commit>^..main --ticket LD-600 --subject-only
+```
+
+The ticket and the paths in this block are invented.
+
+**What the output means.** Run the printed command. It reports recall over the
+files that existed before the change, precision, the changed files nobody
+planned, and the planned files nobody changed. Read the `scored commits` list
+first. It must hold the ticket's own commits and nothing else. For example,
+`LD-442` scored 67% over existing files, and all six misses were consumers of a
+changed surface.
+
+**What to do next.**
+
+1. Add one row to the "Plan recall" table in `docs/observation-log.md`.
+2. For each miss, ask whether it was a consumer or a registration the plan
+   should have found. If so, add a row to the failures table.
+3. Run `python3 tools/evals/eval.py todo --count`. It prints
+   `<tickets> <bugs>`, for example `0 0` when nothing is left.
+
+`todo` finds a ticket only when a commit subject holds `(<TICKET> T`
+(OPEN-008). A ticket committed under another subject style is never listed.
+
+### After a shipped bug
+
+**When.** A bug reached production and its fix merged. `/release` printed the
+shipped-bug record and this command. You added the row to the observation log.
+`eval.py todo` lists each row whose "Eval case" column is empty:
+
+```text
+Shipped bugs without an eval case (1):
+  LD-700: the export drops the last row when the list has one page
+    python3 /path/to/harness/tools/evals/eval.py bugs add --repo /path/to/project --from-log b12c34d5 --defect <term>
+```
+
+The ticket, the bug text and the sha in this block are invented.
+
+**Command.** Build the case, then run it. Write the `--defect` terms from the
+fix: the words a reviewer who saw the bug would use. One regex per term.
+
+```bash
+python3 tools/evals/eval.py bugs add --repo <project> --from-log <fix sha> --defect '<term>'
+python3 tools/evals/eval.py bugs --repo <project> --case fix-<first 8 characters of the sha> --trials 1
+```
+
+The first command is free. It names the case
+`fix-<first 8 characters of the sha>`. Add `--new <name>` to choose another
+name. It exits 2 with "no Shipped bugs row names <sha>" when the log has no
+such row. The second command runs a real `/review`. One trial costs about $7.
+`--trials 1` is a quick look, and a quick look can never become a baseline.
+
+**What the output means.** Each trial is CAUGHT, LOCATED or MISSED. A bug case
+is PASS only when every trial is CAUGHT. The last line is a `Review-eval:`
+line. The first real run scored `Review-eval: bugs 0/4;
+tools/evals/results/bugs/2026-11-25-141741-ccf957f`. All four trials were
+LOCATED, because the four cases had no defect terms. That score is a ceiling.
+It does not measure `/review`.
+
+**What to do next.**
+
+1. Read the trial's `report.md`. Ask whether any finding names the defect.
+2. Add `defect` terms to `case.json` if the case has none.
+3. Record the case name in the "Eval case" column of the Shipped bugs row.
+4. Paste the `Review-eval:` line into a commit that changes a reviewer.
+   `tools/checks/check-rescore.py` checks that commit.
+
+### Promoting a baseline
+
+**When.** You ran every case with the default trials, and you accept the
+result as the new normal. Do it after a BETTER or SAME run of a change you
+keep. Do it also after you add or retire cases, because the old baseline then
+lacks a case or holds one that is gone.
+
+**Command.**
+
+```bash
+python3 tools/evals/eval.py gates
+python3 tools/evals/eval.py baseline gates
+```
+
+The first command runs all 60 cases with 3 trials ($48, about 27 minutes). The
+second takes the latest run. To promote another run, name it:
+`python3 tools/evals/eval.py baseline gates 2026-11-25-121253-d81b0f9`.
+
+**What the output means.** On success it prints
+`gates baseline is now 2026-11-25-121253-d81b0f9`. It refuses, exits 2, and
+names the reason when:
+
+- not every case ran (a subset run);
+- the run used fewer than 3 trials (a quick look);
+- a trial is still ERRORED after its retry;
+- the run has no schema 1 `results.json` (an older run).
+
+**What to do next.** Run `python3 tools/evals/eval.py report gates`. The
+report now says "This run is the gates baseline". Today's gates baseline has 6
+FLAKY and 3 FAIL cases. It is a start, not a clean bill. Each of the nine has a
+row in `docs/observation-log.md`. A case that is FAIL at the baseline cannot
+be lost. Fix it, and the next run shows it as gained. `tasks` and `bugs`
+have no baseline yet.
+
+### Reading a FLAKY case
+
+**When.** A report lists a case under Flaky. The real example is
+`jira_unavailable`, FLAKY 1/3 at the baseline.
+
+**Command.**
+
+```bash
+python3 tools/evals/eval.py report gates
+```
+
+Then open the trial folders under "Read these". For this case they are
+`tools/evals/results/gates/2026-11-25-121253-d81b0f9/jira_unavailable/t2` and
+`.../t3`. `t1` passed.
+
+**What the output means.** `trial.json` in `t2` shows one failed check:
+`ticket_counts_reconcile` is `false`. In `t3`, `enumeration_claim_supported`
+failed too. The model's answer in `t2` had the right counts: 5 unique tickets,
+4 read, 1 unread. It wrote "5 unique tickets found". The check wants the words
+"unique discovered". In `t3` the answer said "unconfirmed", and the check wants
+"unverified". So the check is narrower than the rule. The harness did the right
+thing, and the check judged the wording. All six FLAKY baseline cases turned out
+to be of this kind or close to it.
+
+**What to do next.**
+
+1. Decide where the fault is. If the answer breaks the rule, the harness text
+   is unclear. Fix the text and rerun the case.
+2. If the answer keeps the rule, the check is too narrow. Widen the rule in the
+   case's `case.json`. Then run the workflow tests, and read the next section
+   about replay files.
+3. Rerun only that case: `python3 tools/evals/eval.py gates --case jira_unavailable`.
+4. Record your reading:
+   `python3 tools/evals/eval.py review 2026-11-25-121253-d81b0f9 jira_unavailable ok "check wanted the words unique discovered"`.
+   Use `bad` when the answer was wrong.
+
+Do not call a FLAKY case a pass because two trials of three passed. Do not
+call a change a gain because one case moved by one trial.
+
+## Add, change, retire and re-baseline cases
+
+### `gates`
+
+- **Add.** Copy a folder in `tools/evals/workflow/cases/` and edit its
+  `case.json` and `files/`. `tools/evals/workflow/cases.py` describes the
+  fields, the setup steps and the check rules. Then run
+  `python3 tools/evals/eval.py gates --case <id>`. CI also needs three more
+  things, and the tests fail until you add them:
+  - `tools/evals/workflow/replay/<id>.json` with real outputs, where each
+    check has one output that gives true and one that gives false;
+  - the case's entry in `fixture_manifest.json`. Write it from the workflow
+    folder with
+    `python3 -c "import test_migration; test_migration.write_manifest()"`;
+  - the case count of 60 in two tests in `test_runner.py`.
+- **Change.** Edit the folder. Never edit an `expected` map in `replay/` to
+  make a changed check pass. Regenerate the manifest if the fixture changed.
+  The baseline still holds the old version of the case, so the next run
+  compares new against old.
+- **Retire.** Delete the case folder, its replay file and its manifest entry.
+  Lower the two counts. Write the watched list again with
+  `python3 tools/evals/eval.py gates --write-watched`. A unit test fails when
+  `watched.txt` is stale. A baseline that still holds the case does no harm: a
+  run compares only the cases it ran.
+- **Re-baseline.** Run every case, then
+  `python3 tools/evals/eval.py baseline gates`.
+
+Run the tests from `tools/evals/workflow`:
+`python3 -m unittest -q test_runner test_migration`.
+
+### `bugs`
+
+- **Add.** Use `eval.py bugs add` as in "After a shipped bug". It takes the
+  flags of `review-eval/run.py --new`: `--clean <sha>` for a clean commit,
+  `--tag`, and `--holdout`. Make every third or fourth new case a holdout.
+  Never read a holdout case while you change a reviewer.
+- **Change.** Edit `tools/evals/review-eval/fixtures/<case>/case.json`. Git
+  ignores it. Add `defect` terms by hand to the four `ld-585*` cases (OPEN-007).
+- **Retire.** Delete the case folder.
+- **Re-baseline.** Run `python3 tools/evals/eval.py bugs --repo <project>`
+  with the default trials. Then `python3 tools/evals/eval.py baseline bugs`.
+
+### `tasks`
+
+There is one case. To change what it grades, edit the hidden checks in
+`claude/evals/add-business/hidden/`. The grader self-test must still pass:
+the reference scores 49 of 49 and the seed fails
+(`claude/evals/add-business/README.md`). CI runs this self-test. To re-baseline,
+run `python3 tools/evals/eval.py tasks` and then
+`python3 tools/evals/eval.py baseline tasks`.
+
+### `recall`
+
+Nothing to add. Each shipped ticket gets one row in the observation log.
+
+## Catch up with `eval.py todo`
+
+You may skip the end of a ticket. `python3 tools/evals/eval.py todo` lists what
+you skipped, without a model and without network access:
+
+- each shipped ticket with an Approved plan and no Plan recall row, with the
+  `eval.py recall` command that scores it;
+- each Shipped bugs row with no eval case, with the `eval.py bugs add`
+  command that builds one.
+
+It always exits 0. `--count` prints `<tickets> <bugs>`. A SessionStart hook
+(`claude/hooks/eval-todo-hint.sh`) prints one line when either count is above
+zero: `evals: <n> tickets without recall, <m> bugs without a case — run eval.py todo`.
+The hook prints nothing when the count is zero. It also prints nothing when the
+check fails or takes more than 2 seconds.
+
+## The Eval line in commits
+
+A commit that touches a file in `tools/evals/workflow/watched.txt` needs an
+`Eval:` trailer. CI checks it with `tools/checks/check-eval-trailer.py`. The
+trailer is the last line of the `gates` report, or a reason:
+
+```text
+Eval: gates 51/60 PASS -> 55/60 PASS, flaky 6 -> 2 (BETTER); <run folder>
+Eval: not run - wording only, no decision changed
+```
+
+The watched list holds the harness files the gate cases read. A file no case
+reads is not on it. Write the list again with
+`python3 tools/evals/eval.py gates --write-watched` when a stage gains or loses
+a file. A commit that changes a reviewer carries a `Review-eval:` line instead
+(`tools/checks/check-rescore.py`). Git reads trailers from the last paragraph of
+the message only, so put every trailer there.
+
+## What the evals do not prove
+
+- **No suite proves a change is good.** They show that results moved or did not
+  move on the cases you have. Three trials show consistency, not significance.
+  ADR 0079 rejected a significance test and ADR 0152 keeps that.
+- **The `gates` checks are rules, not judges.** The six FLAKY baseline cases
+  failed on wording that the check did not accept. The three FAIL cases fail
+  every trial: `spec_decisions`, `review_auth_diff` and `review_plain_diff`.
+  Read the "Read these" folders before you trust a number.
+- **`tasks` runs with detection only.** The Bash sandbox probe failed on this
+  host. The driver copies the harness without the evals and audits every trace
+  for reads of hidden files. A read marks the trial LEAKED. It does not stop
+  the read. See "Bash sandbox probe" below.
+- **`tasks` has no full-pipeline result.** One trial stopped at `/spec` on an
+  open question. The next stopped at `/plan` on a `SPEC CONFLICT`. The scripted
+  owner answers open questions only when each marks one option `(recommended)`.
+- **`bugs` has no measure yet.** The first run scored `bugs 0/4`, all LOCATED,
+  because the cases have no defect terms (OPEN-007). Cases and run output name
+  a private project. Only this machine has them. Git cannot restore them.
+- **`todo` is blind to some tickets.** It lists a ticket only when a commit
+  subject holds `(<TICKET> T` (OPEN-008). `recall --trailer-only` cannot score
+  the HR-2 commits from `5448fa3` to `d4bb9cc`, whose trailers git does not
+  parse (OPEN-004).
+- **`recall` counts files.** It does not judge the changes in them.
+
+## Archived
+
+| Eval | Where | Review date |
+| --- | --- | --- |
+| `spec-eval` | `tools/evals/archive/spec-eval/` | 2026-12-25 |
+
+`spec-eval` wrote a fresh `/spec` for a shipped ticket and compared it with the
+approved spec. The owner froze it on 2026-11-23 (ADR 0152). `eval.py` does not
+run it. Its judging tests still run in CI. On the review date, decide whether to
+delete it or build it back. The private fixture `LD-380` is copied to
+`~/harness-archive/spec-eval-fixtures/LD-380/`. See `archive/README.md`.
+
+## Free checks
+
+These cost nothing and need no model. CI runs the first four.
+
+```bash
+cd tools/evals/workflow && python3 -m unittest -q test_runner test_migration
+cd tools/evals/review-eval && python3 test_review_eval.py
+cd tools/evals/plan-recall && python3 test_recall.py
+cd tools/evals/archive/spec-eval && python3 test_judge.py && python3 test_produce.py
+cd tools/evals && python3 -m unittest -q test_core test_sandbox test_todo
+cd tools/evals/tasks && python3 -m unittest -q test_tasks
+python3 tools/tests/test-check-eval-trailer.py
+```
+
+Each suite folder has a README with its own commands. Each one starts by
+pointing here.
 
 ## Ticket content stays local
 
-Real tickets are private. `spec-eval` keeps its fixtures and run output in
-folders git ignores, and this repository is public. Do not commit them.
+Real tickets are private, and this repository is public. Git ignores the
+`bugs` case folders (`tools/evals/review-eval/fixtures/`), the archived
+`spec-eval` fixtures and every run under `tools/evals/results/`. Do not commit
+them.
+
+## Records
+
+Every section from here on records real runs, with dates, commits and
+folders. These sections are the evidence for the sections above. Read them
+when you need the detail.
 
 ## Headless sessions get a copy of the harness
 
@@ -45,7 +530,7 @@ One real turn proved the copy works. It ran once, by hand, on 2026-11-25.
 | Item | Value |
 | --- | --- |
 | Command | `claude -p <prompt> --setting-sources project,local --permission-mode acceptEdits --allowedTools Read Glob Grep Write Edit Task Agent TodoWrite Skill 'Bash(python3 *check-spec.py*)' --max-budget-usd 5 --output-format stream-json --verbose`, with the project as the working directory |
-| Prompt | `/spec EX-1` with the `spec-eval/fixtures/example/intake.md` intake, plus one line that asks for a `repo-recon` subagent before the decision brief |
+| Prompt | `/spec EX-1` with the `archive/spec-eval/fixtures/example/intake.md` intake, plus one line that asks for a `repo-recon` subagent before the decision brief |
 | Project | a README, an empty `docs/specs/`, and the output of `install_harness()` |
 | Claude CLI version | 2.1.331 |
 | Cost | $0.6123 (5 turns, 54.9 s, `stop_reason` `end_turn`) |
@@ -277,8 +762,35 @@ There is no baseline yet, so the report has no verdict.
 
 ## Measured
 
+The `gates` suite runs the cases of `workflow/`. This section records two full
+runs of them. Run output sits in `tools/evals/results/`, which git ignores.
+
+### Three trials per case (the gates baseline)
+
+The first baseline: `python3 tools/evals/eval.py gates`, with the default 3
+trials and `--jobs 4`. The run is `tools/evals/results/gates/2026-11-25-121253-d81b0f9`.
+
+| Item | Value |
+| --- | --- |
+| Date | 2026-11-25 |
+| Harness commit | `d81b0f9` |
+| Cases | 60, three trials each: 180 trials |
+| Total cost | $48.0816 |
+| Cost per trial | about $0.27, which is 3.07 times the one-trial run |
+| Total duration | 1610992 ms (26.8 minutes, four trials at a time) |
+| Trials that passed | 163 of 180 |
+| Case results | 51 PASS, 6 FLAKY, 3 FAIL |
+| Retries | 1 (`review_plain_diff` t2); no ERRORED trial after retry |
+
+The cost is `cost_usd` in the run's `results.json`. FLAKY: `build_independent`,
+`jira_complete`, `jira_paginated`, `jira_unavailable`, `specgate_figma_read`,
+`verifier_survivors`. FAIL in every trial: `spec_decisions`, `review_auth_diff`,
+`review_plain_diff`. Each has a row in `docs/observation-log.md`.
+
+### One trial per case (before the migration)
+
 One full run of every `workflow/` case with the runner as it stood before the
-gate changes. Run output sits in `tools/evals/results/`, which git ignores.
+gate changes.
 
 | Item | Value |
 | --- | --- |
@@ -365,24 +877,3 @@ Four cases ended with a failed assertion, not an execution error:
 | `verifiersteps_method_packet` | 0.1990 | 41506 |
 | `verifiersteps_plain_packet` | 0.1795 | 35559 |
 | **Total, 60 cases** | **15.6664** | **2001039** |
-
-### Three trials per case (the gates baseline)
-
-The first baseline: `python3 tools/evals/eval.py gates`, with the default 3
-trials and `--jobs 4`. The run is `tools/evals/results/gates/2026-11-25-121253-d81b0f9`.
-
-| Item | Value |
-| --- | --- |
-| Date | 2026-11-25 |
-| Harness commit | `d81b0f9` |
-| Cases | 60, three trials each: 180 trials |
-| Total cost | $48.0816 (about $0.27 a trial, 3.07 times the one-trial run) |
-| Total duration | 1610992 ms (26.8 minutes, four trials at a time) |
-| Trials that passed | 163 of 180 |
-| Cases | 51 PASS, 6 FLAKY, 3 FAIL |
-| Retries | 1 (`review_plain_diff` t2); no ERRORED trial after retry |
-
-The cost is `cost_usd` in the run's `results.json`. FLAKY: `build_independent`,
-`jira_complete`, `jira_paginated`, `jira_unavailable`, `specgate_figma_read`,
-`verifier_survivors`. FAIL in every trial: `spec_decisions`, `review_auth_diff`,
-`review_plain_diff`. Each has a row in `docs/observation-log.md`.

@@ -1,5 +1,11 @@
 # Review eval
 
+Run it with `python3 tools/evals/eval.py bugs --repo <project>`. It runs every
+case with trials and prints a verdict against the baseline.
+[The evals README](../README.md) says when to run it and how to read the
+report. This page covers the cases and the judge. The `run.py` commands below
+run one trial of a case, with no baseline in the core's sense.
+
 Does `/review` catch bugs that really shipped, without crying wolf on changes
 that were fine?
 
@@ -59,8 +65,9 @@ empty output, or a findings count the report does not back up marks the case
 the SARIF exists or the report says `Nothing to fix`.
 
 `--bug <sha>` overrides the blame guess when the fix touched lines from more
-than one commit. The run ends with BETTER, SAME, NOT BETTER or WORSE, as in
-spec-eval. Run each side twice before you trust a small difference.
+than one commit. The `run.py` run ends with BETTER, SAME, NOT BETTER or WORSE,
+from one trial per side. `eval.py bugs` runs three trials per case and compares
+with the promoted baseline (ADR 0152). Prefer it for a rescore.
 
 ## Tags and the holdout split
 
