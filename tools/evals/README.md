@@ -235,7 +235,8 @@ case with trials and writes a schema 1 `results.json` (`BugsSuite` in
 `review-eval/run.py`). The judge is unchanged. A bug trial passes when it is
 CAUGHT. A bug case is PASS when every trial is CAUGHT, FLAKY when some are, and
 FAIL when none are. A clean trial passes when it has no BLOCKER or REQUIRED
-finding. `--budget` caps what one `/review` may spend (default $10). A retry of
+finding. A trial whose trace names eval files is LEAKED: it fails and the
+report names it (`sandbox.audit()`, REQ-009). `--budget` caps what one `/review` may spend (default $10). A retry of
 an errored trial gets only what the first attempt left of that cap. When no
 cost can be read from the failed attempt, the retry does not start. The report
 ends with a `Review-eval:` line to paste into a commit that changes a reviewer
@@ -249,6 +250,7 @@ ends with a `Review-eval:` line to paste into a commit that changes a reviewer
 | Harness commit | `ccf957f` (not dirty). It is the first scoring of `ld-585` and `ld-585-builder` with the harness rules loaded (see "Harness rules loading"). `ld-585-filter` and `ld-585-order` ran with them before as well. |
 | Claude CLI version | 2.1.331 |
 | Cost | $28.7448 (a trial cost $6.87 to $7.47). The limit was $40. No trial errored and no trial was retried. |
+| Leak audit | The run itself did not audit. Afterwards `sandbox.audit()` read the four traces: none LEAKED. |
 | Duration | 44.4 min |
 | Run folder | `tools/evals/results/bugs/2026-11-25-141741-ccf957f/` (git ignores it; each trial folder keeps `report.md`, `meta.json`, the SARIF file and `trace.jsonl`) |
 

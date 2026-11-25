@@ -322,12 +322,18 @@ class BugsSuite(unittest.TestCase):
         self.calls = []
         self.suite = rev.BugsSuite(Path('/repo'), 10)
 
-    def play(self, *outcomes, cost=1.25):
-        """Make `produce()` return, or raise, each outcome in turn: a findings list, or an exception."""
+    def play(self, *outcomes, cost=1.25, calls=()):
+        """Make `produce()` return, or raise, each outcome in turn: a findings list, or an exception.
+        With `calls`, each review leaves a trace of those tool calls, `(tool, input)`, beside its report."""
         plan = list(outcomes)
 
         def produce(case, repo, budget, out):
             self.calls.append((case['change'], repo, budget, out))
+            if calls:
+                (out / 'trace.jsonl').write_text('\n'.join(json.dumps(
+                    {'type': 'assistant', 'message': {'content': [
+                        {'type': 'tool_use', 'id': f'toolu_{n}', 'name': tool, 'input': tool_input}]}})
+                    for n, (tool, tool_input) in enumerate(calls)) + '\n')
             outcome = plan.pop(0)
             if isinstance(outcome, Exception):
                 (out / 'meta.json').write_text(json.dumps({'total_cost_usd': cost}))
@@ -430,16 +436,27 @@ class BugsSuite(unittest.TestCase):
             self.trial()
         self.assertEqual(len(self.calls), 1)
 
-    def test_each_installed_harness_file_is_hashed_and_the_evals_are_not(self):
-        harness = Path(self.tmp.name) / 'evals' / 'claude'   # a parent named evals is not an evals folder of the harness
-        for rel in ('AGENTS.md', 'settings.json', 'commands/review.md', 'skills/a/SKILL.md', 'commands/evals/hidden.md', 'other/x.md'):
-            (harness / rel).parent.mkdir(parents=True, exist_ok=True)
-            (harness / rel).write_text(rel)
-        before = rev.harness_hashes(harness)
-        self.assertEqual(sorted(before), ['AGENTS.md', 'commands/review.md', 'settings.json', 'skills/a/SKILL.md'])
-        (harness / 'commands/review.md').write_text('changed')
-        after = rev.harness_hashes(harness)
-        self.assertEqual([k for k in before if before[k] != after[k]], ['commands/review.md'])
+    def test_a_review_that_read_the_hidden_checks_is_leaked_and_fails_even_when_it_caught_the_bug(self):
+        hidden = '/var/www/html/personal/harness/claude/evals/add-business/hidden/checks.json'
+        self.play([NEAR], calls=[('Read', {'file_path': hidden})])
+        trial = self.trial()
+        self.assertEqual((trial['verdict'], trial['caught']), ('CAUGHT', True))
+        self.assertEqual((trial['leaked'], [c['tool'] for c in trial['leaks']]), (True, ['Read']))
+        self.assertEqual(self.suite.state(trial), 'fail')
+
+    def test_a_leaked_clean_trial_fails_though_it_is_quiet(self):
+        self.play([ADVISORY], calls=[('Bash', {'command': 'cat claude/evals/add-business/reference/x.php'})])
+        trial = self.trial('quiet')
+        self.assertEqual((trial['verdict'], trial['leaked'], self.suite.state(trial)), ('QUIET', True, 'fail'))
+
+    def test_a_review_that_read_only_project_files_is_not_leaked(self):
+        self.play([NEAR], calls=[('Read', {'file_path': 'feed.py'})])
+        trial = self.trial()
+        self.assertEqual((trial['leaked'], trial['leaks'], self.suite.state(trial)), (False, [], 'pass'))
+
+    def test_a_review_with_no_trace_is_not_leaked(self):
+        self.play([NEAR])
+        self.assertEqual(self.trial()['leaked'], False)
 
 
 class BugsEndToEnd(unittest.TestCase):
@@ -494,7 +511,7 @@ class BugsEndToEnd(unittest.TestCase):
         states = {c['id']: (c['result']['state'], [t['verdict'] for t in c['trials']]) for c in doc['cases']}
         self.assertEqual(states, {'quiet': ('FAIL', ['NOISY', 'NOISY']), 'shipped': ('PASS', ['CAUGHT', 'CAUGHT'])})
         self.assertEqual((code, doc['trials'], doc['cost_usd'], doc['schema']), (0, 2, 2.0, 1))
-        self.assertEqual(doc['instruction_hashes'], rev.harness_hashes())
+        self.assertEqual(doc['instruction_hashes'], rev.sandbox.harness_hashes())
         self.assertTrue((run / 'shipped' / 't1' / 'trace.jsonl').is_file())
         self.assertEqual(out.getvalue().rstrip('\n').splitlines()[-1],
                          f'Review-eval: bugs 1/1, clean 0/1; tools/evals/results/bugs/{run.name}')

@@ -618,6 +618,18 @@ class ReviewEvalLine(CoreCase):
         saved = (self.runs('bugs')[-1] / 'report.md').read_text()
         self.assertEqual(self.last_line(saved), f'Review-eval: bugs 1/1; {self.shown()}')
 
+    def test_a_leaked_trial_is_named_before_the_line(self):
+        script = {('b1', 1): [{'ok': False, 'kind': 'bug', 'leaked': True}], ('b1', 2): judged('bug', True),
+                  ('b1', 3): judged('bug', True)}
+        _, out, _ = self.run_core(FakeSuite(name='bugs', script=script), [case('b1')])
+        lines = out.rstrip('\n').splitlines()
+        self.assertEqual(lines[-2], f'LEAKED (counted as a fail): {self.shown()}/b1/t1')
+        self.assertTrue(lines[-1].startswith('Review-eval:'))
+
+    def test_a_run_with_no_leaked_trial_says_so(self):
+        _, out, _ = self.run_core(FakeSuite(name='bugs', script=self.script({'b1': 'bug'})), [case('b1')])
+        self.assertEqual(out.rstrip('\n').splitlines()[-2], 'LEAKED (counted as a fail): none')
+
     def test_the_gates_report_gets_no_review_eval_line(self):
         _, out, _ = self.run_core(FakeSuite(), [case('a')])
         self.assertNotIn('Review-eval:', out)

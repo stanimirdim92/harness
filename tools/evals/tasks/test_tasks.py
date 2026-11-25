@@ -840,6 +840,13 @@ class SuiteTrial(unittest.TestCase):
         self.assertTrue((self.folder / 'grade.json').is_file())
         self.assertTrue((self.folder / 'driver.json').is_file())
 
+    def test_the_suite_hashes_the_installed_harness_it_runs(self):
+        hashes = self.suite([]).instruction_hashes([self.case])
+        self.assertEqual(sorted(hashes), ['AGENTS.md', 'settings.json'])
+        (self.harness / 'AGENTS.md').write_text('other rules\n')
+        changed = self.suite([]).instruction_hashes([self.case])
+        self.assertEqual([k for k in hashes if hashes[k] != changed[k]], ['AGENTS.md'])
+
     def test_a_trial_that_stopped_early_is_still_graded(self):
         trial = self.suite(['spec_question']).run_trial(self.case, self.folder)
         self.assertEqual((trial['stop_reason'], trial['stop_stage']), ('question', 'spec'))

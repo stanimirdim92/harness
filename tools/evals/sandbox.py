@@ -11,6 +11,7 @@ The harness is copied into the project, never linked, and the session gets no
 to `claude/evals/`, where the hidden checks of the task evals live. The copy
 holds no `evals` folder.
 """
+import hashlib
 import json
 import os
 import re
@@ -104,6 +105,16 @@ def commit_baseline(project):
     return project
 
 
+def harness_hashes(harness=HARNESS):
+    """`{path relative to the harness: sha256}` of every file `install_harness()` copies into a project:
+    the rules, the settings and the six folders without any `evals` folder."""
+    files = [harness / 'AGENTS.md', harness / 'settings.json']
+    for name in HARNESS_DIRS:
+        files += sorted(p for p in (harness / name).rglob('*')
+                        if p.is_file() and 'evals' not in p.relative_to(harness).parts)
+    return {str(p.relative_to(harness)): hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
+
+
 def session_args(prompt, budget, resume=None, allowed_tools=ALLOWED_TOOLS):
     """The `claude -p` command line. It has no `--add-dir`: the session sees
     its own project and the copied `.claude/`, and nothing else."""
@@ -158,7 +169,8 @@ def audit(trace_path):
             event = json.loads(line)
         except json.JSONDecodeError:
             continue
-        content = event.get('message', {}).get('content', []) if isinstance(event, dict) else []
+        message = event.get('message') if isinstance(event, dict) else None
+        content = message.get('content', []) if isinstance(message, dict) else []
         for block in content if isinstance(content, list) else []:
             if not isinstance(block, dict) or block.get('type') != 'tool_use':
                 continue

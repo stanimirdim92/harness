@@ -217,6 +217,12 @@ def review_eval_line(doc, run_dir, base=None, word=None):
     return f'Review-eval: {", ".join(parts)}' + (f' ({word})' if base else '') + f'; {run_dir}'
 
 
+def _leaked_line(doc, run_dir):
+    """The trials whose trace named eval files (REQ-009). A suite that audits its traces sets `leaked`."""
+    leaked = [t for c in doc['cases'] for t in c['trials'] if t.get('leaked')]
+    return 'LEAKED (counted as a fail): ' + (', '.join(f'{run_dir}/{t["folder"]}' for t in leaked) if leaked else 'none')
+
+
 def _tasks_lines(doc, run_dir):
     """What the `tasks` report adds to the generic one (REQ-020, REQ-031): whether prevention was on,
     the trials that passed every check, and the trials that leaked or stopped early."""
@@ -232,9 +238,7 @@ def _tasks_lines(doc, run_dir):
         lines.append('Checks: ' + ', '.join(f'{states.count(s)} {s}' for s in (PASS, FLAKY, FAIL)))
         every = [n for n, s in result['items'].items() if s == FAIL]
         lines.append(f'Failed in every trial: {", ".join(every) or "none"}')
-    leaked = [t for _, t in trials if t.get('leaked')]
-    lines.append('LEAKED (counted as a fail): ' + (', '.join(f'{run_dir}/{t["folder"]}' for t in leaked)
-                                                  if leaked else 'none'))
+    lines.append(_leaked_line(doc, run_dir))
     lines += [f'{t["folder"]} stopped: {t["stop_reason"]} at /{t.get("stop_stage")}'
               for _, t in trials if t.get('stop_reason') not in (None, 'complete')]
     lines.append('3 trials measure consistency: a check that passes in some trials and fails in others is FLAKY. '
@@ -296,6 +300,7 @@ def render_report(doc, run_dir, base=None, diff=None, word=None, why=None, selec
     if suite == 'gates':
         lines.append(eval_line(doc, run_dir, None if is_baseline else base, word, selection))
     if suite == 'bugs':
+        lines.append(_leaked_line(doc, run_dir))
         lines.append(review_eval_line(doc, run_dir, None if is_baseline else base, word))
     if tasks_head:
         lines.insert(0, tasks_head)

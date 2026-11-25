@@ -338,6 +338,9 @@ class TasksSuite:
     def all_cases(self):
         return [{'id': 'add-business', 'split': 'optimization', 'tags': []}]
 
+    def instruction_hashes(self, cases):
+        return sandbox.harness_hashes(self.harness)
+
     def run_trial(self, case, folder):
         """One trial in `folder`: the pipeline, then the grade. The core retries a trial that raises,
         so what the first attempt spent comes off the budget of the retry."""

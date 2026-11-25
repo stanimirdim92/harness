@@ -26,7 +26,6 @@ not. A change is accepted only when no holdout case the baseline passed is lost
 (ADR 0117). Producing drives the real model and costs money: never in CI.
 """
 import argparse
-import hashlib
 import importlib.util
 import json
 import re
@@ -283,15 +282,6 @@ def produce(case, repo, budget, out=None):
 
 # ---------------------------------------------------------------- suite
 
-def harness_hashes(harness=sandbox.HARNESS):
-    """{path relative to the harness: sha256} of every file `install_harness()` copies into a review project."""
-    files = [harness / 'AGENTS.md', harness / 'settings.json']
-    for name in sandbox.HARNESS_DIRS:
-        files += sorted(p for p in (harness / name).rglob('*')
-                        if p.is_file() and 'evals' not in p.relative_to(harness).parts)
-    return {str(p.relative_to(harness)): hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
-
-
 def kept_cost(folder):
     """What a review that raised still spent, or None when it cannot be known. `keep()` saves `meta.json`
     once the session ended. A session that exited non-zero left only its trace, which ends with the
@@ -342,7 +332,7 @@ class BugsSuite:
         return out
 
     def instruction_hashes(self, cases):
-        return harness_hashes()
+        return sandbox.harness_hashes()
 
     def run_trial(self, case, folder):
         """The core retries a trial that raises, so what the first attempt spent comes off the budget of the retry."""
@@ -360,14 +350,18 @@ class BugsSuite:
             self.spent[key] = self.spent.get(key, 0) + (float(self.budget) if cost is None else cost)
             raise
         result = judge(full, findings)
+        trace = Path(folder) / 'trace.jsonl'
+        leaked, leaks = sandbox.audit(trace) if trace.is_file() else (False, [])
         return {'checks': None, 'kind': full['kind'], 'verdict': verdict_word(full['kind'], result),
                 'source': source, 'cost_usd': meta.get('total_cost_usd'), 'duration_ms': meta.get('duration_ms'),
+                'leaked': leaked, 'leaks': leaks,
                 **{k: result[k] for k in ('caught', 'located', 'blocking', 'findings', 'by')}}
 
     def state(self, trial):
+        """A LEAKED trial fails whatever the judge said (REQ-009)."""
         if not trial.get('kind'):
             return 'errored'
-        return 'pass' if item(trial, trial) else 'fail'
+        return 'pass' if item(trial, trial) and not trial.get('leaked') else 'fail'
 
 
 # ---------------------------------------------------------------- cli

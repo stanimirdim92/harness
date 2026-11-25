@@ -116,6 +116,40 @@ def git(cwd, *args):
                           check=True, capture_output=True, text=True).stdout.strip()
 
 
+class HarnessHashes(unittest.TestCase):
+    """The hashes name the files `install_harness()` copies, for `instruction_hashes` (REQ-002)."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        # A parent named evals is not an evals folder of the harness.
+        self.harness = Path(self.tmp.name) / 'evals' / 'claude'
+        for rel in ('AGENTS.md', 'settings.json', 'commands/review.md', 'skills/a/SKILL.md',
+                    'commands/evals/hidden.md', 'other/x.md'):
+            (self.harness / rel).parent.mkdir(parents=True, exist_ok=True)
+            (self.harness / rel).write_text(rel)
+
+    def test_each_installed_file_is_hashed_and_no_evals_or_other_file_is(self):
+        self.assertEqual(sorted(sandbox.harness_hashes(self.harness)),
+                         ['AGENTS.md', 'commands/review.md', 'settings.json', 'skills/a/SKILL.md'])
+
+    def test_a_changed_file_changes_only_its_own_hash(self):
+        before = sandbox.harness_hashes(self.harness)
+        (self.harness / 'commands/review.md').write_text('changed')
+        after = sandbox.harness_hashes(self.harness)
+        self.assertEqual([k for k in before if before[k] != after[k]], ['commands/review.md'])
+
+    def test_the_hashes_name_what_the_install_copies(self):
+        project = Path(self.tmp.name) / 'project'
+        project.mkdir()
+        (self.harness / 'settings.json').write_text(json.dumps({'model': 'opus', 'env': {}}))
+        sandbox.install_harness(project, harness=self.harness)
+        copied = {str(p.relative_to(project / '.claude')) for p in (project / '.claude').rglob('*')
+                  if p.is_file() and p.name in ('review.md', 'SKILL.md')}
+        self.assertEqual(copied, {'commands/review.md', 'skills/a/SKILL.md'})
+        self.assertTrue(copied <= set(sandbox.harness_hashes(self.harness)))
+
+
 class RepoProject(unittest.TestCase):
     """The project a run of a repo-backed fixture gets: the repository's files at a
     commit, the harness beside the project's own `.claude`, and a one-commit history."""
@@ -278,6 +312,13 @@ class Audit(unittest.TestCase):
         self.assertTrue(leaked)
         self.assertEqual([(c['tool'], c['subagent']) for c in calls], [('Read', False)])
         self.assertIn('hidden/checks.json', calls[0]['text'])
+
+    def test_an_event_whose_message_is_a_string_is_skipped_not_a_crash(self):
+        # A real trace holds `system` events such as a permission decision whose `message` is text.
+        note = {'type': 'system', 'subtype': 'permission', 'message': 'Tilde in assignment value'}
+        leaked, calls = self.audit([note, tool_use('Read', {'file_path': HIDDEN}), 'a bare string', ['a', 'list']])
+        self.assertEqual((leaked, len(calls)), (True, 1))
+        self.assertEqual(self.audit([note]), (False, []))
 
     def test_bash_naming_the_hidden_folder_is_leaked(self):
         leaked, calls = self.audit([tool_use('Bash', {'command': 'cat evals/add-business/hidden/api/dup.test.php'})])
