@@ -149,7 +149,7 @@ repository with no prior specs, no branches and no stale worktrees.
   spec/capability-map/plan/todo artifact path differently from the canonical
   set (the drift class fixed in c4584dd); `tools/tests/validate-artifact-paths-test.py`
   covers the allow and deny cases.
-- [Spec eval](tools/evals/spec-eval/README.md) re-runs `/spec` against a ticket
+- [Spec eval](tools/evals/archive/spec-eval/README.md) re-runs `/spec` against a ticket
   whose right answer is known from a human reading its spec against what
   shipped, and checks the known findings survive. It is the only check here
   that can tell whether a harness change moved spec *quality* rather than

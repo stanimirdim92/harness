@@ -790,7 +790,7 @@ same rule applies to the `/plan` Draft.
 
 ## T021: spec-eval is frozen, its private fixture kept and ignored
 
-**Status:** Pending
+**Status:** Done
 
 **Requirements:** REQ-026
 

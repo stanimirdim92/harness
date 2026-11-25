@@ -46,7 +46,7 @@ sys.path.insert(0, str(HERE.parent))
 import sandbox  # noqa: E402
 import todo  # noqa: E402
 
-_spec = importlib.util.spec_from_file_location('spec_eval', HERE.parent / 'spec-eval' / 'run.py')
+_spec = importlib.util.spec_from_file_location('spec_eval', HERE.parent / 'archive' / 'spec-eval' / 'run.py')
 spec_eval = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(spec_eval)
 
