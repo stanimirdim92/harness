@@ -129,9 +129,46 @@ class Produce(unittest.TestCase):
         self.tmp.cleanup()
 
     def stub(self, **meta):
+        """A `claude` that records its arguments and prints a stream-json result event."""
         out = self.bin / 'claude'
-        out.write_text(f"#!/bin/sh\ncat <<'EOF'\n{json.dumps(meta)}\nEOF\n")
+        event = json.dumps({'type': 'result', **meta})
+        out.write_text(f"#!/bin/sh\nprintf '%s\\n' \"$@\" > {self.bin}/args\ncat <<'EOF'\n{event}\nEOF\n")
         out.chmod(out.stat().st_mode | stat.S_IEXEC)
+
+    def test_session_is_stream_json_verbose_with_no_add_dir(self):
+        self.stub(is_error=False, result='**Findings: 0 BLOCKER · 0 REQUIRED · 0 ADVISORY**')
+        rev.produce(self.case, self.repo, '1')
+        args = (self.bin / 'args').read_text().splitlines()
+        self.assertNotIn('--add-dir', args)
+        self.assertEqual(args[args.index('--output-format') + 1], 'stream-json')
+        self.assertIn('--verbose', args)
+        self.assertEqual(args[args.index('--max-budget-usd') + 1], '1')
+
+    def test_review_tools_stay_the_narrow_review_set(self):
+        self.stub(is_error=False, result='**Findings: 0 BLOCKER · 0 REQUIRED · 0 ADVISORY**')
+        rev.produce(self.case, self.repo, '1')
+        args = (self.bin / 'args').read_text().splitlines()
+        tools = args[args.index('--allowedTools') + 1:args.index('--max-budget-usd')]
+        self.assertEqual(tools, list(rev.REVIEW_TOOLS))
+        self.assertNotIn('Edit', tools)
+
+    def test_the_trace_is_kept_beside_the_report_for_the_audit(self):
+        self.stub(is_error=False, result='**Findings: 0 BLOCKER · 0 REQUIRED · 0 ADVISORY**')
+        out = Path(self.tmp.name) / 'out'
+        rev.produce(self.case, self.repo, '1', out=out)
+        trace = out / 'trace.jsonl'
+        self.assertEqual(json.loads(trace.read_text().splitlines()[-1])['type'], 'result')
+        self.assertEqual(rev.sandbox.audit(trace), (False, []))
+
+    def test_the_review_project_holds_a_copy_of_the_harness_not_links(self):
+        self.stub(is_error=False, result='**Findings: 0 BLOCKER · 0 REQUIRED · 0 ADVISORY**')
+        self.bin.joinpath('claude').write_text(
+            "#!/bin/sh\nfind .claude -type l | wc -l > " + f"{self.bin}/links\n"
+            "test -f .claude/commands/review.md && echo yes > " + f"{self.bin}/review\n"
+            "echo '{\"type\":\"result\",\"is_error\":false,\"result\":\"**Findings: 0 BLOCKER · 0 REQUIRED · 0 ADVISORY**\"}'\n")
+        rev.produce(self.case, self.repo, '1')
+        self.assertEqual((self.bin / 'links').read_text().strip(), '0')
+        self.assertEqual((self.bin / 'review').read_text().strip(), 'yes')
 
     def test_error_result_is_not_a_quiet_review(self):
         self.stub(is_error=True, result='REVIEW BLOCKED: verification missing')

@@ -2,6 +2,8 @@
 """The sandbox: the harness copy, the session arguments and the leak audit.
 `claude` is never invoked. Runs in CI."""
 import json
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -94,7 +96,133 @@ class InstallHarness(unittest.TestCase):
         self.assertTrue((self.project / '.claude/commands/file.md').is_file())
 
 
+def git(cwd, *args):
+    return subprocess.run(['git', '-C', str(cwd), '-c', 'user.email=t@t', '-c', 'user.name=t', *args],
+                          check=True, capture_output=True, text=True).stdout.strip()
+
+
+class RepoProject(unittest.TestCase):
+    """The project a run of a repo-backed fixture gets: the repository's files at a
+    commit, the harness beside the project's own `.claude`, and a one-commit history."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        tmp = Path(self.tmp.name)
+        self.repo = tmp / 'app'
+        (self.repo / 'docs/specs').mkdir(parents=True)
+        (self.repo / '.claude/agents').mkdir(parents=True)
+        (self.repo / 'docs/specs/LD-1-SPEC.md').write_text('old spec\n')
+        (self.repo / '.claude/agents/local-helper.md').write_text('project agent\n')
+        (self.repo / 'CLAUDE.md').write_text('project rules\n')
+        (self.repo / 'Ticker.php').write_text('<?php // before\n')
+        git(self.repo, 'init', '-q')
+        git(self.repo, 'add', '-A')
+        git(self.repo, 'commit', '-qm', 'base')
+        self.base = git(self.repo, 'rev-parse', 'HEAD')
+        (self.repo / 'Shipped.php').write_text('<?php // the implementation\n')
+        (self.repo / 'docs/specs/LD-2-SPEC.md').write_text('the final spec\n')
+        git(self.repo, 'add', '-A')
+        git(self.repo, 'commit', '-qm', 'LD-2: shipped')
+        self.harness = tmp / 'claude'
+        (self.harness / 'agents').mkdir(parents=True)
+        (self.harness / 'agents/executor.md').write_text('harness agent\n')
+        (self.harness / 'AGENTS.md').write_text('harness rules\n')
+        (self.harness / 'settings.json').write_text(json.dumps({'model': 'opus', 'env': {}}))
+        self.project = tmp / 'project'
+        sandbox.export_repo(self.project, self.repo, self.base)
+        sandbox.install_harness(self.project, harness=self.harness)
+        sandbox.commit_baseline(self.project)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_files_at_the_commit_without_the_future(self):
+        self.assertTrue((self.project / 'Ticker.php').is_file())
+        self.assertFalse((self.project / 'Shipped.php').exists())
+        self.assertFalse((self.project / 'docs/specs/LD-2-SPEC.md').exists())
+
+    def test_export_ignore_paths_are_kept(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp) / 'app'
+            (repo / 'tests').mkdir(parents=True)
+            (repo / 'tests/Pest.php').write_text('<?php\n')
+            (repo / '.gitattributes').write_text('/tests export-ignore\n')
+            git(repo, 'init', '-q')
+            git(repo, 'add', '-A')
+            git(repo, 'commit', '-qm', 'base')
+            sandbox.export_repo(Path(tmp) / 'project', repo, 'HEAD')
+            self.assertTrue((Path(tmp) / 'project/tests/Pest.php').is_file())
+
+    def test_no_history_reaches_the_run(self):
+        self.assertEqual(git(self.project, 'rev-list', '--count', 'HEAD'), '1')
+        self.assertNotIn('shipped', git(self.project, 'log', '--all', '--format=%s'))
+
+    def test_the_throwaway_index_is_gone(self):
+        self.assertFalse((self.project.parent / 'export.index').exists())
+
+    def test_project_config_kept_and_harness_merged_beside_it(self):
+        agents = self.project / '.claude/agents'
+        self.assertEqual((agents / 'local-helper.md').read_text(), 'project agent\n')
+        self.assertEqual((agents / 'executor.md').read_text(), 'harness agent\n')
+        self.assertEqual((self.project / 'CLAUDE.md').read_text(), 'project rules\n')
+        self.assertEqual((self.project / '.claude/AGENTS.md').read_text(), 'harness rules\n')
+        self.assertTrue((self.project / '.claude/settings.local.json').is_file())
+
+    def test_the_baseline_commit_holds_the_installed_harness(self):
+        tracked = git(self.project, 'ls-files').splitlines()
+        self.assertIn('.claude/agents/executor.md', tracked)
+        self.assertIn('Ticker.php', tracked)
+
+    def test_a_commit_that_does_not_exist_stops_the_export(self):
+        with self.assertRaises(subprocess.CalledProcessError):
+            sandbox.export_repo(Path(self.tmp.name) / 'other', self.repo, 'nosuchcommit')
+
+
+class RunSession(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.dir = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def session(self, *events, code=0, trace=None):
+        lines = ''.join(json.dumps(e) + '\n' for e in events)
+        script = f"import sys; sys.stdout.write({lines!r}); sys.exit({code})"
+        return sandbox.run_session([sys.executable, '-c', script], self.dir, trace=trace)
+
+    def test_returns_the_result_event(self):
+        result = self.session({'type': 'system'}, {'type': 'result', 'result': 'done', 'total_cost_usd': 0.5})
+        self.assertEqual((result['result'], result['total_cost_usd']), ('done', 0.5))
+
+    def test_keeps_the_whole_stream_as_the_trace_for_audit(self):
+        trace = self.dir / 'out' / 'trace.jsonl'
+        self.session(tool_use('Read', {'file_path': HIDDEN}), {'type': 'result', 'result': 'x'}, trace=trace)
+        self.assertEqual(len(trace.read_text().splitlines()), 2)
+        self.assertTrue(sandbox.audit(trace)[0])
+
+    def test_a_failing_session_is_an_error(self):
+        with self.assertRaisesRegex(RuntimeError, 'exited 3'):
+            self.session({'type': 'result', 'result': 'x'}, code=3)
+
+    def test_a_stream_without_a_result_event_is_an_error(self):
+        with self.assertRaisesRegex(RuntimeError, 'no result'):
+            self.session({'type': 'system'})
+
+    def test_the_trace_is_kept_even_when_the_session_fails(self):
+        trace = self.dir / 'trace.jsonl'
+        with self.assertRaises(RuntimeError):
+            self.session({'type': 'system'}, code=1, trace=trace)
+        self.assertTrue(trace.is_file())
+
+
 class SessionArgs(unittest.TestCase):
+    def test_a_caller_can_narrow_the_allowed_tools(self):
+        args = sandbox.session_args('p', 1, allowed_tools=('Read', 'Bash(git *)'))
+        start = args.index('--allowedTools')
+        self.assertEqual(args[start + 1:start + 3], ['Read', 'Bash(git *)'])
+        self.assertEqual(args[start + 3], '--max-budget-usd')
+
     def test_no_add_dir_at_all(self):
         args = sandbox.session_args('/spec X-1', 3)
         self.assertNotIn('--add-dir', args)

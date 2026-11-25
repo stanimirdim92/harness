@@ -39,6 +39,11 @@ HERE = Path(__file__).resolve().parent
 FIXTURES = HERE / 'fixtures'
 TOLERANCE = 3          # a finding within this many lines of a target line counts
 BLOCKING = {'BLOCKER', 'REQUIRED'}
+REVIEW_TOOLS = ('Read', 'Glob', 'Grep', 'Write', 'Task', 'Agent', 'Skill',
+                'Bash(git *)', 'Bash(mkdir *)', 'Bash(python3 *)')
+
+sys.path.insert(0, str(HERE.parent))
+import sandbox  # noqa: E402
 
 _spec = importlib.util.spec_from_file_location('spec_eval', HERE.parent / 'spec-eval' / 'run.py')
 spec_eval = importlib.util.module_from_spec(_spec)
@@ -257,22 +262,17 @@ def produce(case, repo, budget, out=None):
     """Run a standalone /review on the case's change, in a throwaway project.
     With `out`, the report, metadata and SARIF are copied there first."""
     with tempfile.TemporaryDirectory() as tmp:
-        project = spec_eval.build_project(Path(tmp) / 'project', repo, f'{case["change"]}^')
+        project = sandbox.export_repo(Path(tmp) / 'project', repo, f'{case["change"]}^')
+        sandbox.install_harness(project)
+        sandbox.commit_baseline(project)
         patch = git(repo, 'diff', '--binary', '--no-ext-diff', f'{case["change"]}^', case['change'])
         subprocess.run(['git', 'apply', '--index'], input=patch, text=True, cwd=project, check=True)
         subprocess.run(['git', '-c', 'user.email=f@f', '-c', 'user.name=f', 'commit', '-qm', 'Change under review'],
                        cwd=project, check=True, capture_output=True)
         prompt = ('/review HEAD~1..HEAD\n\nThis is a standalone review of the last commit; there is no '
                   'BUILD handoff, spec or ticket. Use REVIEW-EVAL as the ticket id for the SARIF file.')
-        result = subprocess.run(
-            ['claude', '-p', prompt, '--setting-sources', 'project,local', '--add-dir', str(spec_eval.HARNESS),
-             '--permission-mode', 'acceptEdits', '--allowedTools', 'Read', 'Glob', 'Grep', 'Write', 'Task',
-             'Agent', 'Skill', 'Bash(git *)', 'Bash(mkdir *)', 'Bash(python3 *)',
-             '--max-budget-usd', str(budget), '--output-format', 'json'],
-            cwd=project, capture_output=True, text=True, timeout=1800)
-        if result.returncode != 0:
-            raise RuntimeError(f'claude exited {result.returncode}: {result.stderr[-600:]}')
-        meta = json.loads(result.stdout)
+        meta = sandbox.run_session(sandbox.session_args(prompt, budget, allowed_tools=REVIEW_TOOLS), project,
+                                   trace=(out or Path(tmp)) / 'trace.jsonl')
         sarifs = sorted((project / 'docs' / 'reviews').glob('*.sarif'))
         if out:
             keep(out, meta, sarifs)

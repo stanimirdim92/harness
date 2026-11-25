@@ -30,16 +30,15 @@ you re-judge yesterday's spec under today's expectations.
 """
 import argparse
 import json
-import os
 import re
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[3]
-HARNESS = ROOT / 'claude'
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE.parent))
+import sandbox  # noqa: E402
 
 
 # ---------------------------------------------------------------- judging
@@ -100,67 +99,25 @@ def judge(fixture, spec, tags=()):
 
 # ---------------------------------------------------------------- producing
 
-HARNESS_DIRS = ('commands', 'agents', 'skills', 'references', 'docs', 'hooks')
-
-
-def link_tree(dst, src):
-    """Make `src` visible at `dst`: the whole directory when `dst` is absent,
-    otherwise each entry the project does not already have. A project's own
-    `.claude/agents` and the global harness combine the same way in real use."""
-    if not dst.exists():
-        dst.symlink_to(src)
-        return
-    for child in sorted(src.iterdir()):
-        if not (dst / child.name).exists():
-            (dst / child.name).symlink_to(child)
-
-
 def build_project(project, repo=None, at=None):
     """Lay out the throwaway project /spec runs in.
 
     Without a repository: an empty project, so the fixture measures what the
     spec does with the tickets alone. With one: the files of `repo` at commit
-    `at`, checked out through a throwaway index -- no `.git`, no history, so the
-    run can see neither the shipped implementation nor the final spec. Not
-    `git archive`: it drops `export-ignore` paths, and a project that keeps
-    `tests/` out of its release archives would look like it has no tests.
-    Gitignored files (`.env`, `vendor/`) are absent; specification needs none.
+    `at`, with no `.git` and no history, so the run can see neither the shipped
+    implementation nor the final spec (`sandbox.export_repo`). The harness is
+    copied in beside the project's own `.claude` (`sandbox.install_harness`).
     """
-    project.mkdir(parents=True)
     if repo:
-        env = {**os.environ, 'GIT_INDEX_FILE': str(project.parent / 'export.index')}
-        subprocess.run(['git', '-C', str(repo), 'read-tree', at], env=env, check=True, capture_output=True)
-        subprocess.run(['git', '-C', str(repo), 'checkout-index', '-a', f'--prefix={project.resolve()}/'],
-                       env=env, check=True, capture_output=True)
-        Path(env['GIT_INDEX_FILE']).unlink()
+        sandbox.export_repo(project, repo, at)
     else:
+        project.mkdir(parents=True)
         # No application source on purpose: a stand-in repository would measure
         # the stand-in. Expectations assert the spec says so rather than inventing.
         (project / 'README.md').write_text('Empty project fixture. No application source is available in this run.\n')
     (project / 'docs/specs').mkdir(parents=True, exist_ok=True)
-    (project / '.claude').mkdir(exist_ok=True)
-    for name in HARNESS_DIRS:
-        link_tree(project / '.claude' / name, HARNESS / name)
-    # The harness rules load as project memory. A project keeps its own
-    # CLAUDE.md / AGENTS.md; the harness copy goes beside them, not over them.
-    for memory in (project / 'AGENTS.md', project / '.claude/CLAUDE.md'):
-        if not memory.exists():
-            memory.symlink_to(HARNESS / 'AGENTS.md')
-            break
-    settings = json.loads((HARNESS / 'settings.json').read_text())
-    # settings.local.json, so a project's own .claude/settings.json still applies.
-    (project / '.claude/settings.local.json').write_text(json.dumps({
-        'model': settings['model'],
-        'effortLevel': settings.get('effortLevel'),
-        'env': {k: v for k, v in settings['env'].items() if k.startswith('CLAUDE_CODE_MAX_SUBAGENT')
-                or k.startswith('CLAUDE_CODE_EXPERIMENTAL') or k.startswith('CLAUDE_CODE_FORK')},
-        'worktree': settings.get('worktree', {}),
-        'permissions': {'defaultMode': 'acceptEdits'},
-    }, indent=2))
-    for command in (['git', 'init', '-q', '-b', 'main', '.'], ['git', 'add', '-A'],
-                    ['git', '-c', 'user.email=f@f', '-c', 'user.name=f', 'commit', '-qm', 'Fixture baseline']):
-        subprocess.run(command, cwd=project, check=True, capture_output=True)
-    return project
+    sandbox.install_harness(project)
+    return sandbox.commit_baseline(project)
 
 
 def specs_snapshot(project):
@@ -209,18 +166,7 @@ BRIEF_REPLY = ('decisions: the owner takes your recommended option for every que
 
 
 def run_claude(project, prompt, budget, resume: str | None = None):
-    result = subprocess.run(
-        ['claude', '-p', prompt, *(['--resume', resume] if resume else []),
-         '--setting-sources', 'project,local',
-         '--add-dir', str(HARNESS), '--permission-mode', 'acceptEdits',
-         '--allowedTools', 'Read', 'Glob', 'Grep', 'Write', 'Edit', 'Task', 'Agent', 'TodoWrite', 'Skill',
-         # /spec runs its shape check before presenting (commands/spec.md).
-         'Bash(python3 *check-spec.py*)',
-         '--max-budget-usd', str(budget), '--output-format', 'json'],
-        cwd=project, capture_output=True, text=True, timeout=1800)
-    if result.returncode != 0:
-        raise RuntimeError(f'claude exited {result.returncode}: {result.stderr[-600:]}')
-    return json.loads(result.stdout)
+    return sandbox.run_session(sandbox.session_args(prompt, budget, resume), project)
 
 
 # ---------------------------------------------------------------- new fixture

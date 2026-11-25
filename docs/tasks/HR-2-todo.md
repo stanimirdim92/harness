@@ -155,7 +155,7 @@ interface (CP-001).
 
 ## T005: spec-eval and review-eval use the shared install
 
-**Status:** Pending
+**Status:** Done
 
 **Requirements:** REQ-008
 

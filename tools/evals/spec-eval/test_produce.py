@@ -3,6 +3,7 @@
 import importlib.util
 import io
 import json
+import os
 import subprocess
 import tempfile
 import unittest
@@ -39,38 +40,52 @@ class RepoProject(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
-    def test_files_at_the_commit_without_the_future(self):
+    def test_build_project_exports_the_commit_and_copies_the_harness_beside_the_project(self):
+        agents = self.project / '.claude/agents'
         self.assertTrue((self.project / 'Ticker.php').is_file())
         self.assertFalse((self.project / 'Shipped.php').exists())
-        self.assertFalse((self.project / 'docs/specs/LD-2-SPEC.md').exists())
-
-    def test_export_ignore_paths_are_kept(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            repo = Path(tmp) / 'app'
-            (repo / 'tests').mkdir(parents=True)
-            (repo / 'tests/Pest.php').write_text('<?php\n')
-            (repo / '.gitattributes').write_text('/tests export-ignore\n')
-            git(repo, 'init', '-q'); git(repo, 'add', '-A'); git(repo, 'commit', '-qm', 'base')
-            project = run.build_project(Path(tmp) / 'project', repo, 'HEAD')
-            self.assertTrue((project / 'tests/Pest.php').is_file())
-
-    def test_no_history_reaches_the_run(self):
-        self.assertEqual(git(self.project, 'rev-list', '--count', 'HEAD'), '1')
-        self.assertNotIn('shipped', git(self.project, 'log', '--all', '--format=%s'))
-
-    def test_project_config_kept_and_harness_merged(self):
-        agents = self.project / '.claude/agents'
         self.assertTrue((agents / 'local-helper.md').is_file())
-        self.assertTrue((agents / 'executor.md').exists())
+        self.assertTrue((agents / 'executor.md').is_file())
         self.assertEqual((self.project / 'CLAUDE.md').read_text(), 'project rules\n')
-        self.assertEqual((self.project / 'AGENTS.md').resolve(), (run.HARNESS / 'AGENTS.md').resolve())
-        self.assertTrue((self.project / '.claude/settings.local.json').is_file())
+        self.assertFalse(any(p.is_symlink() for p in (self.project / '.claude').rglob('*')))
+        self.assertTrue((self.project / 'docs/specs').is_dir())
 
     def test_written_spec_is_the_new_one_for_the_ticket(self):
         before = run.specs_snapshot(self.project)
         (self.project / 'docs/specs/LD-3-SPEC.md').write_text('fresh\n')
         self.assertEqual(run.written_spec(self.project, before, 'LD-3'), 'fresh\n')
         self.assertIsNone(run.written_spec(self.project, run.specs_snapshot(self.project), 'LD-3'))
+
+
+class Session(unittest.TestCase):
+    """run_claude() with a stub `claude` on PATH that records its arguments."""
+
+    def session(self, **kwargs):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            (tmp / 'bin').mkdir()
+            stub = tmp / 'bin/claude'
+            stub.write_text(f"#!/bin/sh\nprintf '%s\\n' \"$@\" > {tmp}/args\n"
+                            "echo '{\"type\":\"result\",\"result\":\"ok\",\"total_cost_usd\":1}'\n")
+            stub.chmod(0o755)
+            (tmp / 'project').mkdir()
+            saved = os.environ['PATH']
+            os.environ['PATH'] = f'{tmp}/bin:{saved}'
+            try:
+                result = run.run_claude(tmp / 'project', '/spec X-1', 3, **kwargs)
+            finally:
+                os.environ['PATH'] = saved
+            return result, (tmp / 'args').read_text().splitlines()
+
+    def test_session_has_no_add_dir_and_returns_the_result_event(self):
+        result, args = self.session()
+        self.assertNotIn('--add-dir', args)
+        self.assertIn('stream-json', args)
+        self.assertEqual((result['result'], result['total_cost_usd']), ('ok', 1))
+
+    def test_a_resumed_session_names_the_session_to_resume(self):
+        _, args = self.session(resume='s1')
+        self.assertEqual(args[args.index('--resume') + 1], 's1')
 
 
 class DecisionBrief(unittest.TestCase):
@@ -104,7 +119,8 @@ class EmptyProject(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             project = run.build_project(Path(tmp) / 'project')
             self.assertIn('Empty project fixture', (project / 'README.md').read_text())
-            self.assertTrue((project / '.claude/skills').is_symlink())
+            self.assertTrue((project / '.claude/skills').is_dir())
+            self.assertFalse((project / '.claude/skills').is_symlink())
 
 
 class Arguments(unittest.TestCase):

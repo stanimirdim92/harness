@@ -1,8 +1,10 @@
 """The sandbox a headless eval session runs in.
 
 A suite that starts `claude -p` builds its throwaway project with
-`install_harness()`, starts the session with `session_args()`, and after the
-session reads the stream-json trace with `audit()`.
+`export_repo()` (when the project is a repository at a commit),
+`install_harness()` and `commit_baseline()`. It starts the session with
+`session_args()` and `run_session()`, which keeps the stream-json trace, and
+after the session reads that trace with `audit()`.
 
 The harness is copied into the project, never linked, and the session gets no
 `--add-dir`. A link or an added directory would let the session read through
@@ -10,8 +12,10 @@ to `claude/evals/`, where the hidden checks of the task evals live. The copy
 holds no `evals` folder.
 """
 import json
+import os
 import re
 import shutil
+import subprocess
 from pathlib import Path
 
 HARNESS = Path(__file__).resolve().parents[2] / 'claude'
@@ -67,6 +71,33 @@ def install_harness(project, harness=HARNESS):
     return project
 
 
+def export_repo(project, repo, at):
+    """Put the files of `repo` at commit `at` into `project`: no `.git`, no history,
+    so a run sees neither what shipped later nor the final spec. A throwaway
+    index, not `git archive`: that drops `export-ignore` paths, and a project
+    that keeps `tests/` out of its release archives would look like it has no
+    tests. Gitignored files (`.env`, `vendor/`) are absent."""
+    project = Path(project)
+    project.mkdir(parents=True)
+    index = project.parent / 'export.index'
+    env = {**os.environ, 'GIT_INDEX_FILE': str(index)}
+    try:
+        subprocess.run(['git', '-C', str(repo), 'read-tree', at], env=env, check=True, capture_output=True)
+        subprocess.run(['git', '-C', str(repo), 'checkout-index', '-a', f'--prefix={project.resolve()}/'],
+                       env=env, check=True, capture_output=True)
+    finally:
+        index.unlink(missing_ok=True)
+    return project
+
+
+def commit_baseline(project):
+    """Start the project's own one-commit history."""
+    for command in (['git', 'init', '-q', '-b', 'main', '.'], ['git', 'add', '-A'],
+                    ['git', '-c', 'user.email=f@f', '-c', 'user.name=f', 'commit', '-qm', 'Fixture baseline']):
+        subprocess.run(command, cwd=project, check=True, capture_output=True)
+    return project
+
+
 def session_args(prompt, budget, resume=None, allowed_tools=ALLOWED_TOOLS):
     """The `claude -p` command line. It has no `--add-dir`: the session sees
     its own project and the copied `.claude/`, and nothing else."""
@@ -74,6 +105,26 @@ def session_args(prompt, budget, resume=None, allowed_tools=ALLOWED_TOOLS):
             '--setting-sources', 'project,local', '--permission-mode', 'acceptEdits',
             '--allowedTools', *allowed_tools,
             '--max-budget-usd', str(budget), '--output-format', 'stream-json', '--verbose']
+
+
+def run_session(args, cwd, trace=None, timeout=1800):
+    """Run a `session_args()` command line in `cwd`. Returns its `result` event.
+    With `trace`, the whole stream-json output is saved there first, so
+    `audit()` can read it after a failed session too."""
+    done = subprocess.run(args, cwd=cwd, capture_output=True, text=True, timeout=timeout)
+    if trace is not None:
+        Path(trace).parent.mkdir(parents=True, exist_ok=True)
+        Path(trace).write_text(done.stdout)
+    if done.returncode != 0:
+        raise RuntimeError(f'claude exited {done.returncode}: {done.stderr[-600:]}')
+    for line in reversed(done.stdout.splitlines()):
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(event, dict) and event.get('type') == 'result':
+            return event
+    raise RuntimeError(f'claude printed no result event: {done.stdout[-600:]}')
 
 
 def _strings(value):
