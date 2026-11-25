@@ -8,6 +8,7 @@
     eval.py bugs add --new <name> --repo <project> --fix <sha> --defect <re>   the flags of run.py --new
     eval.py gates --write-watched            write the watched list, run nothing
     eval.py recall <recall.py flags>         plan-recall, flags passed on unchanged
+    eval.py todo [--count]                   the shipped tickets and bugs whose recall or case you skipped
     eval.py baseline <suite> [<run>]         make a run the suite's baseline
     eval.py report [<suite>]                 print the last run's report again
     eval.py review <run> <case> ok|bad "<note>"
@@ -155,6 +156,7 @@ def parser_for(suites):
             sub.add_argument('--write-watched', action='store_true',
                              help='write workflow/watched.txt, the harness files the cases read; run nothing')
     commands.add_parser('recall', help=suites['recall']['question'])
+    commands.add_parser('todo', help='list the shipped tickets and bugs whose eval step you skipped')
     sub = commands.add_parser('baseline', help='make a run the suite baseline')
     sub.add_argument('suite', choices=list(suites))
     sub.add_argument('run', nargs='?', help='run folder name (default: the latest run)')
@@ -183,6 +185,9 @@ def main(argv=None, suites=None, root=core.ROOT, readme=README):
     if argv[:1] == ['recall']:  # argparse cannot pass on a leading flag such as `--repo`
         suite = build(suites, 'recall')
         return 2 if suite is None else suite.run(argv[1:])
+    if argv[:1] == ['todo']:  # reads git and the log, not a suite
+        import todo
+        return todo.main(argv[1:])
     if argv[:2] == ['bugs', 'add']:  # its flags are `run.py --new`'s, not the run flags
         suite = build(suites, 'bugs')
         return 2 if suite is None else suite.add(argv[2:])

@@ -44,6 +44,7 @@ REVIEW_TOOLS = ('Read', 'Glob', 'Grep', 'Write', 'Task', 'Agent', 'Skill',
 
 sys.path.insert(0, str(HERE.parent))
 import sandbox  # noqa: E402
+import todo  # noqa: E402
 
 _spec = importlib.util.spec_from_file_location('spec_eval', HERE.parent / 'spec-eval' / 'run.py')
 spec_eval = importlib.util.module_from_spec(_spec)
@@ -319,23 +320,13 @@ def shipped_bug(text, sha):
     """The row of the observation log's "Shipped bugs" table whose fix-commit column names `sha`, as
     `{'bug', 'fix'}` (the cell texts), or None. The column holds a short sha, so `sha` names it when
     either is a prefix of the other. Prose and other tables do not count."""
-    section = re.search(r'^## Shipped bugs\n(.*?)(?=^## |\Z)', text, re.M | re.S)
-    header = None
-    for line in section.group(1).splitlines() if section else []:
-        if not line.startswith('|'):
+    for row in todo.log_table(text, 'Shipped bugs') or []:
+        if 'bug' not in row or 'fix commit' not in row:
             continue
-        cells = [c.strip() for c in line.strip().strip('|').split('|')]
-        if header is None:
-            header = {c.lower(): i for i, c in enumerate(cells)}
-            if 'bug' not in header or 'fix commit' not in header:
-                return None
-            continue
-        if len(cells) <= max(header['bug'], header['fix commit']):
-            continue
-        fix = cells[header['fix commit']]
+        fix = row['fix commit']
         if len(sha) >= MIN_SHA and any(t.startswith(sha) or sha.startswith(t)
                                        for t in re.findall(rf'\b[0-9a-f]{{{MIN_SHA},40}}\b', fix)):
-            return {'bug': cells[header['bug']], 'fix': fix}
+            return {'bug': row['bug'], 'fix': fix}
     return None
 
 

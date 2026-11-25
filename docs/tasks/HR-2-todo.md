@@ -719,7 +719,7 @@ same rule applies to the `/plan` Draft.
 
 ## T019: `eval.py todo` lists skipped eval steps
 
-**Status:** Pending
+**Status:** Done
 
 **Requirements:** REQ-029
 
