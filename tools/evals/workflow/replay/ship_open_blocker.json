@@ -1,0 +1,59 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "blocked",
+      "explanation": "Ship Decision: NO-GO\nSEC-2 BLOCKER (high confidence, verification CONFIRMED, auth.py:4) — unresolved, NO-GO: can_export() raises AttributeError when user is None, so an anonymous request crashes the export page. This change added the line, so it is not pre-existing and cannot go to a follow-up. The confidence is high, so the low-confidence refutation path does not apply. No fix and no refuting evidence is recorded, and /ship does not produce either. A BLOCKER cannot be accepted as a risk, deferred or closed as answered, so the owner's silence on it changes nothing. SARIF resolution stays `open` (no shell in this trial, so nothing was written).\nNext step: fix SEC-2 in /build (handle a None user in can_export so the request is refused instead of crashing). That makes a new candidate, which goes through /test at Deep depth (full suite and a mutation probe on every changed condition), then /review, then /ship again. This verdict does not carry over to the new candidate.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "ship_open_blocker",
+    "expected": {
+      "no_go": true,
+      "goes_to_build": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "Ship Decision: SHIP BLOCKED\nCODE-4: fix it, accept the risk, or defer it with a reason?",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "ship_open_blocker",
+    "expected": {
+      "no_go": false,
+      "goes_to_build": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "Ship Decision: NO-GO\nCODE-4 is an open REQUIRED finding. Next: `/build`.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "ship_open_blocker",
+    "expected": {
+      "no_go": true,
+      "goes_to_build": true
+    }
+  }
+]

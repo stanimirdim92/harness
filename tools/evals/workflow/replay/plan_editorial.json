@@ -1,0 +1,82 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "approved_unchanged",
+      "explanation": "Editorial-only revision of the existing WF-20 plan: title corrected 'Dowload action' -> 'Download action'. Per plan-quality-gates §1 a typo fix is not material, so Status: Approved, Approved by: Fixture owner, Approved at: 2026-09-01, and Handoff: Ready for /build are preserved. Spec requirements/WF-20-SPEC.md verified Approved with REQ-001/REQ-002; runner evidence shows no uncommitted edits and last-touching commit {spec_sha}, which matches the existing pin (no re-pin needed). Task scope, dependencies, coverage and verification command (python3 verify.py, per AGENTS.md and spec) unchanged. Todo not modified (empty todo output = unchanged on disk). Not run: check-plan.py and python3 verify.py (no shell); no test result claimed. Pre-existing issues outside this editorial scope, not fixed: (1) work/WF-20-todo.md T001 lacks a **Status:** line, which check-plan.py flags as FAIL — adding 'Pending' would be editorial but was not requested; (2) work/WF-20-plan.md and work/WF-20-todo.md are untracked despite Approved status — they still need the scoped commit with 'Refs: WF-20' trailer, which this read-only run cannot make. No approval simulated; no other stage invoked.",
+      "intake": "",
+      "spec": "",
+      "plan": "# Implementation Plan: Download action\nStatus: Approved\nSpec: requirements/WF-20-SPEC.md\nSpec status: Approved\nSpec revision: git-commit:{spec_sha}:requirements/WF-20-SPEC.md\nApproved by: Fixture owner\nApproved at: 2026-09-01\n## Technical Approach\nChange ui.py LABEL; retain callback behavior and update verify.py assertions.\n## Task Index\n- [ ] T001 (S, ws-main, deps: —) [REQ-001, REQ-002]: Download label with preserved action\n## Requirement Coverage\n- REQ-001 → T001 → label assertion\n- REQ-002 → T001 → callback assertion\nUnmapped requirements: None\nOrphan tasks: None\n## Verification Strategy\n- Integrated: python3 verify.py\nHandoff: Ready for /build\n",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plan_editorial",
+    "expected": {
+      "editorial_state": true,
+      "only_requested_title_changed": true,
+      "task_packet_unchanged": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "approved_unchanged",
+      "explanation": "Editorial-only revision of the existing WF-20 plan: title corrected 'Dowload action' -> 'Download action'. Per plan-quality-gates §1 a typo fix is not material, so Status: Approved, Approved by: Fixture owner, Approved at: 2026-09-01, and Handoff: Ready for /build are preserved. Spec requirements/WF-20-SPEC.md verified Approved with REQ-001/REQ-002; runner evidence shows no uncommitted edits and last-touching commit {spec_sha}, which matches the existing pin (no re-pin needed). Task scope, dependencies, coverage and verification command (python3 verify.py, per AGENTS.md and spec) unchanged. Todo not modified (empty todo output = unchanged on disk). Not run: check-plan.py and python3 verify.py (no shell); no test result claimed. Pre-existing issues outside this editorial scope, not fixed: (1) work/WF-20-todo.md T001 lacks a **Status:** line, which check-plan.py flags as FAIL — adding 'Pending' would be editorial but was not requested; (2) work/WF-20-plan.md and work/WF-20-todo.md are untracked despite Approved status — they still need the scoped commit with 'Refs: WF-20' trailer, which this read-only run cannot make. No approval simulated; no other stage invoked.",
+      "intake": "",
+      "spec": "",
+      "plan": "Status: Approved\nSpec: requirements/WF-20-SPEC.md\nSpec status: Approved\nSpec revision: git-commit:{spec_sha}:requirements/WF-20-SPEC.md\nApproved by: Fixture owner\nApproved at: 2026-09-01\n## Technical Approach\nChange ui.py LABEL; retain callback behavior and update verify.py assertions.\n## Task Index\n- [ ] T001 (S, ws-main, deps: —) [REQ-001, REQ-002]: Download label with preserved action\n## Requirement Coverage\n- REQ-001 → T001 → label assertion\n- REQ-002 → T001 → callback assertion\nUnmapped requirements: None\nOrphan tasks: None\n## Verification Strategy\n- Integrated: python3 verify.py\nHandoff: Ready for /build\n",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plan_editorial",
+    "expected": {
+      "editorial_state": true,
+      "only_requested_title_changed": false,
+      "task_packet_unchanged": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "approved_unchanged",
+      "explanation": "Editorial-only revision of the existing WF-20 plan: title corrected 'Dowload action' -> 'Download action'. Per plan-quality-gates §1 a typo fix is not material, so Status: Approved, Approved by: Fixture owner, Approved at: 2026-09-01, and Handoff: Ready for /build are preserved. Spec requirements/WF-20-SPEC.md verified Approved with REQ-001/REQ-002; runner evidence shows no uncommitted edits and last-touching commit {spec_sha}, which matches the existing pin (no re-pin needed). Task scope, dependencies, coverage and verification command (python3 verify.py, per AGENTS.md and spec) unchanged. Todo not modified (empty todo output = unchanged on disk). Not run: check-plan.py and python3 verify.py (no shell); no test result claimed. Pre-existing issues outside this editorial scope, not fixed: (1) work/WF-20-todo.md T001 lacks a **Status:** line, which check-plan.py flags as FAIL — adding 'Pending' would be editorial but was not requested; (2) work/WF-20-plan.md and work/WF-20-todo.md are untracked despite Approved status — they still need the scoped commit with 'Refs: WF-20' trailer, which this read-only run cannot make. No approval simulated; no other stage invoked.",
+      "intake": "",
+      "spec": "",
+      "plan": "# Implementation Plan: Download action\nStatus: Approved\nSpec: requirements/WF-20-SPEC.md\nSpec status: Approved\nSpec revision: git-commit:{spec_sha}:requirements/WF-20-SPEC.md\nApproved by: Fixture owner\nApproved at: 2026-09-01\n## Technical Approach\nChange ui.py LABEL; retain callback behavior and update verify.py assertions.\n## Task Index\n- [ ] T001 (S, ws-main, deps: —) [REQ-001, REQ-002]: Download label with preserved action\n## Requirement Coverage\n- REQ-001 → T001 → label assertion\n- REQ-002 → T001 → callback assertion\nUnmapped requirements: None\nOrphan tasks: None\n## Verification Strategy\n- Integrated: python3 verify.py\nHandoff: Ready for /build\n",
+      "todo": "\n## T001: Change the label\n**Requirements:** REQ-001\n- [ ] done",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plan_editorial",
+    "expected": {
+      "editorial_state": true,
+      "only_requested_title_changed": true,
+      "task_packet_unchanged": false
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "approved_unchanged",
+      "explanation": "Editorial-only revision of the existing WF-20 plan: title corrected 'Dowload action' -> 'Download action'. Per plan-quality-gates §1 a typo fix is not material, so Status: Approved, Approved by: Fixture owner, Approved at: 2026-09-01, and Handoff: Ready for /build are preserved. Spec requirements/WF-20-SPEC.md verified Approved with REQ-001/REQ-002; runner evidence shows no uncommitted edits and last-touching commit {spec_sha}, which matches the existing pin (no re-pin needed). Task scope, dependencies, coverage and verification command (python3 verify.py, per AGENTS.md and spec) unchanged. Todo not modified (empty todo output = unchanged on disk). Not run: check-plan.py and python3 verify.py (no shell); no test result claimed. Pre-existing issues outside this editorial scope, not fixed: (1) work/WF-20-todo.md T001 lacks a **Status:** line, which check-plan.py flags as FAIL — adding 'Pending' would be editorial but was not requested; (2) work/WF-20-plan.md and work/WF-20-todo.md are untracked despite Approved status — they still need the scoped commit with 'Refs: WF-20' trailer, which this read-only run cannot make. No approval simulated; no other stage invoked.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plan_editorial",
+    "expected": {
+      "editorial_state": false,
+      "only_requested_title_changed": false,
+      "task_packet_unchanged": true
+    }
+  }
+]

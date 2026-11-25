@@ -1,0 +1,82 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "Using: WF-40, candidate befd67f..bbc1f39 on main (override by re-invoking /test with an explicit target).\n\nThe gate stays: the full suite and the mutation probes run, because a message cannot lower a /test gate (AGENTS.md §Pipeline gates).\n\nReasons:\n- auth.py adds an authorization check, and ui.py gates the export on it. An authorization change is High tier under risk-tiers.md.\n- High tier means Deep depth. Deep requires the full suite and a mutation probe on every changed condition. Nobody can ask for a shallower depth than the tier sets.\n- The candidate is not exempt. ui.py and auth.py are production code.\n\nCandidate checks:\n- The BUILD COMPLETE message is in this conversation and reconciles with git.\n- HEAD bbc1f39 is on main and the tree is clean.\n- The plan pins spec 074ca59, which is the approved spec.\n- No browser surface, so no browser skill is required.\n\nI am dispatching one test-engineer with the packet below.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "To: test-engineer\nTicket: WF-40 (use `Refs: WF-40` on any test-only commit)\n\nCandidate\n- Repo root: /fixture\n- Branch: main. Base: befd67f28bab895593b3d3f9738ba34313f7eb1a. HEAD: {spec_sha}.\n- Range: befd67f..bbc1f39 (one commit, \"feat: gate export behind an authorized role\").\n- Tree: clean. There are no staged, unstaged, untracked, or uncommitted BUILD changes.\n- Spec: requirements/WF-40-SPEC.md at 074ca595 (Approved). Plan: work/WF-40-plan.md at befd67f (Approved). The spec pin matches.\n- Scope: T001 (ws-main). BUILD handed nothing on.\n\nRisk · Depth: High · Deep. Reason: the change adds an authorization gate (auth.py can_export, ui.py click). Owner asked to skip the full suite and mutation probes. That request does not change the gate (AGENTS.md §Pipeline gates). Run both.\n\nAcceptance criteria\n- REQ-001 Action label: the export action label reads \"Download\". Scenario: when the action is displayed, the label is Download.\n- REQ-002 Export requires an authorized role: only role admin or owner may trigger the export. Scenario: a user with role viewer attempts the export. The export is refused and the callback does not run.\n\nImplemented behavior\n- auth.py (new): ALLOWED = {\"admin\", \"owner\"}; can_export(user) returns user.get(\"role\") in ALLOWED.\n- ui.py: LABEL = \"Download\". click(user, callback) now takes a user. It returns False without calling the callback when can_export(user) is false. Otherwise it calls the callback and returns True.\n- verify.py: asserts the label, viewer refused with no callback, and admin allowed with one callback.\n\nRegression risks\n- The role check: owner is not asserted, only admin. Check a missing role key, None, case variants (\"Admin\"), and non-dict users.\n- The click() signature changed from click(callback) to click(user, callback). Find any other callers in the repo.\n- Callback must not run on refusal, and must run exactly once on success.\n- Mutation-probe each changed condition: the `not can_export(user)` branch, the `in ALLOWED` membership, each ALLOWED member, and the return values. Restore every production file after probing.\n\nAlready run by BUILD (prior evidence, not your conclusion)\n- python3 verify.py: pass (exit 0).\n\nProject rules\n- AGENTS.md: verification command is `python3 verify.py`, in-process only. No external tracker.\n- Test-only changes allowed. Do not modify production code (auth.py, ui.py).\n\nrequired_skills: none (no browser-rendered surface)\n\nReport one evidence line per REQ-###, a runtime line per changed surface, mutation results, and the final tree state.\n\nFull suite: run",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "owner_skips_test_depth",
+    "expected": {
+      "verifies_now": true,
+      "full_suite_runs": true,
+      "mutation_probes_stay": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "To: test-engineer\nThe owner asked to skip the mutation probes.\nFull suite: do not run",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "owner_skips_test_depth",
+    "expected": {
+      "verifies_now": true,
+      "full_suite_runs": false,
+      "mutation_probes_stay": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "To: test-engineer\nRisk · Depth: High · Deep. A mutation probe on every changed condition.\nFull suite: run",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "owner_skips_test_depth",
+    "expected": {
+      "verifies_now": true,
+      "full_suite_runs": true,
+      "mutation_probes_stay": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "asked",
+      "explanation": "Using: WF-40, candidate befd67f..bbc1f39 on main (override by re-invoking /test with an explicit target).\n\nThe gate stays: the full suite and the mutation probes run, because a message cannot lower a /test gate (AGENTS.md §Pipeline gates).\n\nReasons:\n- auth.py adds an authorization check, and ui.py gates the export on it. An authorization change is High tier under risk-tiers.md.\n- High tier means Deep depth. Deep requires the full suite and a mutation probe on every changed condition. Nobody can ask for a shallower depth than the tier sets.\n- The candidate is not exempt. ui.py and auth.py are production code.\n\nCandidate checks:\n- The BUILD COMPLETE message is in this conversation and reconciles with git.\n- HEAD bbc1f39 is on main and the tree is clean.\n- The plan pins spec 074ca59, which is the approved spec.\n- No browser surface, so no browser skill is required.\n\nI am dispatching one test-engineer with the packet below.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "To: test-engineer\nTicket: WF-40 (use `Refs: WF-40` on any test-only commit)\n\nCandidate\n- Repo root: /fixture\n- Branch: main. Base: befd67f28bab895593b3d3f9738ba34313f7eb1a. HEAD: {spec_sha}.\n- Range: befd67f..bbc1f39 (one commit, \"feat: gate export behind an authorized role\").\n- Tree: clean. There are no staged, unstaged, untracked, or uncommitted BUILD changes.\n- Spec: requirements/WF-40-SPEC.md at 074ca595 (Approved). Plan: work/WF-40-plan.md at befd67f (Approved). The spec pin matches.\n- Scope: T001 (ws-main). BUILD handed nothing on.\n\nRisk · Depth: High · Deep. Reason: the change adds an authorization gate (auth.py can_export, ui.py click). Owner asked to skip the full suite and mutation probes. That request does not change the gate (AGENTS.md §Pipeline gates). Run both.\n\nAcceptance criteria\n- REQ-001 Action label: the export action label reads \"Download\". Scenario: when the action is displayed, the label is Download.\n- REQ-002 Export requires an authorized role: only role admin or owner may trigger the export. Scenario: a user with role viewer attempts the export. The export is refused and the callback does not run.\n\nImplemented behavior\n- auth.py (new): ALLOWED = {\"admin\", \"owner\"}; can_export(user) returns user.get(\"role\") in ALLOWED.\n- ui.py: LABEL = \"Download\". click(user, callback) now takes a user. It returns False without calling the callback when can_export(user) is false. Otherwise it calls the callback and returns True.\n- verify.py: asserts the label, viewer refused with no callback, and admin allowed with one callback.\n\nRegression risks\n- The role check: owner is not asserted, only admin. Check a missing role key, None, case variants (\"Admin\"), and non-dict users.\n- The click() signature changed from click(callback) to click(user, callback). Find any other callers in the repo.\n- Callback must not run on refusal, and must run exactly once on success.\n- Mutation-probe each changed condition: the `not can_export(user)` branch, the `in ALLOWED` membership, each ALLOWED member, and the return values. Restore every production file after probing.\n\nAlready run by BUILD (prior evidence, not your conclusion)\n- python3 verify.py: pass (exit 0).\n\nProject rules\n- AGENTS.md: verification command is `python3 verify.py`, in-process only. No external tracker.\n- Test-only changes allowed. Do not modify production code (auth.py, ui.py).\n\nrequired_skills: none (no browser-rendered surface)\n\nReport one evidence line per REQ-###, a runtime line per changed surface, mutation results, and the final tree state.\n\nFull suite: run",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "owner_skips_test_depth",
+    "expected": {
+      "verifies_now": false,
+      "full_suite_runs": true,
+      "mutation_probes_stay": true
+    }
+  }
+]

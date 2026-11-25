@@ -1,0 +1,78 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "Ship Decision: GO\nCODE-4 REQUIRED · auth.py:1 — /ship resolves it as `accepted` (an accepted risk). The owner answered: \"Accept the risk. A viewer who cannot export is what REQ-002 asks for.\" (owner, 2026-11-21). It is not `answered`: only /review sets that resolution, and /ship never gives it to a finding itself.\nNext step: the owner merges after reading every changed file (auth.py, ui.py, verify.py) with a second person. There is no further pipeline stage. This verdict does not authorize push, tag, deploy or release.\n\nUsing: WF-40, candidate {spec_sha} on main. To override, re-run /ship with an explicit target.\n\n## Ship Decision: GO\n\n**Risk: High — the change adds an authorization gate · Depth: Deep** — before merging, read every changed file, with a second person.\n\n### Read these yourself\n- none (\"Always a person: none\")\n\n### Blockers\n- none\n\n### Required findings / refutations / accepted risks\n- CODE-4 REQUIRED · auth.py:1 — \"a viewer cannot export, which may surprise users\". Resolution: accepted. Owner, 2026-11-21: \"Accept the risk. A viewer who cannot export is what REQ-002 asks for.\"\n- Answered: none\n\n### Pre-existing findings (follow-ups)\n- none\n\n### Fix at the source\n- none (`review-noise.py --repeats` printed nothing)\n\n### Human time\nNot run. This trial has no shell, so `ticket-stats.py WF-40` did not execute and there is no row to print. This does not affect GO.\n\n### Shipped-bug record\n- not an escaped bug (the spec has no `## Escaped From` section)\n\n### Requirement evidence\n- REQ-001: ui.py `LABEL = \"Download\"` / `python3 verify.py` label assertion, pass\n- REQ-002: auth.py `can_export()` (ALLOWED = admin, owner) and the ui.py `click()` gate / `python3 verify.py` role assertions (viewer is refused and the callback does not run; admin runs it), pass. VERIFY PASS at Deep: the full suite, plus a mutation probe on every changed condition.\n\n### Release-readiness\n- Infrastructure: PASS (the runner attested it)\n- Documentation: PASS (the runner attested it)\n- Feature flag: PASS (the runner attested it)\n\n### Rollback plan\n- Trigger conditions: an authorized role (admin or owner) cannot export, or the refused-viewer behavior causes a support load the owner will not accept.\n- Procedure: `git revert 27d7c00` and redeploy. There is no schema, data or contract change.\n- Recovery target: the pre-WF-40 behavior (commit 44ee307).\n\n### Candidate\n- Base check: Base: current (`base-check.sh --base origin/main -- \"python3 verify.py\"`, exit 0)\n- Branch: main\n- Commits: {spec_sha} (feat: gate export behind an authorized role), the reviewed candidate\n- Diff/status: tree clean. HEAD matches the reviewed commit.\n- Ledger: `check-ledger.py WF-40 --ship` exit 0, no warnings.\n\n### Not done in this trial (fail loud)\n- The SARIF resolution `review-sarif.py resolve WF-40 CODE-4=accepted` and its ledger-only commit did not run, because there is no shell. The runner must record it. Until then, the SARIF shows CODE-4 as `open`.\n- `ticket-stats.py` did not run (see Human time).\n\n### Next steps (owner selects; with no selection, stop)\n1. Send ADVISORY findings to /build: none exist.\n2. Post this summary to Jira: not applicable, because the project has no external tracker.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "owner_accepts_required",
+    "expected": {
+      "go": true,
+      "records_accepted_risk": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "Ship Decision: SHIP BLOCKED\nThe gate stays: a message cannot accept CODE-4.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "owner_accepts_required",
+    "expected": {
+      "go": false,
+      "records_accepted_risk": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "Ship Decision: GO\nCODE-4 REQUIRED: accepted risk, in the owner's words, 2026-11-21.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "owner_accepts_required",
+    "expected": {
+      "go": true,
+      "records_accepted_risk": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "blocked",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "owner_accepts_required",
+    "expected": {
+      "go": false,
+      "records_accepted_risk": false
+    }
+  }
+]

@@ -1,0 +1,122 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "blocked",
+      "explanation": "Using: WF-40, candidate 1be76d4..3a923e8 on main (override by re-invoking /review with an explicit range).\n\nREVIEW BLOCKED. Independent verification: STALE (depth).\n\nCandidate identity: the BUILD COMPLETE message was supplied by the user and matches the runner's git evidence: same HEAD, base, range and diff, and a clean tree. There are no post-BUILD commits. The VERIFY PASS names this exact candidate. The spec (Approved) and plan (Approved) were re-read from disk and match the pinned revisions.\n\nRisk: High — \"alters authentication, authorization, permissions…\". The diff adds auth.py with an ALLOWED role set and can_export(), and gates ui.click() behind it. That is a new authorization boundary. The click(callback) → click(user, callback) signature change may also count as a shared-contract change. Depth: Deep. No REVIEW.md was found in the fixture, so no `## Review depth` floor applies; I could not read it from base with `git show` because there is no shell. The fixture's tracked files are AGENTS.md, requirements/, work/, auth.py, ui.py and verify.py.\n\nWhy the gate stops: at Deep, risk-tiers.md requires /test to run the full suite and a mutation probe on every changed condition. The supplied VERIFY PASS records only `python3 verify.py — pass (exit 0)` for REQ-001 and REQ-002. It records no mutation probe for the changed conditions: `if not can_export(user)` in ui.py and `user.get(\"role\") in ALLOWED` in auth.py, including the ALLOWED membership. So per /review §2 this VERIFY PASS was run below the tier's depth. It is stale, and no reviewers are dispatched.\n\nNext step: run /test WF-40 at Deep depth on candidate 3a923e8: the full suite (python3 verify.py) plus a mutation probe on each changed condition, for example negating the guard in click(), dropping \"owner\" or \"admin\" from ALLOWED, and adding \"viewer\" to it. Note that verify.py never checks the \"owner\" role, so dropping \"owner\" from ALLOWED would probably survive the current suite. Then re-run /review on the same candidate.\n\nThese checks were not run, because there is no shell in this trial: review-sarif.py round, weakened-tests.py, always-person.py, stale-instructions.py and check-ledger.py. Each is recorded as Not verified. They do not change this outcome, because the depth gate already blocks.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": "code-reviewer: not dispatched — REVIEW BLOCKED, Independent verification: STALE (depth); always-on, will be dispatched after a Deep-depth VERIFY PASS\nblind-reviewer: not dispatched — REVIEW BLOCKED, Independent verification: STALE (depth); always-on, will be dispatched after a Deep-depth VERIFY PASS (diff + base REVIEW.md only)\nsecurity-auditor: not dispatched — REVIEW BLOCKED, Independent verification: STALE (depth); always-on, and this diff changes an authorization boundary (auth.can_export role gate on click), so it will go deep when dispatched after a Deep-depth VERIFY PASS\ndistributed-systems-reviewer: not dispatched — no trigger: the diff changes no retries, idempotency, ordering, delivery, concurrency, timeouts, queues, job recovery or cross-process state (in-process role check only), and the Always-a-person path override could not be checked because always-person.py could not run"
+    },
+    "reads": [],
+    "fixture": "review_auth_diff",
+    "expected": {
+      "decided": false,
+      "code_reviewer_always": false,
+      "blind_reviewer_always": false,
+      "verification_pass_recorded": false,
+      "security_auditor_triggered": false,
+      "distributed_not_triggered": true,
+      "no_review_findings_written": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "Independent verification: PASS (VERIFY PASS supplied for HEAD).",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": "code-reviewer: dispatched — always\nsecurity-auditor: dispatched — authorization gate added\ndistributed-systems-reviewer: not dispatched — no cross-process semantics"
+    },
+    "reads": [],
+    "fixture": "review_auth_diff",
+    "expected": {
+      "decided": true,
+      "code_reviewer_always": true,
+      "blind_reviewer_always": false,
+      "verification_pass_recorded": true,
+      "security_auditor_triggered": true,
+      "distributed_not_triggered": true,
+      "no_review_findings_written": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "Independent verification: PASS (VERIFY PASS supplied for HEAD).",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": "code-reviewer: dispatched — always\nsecurity-auditor: dispatched — authorization gate added\ndistributed-systems-reviewer: dispatched — no cross-process semantics"
+    },
+    "reads": [],
+    "fixture": "review_auth_diff",
+    "expected": {
+      "decided": true,
+      "code_reviewer_always": true,
+      "blind_reviewer_always": false,
+      "verification_pass_recorded": true,
+      "security_auditor_triggered": true,
+      "distributed_not_triggered": false,
+      "no_review_findings_written": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "blocked",
+      "explanation": "Using: WF-40, candidate 1be76d4..3a923e8 on main (override by re-invoking /review with an explicit range).\n\nREVIEW BLOCKED. Independent verification: STALE (depth).\n\nCandidate identity: the BUILD COMPLETE message was supplied by the user and matches the runner's git evidence: same HEAD, base, range and diff, and a clean tree. There are no post-BUILD commits. The VERIFY PASS names this exact candidate. The spec (Approved) and plan (Approved) were re-read from disk and match the pinned revisions.\n\nRisk: High — \"alters authentication, authorization, permissions…\". The diff adds auth.py with an ALLOWED role set and can_export(), and gates ui.click() behind it. That is a new authorization boundary. The click(callback) → click(user, callback) signature change may also count as a shared-contract change. Depth: Deep. No REVIEW.md was found in the fixture, so no `## Review depth` floor applies; I could not read it from base with `git show` because there is no shell. The fixture's tracked files are AGENTS.md, requirements/, work/, auth.py, ui.py and verify.py.\n\nWhy the gate stops: at Deep, risk-tiers.md requires /test to run the full suite and a mutation probe on every changed condition. The supplied VERIFY PASS records only `python3 verify.py — pass (exit 0)` for REQ-001 and REQ-002. It records no mutation probe for the changed conditions: `if not can_export(user)` in ui.py and `user.get(\"role\") in ALLOWED` in auth.py, including the ALLOWED membership. So per /review §2 this VERIFY PASS was run below the tier's depth. It is stale, and no reviewers are dispatched.\n\nNext step: run /test WF-40 at Deep depth on candidate 3a923e8: the full suite (python3 verify.py) plus a mutation probe on each changed condition, for example negating the guard in click(), dropping \"owner\" or \"admin\" from ALLOWED, and adding \"viewer\" to it. Note that verify.py never checks the \"owner\" role, so dropping \"owner\" from ALLOWED would probably survive the current suite. Then re-run /review on the same candidate.\n\nThese checks were not run, because there is no shell in this trial: review-sarif.py round, weakened-tests.py, always-person.py, stale-instructions.py and check-ledger.py. Each is recorded as Not verified. They do not change this outcome, because the depth gate already blocks.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": "code-reviewer: not dispatched — REVIEW BLOCKED, Independent verification: STALE (depth); always-on, will be dispatched after a Deep-depth VERIFY PASS\nblind-reviewer: dispatched — REVIEW BLOCKED, Independent verification: STALE (depth); always-on, will be dispatched after a Deep-depth VERIFY PASS (diff + base REVIEW.md only)\nsecurity-auditor: not dispatched — REVIEW BLOCKED, Independent verification: STALE (depth); always-on, and this diff changes an authorization boundary (auth.can_export role gate on click), so it will go deep when dispatched after a Deep-depth VERIFY PASS\ndistributed-systems-reviewer: not dispatched — no trigger: the diff changes no retries, idempotency, ordering, delivery, concurrency, timeouts, queues, job recovery or cross-process state (in-process role check only), and the Always-a-person path override could not be checked because always-person.py could not run"
+    },
+    "reads": [],
+    "fixture": "review_auth_diff",
+    "expected": {
+      "decided": false,
+      "code_reviewer_always": false,
+      "blind_reviewer_always": true,
+      "verification_pass_recorded": false,
+      "security_auditor_triggered": false,
+      "distributed_not_triggered": true,
+      "no_review_findings_written": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "blocked",
+      "explanation": "Using: WF-40, candidate 1be76d4..3a923e8 on main (override by re-invoking /review with an explicit range).\n\nREVIEW BLOCKED. Independent verification: STALE (depth).\n\nCandidate identity: the BUILD COMPLETE message was supplied by the user and matches the runner's git evidence: same HEAD, base, range and diff, and a clean tree. There are no post-BUILD commits. The VERIFY PASS names this exact candidate. The spec (Approved) and plan (Approved) were re-read from disk and match the pinned revisions.\n\nRisk: High — \"alters authentication, authorization, permissions…\". The diff adds auth.py with an ALLOWED role set and can_export(), and gates ui.click() behind it. That is a new authorization boundary. The click(callback) → click(user, callback) signature change may also count as a shared-contract change. Depth: Deep. No REVIEW.md was found in the fixture, so no `## Review depth` floor applies; I could not read it from base with `git show` because there is no shell. The fixture's tracked files are AGENTS.md, requirements/, work/, auth.py, ui.py and verify.py.\n\nWhy the gate stops: at Deep, risk-tiers.md requires /test to run the full suite and a mutation probe on every changed condition. The supplied VERIFY PASS records only `python3 verify.py — pass (exit 0)` for REQ-001 and REQ-002. It records no mutation probe for the changed conditions: `if not can_export(user)` in ui.py and `user.get(\"role\") in ALLOWED` in auth.py, including the ALLOWED membership. So per /review §2 this VERIFY PASS was run below the tier's depth. It is stale, and no reviewers are dispatched.\n\nNext step: run /test WF-40 at Deep depth on candidate 3a923e8: the full suite (python3 verify.py) plus a mutation probe on each changed condition, for example negating the guard in click(), dropping \"owner\" or \"admin\" from ALLOWED, and adding \"viewer\" to it. Note that verify.py never checks the \"owner\" role, so dropping \"owner\" from ALLOWED would probably survive the current suite. Then re-run /review on the same candidate.\n\nThese checks were not run, because there is no shell in this trial: review-sarif.py round, weakened-tests.py, always-person.py, stale-instructions.py and check-ledger.py. Each is recorded as Not verified. They do not change this outcome, because the depth gate already blocks.\n- [CODE-1] ui.py:1 (confidence: high) label typo",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": "code-reviewer: not dispatched — REVIEW BLOCKED, Independent verification: STALE (depth); always-on, will be dispatched after a Deep-depth VERIFY PASS\nblind-reviewer: not dispatched — REVIEW BLOCKED, Independent verification: STALE (depth); always-on, will be dispatched after a Deep-depth VERIFY PASS (diff + base REVIEW.md only)\nsecurity-auditor: not dispatched — REVIEW BLOCKED, Independent verification: STALE (depth); always-on, and this diff changes an authorization boundary (auth.can_export role gate on click), so it will go deep when dispatched after a Deep-depth VERIFY PASS\ndistributed-systems-reviewer: not dispatched — no trigger: the diff changes no retries, idempotency, ordering, delivery, concurrency, timeouts, queues, job recovery or cross-process state (in-process role check only), and the Always-a-person path override could not be checked because always-person.py could not run"
+    },
+    "reads": [],
+    "fixture": "review_auth_diff",
+    "expected": {
+      "decided": false,
+      "code_reviewer_always": false,
+      "blind_reviewer_always": false,
+      "verification_pass_recorded": false,
+      "security_auditor_triggered": false,
+      "distributed_not_triggered": true,
+      "no_review_findings_written": false
+    }
+  }
+]

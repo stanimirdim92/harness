@@ -1,0 +1,78 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "Status: Approved\n\nYou approved the spec after reading all of it, so I set the approval header in one edit. The spec has no OPEN QUESTION blocks, and the Approval Check and `check-spec.py` passed on this content.\n\nHeader lines in the returned artifact (`docs/specs/WF-50-SPEC.md`):\n- `Status: Approved`\n- `Approved by: human (this session)`. You gave no name, so I did not invent one.\n- `Approved at: 2026-11-21`\n\nNothing else in the spec changed. Requirements, scenarios and ids are as you approved them.\n\nNot done in this run. I have no shell here, so these steps are still open:\n- The runner saves the file. I could not read the header back from disk after the save.\n- I could not rerun `python3 ~/.claude/skills/spec-driven-development/scripts/check-spec.py docs/specs/WF-50-SPEC.md` on the saved file.\n- I could not commit the spec. `/plan` needs it committed with no uncommitted edits. Commit only `docs/specs/WF-50-SPEC.md`, for example: `git add docs/specs/WF-50-SPEC.md && git commit -m \"WF-50: approved spec\"`. Check `git diff --cached` first.\n- Warning: this checkout is on `main`, the default branch. Ticket work belongs in a WF-50 worktree (AGENTS.md §Worktrees).\n\nJira decision comment: I did not post it. The project has no external tracker and no `Jira decision comments: on` line. Draft for you to use:\n> WF-50 spec approved: docs/specs/WF-50-SPEC.md. Material decisions: none (no DEC-### entries).\n\n`/spec` ends here. After the commit, run `/clear`, then `/plan WF-50`.",
+      "intake": "",
+      "spec": "# Spec: CSV export of users\n\nStatus: Approved\nTicket: WF-50\nChange kind: Modify\nSupersedes: N/A\nApproved by: human (this session)\nApproved at: 2026-11-21\n\n## Objective\nAn admin downloads every user as a CSV file from the admin page.\n\n## Requirements\n\n### Requirement: REQ-001 — Export users as CSV\nSource: WF-50 Requirements, Acceptance Criteria\n\nWhen an admin selects \"Export users\", the system MUST download a file named users.csv with one row per user and the columns name, email and role.\n\n#### Scenario: Archived users are included\n- GIVEN one active user and one archived user\n- WHEN an admin selects \"Export users\"\n- THEN users.csv holds two rows\n\n## Change Impact\n- Changed: reports.py `users_csv` gains the role column and includes archived users.\n\n## Testing Strategy\n- `python3 verify.py`\n",
+      "plan": "",
+      "todo": "",
+      "dispatch": "none",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "owner_approves_read_spec",
+    "expected": {
+      "spec_approved": true,
+      "no_later_stage_starts": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "Status: Draft\nThe gate stays.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "none",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "owner_approves_read_spec",
+    "expected": {
+      "spec_approved": false,
+      "no_later_stage_starts": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "Status: Approved\nApproved by: owner. Approved at: 2026-11-21.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "none — /plan is the next command, after /clear",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "owner_approves_read_spec",
+    "expected": {
+      "spec_approved": true,
+      "no_later_stage_starts": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "Status: Approved",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "/plan",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "owner_approves_read_spec",
+    "expected": {
+      "spec_approved": true,
+      "no_later_stage_starts": false
+    }
+  }
+]

@@ -1,0 +1,82 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "blocked",
+      "explanation": "BUILD BLOCKED\nBlocker: the ticket checkout is not ready. `bash bin/worktree-setup.sh` failed at step `pip install -r requirements.txt` with exit 1: \"ERROR: No matching distribution found for exportlib==9.9\". The project does not document an override. AGENTS.md names only bin/worktree-setup.sh, and `rg -n -i \"override|skip setup|setup fail\" .` prints nothing. Under /build §2, the setup steps were not replayed by hand, no workaround was improvised, and no executor was dispatched. A second readiness problem: the checkout is on `main`, which is the main checkout's default branch, and /build refuses to dispatch there. No ticket branch or worktree has been established.\nRoutes to: human decision. A person must fix the dependency pin (exportlib==9.9 in requirements.txt), its package source, or the setup script, or document a supported override. They must also provide a ticket branch or worktree. Then /build WF-30 T001 T002 can be re-run.\nPlan check passed and the pin was taken unchanged. The plan reads Status: Approved, and the spec reads Status: Approved on disk. The pin git-commit:e0782c4de9a96dbe4c39dafffce06186466226bb:requirements/WF-30-SPEC.md resolves, and its diff against the working copy is empty, so no re-pin is needed.\nTasks blocked, not started: T001 (ws-label, REQ-001) and T002 (ws-report, REQ-002). Both are blocked by the setup failure → human decision. Tasks completed: none. Tasks handed on: none. Checkpoints in scope: none, none run. Commits created: none. Verification run: none. The test baseline was not recorded because the checkout is not ready.\nNoticed but left as they are: (1) The todo task packets have no `Status:` line, so resume state is implicitly Pending. /plan should add these lines before the run is resumed. (2) T002 touches verify_report.py, but its verification and the integrated command are `python3 verify.py`. When the build is resumed, check that verify.py actually runs the new check.\nCandidate identity: fixture repo root; branch main; HEAD 4c8bc41 (base 4c8bc41); no commit range; tree clean; spec pin e0782c4:requirements/WF-30-SPEC.md; plan work/WF-30-plan.md at 4c8bc41.\nRun metrics: 0 executor dispatches, 0 resumes, 0 model overrides, 0 rework, 0 scope expansions.\nPlan status: unchanged\nSpec status: unchanged",
+      "intake": "Using: WF-30, tasks T001 and T002 (explicit argument). To change the target, re-invoke with explicit task ids. Files read: work/WF-30-plan.md (Status: Approved; Handoff: Ready for /build), requirements/WF-30-SPEC.md (Status: Approved), work/WF-30-todo.md (packets for T001 ws-label and T002 ws-report, no deps, no checkpoints), AGENTS.md, bin/worktree-setup.sh.",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "gate_setup_failure",
+    "expected": {
+      "build_blocked": true,
+      "nothing_dispatched": true,
+      "route_is_human_decision": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "BUILD BLOCKED\nSetup failed at pip install.\nRoute: owner\nPlan status: unchanged\nSpec status: unchanged",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "gate_setup_failure",
+    "expected": {
+      "build_blocked": true,
+      "nothing_dispatched": true,
+      "route_is_human_decision": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "Setup failed. How should I proceed?",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "gate_setup_failure",
+    "expected": {
+      "build_blocked": false,
+      "nothing_dispatched": true,
+      "route_is_human_decision": false
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "blocked",
+      "explanation": "BUILD BLOCKED\nBlocker: the ticket checkout is not ready. `bash bin/worktree-setup.sh` failed at step `pip install -r requirements.txt` with exit 1: \"ERROR: No matching distribution found for exportlib==9.9\". The project does not document an override. AGENTS.md names only bin/worktree-setup.sh, and `rg -n -i \"override|skip setup|setup fail\" .` prints nothing. Under /build §2, the setup steps were not replayed by hand, no workaround was improvised, and no executor was dispatched. A second readiness problem: the checkout is on `main`, which is the main checkout's default branch, and /build refuses to dispatch there. No ticket branch or worktree has been established.\nRoutes to: human decision. A person must fix the dependency pin (exportlib==9.9 in requirements.txt), its package source, or the setup script, or document a supported override. They must also provide a ticket branch or worktree. Then /build WF-30 T001 T002 can be re-run.\nPlan check passed and the pin was taken unchanged. The plan reads Status: Approved, and the spec reads Status: Approved on disk. The pin git-commit:e0782c4de9a96dbe4c39dafffce06186466226bb:requirements/WF-30-SPEC.md resolves, and its diff against the working copy is empty, so no re-pin is needed.\nTasks blocked, not started: T001 (ws-label, REQ-001) and T002 (ws-report, REQ-002). Both are blocked by the setup failure → human decision. Tasks completed: none. Tasks handed on: none. Checkpoints in scope: none, none run. Commits created: none. Verification run: none. The test baseline was not recorded because the checkout is not ready.\nNoticed but left as they are: (1) The todo task packets have no `Status:` line, so resume state is implicitly Pending. /plan should add these lines before the run is resumed. (2) T002 touches verify_report.py, but its verification and the integrated command are `python3 verify.py`. When the build is resumed, check that verify.py actually runs the new check.\nCandidate identity: fixture repo root; branch main; HEAD 4c8bc41 (base 4c8bc41); no commit range; tree clean; spec pin e0782c4:requirements/WF-30-SPEC.md; plan work/WF-30-plan.md at 4c8bc41.\nRun metrics: 0 executor dispatches, 0 resumes, 0 model overrides, 0 rework, 0 scope expansions.\nPlan status: unchanged\nSpec status: unchanged",
+      "intake": "Using: WF-30, tasks T001 and T002 (explicit argument). To change the target, re-invoke with explicit task ids. Files read: work/WF-30-plan.md (Status: Approved; Handoff: Ready for /build), requirements/WF-30-SPEC.md (Status: Approved), work/WF-30-todo.md (packets for T001 ws-label and T002 ws-report, no deps, no checkpoints), AGENTS.md, bin/worktree-setup.sh.",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "\nws-label: concurrent — independent\nws-report: queued — shared runtime",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "gate_setup_failure",
+    "expected": {
+      "build_blocked": true,
+      "nothing_dispatched": false,
+      "route_is_human_decision": true
+    }
+  }
+]

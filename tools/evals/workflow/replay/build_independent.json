@@ -1,0 +1,128 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "Using: WF-30 T001, T002 (override by re-invoking /build with explicit task ids).\n\nPlan gate passed: work/WF-30-plan.md reads Status: Approved, and requirements/WF-30-SPEC.md reads Status: Approved. The runner confirmed that the spec pin git-commit:8bb81f9…:requirements/WF-30-SPEC.md resolves and shows an empty diff against the working copy, so no re-pin and no replan are needed. Neither packet in work/WF-30-todo.md has a `Status:` line, so neither task is Done. Both are treated as pending and dispatchable.\n\nDispatch decision: both workstreams run concurrently. build.md defaults to sequential (ADR 0136) unless this run asks for parallel. I read this run as asking for it, because it requests a per-workstream concurrent/queued decision based on parallel-eligibility conditions and supplies worktree availability and rate-limit headroom for that purpose. If that reading is wrong, both lines become queued: ws-label first, then ws-report, in the ticket checkout. Every eligibility condition holds:\n- Independence: the file sets are disjoint. T001 touches ui.py and verify.py (work/WF-30-todo.md:9). T002 touches report.py and verify_report.py (work/WF-30-todo.md:20). The plan says the workstreams share no files, state, dependency or checkpoint (work/WF-30-plan.md:9-11).\n- Dependency-readiness: both packets say Dependencies: None. The plan index shows deps: — for both, and the plan records no checkpoints.\n- Runtime isolation: AGENTS.md says verification is in-process only, with no database, queue, cache, network or fixed port. verify.py and ui.py confirm this: verify.py imports only ui and does no I/O.\n- Worktree isolation and rate-limit headroom: these come from the runner's supplied evidence. No fixture file establishes them.\n\nNon-blocking notes:\n1. Verification gap, routed to /plan. The plan's ws-report and Integrated command is `python3 verify.py`, but verify.py never imports or runs verify_report.py, so that command does not exercise REQ-002. ws-report must stay within report.py and verify_report.py. If it wired its check into verify.py, it would collide with ws-label's file and break independence. T002 needs its own executed evidence (`python3 verify_report.py`) at completion, because a green verify.py does not prove T002.\n2. The current checkout is on `main`, the default branch, so neither executor may write there. Each dispatch must set `isolation: worktree`, and its returned checkout path must be verified before accepting evidence. bin/worktree-doctor.sh is absent from the repository, so no doctor check applies.\n3. ../references/parallel-workstreams.md is outside this trial's read boundary and was not read. It must be read before any real parallel dispatch.\n4. No test baseline was recorded because there is no shell in this trial.\n\nNothing was dispatched.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "ws-label: concurrent — independent: T001 touches only ui.py and verify.py (work/WF-30-todo.md:9), and the plan states no shared files, state, dependency or checkpoint (work/WF-30-plan.md:9-11); dependency-ready: Dependencies: None (work/WF-30-todo.md:6), deps: — and no checkpoints (work/WF-30-plan.md:13); runtime-isolated: verification `python3 verify.py` is in-process only, with no database, queue, cache, network or fixed port (AGENTS.md:1; verify.py imports only ui.py); worktree isolation: `isolation: worktree` per runner evidence, required because the checkout is on main; rate-limit headroom: ample per runner evidence\nws-report: concurrent — independent: T002 touches only report.py and verify_report.py (work/WF-30-todo.md:20), disjoint from ws-label (work/WF-30-plan.md:9-11); dependency-ready: Dependencies: None (work/WF-30-todo.md:17), deps: — and no checkpoints (work/WF-30-plan.md:14); runtime-isolated: in-process verification only (AGENTS.md:1), and summarize() is pure (work/WF-30-plan.md:10); worktree isolation: `isolation: worktree` per runner evidence; rate-limit headroom: ample per runner evidence; verify.py does not run verify_report.py, so T002 needs its own evidence (routed to /plan)",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "build_independent",
+    "expected": {
+      "decided": true,
+      "both_workstreams_decided": true,
+      "independent_workstreams_fanned_out": true,
+      "no_implementation_artifacts": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "ws-label: concurrent — isolated\nws-report: queued — sequential default",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "build_independent",
+    "expected": {
+      "decided": true,
+      "both_workstreams_decided": true,
+      "independent_workstreams_fanned_out": false,
+      "no_implementation_artifacts": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "ws-label: concurrent — python3 verify.py is in-process\nws-report: concurrent — same",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "build_independent",
+    "expected": {
+      "decided": true,
+      "both_workstreams_decided": true,
+      "independent_workstreams_fanned_out": true,
+      "no_implementation_artifacts": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "ws-label: concurrent — fine",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "build_independent",
+    "expected": {
+      "decided": true,
+      "both_workstreams_decided": false,
+      "independent_workstreams_fanned_out": false,
+      "no_implementation_artifacts": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "asked",
+      "explanation": "Using: WF-30 T001, T002 (override by re-invoking /build with explicit task ids).\n\nPlan gate passed: work/WF-30-plan.md reads Status: Approved, and requirements/WF-30-SPEC.md reads Status: Approved. The runner confirmed that the spec pin git-commit:8bb81f9…:requirements/WF-30-SPEC.md resolves and shows an empty diff against the working copy, so no re-pin and no replan are needed. Neither packet in work/WF-30-todo.md has a `Status:` line, so neither task is Done. Both are treated as pending and dispatchable.\n\nDispatch decision: both workstreams run concurrently. build.md defaults to sequential (ADR 0136) unless this run asks for parallel. I read this run as asking for it, because it requests a per-workstream concurrent/queued decision based on parallel-eligibility conditions and supplies worktree availability and rate-limit headroom for that purpose. If that reading is wrong, both lines become queued: ws-label first, then ws-report, in the ticket checkout. Every eligibility condition holds:\n- Independence: the file sets are disjoint. T001 touches ui.py and verify.py (work/WF-30-todo.md:9). T002 touches report.py and verify_report.py (work/WF-30-todo.md:20). The plan says the workstreams share no files, state, dependency or checkpoint (work/WF-30-plan.md:9-11).\n- Dependency-readiness: both packets say Dependencies: None. The plan index shows deps: — for both, and the plan records no checkpoints.\n- Runtime isolation: AGENTS.md says verification is in-process only, with no database, queue, cache, network or fixed port. verify.py and ui.py confirm this: verify.py imports only ui and does no I/O.\n- Worktree isolation and rate-limit headroom: these come from the runner's supplied evidence. No fixture file establishes them.\n\nNon-blocking notes:\n1. Verification gap, routed to /plan. The plan's ws-report and Integrated command is `python3 verify.py`, but verify.py never imports or runs verify_report.py, so that command does not exercise REQ-002. ws-report must stay within report.py and verify_report.py. If it wired its check into verify.py, it would collide with ws-label's file and break independence. T002 needs its own executed evidence (`python3 verify_report.py`) at completion, because a green verify.py does not prove T002.\n2. The current checkout is on `main`, the default branch, so neither executor may write there. Each dispatch must set `isolation: worktree`, and its returned checkout path must be verified before accepting evidence. bin/worktree-doctor.sh is absent from the repository, so no doctor check applies.\n3. ../references/parallel-workstreams.md is outside this trial's read boundary and was not read. It must be read before any real parallel dispatch.\n4. No test baseline was recorded because there is no shell in this trial.\n\nNothing was dispatched.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "ws-label: concurrent — independent: T001 touches only ui.py and verify.py (work/WF-30-todo.md:9), and the plan states no shared files, state, dependency or checkpoint (work/WF-30-plan.md:9-11); dependency-ready: Dependencies: None (work/WF-30-todo.md:6), deps: — and no checkpoints (work/WF-30-plan.md:13); runtime-isolated: verification `python3 verify.py` is in-process only, with no database, queue, cache, network or fixed port (AGENTS.md:1; verify.py imports only ui.py); worktree isolation: `isolation: worktree` per runner evidence, required because the checkout is on main; rate-limit headroom: ample per runner evidence\nws-report: concurrent — independent: T002 touches only report.py and verify_report.py (work/WF-30-todo.md:20), disjoint from ws-label (work/WF-30-plan.md:9-11); dependency-ready: Dependencies: None (work/WF-30-todo.md:17), deps: — and no checkpoints (work/WF-30-plan.md:14); runtime-isolated: in-process verification only (AGENTS.md:1), and summarize() is pure (work/WF-30-plan.md:10); worktree isolation: `isolation: worktree` per runner evidence; rate-limit headroom: ample per runner evidence; verify.py does not run verify_report.py, so T002 needs its own evidence (routed to /plan)",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "build_independent",
+    "expected": {
+      "decided": false,
+      "both_workstreams_decided": true,
+      "independent_workstreams_fanned_out": true,
+      "no_implementation_artifacts": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "decided",
+      "explanation": "Using: WF-30 T001, T002 (override by re-invoking /build with explicit task ids).\n\nPlan gate passed: work/WF-30-plan.md reads Status: Approved, and requirements/WF-30-SPEC.md reads Status: Approved. The runner confirmed that the spec pin git-commit:8bb81f9…:requirements/WF-30-SPEC.md resolves and shows an empty diff against the working copy, so no re-pin and no replan are needed. Neither packet in work/WF-30-todo.md has a `Status:` line, so neither task is Done. Both are treated as pending and dispatchable.\n\nDispatch decision: both workstreams run concurrently. build.md defaults to sequential (ADR 0136) unless this run asks for parallel. I read this run as asking for it, because it requests a per-workstream concurrent/queued decision based on parallel-eligibility conditions and supplies worktree availability and rate-limit headroom for that purpose. If that reading is wrong, both lines become queued: ws-label first, then ws-report, in the ticket checkout. Every eligibility condition holds:\n- Independence: the file sets are disjoint. T001 touches ui.py and verify.py (work/WF-30-todo.md:9). T002 touches report.py and verify_report.py (work/WF-30-todo.md:20). The plan says the workstreams share no files, state, dependency or checkpoint (work/WF-30-plan.md:9-11).\n- Dependency-readiness: both packets say Dependencies: None. The plan index shows deps: — for both, and the plan records no checkpoints.\n- Runtime isolation: AGENTS.md says verification is in-process only, with no database, queue, cache, network or fixed port. verify.py and ui.py confirm this: verify.py imports only ui and does no I/O.\n- Worktree isolation and rate-limit headroom: these come from the runner's supplied evidence. No fixture file establishes them.\n\nNon-blocking notes:\n1. Verification gap, routed to /plan. The plan's ws-report and Integrated command is `python3 verify.py`, but verify.py never imports or runs verify_report.py, so that command does not exercise REQ-002. ws-report must stay within report.py and verify_report.py. If it wired its check into verify.py, it would collide with ws-label's file and break independence. T002 needs its own executed evidence (`python3 verify_report.py`) at completion, because a green verify.py does not prove T002.\n2. The current checkout is on `main`, the default branch, so neither executor may write there. Each dispatch must set `isolation: worktree`, and its returned checkout path must be verified before accepting evidence. bin/worktree-doctor.sh is absent from the repository, so no doctor check applies.\n3. ../references/parallel-workstreams.md is outside this trial's read boundary and was not read. It must be read before any real parallel dispatch.\n4. No test baseline was recorded because there is no shell in this trial.\n\nNothing was dispatched.",
+      "intake": "",
+      "spec": "",
+      "plan": "\n# Plan\nStatus: Draft\nHandoff: Ready for /build",
+      "todo": "",
+      "dispatch": "ws-label: concurrent — independent: T001 touches only ui.py and verify.py (work/WF-30-todo.md:9), and the plan states no shared files, state, dependency or checkpoint (work/WF-30-plan.md:9-11); dependency-ready: Dependencies: None (work/WF-30-todo.md:6), deps: — and no checkpoints (work/WF-30-plan.md:13); runtime-isolated: verification `python3 verify.py` is in-process only, with no database, queue, cache, network or fixed port (AGENTS.md:1; verify.py imports only ui.py); worktree isolation: `isolation: worktree` per runner evidence, required because the checkout is on main; rate-limit headroom: ample per runner evidence\nws-report: concurrent — independent: T002 touches only report.py and verify_report.py (work/WF-30-todo.md:20), disjoint from ws-label (work/WF-30-plan.md:9-11); dependency-ready: Dependencies: None (work/WF-30-todo.md:17), deps: — and no checkpoints (work/WF-30-plan.md:14); runtime-isolated: in-process verification only (AGENTS.md:1), and summarize() is pure (work/WF-30-plan.md:10); worktree isolation: `isolation: worktree` per runner evidence; rate-limit headroom: ample per runner evidence; verify.py does not run verify_report.py, so T002 needs its own evidence (routed to /plan)",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "build_independent",
+    "expected": {
+      "decided": true,
+      "both_workstreams_decided": true,
+      "independent_workstreams_fanned_out": true,
+      "no_implementation_artifacts": false
+    }
+  }
+]

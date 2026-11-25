@@ -1,0 +1,59 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "blocked",
+      "explanation": "Using: WF-40, candidate 2961714f0973fb7883db674a41c3ad0f61658aae..{spec_sha} on main. To override, re-invoke with an explicit range.\n\nThis is review round 2 (review-sarif round=2, counted=2), so it is a fix round. The only new commit, 03d01ef (Task: CODE-1), came from `/build WF-40 review fixes`. The user supplied the BUILD COMPLETE (review fixes) message, and it matches git: same HEAD, same range, clean tree.\n\nA fix round needs a VERIFY PASS (fix diff) for this exact candidate (ADR 0147). The runner confirms no `/test` ran after 2961714. Round 1's Deep VERIFY PASS covered 2961714 only. 03d01ef is a new production change to the authorization gate, so that result does not cover this candidate. /build's own `python3 verify.py` pass is implementation-time evidence. It cannot stand in for independent verification. The VERIFY NOT REQUIRED exemption also does not apply, because the commit changes production behavior.\n\nIndependent verification: REVIEW BLOCKED — there is no VERIFY PASS (fix diff) for {spec_sha}. Next step: run `/test WF-40` on the fix diff 2961714..03d01ef. Then re-run `/review WF-40` for round 2. That round should record PASS (fix diff) and review the fix against CODE-1. The round-4 stop is not reached (counted=2).",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": "code-reviewer: not dispatched — REVIEW BLOCKED: there is no VERIFY PASS (fix diff) for 03d01ef. It runs on the fix diff with CODE-1 and its resolution once /test passes.\nblind-reviewer: not dispatched — REVIEW BLOCKED: there is no VERIFY PASS (fix diff) for 03d01ef. It runs on the fix diff alone once /test passes.\nsecurity-auditor: not dispatched — REVIEW BLOCKED: there is no VERIFY PASS (fix diff) for 03d01ef. It is required every round and runs once /test passes, because the fix changes the authorization gate.\ndistributed-systems-reviewer: not dispatched — REVIEW BLOCKED: no reviewer runs before /test. Its trigger also does not match: the fix refuses the export when no user is given, which changes no retry, ordering, concurrency or cross-process failure behavior."
+    },
+    "reads": [],
+    "fixture": "fixround_unverified",
+    "expected": {
+      "review_blocked_pending_test": true,
+      "no_reviewer_dispatched": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "Independent verification: DEFERRED (fix round)",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": "code-reviewer: dispatched — fix round\nblind-reviewer: dispatched — fix round\nsecurity-auditor: dispatched — every round\ndistributed-systems-reviewer: not dispatched — none"
+    },
+    "reads": [],
+    "fixture": "fixround_unverified",
+    "expected": {
+      "review_blocked_pending_test": false,
+      "no_reviewer_dispatched": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "REVIEW BLOCKED: no VERIFY PASS (fix diff) for this candidate. Next step: /test.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": "code-reviewer: not dispatched — fix round\nblind-reviewer: not dispatched — fix round\nsecurity-auditor: not dispatched — every round\ndistributed-systems-reviewer: not dispatched — none"
+    },
+    "reads": [],
+    "fixture": "fixround_unverified",
+    "expected": {
+      "review_blocked_pending_test": true,
+      "no_reviewer_dispatched": true
+    }
+  }
+]

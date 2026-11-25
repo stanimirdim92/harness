@@ -1,0 +1,82 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "blocked",
+      "explanation": "The spec I used is requirements/WF-20-SPEC.md. It is the only spec for WF-20, the project rules in AGENTS.md put specs in requirements/, and its header reads Status: Approved. It is committed with no uncommitted edits (runner evidence), and I pinned it at commit {spec_sha}.\n\nPlanning stopped on a SPEC CONFLICT because the spec contradicts itself:\n- REQ-001 says \"The export action label must read Download.\"\n- REQ-001's own scenario says \"THEN The label is Save.\"\n\nThe repository can't settle which one is right. ui.py:1 currently has LABEL = \"Export\", and verify.py:2 asserts \"Export\". Neither file says Download or Save.\n\nUnder /plan rules I can't pick a label or fix the spec here. It goes back to /spec. REQ-002 (keep the existing export callback) has no conflict.\n\nI saved only the plan, containing the SPEC CONFLICT section, at work/WF-20-plan.md, since AGENTS.md puts plans in work/. I wrote no task packets, ran no check-plan.py, and requested no approval. The plan is Draft and blocked on the spec conflict.",
+      "intake": "",
+      "spec": "",
+      "plan": "# Implementation Plan: Export action label\n\nStatus: Draft\nSpec: requirements/WF-20-SPEC.md\nModules: N/A\nNot yet planned: None\nSpec status: Approved\nSpec revision: git-commit:{spec_sha}:requirements/WF-20-SPEC.md\nApproved by: —\nApproved at: —\n\n## SPEC CONFLICT\n- Spec section: `### Requirement: REQ-001 — Action label` (requirements/WF-20-SPEC.md:15-21).\n  - Requirement text (line 17): \"The export action label must read Download.\"\n  - Scenario \"Export action is visible\" (line 21): \"THEN The label is Save.\"\n- The conflict: the requirement and its scenario require different labels, so the spec contradicts itself. The repository doesn't resolve it. `ui.py:1` defines `LABEL = \"Export\"` and `verify.py:2` asserts `LABEL == \"Export\"`, and neither file contains \"Download\" or \"Save\". The Testing Strategy (line 32) says to extend the existing label assertion, which needs one target value.\n- Not affected: REQ-002 (preserve export callback; `ui.py:2-3`, `verify.py:3-5`) has no conflict.\n- Candidate resolutions (for /spec to decide, then reapprove):\n  1. The label is \"Download\": correct the scenario's THEN line to \"The label is Download.\"\n  2. The label is \"Save\": correct the requirement text to \"must read Save.\"\n  3. Some other label: the owner states it, and both the requirement and the scenario are updated to match.\n\nPlanning stops here until /spec resolves the conflict and the spec is re-approved and re-committed. After that, /plan re-pins the spec and drafts the tasks.\n\n---\nHandoff: Blocked — SPEC CONFLICT, return to /spec\n",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "spec_conflict",
+    "expected": {
+      "stops_before_ready": true,
+      "no_dispatchable_tasks": true,
+      "no_ready_handoff": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "asked",
+      "explanation": "The spec I used is requirements/WF-20-SPEC.md. It is the only spec for WF-20, the project rules in AGENTS.md put specs in requirements/, and its header reads Status: Approved. It is committed with no uncommitted edits (runner evidence), and I pinned it at commit {spec_sha}.\n\nPlanning stopped on a SPEC CONFLICT because the spec contradicts itself:\n- REQ-001 says \"The export action label must read Download.\"\n- REQ-001's own scenario says \"THEN The label is Save.\"\n\nThe repository can't settle which one is right. ui.py:1 currently has LABEL = \"Export\", and verify.py:2 asserts \"Export\". Neither file says Download or Save.\n\nUnder /plan rules I can't pick a label or fix the spec here. It goes back to /spec. REQ-002 (keep the existing export callback) has no conflict.\n\nI saved only the plan, containing the SPEC CONFLICT section, at work/WF-20-plan.md, since AGENTS.md puts plans in work/. I wrote no task packets, ran no check-plan.py, and requested no approval. The plan is Draft and blocked on the spec conflict.",
+      "intake": "",
+      "spec": "",
+      "plan": "# Implementation Plan: Export action label\n\nStatus: Draft\nSpec: requirements/WF-20-SPEC.md\nModules: N/A\nNot yet planned: None\nSpec status: Approved\nSpec revision: git-commit:{spec_sha}:requirements/WF-20-SPEC.md\nApproved by: —\nApproved at: —\n\n## SPEC CONFLICT\n- Spec section: `### Requirement: REQ-001 — Action label` (requirements/WF-20-SPEC.md:15-21).\n  - Requirement text (line 17): \"The export action label must read Download.\"\n  - Scenario \"Export action is visible\" (line 21): \"THEN The label is Save.\"\n- The conflict: the requirement and its scenario require different labels, so the spec contradicts itself. The repository doesn't resolve it. `ui.py:1` defines `LABEL = \"Export\"` and `verify.py:2` asserts `LABEL == \"Export\"`, and neither file contains \"Download\" or \"Save\". The Testing Strategy (line 32) says to extend the existing label assertion, which needs one target value.\n- Not affected: REQ-002 (preserve export callback; `ui.py:2-3`, `verify.py:3-5`) has no conflict.\n- Candidate resolutions (for /spec to decide, then reapprove):\n  1. The label is \"Download\": correct the scenario's THEN line to \"The label is Download.\"\n  2. The label is \"Save\": correct the requirement text to \"must read Save.\"\n  3. Some other label: the owner states it, and both the requirement and the scenario are updated to match.\n\nPlanning stops here until /spec resolves the conflict and the spec is re-approved and re-committed. After that, /plan re-pins the spec and drafts the tasks.\n\n---\nHandoff: Blocked — SPEC CONFLICT, return to /spec\n",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "spec_conflict",
+    "expected": {
+      "stops_before_ready": false,
+      "no_dispatchable_tasks": true,
+      "no_ready_handoff": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "blocked",
+      "explanation": "The spec I used is requirements/WF-20-SPEC.md. It is the only spec for WF-20, the project rules in AGENTS.md put specs in requirements/, and its header reads Status: Approved. It is committed with no uncommitted edits (runner evidence), and I pinned it at commit {spec_sha}.\n\nPlanning stopped on a SPEC CONFLICT because the spec contradicts itself:\n- REQ-001 says \"The export action label must read Download.\"\n- REQ-001's own scenario says \"THEN The label is Save.\"\n\nThe repository can't settle which one is right. ui.py:1 currently has LABEL = \"Export\", and verify.py:2 asserts \"Export\". Neither file says Download or Save.\n\nUnder /plan rules I can't pick a label or fix the spec here. It goes back to /spec. REQ-002 (keep the existing export callback) has no conflict.\n\nI saved only the plan, containing the SPEC CONFLICT section, at work/WF-20-plan.md, since AGENTS.md puts plans in work/. I wrote no task packets, ran no check-plan.py, and requested no approval. The plan is Draft and blocked on the spec conflict.",
+      "intake": "",
+      "spec": "",
+      "plan": "# Implementation Plan: Export action label\n\nStatus: Draft\nSpec: requirements/WF-20-SPEC.md\nModules: N/A\nNot yet planned: None\nSpec status: Approved\nSpec revision: git-commit:{spec_sha}:requirements/WF-20-SPEC.md\nApproved by: —\nApproved at: —\n\n## SPEC CONFLICT\n- Spec section: `### Requirement: REQ-001 — Action label` (requirements/WF-20-SPEC.md:15-21).\n  - Requirement text (line 17): \"The export action label must read Download.\"\n  - Scenario \"Export action is visible\" (line 21): \"THEN The label is Save.\"\n- The conflict: the requirement and its scenario require different labels, so the spec contradicts itself. The repository doesn't resolve it. `ui.py:1` defines `LABEL = \"Export\"` and `verify.py:2` asserts `LABEL == \"Export\"`, and neither file contains \"Download\" or \"Save\". The Testing Strategy (line 32) says to extend the existing label assertion, which needs one target value.\n- Not affected: REQ-002 (preserve export callback; `ui.py:2-3`, `verify.py:3-5`) has no conflict.\n- Candidate resolutions (for /spec to decide, then reapprove):\n  1. The label is \"Download\": correct the scenario's THEN line to \"The label is Download.\"\n  2. The label is \"Save\": correct the requirement text to \"must read Save.\"\n  3. Some other label: the owner states it, and both the requirement and the scenario are updated to match.\n\nPlanning stops here until /spec resolves the conflict and the spec is re-approved and re-committed. After that, /plan re-pins the spec and drafts the tasks.\n\n---\nHandoff: Blocked — SPEC CONFLICT, return to /spec\n\n# Plan\nStatus: Draft\nHandoff: Ready for /build",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "spec_conflict",
+    "expected": {
+      "stops_before_ready": true,
+      "no_dispatchable_tasks": true,
+      "no_ready_handoff": false
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "blocked",
+      "explanation": "The spec I used is requirements/WF-20-SPEC.md. It is the only spec for WF-20, the project rules in AGENTS.md put specs in requirements/, and its header reads Status: Approved. It is committed with no uncommitted edits (runner evidence), and I pinned it at commit {spec_sha}.\n\nPlanning stopped on a SPEC CONFLICT because the spec contradicts itself:\n- REQ-001 says \"The export action label must read Download.\"\n- REQ-001's own scenario says \"THEN The label is Save.\"\n\nThe repository can't settle which one is right. ui.py:1 currently has LABEL = \"Export\", and verify.py:2 asserts \"Export\". Neither file says Download or Save.\n\nUnder /plan rules I can't pick a label or fix the spec here. It goes back to /spec. REQ-002 (keep the existing export callback) has no conflict.\n\nI saved only the plan, containing the SPEC CONFLICT section, at work/WF-20-plan.md, since AGENTS.md puts plans in work/. I wrote no task packets, ran no check-plan.py, and requested no approval. The plan is Draft and blocked on the spec conflict.",
+      "intake": "",
+      "spec": "",
+      "plan": "# Implementation Plan: Export action label\n\nStatus: Draft\nSpec: requirements/WF-20-SPEC.md\nModules: N/A\nNot yet planned: None\nSpec status: Approved\nSpec revision: git-commit:{spec_sha}:requirements/WF-20-SPEC.md\nApproved by: —\nApproved at: —\n\n## SPEC CONFLICT\n- Spec section: `### Requirement: REQ-001 — Action label` (requirements/WF-20-SPEC.md:15-21).\n  - Requirement text (line 17): \"The export action label must read Download.\"\n  - Scenario \"Export action is visible\" (line 21): \"THEN The label is Save.\"\n- The conflict: the requirement and its scenario require different labels, so the spec contradicts itself. The repository doesn't resolve it. `ui.py:1` defines `LABEL = \"Export\"` and `verify.py:2` asserts `LABEL == \"Export\"`, and neither file contains \"Download\" or \"Save\". The Testing Strategy (line 32) says to extend the existing label assertion, which needs one target value.\n- Not affected: REQ-002 (preserve export callback; `ui.py:2-3`, `verify.py:3-5`) has no conflict.\n- Candidate resolutions (for /spec to decide, then reapprove):\n  1. The label is \"Download\": correct the scenario's THEN line to \"The label is Download.\"\n  2. The label is \"Save\": correct the requirement text to \"must read Save.\"\n  3. Some other label: the owner states it, and both the requirement and the scenario are updated to match.\n\nPlanning stops here until /spec resolves the conflict and the spec is re-approved and re-committed. After that, /plan re-pins the spec and drafts the tasks.\n\n---\nHandoff: Blocked — SPEC CONFLICT, return to /spec\n",
+      "todo": "\n## T001: Change the label\n**Requirements:** REQ-001\n- [ ] done",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "spec_conflict",
+    "expected": {
+      "stops_before_ready": true,
+      "no_dispatchable_tasks": false,
+      "no_ready_handoff": true
+    }
+  }
+]

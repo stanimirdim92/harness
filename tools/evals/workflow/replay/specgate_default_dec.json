@@ -1,0 +1,82 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "/spec WF-50 reuses the saved intake `docs/specs/WF-50-intake.md`, fetched 2026-11-20. The ticket hasn't changed since and the intake is complete: 1 of 1 tickets fully read, no Blockers and no design references. No spec exists yet, so this is a new spec.\n\nThe repository check covered `reports.py`, `users.py` and `AGENTS.md`. It answers the intake question \"Which module owns the existing exports?\": `reports.py` owns them (`users_csv`, reports.py:1-2). Today that export leaves out archived users and has only the name and email columns. The ticket asks for archived users to be included and for a role column. The ticket outranks repository precedent, so the spec records both as changed behavior (Change kind: Modify). Neither is a choice for the owner. Verification command, as written in AGENTS.md (found in source, not run): `python3 verify.py`.\n\nDrafting raises one choice. It is Low risk (a read-only export that changes no stored data), so it is decided by default and no decision brief is needed. The spec goes straight to drafting.\n\n### DEC-001 — CSV delimiter for the users export\n- Decision: Fields in users.csv are separated by a comma (`,`).\n- Alternatives: Semicolon (`;`) — rejected; no existing export uses it.\n- Reason: The ticket names no delimiter. Every existing CSV export uses a comma (reports.py:2). The choice affects only a read-only export and doesn't narrow any behavior the ticket asks for (REQ-001).\n- Source: repository precedent, reports.py:2\n- Decided by: default (interactive)\n- Affects: REQ-001\n\nDefaults taken (override by id):\n- DEC-001: comma delimiter (reports.py:2 precedent). Low risk.\n\nNext steps: draft `docs/specs/WF-50-SPEC.md` as Status: Draft, run the Approval Check and `check-spec.py`, then ask for approval. The approval request will include a step-by-step example: one archived user's record goes through the export to a row in users.csv. No OPEN QUESTION blocks remain.",
+      "intake": "Reused: docs/specs/WF-50-intake.md (fetched 2026-11-20, complete, ticket unchanged).",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "1. Resolve the ticket as WF-50 and reuse the complete, current intake docs/specs/WF-50-intake.md. The jira-ticket skill is not invoked again.\n2. Check the target: docs/specs/ contains only WF-50-intake.md, so no WF-50 spec exists and this is a new spec.\n3. Read the design references: none in the intake, so no Figma step runs and no Figma tools are called.\n4. Run a bounded repository check (repository-precedent §1, option 2) on AGENTS.md, reports.py and users.py. It finds that reports.py owns the exports, that the existing export leaves out archived users and has no role column (the ticket wins, so this is modified behavior), and that the verification command is `python3 verify.py`.\n5. Shape the choices drafting raises and assign risk tiers. Q1 is Low risk, so no decision brief is needed.\nQ1: default — comma\n6. Draft docs/specs/WF-50-SPEC.md as a compact spec with Status: Draft, Change kind: Modify and DEC-001 under Material Decisions.\n7. Run the Approval Check and spec-quality-gates §1.\n8. Save the spec and run `python3 ~/.claude/skills/spec-driven-development/scripts/check-spec.py docs/specs/WF-50-SPEC.md`, then fix any FAIL.\n9. Report the path, status and blockers (none), list the defaults taken (DEC-001), and include the step-by-step example with the approval request. Then stop and wait for human approval.",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "specgate_default_dec",
+    "expected": {
+      "decided_by_default": true,
+      "decided_by_on_its_own_line": true,
+      "source_line_is_a_source": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "### DEC-001 — Delimiter\n- Decision: comma\n- Source: Decided by: default (interactive); reports.py:2",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "Q1: default — comma",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "specgate_default_dec",
+    "expected": {
+      "decided_by_default": true,
+      "decided_by_on_its_own_line": false,
+      "source_line_is_a_source": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "### DEC-001 — Delimiter\n- Decision: comma\n- Source: repository precedent, reports.py:2\n- Decided by: default (interactive)",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "Q1: default — comma",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "specgate_default_dec",
+    "expected": {
+      "decided_by_default": true,
+      "decided_by_on_its_own_line": true,
+      "source_line_is_a_source": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "decided",
+      "explanation": "/spec WF-50 reuses the saved intake `docs/specs/WF-50-intake.md`, fetched 2026-11-20. The ticket hasn't changed since and the intake is complete: 1 of 1 tickets fully read, no Blockers and no design references. No spec exists yet, so this is a new spec.\n\nThe repository check covered `reports.py`, `users.py` and `AGENTS.md`. It answers the intake question \"Which module owns the existing exports?\": `reports.py` owns them (`users_csv`, reports.py:1-2). Today that export leaves out archived users and has only the name and email columns. The ticket asks for archived users to be included and for a role column. The ticket outranks repository precedent, so the spec records both as changed behavior (Change kind: Modify). Neither is a choice for the owner. Verification command, as written in AGENTS.md (found in source, not run): `python3 verify.py`.\n\nDrafting raises one choice. It is Low risk (a read-only export that changes no stored data), so it is decided by default and no decision brief is needed. The spec goes straight to drafting.\n\n### DEC-001 — CSV delimiter for the users export\n- Decision: Fields in users.csv are separated by a comma (`,`).\n- Alternatives: Semicolon (`;`) — rejected; no existing export uses it.\n- Reason: The ticket names no delimiter. Every existing CSV export uses a comma (reports.py:2). The choice affects only a read-only export and doesn't narrow any behavior the ticket asks for (REQ-001).\n- Source: repository precedent, reports.py:2\n- Decided by: default (interactive)\n- Affects: REQ-001\n\nDefaults taken (override by id):\n- DEC-001: comma delimiter (reports.py:2 precedent). Low risk.\n\nNext steps: draft `docs/specs/WF-50-SPEC.md` as Status: Draft, run the Approval Check and `check-spec.py`, then ask for approval. The approval request will include a step-by-step example: one archived user's record goes through the export to a row in users.csv. No OPEN QUESTION blocks remain.",
+      "intake": "Reused: docs/specs/WF-50-intake.md (fetched 2026-11-20, complete, ticket unchanged).",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "specgate_default_dec",
+    "expected": {
+      "decided_by_default": false,
+      "decided_by_on_its_own_line": true,
+      "source_line_is_a_source": true
+    }
+  }
+]

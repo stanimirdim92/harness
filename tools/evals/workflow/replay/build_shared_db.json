@@ -1,0 +1,134 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "Using: WF-30 T001, T002 (explicit argument; re-invoke with other task ids to override).\n\nPlan gate passes. The plan (work/WF-30-plan.md:2) and the spec (requirements/WF-30-SPEC.md:2) both read Status: Approved. The runner verified that the pinned spec git-commit:3eb0913…:requirements/WF-30-SPEC.md resolves and has an empty diff against the working copy, so the pin stands with no re-pin. Neither task in work/WF-30-todo.md has a `Status:` line, so neither is Done. The tree is clean, so the working copy matches HEAD. Both tasks are dispatched as Pending. Both are /build-owned, and nothing is handed on.\n\nDispatch decision: both workstreams run sequentially and neither runs concurrently. The workstreams are independent and dependency-ready, but their verification shares a database:\n- AGENTS.md:1 says that `bash tests/run.sh` migrates and truncates the shared Postgres database from .env, and that there is no per-worktree, per-process or in-memory database configuration.\n- tests/run.sh:5-6 truncates `exports` and reapplies schema.sql on every run.\n- .env:1 names that database as DB_DATABASE=app_test.\n- work/WF-30-plan.md:21-22 gives both workstreams the same verification command.\n\n`isolation: worktree` separates checkouts, not Postgres. Concurrent executors would truncate each other's test data mid-run. Sequential is also the default (ADR 0136), and the user did not ask for parallelism in this run.\n\nBefore real dispatch: the checkout is on `main`, the default branch, which build.md refuses for executors. A ticket branch must be set up, and `bin/worktree-doctor.sh --infrastructure` run if the project provides it. Neither can be done in this trial with no shell.\n\nNon-blocking: tests/run.sh runs only verify.py. T002's planned verify_report.py is exercised only if the executor wires it into tests/run.sh.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "ws-label: queued — runs first and alone, in the existing ticket checkout with no isolation argument. Fails runtime isolation: AGENTS.md:1 (one shared Postgres database, no per-worktree, per-process or in-memory configuration), tests/run.sh:5-6 (truncates exports and reapplies schema.sql every run), .env:1 (DB_DATABASE=app_test), work/WF-30-plan.md:21-22 (same command for both workstreams). Passes independence: work/WF-30-plan.md:9-11 says no shared files, state, dependency or checkpoint, and work/WF-30-todo.md lists ui.py/verify.py against report.py/verify_report.py. Passes dependency-readiness: work/WF-30-todo.md says Dependencies: None, and the plan has no checkpoints. Worktree isolation and rate-limit headroom come from the runner, not a repository file, and do not cure the shared database.\nws-report: queued — until ws-label's T001 run of bash tests/run.sh has finished and is integrated. Its verification truncates and migrates the same app_test database: AGENTS.md:1, tests/run.sh:5-6, .env:1, work/WF-30-plan.md:22. Passes independence: work/WF-30-plan.md:9-11 and the disjoint files in work/WF-30-todo.md. Passes dependency-readiness: work/WF-30-todo.md T002 says Dependencies: None, with no plan checkpoints. Worktree isolation and rate-limit headroom are available (runner-stated) but do not isolate the shared database.",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "build_shared_db",
+    "expected": {
+      "decided": true,
+      "both_workstreams_decided": true,
+      "shared_runtime_not_fanned_out": true,
+      "runtime_condition_named": true,
+      "no_implementation_artifacts": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "ws-label: concurrent — independent files\nws-report: concurrent — independent files",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "build_shared_db",
+    "expected": {
+      "decided": true,
+      "both_workstreams_decided": true,
+      "shared_runtime_not_fanned_out": false,
+      "runtime_condition_named": false,
+      "no_implementation_artifacts": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "ws-label: concurrent — worktree isolated\nws-report: queued — tests/run.sh truncates the shared app_test database",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "build_shared_db",
+    "expected": {
+      "decided": true,
+      "both_workstreams_decided": true,
+      "shared_runtime_not_fanned_out": true,
+      "runtime_condition_named": true,
+      "no_implementation_artifacts": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "asked",
+      "explanation": "Using: WF-30 T001, T002 (explicit argument; re-invoke with other task ids to override).\n\nPlan gate passes. The plan (work/WF-30-plan.md:2) and the spec (requirements/WF-30-SPEC.md:2) both read Status: Approved. The runner verified that the pinned spec git-commit:3eb0913…:requirements/WF-30-SPEC.md resolves and has an empty diff against the working copy, so the pin stands with no re-pin. Neither task in work/WF-30-todo.md has a `Status:` line, so neither is Done. The tree is clean, so the working copy matches HEAD. Both tasks are dispatched as Pending. Both are /build-owned, and nothing is handed on.\n\nDispatch decision: both workstreams run sequentially and neither runs concurrently. The workstreams are independent and dependency-ready, but their verification shares a database:\n- AGENTS.md:1 says that `bash tests/run.sh` migrates and truncates the shared Postgres database from .env, and that there is no per-worktree, per-process or in-memory database configuration.\n- tests/run.sh:5-6 truncates `exports` and reapplies schema.sql on every run.\n- .env:1 names that database as DB_DATABASE=app_test.\n- work/WF-30-plan.md:21-22 gives both workstreams the same verification command.\n\n`isolation: worktree` separates checkouts, not Postgres. Concurrent executors would truncate each other's test data mid-run. Sequential is also the default (ADR 0136), and the user did not ask for parallelism in this run.\n\nBefore real dispatch: the checkout is on `main`, the default branch, which build.md refuses for executors. A ticket branch must be set up, and `bin/worktree-doctor.sh --infrastructure` run if the project provides it. Neither can be done in this trial with no shell.\n\nNon-blocking: tests/run.sh runs only verify.py. T002's planned verify_report.py is exercised only if the executor wires it into tests/run.sh.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "ws-label: queued — runs first and alone, in the existing ticket checkout with no isolation argument. Fails runtime isolation: AGENTS.md:1 (one shared Postgres database, no per-worktree, per-process or in-memory configuration), tests/run.sh:5-6 (truncates exports and reapplies schema.sql every run), .env:1 (DB_DATABASE=app_test), work/WF-30-plan.md:21-22 (same command for both workstreams). Passes independence: work/WF-30-plan.md:9-11 says no shared files, state, dependency or checkpoint, and work/WF-30-todo.md lists ui.py/verify.py against report.py/verify_report.py. Passes dependency-readiness: work/WF-30-todo.md says Dependencies: None, and the plan has no checkpoints. Worktree isolation and rate-limit headroom come from the runner, not a repository file, and do not cure the shared database.\nws-report: queued — until ws-label's T001 run of bash tests/run.sh has finished and is integrated. Its verification truncates and migrates the same app_test database: AGENTS.md:1, tests/run.sh:5-6, .env:1, work/WF-30-plan.md:22. Passes independence: work/WF-30-plan.md:9-11 and the disjoint files in work/WF-30-todo.md. Passes dependency-readiness: work/WF-30-todo.md T002 says Dependencies: None, with no plan checkpoints. Worktree isolation and rate-limit headroom are available (runner-stated) but do not isolate the shared database.",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "build_shared_db",
+    "expected": {
+      "decided": false,
+      "both_workstreams_decided": true,
+      "shared_runtime_not_fanned_out": true,
+      "runtime_condition_named": true,
+      "no_implementation_artifacts": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "decided",
+      "explanation": "Using: WF-30 T001, T002 (explicit argument; re-invoke with other task ids to override).\n\nPlan gate passes. The plan (work/WF-30-plan.md:2) and the spec (requirements/WF-30-SPEC.md:2) both read Status: Approved. The runner verified that the pinned spec git-commit:3eb0913…:requirements/WF-30-SPEC.md resolves and has an empty diff against the working copy, so the pin stands with no re-pin. Neither task in work/WF-30-todo.md has a `Status:` line, so neither is Done. The tree is clean, so the working copy matches HEAD. Both tasks are dispatched as Pending. Both are /build-owned, and nothing is handed on.\n\nDispatch decision: both workstreams run sequentially and neither runs concurrently. The workstreams are independent and dependency-ready, but their verification shares a database:\n- AGENTS.md:1 says that `bash tests/run.sh` migrates and truncates the shared Postgres database from .env, and that there is no per-worktree, per-process or in-memory database configuration.\n- tests/run.sh:5-6 truncates `exports` and reapplies schema.sql on every run.\n- .env:1 names that database as DB_DATABASE=app_test.\n- work/WF-30-plan.md:21-22 gives both workstreams the same verification command.\n\n`isolation: worktree` separates checkouts, not Postgres. Concurrent executors would truncate each other's test data mid-run. Sequential is also the default (ADR 0136), and the user did not ask for parallelism in this run.\n\nBefore real dispatch: the checkout is on `main`, the default branch, which build.md refuses for executors. A ticket branch must be set up, and `bin/worktree-doctor.sh --infrastructure` run if the project provides it. Neither can be done in this trial with no shell.\n\nNon-blocking: tests/run.sh runs only verify.py. T002's planned verify_report.py is exercised only if the executor wires it into tests/run.sh.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "build_shared_db",
+    "expected": {
+      "decided": true,
+      "both_workstreams_decided": false,
+      "shared_runtime_not_fanned_out": true,
+      "runtime_condition_named": true,
+      "no_implementation_artifacts": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "decided",
+      "explanation": "Using: WF-30 T001, T002 (explicit argument; re-invoke with other task ids to override).\n\nPlan gate passes. The plan (work/WF-30-plan.md:2) and the spec (requirements/WF-30-SPEC.md:2) both read Status: Approved. The runner verified that the pinned spec git-commit:3eb0913…:requirements/WF-30-SPEC.md resolves and has an empty diff against the working copy, so the pin stands with no re-pin. Neither task in work/WF-30-todo.md has a `Status:` line, so neither is Done. The tree is clean, so the working copy matches HEAD. Both tasks are dispatched as Pending. Both are /build-owned, and nothing is handed on.\n\nDispatch decision: both workstreams run sequentially and neither runs concurrently. The workstreams are independent and dependency-ready, but their verification shares a database:\n- AGENTS.md:1 says that `bash tests/run.sh` migrates and truncates the shared Postgres database from .env, and that there is no per-worktree, per-process or in-memory database configuration.\n- tests/run.sh:5-6 truncates `exports` and reapplies schema.sql on every run.\n- .env:1 names that database as DB_DATABASE=app_test.\n- work/WF-30-plan.md:21-22 gives both workstreams the same verification command.\n\n`isolation: worktree` separates checkouts, not Postgres. Concurrent executors would truncate each other's test data mid-run. Sequential is also the default (ADR 0136), and the user did not ask for parallelism in this run.\n\nBefore real dispatch: the checkout is on `main`, the default branch, which build.md refuses for executors. A ticket branch must be set up, and `bin/worktree-doctor.sh --infrastructure` run if the project provides it. Neither can be done in this trial with no shell.\n\nNon-blocking: tests/run.sh runs only verify.py. T002's planned verify_report.py is exercised only if the executor wires it into tests/run.sh.",
+      "intake": "",
+      "spec": "",
+      "plan": "\n# Plan\nStatus: Draft\nHandoff: Ready for /build",
+      "todo": "",
+      "dispatch": "ws-label: queued — runs first and alone, in the existing ticket checkout with no isolation argument. Fails runtime isolation: AGENTS.md:1 (one shared Postgres database, no per-worktree, per-process or in-memory configuration), tests/run.sh:5-6 (truncates exports and reapplies schema.sql every run), .env:1 (DB_DATABASE=app_test), work/WF-30-plan.md:21-22 (same command for both workstreams). Passes independence: work/WF-30-plan.md:9-11 says no shared files, state, dependency or checkpoint, and work/WF-30-todo.md lists ui.py/verify.py against report.py/verify_report.py. Passes dependency-readiness: work/WF-30-todo.md says Dependencies: None, and the plan has no checkpoints. Worktree isolation and rate-limit headroom come from the runner, not a repository file, and do not cure the shared database.\nws-report: queued — until ws-label's T001 run of bash tests/run.sh has finished and is integrated. Its verification truncates and migrates the same app_test database: AGENTS.md:1, tests/run.sh:5-6, .env:1, work/WF-30-plan.md:22. Passes independence: work/WF-30-plan.md:9-11 and the disjoint files in work/WF-30-todo.md. Passes dependency-readiness: work/WF-30-todo.md T002 says Dependencies: None, with no plan checkpoints. Worktree isolation and rate-limit headroom are available (runner-stated) but do not isolate the shared database.",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "build_shared_db",
+    "expected": {
+      "decided": true,
+      "both_workstreams_decided": true,
+      "shared_runtime_not_fanned_out": true,
+      "runtime_condition_named": true,
+      "no_implementation_artifacts": false
+    }
+  }
+]

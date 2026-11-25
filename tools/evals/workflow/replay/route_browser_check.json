@@ -1,0 +1,59 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "CODE-3 asks for a browser check, so per /review §4 it goes to the verifier (/test), not the owner. No verifier has tried the check yet. The dev server being down right now is not a verifier BLOCKED report: /test must try to serve the candidate itself, and the chrome-devtools MCP is configured for this project. The finding stays ADVISORY until that evidence exists. The next step is /test with this report, then the review repeats once on the same candidate (HEAD 0703cd6). It goes to the owner only if the verifier reports BLOCKED, meaning no browser tool or its own attempt to serve failed.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "CODE-3: verifier — the finding asks for a browser check, and no verifier has attempted it (today's refused connection on 127.0.0.1:8000 is not a verifier BLOCKED report). Next step: /test with this report. Serve the candidate at 0703cd6. Using chrome-devtools MCP, open the export page, set the viewport width to 360px, and check whether the \"Download\" label (ui.py:2) wraps or is clipped. Attach a screenshot as evidence. CODE-3 stays ADVISORY and open until then, and the review repeats once on the same candidate. It goes to the owner only if the verifier reports BLOCKED (no browser tool, or its own attempt to serve failed).",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "route_browser_check",
+    "expected": {
+      "check_goes_to_the_verifier": true,
+      "next_step_is_test": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "CODE-3: owner — no running app, so the owner checks the page",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "route_browser_check",
+    "expected": {
+      "check_goes_to_the_verifier": false,
+      "next_step_is_test": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "- `CODE-3`: verifier — /test serves the candidate on 127.0.0.1 and runs the check",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "route_browser_check",
+    "expected": {
+      "check_goes_to_the_verifier": true,
+      "next_step_is_test": true
+    }
+  }
+]

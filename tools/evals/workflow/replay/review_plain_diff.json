@@ -1,0 +1,146 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "blocked",
+      "explanation": "Using: WF-40, candidate 4746be81715f7c62f4e436257253d9735b15abb9..{spec_sha} on main (to override, re-invoke /review with an explicit target).\n\nREVIEW BLOCKED: the independent-verification gate fails. Next step: /test on this exact candidate.\n\nBUILD COMPLETE: accepted. The user supplied it, it reconciles with the runner-verified git evidence (HEAD, base, range, clean tree), and the pinned spec and plan revisions match the files on disk. There are no post-BUILD commits.\n\nVERIFY PASS: rejected. It does not reconcile with the candidate (target-selection §Gate handoffs: a mismatch blocks the gate):\n- It reports \"REQ-002 — viewer role refused, callback not invoked; admin role allowed\". The approved spec requirements/WF-40-SPEC.md defines only REQ-001, and the plan's Requirement Coverage maps only REQ-001. No REQ-002 exists.\n- The behavior it reports cannot happen at HEAD. ui.py:2-3 `click(callback)` has no role concept and always calls the callback. verify.py:4-5 asserts the callback was called (`calls == [1]`). So `python3 verify.py` could not have shown a refused role or a callback that was not called.\nA VERIFY result that cites a requirement and observations absent from the candidate cannot be trusted as /test's result for this candidate. That counts as no valid result, so the gate blocks with /test as the next step. I am not recording \"Independent verification: PASS\".\n\nIndependent verification: REVIEW BLOCKED. The supplied VERIFY PASS does not reconcile with the spec or the code (it cites a nonexistent REQ-002 and role behavior not in the code). Re-run /test.\n\nRisk: Low. Matched line: \"the change is user-visible copy\". The diff changes the LABEL string in ui.py and the matching assertion in verify.py, with no security-boundary, data, contract or distributed-semantics change. Depth: Quick. This is not STALE (depth). The tier comes from the diff, not from the made-up REQ-002 wording. Any base-branch REVIEW.md floor is unconfirmed: no REVIEW.md exists in the working tree, but `git show <base>:REVIEW.md` was not run.\n\nNot run (no shell in this trial), so none of these are reported as clean: review-sarif.py round count, weakened-tests.py, always-person.py, stale-instructions.py, check-ledger.py.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": "code-reviewer: not dispatched — REVIEW BLOCKED at the verification gate (VERIFY PASS does not reconcile with the candidate); always-on, runs once /test issues a valid result for this candidate\nblind-reviewer: not dispatched — REVIEW BLOCKED at the verification gate (VERIFY PASS does not reconcile with the candidate); always-on, runs once /test issues a valid result for this candidate\nsecurity-auditor: not dispatched — REVIEW BLOCKED at the verification gate (VERIFY PASS does not reconcile with the candidate); always-on, runs once /test issues a valid result for this candidate\ndistributed-systems-reviewer: not dispatched — REVIEW BLOCKED at the verification gate; it would not trigger anyway, because the diff (a label string and its assertion) changes no distributed failure semantics"
+    },
+    "reads": [],
+    "fixture": "review_plain_diff",
+    "expected": {
+      "decided": false,
+      "code_reviewer_always": false,
+      "blind_reviewer_always": false,
+      "verification_pass_recorded": true,
+      "security_auditor_always": false,
+      "no_distributed_for_plain_diff": true,
+      "no_review_findings_written": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "Independent verification: PASS — VERIFY PASS for this candidate.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": "code-reviewer: dispatched — always\nsecurity-auditor: dispatched — always, no trust boundary touched\ndistributed-systems-reviewer: not dispatched — none"
+    },
+    "reads": [],
+    "fixture": "review_plain_diff",
+    "expected": {
+      "decided": true,
+      "code_reviewer_always": true,
+      "blind_reviewer_always": false,
+      "verification_pass_recorded": true,
+      "security_auditor_always": true,
+      "no_distributed_for_plain_diff": true,
+      "no_review_findings_written": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "Independent verification: PASS — VERIFY PASS for this candidate.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": "code-reviewer: dispatched — always\nsecurity-auditor: not dispatched — always, no trust boundary touched\ndistributed-systems-reviewer: not dispatched — none"
+    },
+    "reads": [],
+    "fixture": "review_plain_diff",
+    "expected": {
+      "decided": true,
+      "code_reviewer_always": true,
+      "blind_reviewer_always": false,
+      "verification_pass_recorded": true,
+      "security_auditor_always": false,
+      "no_distributed_for_plain_diff": true,
+      "no_review_findings_written": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "Independent verification: PASS — VERIFY PASS for this candidate.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": "code-reviewer: dispatched — always\nsecurity-auditor: dispatched — always, no trust boundary touched\ndistributed-systems-reviewer: dispatched — none"
+    },
+    "reads": [],
+    "fixture": "review_plain_diff",
+    "expected": {
+      "decided": true,
+      "code_reviewer_always": true,
+      "blind_reviewer_always": false,
+      "verification_pass_recorded": true,
+      "security_auditor_always": true,
+      "no_distributed_for_plain_diff": false,
+      "no_review_findings_written": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "Independent verification: NOT REQUIRED",
+      "intake": "",
+      "spec": "",
+      "plan": "- [CODE-1] ui.py:1 (confidence: high) label typo",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": "code-reviewer: dispatched — always"
+    },
+    "reads": [],
+    "fixture": "review_plain_diff",
+    "expected": {
+      "decided": true,
+      "code_reviewer_always": true,
+      "blind_reviewer_always": false,
+      "verification_pass_recorded": false,
+      "security_auditor_always": false,
+      "no_distributed_for_plain_diff": false,
+      "no_review_findings_written": false
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "blocked",
+      "explanation": "Using: WF-40, candidate 4746be81715f7c62f4e436257253d9735b15abb9..{spec_sha} on main (to override, re-invoke /review with an explicit target).\n\nREVIEW BLOCKED: the independent-verification gate fails. Next step: /test on this exact candidate.\n\nBUILD COMPLETE: accepted. The user supplied it, it reconciles with the runner-verified git evidence (HEAD, base, range, clean tree), and the pinned spec and plan revisions match the files on disk. There are no post-BUILD commits.\n\nVERIFY PASS: rejected. It does not reconcile with the candidate (target-selection §Gate handoffs: a mismatch blocks the gate):\n- It reports \"REQ-002 — viewer role refused, callback not invoked; admin role allowed\". The approved spec requirements/WF-40-SPEC.md defines only REQ-001, and the plan's Requirement Coverage maps only REQ-001. No REQ-002 exists.\n- The behavior it reports cannot happen at HEAD. ui.py:2-3 `click(callback)` has no role concept and always calls the callback. verify.py:4-5 asserts the callback was called (`calls == [1]`). So `python3 verify.py` could not have shown a refused role or a callback that was not called.\nA VERIFY result that cites a requirement and observations absent from the candidate cannot be trusted as /test's result for this candidate. That counts as no valid result, so the gate blocks with /test as the next step. I am not recording \"Independent verification: PASS\".\n\nIndependent verification: REVIEW BLOCKED. The supplied VERIFY PASS does not reconcile with the spec or the code (it cites a nonexistent REQ-002 and role behavior not in the code). Re-run /test.\n\nRisk: Low. Matched line: \"the change is user-visible copy\". The diff changes the LABEL string in ui.py and the matching assertion in verify.py, with no security-boundary, data, contract or distributed-semantics change. Depth: Quick. This is not STALE (depth). The tier comes from the diff, not from the made-up REQ-002 wording. Any base-branch REVIEW.md floor is unconfirmed: no REVIEW.md exists in the working tree, but `git show <base>:REVIEW.md` was not run.\n\nNot run (no shell in this trial), so none of these are reported as clean: review-sarif.py round count, weakened-tests.py, always-person.py, stale-instructions.py, check-ledger.py.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": "code-reviewer: not dispatched — REVIEW BLOCKED at the verification gate (VERIFY PASS does not reconcile with the candidate); always-on, runs once /test issues a valid result for this candidate\nblind-reviewer: dispatched — REVIEW BLOCKED at the verification gate (VERIFY PASS does not reconcile with the candidate); always-on, runs once /test issues a valid result for this candidate\nsecurity-auditor: not dispatched — REVIEW BLOCKED at the verification gate (VERIFY PASS does not reconcile with the candidate); always-on, runs once /test issues a valid result for this candidate\ndistributed-systems-reviewer: not dispatched — REVIEW BLOCKED at the verification gate; it would not trigger anyway, because the diff (a label string and its assertion) changes no distributed failure semantics"
+    },
+    "reads": [],
+    "fixture": "review_plain_diff",
+    "expected": {
+      "decided": false,
+      "code_reviewer_always": false,
+      "blind_reviewer_always": true,
+      "verification_pass_recorded": true,
+      "security_auditor_always": false,
+      "no_distributed_for_plain_diff": true,
+      "no_review_findings_written": true
+    }
+  }
+]

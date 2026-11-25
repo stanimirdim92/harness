@@ -1,0 +1,82 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "Using: WF-40, candidate 839ca196..2124322 (override by re-invoking /test with an explicit target). The BUILD COMPLETE (review fixes) message was supplied in this conversation and matches git: HEAD is 2124322, the range is 839ca19..2124322 with one commit carrying Task: CODE-1, and the tree is clean. The candidate changes production code (an auth gate), so it is not exempt from verification. It came from `/build WF-40 review fixes` and no `/review` round has seen 2124322, so ADR 0147 applies: a fresh test-engineer runs only the fix diff, with `Scope: fix diff` and no full suite at any depth. Risk · Depth stays High · Deep from review round 1. No browser surface is involved, so no skills are required.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "To: test-engineer (fresh instance, not resumed)\nTicket: WF-40 (use `Refs: WF-40` on any test-only commit)\nScope: fix diff\nRisk · Depth: High · Deep (set by /review round 1: the change adds an authorization gate)\nrequired_skills: none (no browser-rendered surface; ui.py is an in-process module)\n\nCandidate identity\n- Repository root: /fixture; branch main\n- Previously verified commit: 839ca196131377c1737f59370f12e8b817abb0d5 (VERIFY PASS at Deep)\n- Candidate HEAD: {spec_sha} (\"fix: refuse the export when no user is given\", Task: CODE-1), from `/build WF-40 review fixes`\n- Diff under verification: 839ca196131377c1737f59370f12e8b817abb0d5..{spec_sha} (run `git diff` on this range yourself; it is the authoritative diff)\n- Baseline tree: clean. No staged, unstaged or untracked changes, and no uncommitted BUILD diff.\n- Spec pin: requirements/WF-40-SPEC.md @ 5691dce4c6b699e80639f63b800ee91319395d9c (Approved). Plan: work/WF-40-plan.md (Approved, unchanged).\n\nPrevious VERIFY report (on 839ca19)\n- VERIFY PASS at Deep: the full suite (`python3 verify.py`) and a mutation probe on every changed condition. Risk · Depth: High · Deep.\n- Review round 1 on 839ca19 then left one open REQUIRED finding, CODE-1: the export was not refused when no user was given.\n\nTasks handed on by BUILD: none.\n\nAcceptance criteria (full requirement list)\n- REQ-001: Action label. The export action label must read Download. Scenario: given the existing export action, when it is displayed, then the label is Download.\n- REQ-002: Export requires an authorized role. Only users whose role is admin or owner may trigger the export. Scenario: given a user whose role is viewer, when they attempt the export, then the export is refused and the callback does not run.\n\nImplemented behavior (BUILD's claim; confirm against the diff)\n- CODE-1 fix: `auth.can_export(user)` now refuses when `user` is None (`user is not None and user.get(\"role\") in ALLOWED`). `ui.click(None, cb)` returns False.\n- verify.py gains a `click(None, ...)` assertion. It was written test-first.\n\nRegression risks\n- The added or changed condition in auth.py:4 (`user is not None`) must be mutation-probed, along with any other condition the diff touches. Restore every production file afterwards.\n- The refusal path must also leave the callback uncalled for a None user, as REQ-002 requires. The new verify.py assertion checks only the return value, not `calls`.\n- The admin/owner allow path and the viewer refusal must be unchanged.\n- REQ-001 (the label): re-run it only if the diff can affect it. Otherwise cite the earlier evidence at 839ca19.\n\nAlready run by BUILD (prior evidence, not your conclusion)\n- `python3 verify.py`: pass (exit 0). BUILD reports no other instance of the failure nearby.\n\nPointers: auth.py, ui.py, verify.py.\n\nOwnership: test-only changes only (tests, fixtures, test configuration). Do not modify production code. If you find a production defect, preserve the reproduction and report it for /build.\n\nReport: VERIFY PASS (fix diff), FAIL or BLOCKED. Give one evidence line per REQ-###, each marked as executed now or inherited from 839ca19, plus the mutation-probe results and the final branch, HEAD and tree state.\nFull suite: do not run",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testfix_packet",
+    "expected": {
+      "verifies_now": true,
+      "packet_scope_is_fix_diff": true,
+      "no_full_suite": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "Candidate HEAD abc. Risk · Depth: High · Deep.\nFull suite: run",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testfix_packet",
+    "expected": {
+      "verifies_now": true,
+      "packet_scope_is_fix_diff": false,
+      "no_full_suite": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "/test runs once, after /review converges.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testfix_packet",
+    "expected": {
+      "verifies_now": false,
+      "packet_scope_is_fix_diff": false,
+      "no_full_suite": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "Candidate HEAD abc. Scope: fix diff.\nFull suite: do not run",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testfix_packet",
+    "expected": {
+      "verifies_now": true,
+      "packet_scope_is_fix_diff": true,
+      "no_full_suite": true
+    }
+  }
+]

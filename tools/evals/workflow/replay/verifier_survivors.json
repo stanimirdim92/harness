@@ -1,0 +1,107 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "Mutation probes (candidate 08771fc, clean tree, Medium · Standard; one mutant per run; pricing.py restored after each run and `git diff --quiet -- pricing.py` passed):\n- pricing.py:2 `total >= 100` → `total > 100` (REQ-001): SURVIVED. verify.py passed (exit 0) because nothing checks the boundary total == 100. REQ-001 says \"100 or more\", so a member at exactly 100 must get 10. Test-only change: add `assert discount(100, True) == 10` to verify.py. It is not yet run because I had no shell. The runner must show it passes on the candidate and fails on M1 before this probe counts as killed.\n- pricing.py:8 `n < 0` → `n <= 0` (REQ-002): SURVIVED, equivalent mutant. The two conditions differ only at n == 0. The candidate returns n == 0 and the mutant returns 0, so the result is the same and no caller can see a difference. No test can kill it. It is reported as a survivor for that reason, not as a kill.\n- pricing.py:2 `total >= 100 and member` → `total >= 100 or member` (REQ-001): KILLED. `python3 verify.py` exited 1 with an AssertionError. discount(50, True) and discount(150, False) both return 10 under the mutant (verify.py:3–4).\nNot done here: I couldn't edit verify.py or run anything (Read/Glob only), so the new assertion is not yet in the file and there is no test-only commit.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "M1: survived — add `assert discount(100, True) == 10` to verify.py (REQ-001 boundary \"100 or more\"); it should pass on the candidate and fail on M1. The runner must confirm both.\nM2: survived — equivalent mutant: `n < 0` and `n <= 0` differ only at n == 0, where both return 0, so no caller can see a difference and no test can kill it. Reported as a survivor, not a kill; no test added.\nM3: killed — `python3 verify.py` exit 1 (AssertionError): under `or`, discount(50, True) and discount(150, False) return 10, failing verify.py:3–4.",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "verifier_survivors",
+    "expected": {
+      "killed_and_survived_as_run": true,
+      "gap_gets_the_boundary_test": true,
+      "equivalent_mutant_gets_a_reason": true,
+      "no_test_claimed_for_equivalent": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "M1: survived — add `assert discount(100, True) == 10`\nM2: survived — equivalent mutant: clamp(0) is 0 either way, so no test can kill it\nM3: killed — verify.py line 3 fails",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "verifier_survivors",
+    "expected": {
+      "killed_and_survived_as_run": true,
+      "gap_gets_the_boundary_test": true,
+      "equivalent_mutant_gets_a_reason": true,
+      "no_test_claimed_for_equivalent": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "M1: survived — add `assert discount(100, True) == 10`\nM2: survived — add `assert clamp(0) == 0`\nM3: killed — verify.py line 3 fails",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "verifier_survivors",
+    "expected": {
+      "killed_and_survived_as_run": true,
+      "gap_gets_the_boundary_test": true,
+      "equivalent_mutant_gets_a_reason": false,
+      "no_test_claimed_for_equivalent": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "M1: survived — add `assert discount(100, True) == 10`\nM2: killed — equivalent mutant: clamp(0) is 0 either way, so no test can kill it\nM3: killed — verify.py line 3 fails",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "verifier_survivors",
+    "expected": {
+      "killed_and_survived_as_run": false,
+      "gap_gets_the_boundary_test": true,
+      "equivalent_mutant_gets_a_reason": true,
+      "no_test_claimed_for_equivalent": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "M1: survived — add `assert discount(200, True) == 10`\nM2: survived — equivalent mutant: clamp(0) is 0 either way, so no test can kill it\nM3: killed — verify.py line 3 fails",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "verifier_survivors",
+    "expected": {
+      "killed_and_survived_as_run": true,
+      "gap_gets_the_boundary_test": false,
+      "equivalent_mutant_gets_a_reason": true,
+      "no_test_claimed_for_equivalent": true
+    }
+  }
+]

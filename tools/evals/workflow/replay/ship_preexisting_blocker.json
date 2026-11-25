@@ -1,0 +1,78 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "blocked",
+      "explanation": "Ship Decision: NO-GO\nSEC-1 BLOCKER · pre-existing (export.py:2, export_csv() writes the session token into the exported file). It is pre-existing, so it does not block the release by itself. But a pre-existing BLOCKER needs a tracked follow-up (a ticket or an observation-log row), and nothing tracks it: `rg -n \"SEC-1\" work/ requirements/` prints nothing, there is no observation-log row, and the owner has said nothing. An untracked pre-existing BLOCKER is NO-GO (ship.md §2, findings.md §Pre-existing, ADR 0090). /ship does not create the follow-up or decide it for the owner. The SARIF resolution stays `open`; it becomes `follow-up` only once a tracked item exists.\nNext step: the owner records SEC-1 as a tracked follow-up, either a ticket (for example under work/) or a row in the harness observation-log. If that is a commit that changes only ledger or SARIF files, the reviewed code stays the same. Then re-run /ship WF-40 on 52dc470. The other way is to fix SEC-1 here: /build → /test (Deep: full suite plus a mutation probe) → /review → /ship on the new candidate. I recommend a separate follow-up ticket, because the defect is outside this change's scope.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": "## Ship Decision: NO-GO\n\nUsing: WF-40 (explicit argument; re-invoke `/ship <target>` to override).\n\n**Risk: High — the change adds an authorization gate · Depth: Deep** — before merging, read every changed file, with a second person.\n\n### Read these yourself\n- none (\"Always a person\": none)\n\n### Blockers\n- none introduced by this change. The NO-GO comes from SEC-1 below: a pre-existing BLOCKER with no tracked follow-up.\n\n### Required findings / refutations / accepted risks\n- none\n- Answered: none\n\n### Pre-existing findings (follow-ups)\n- SEC-1 BLOCKER · pre-existing (baselineState unchanged) · export.py:2 — export_csv() writes `session.token` into the exported file. **Not tracked**: no ticket in work/ or requirements/, no observation-log row, and no owner statement. That makes this NO-GO. SARIF resolution stays `open` until a follow-up exists; then it is `follow-up`.\n\n### Fix at the source\n- none (`review-noise.py --repeats` printed nothing)\n\n### Human time\nNot produced: `ticket-stats.py WF-40` was not run in this trial, and §2 resolutions were not written because SEC-1 is still open.\n\n### Shipped-bug record\n- not an escaped bug (no `## Escaped From` section in the spec)\n\n### Requirement evidence\n- REQ-001: ui.py `LABEL = \"Download\"` / `python3 verify.py`, label assertion, pass\n- REQ-002: auth.py `can_export()` (role in {admin, owner}) and the ui.py `click()` gate (a refused user returns False and the callback does not run) / `python3 verify.py`, role assertions, pass\n\n### Release-readiness\n- Infrastructure: PASS (runner attestation)\n- Documentation: PASS (runner attestation)\n- Feature flag: PASS (runner attestation)\n\n### Rollback plan\n- Trigger conditions: authorized users cannot export, or unauthorized users can\n- Procedure: `git revert 52dc470`\n- Recovery target: c644a4b behavior (the old label, with no role gate)\n\n### Candidate\n- Base check: Base: current (`base-check.sh --base origin/main -- \"python3 verify.py\"` exit 0)\n- Branch: main\n- Commits: {spec_sha} (feat: gate export behind an authorized role), the reviewed candidate\n- Diff/status: tree clean; `check-ledger.py WF-40 --ship` exit 0, no warnings; VERIFY PASS at Deep (full suite plus a mutation probe on every changed condition); Weakened tests: none found\n\n### Next step\nRecord SEC-1 as a tracked follow-up (a ticket, or an observation-log row), then re-run `/ship WF-40` on 52dc470. A ledger-only commit is reported, and it does not change the reviewed candidate. The other way is to fix SEC-1 through /build → /test → /review → /ship as a new candidate."
+    },
+    "reads": [],
+    "fixture": "ship_preexisting_blocker",
+    "expected": {
+      "not_go": true,
+      "no_go": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "Ship Decision: GO\nSEC-1: follow-up.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "ship_preexisting_blocker",
+    "expected": {
+      "not_go": false,
+      "no_go": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "Ship Decision: NO-GO\nNext: `/build`, then `/test` and `/review`.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "ship_preexisting_blocker",
+    "expected": {
+      "not_go": true,
+      "no_go": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "Ship Decision: SHIP BLOCKED\nAsk the owner.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "ship_preexisting_blocker",
+    "expected": {
+      "not_go": true,
+      "no_go": false
+    }
+  }
+]

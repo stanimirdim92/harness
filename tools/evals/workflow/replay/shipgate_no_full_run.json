@@ -1,0 +1,56 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "blocked",
+      "explanation": "SHIP BLOCKED\nUsing: WF-40, candidate {spec_sha} on main (tree clean; nothing after the round-2 review commit). Round 2 of /review reviewed this candidate and recorded \"Independent verification: PASS (fix diff)\". Under ship.md §1 (ADR 0147), PASS (fix diff) needs a full-depth /test after that review. The full-depth /test must produce a VERIFY PASS for this exact candidate that adds no commits. No /test ran after round 2. The only VERIFY PASS supplied is not enough, for three reasons:\n- Its candidate is 6f0107b. The reviewed candidate is 2fc3763.\n- Its scope is the fix diff, and it says \"Full suite: not run\".\n- It added a commit: test-only commit 2fc3763.\nThe Risk · Depth line is High · Deep (the change adds an authorization gate). At Deep, a VERIFY PASS with no full-suite run is also SHIP BLOCKED. The round-1 Deep VERIFY PASS covered e46ccf4 and does not cover the current candidate.\nNext step: `/test WF-40` at full depth on {spec_sha}: the full suite, plus a mutation probe on every changed condition. If that /test adds no commits, re-run /ship with its VERIFY PASS. If it adds commits, a closing /review round comes first, then /ship.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "shipgate_no_full_run",
+    "expected": {
+      "ship_blocked_pending_test": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "Verification: satisfied\nThe full VERIFY PASS covers this candidate and added no commits.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "shipgate_no_full_run",
+    "expected": {
+      "ship_blocked_pending_test": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "SHIP BLOCKED\nPASS (fix diff) needs the full-depth run. Next: `/test`.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "shipgate_no_full_run",
+    "expected": {
+      "ship_blocked_pending_test": true
+    }
+  }
+]

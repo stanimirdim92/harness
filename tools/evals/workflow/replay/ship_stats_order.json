@@ -1,0 +1,102 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "Using: WF-40 (explicit argument; re-invoke /ship with another argument to override). The candidate is 949551b on main with a clean tree. It matches the /review round 1 handoff the user supplied, which the runner reconciled with git. I re-read the spec and plan from disk. Spec: requirements/WF-40-SPEC.md, Approved, REQ-001 and REQ-002. Plan: work/WF-40-plan.md, Approved, pinned to the spec at 8ff85e1. The plan's Integrated command is `python3 verify.py`. Independent verification is PASS with a VERIFY PASS at Deep that includes the full suite and a mutation probe on every changed condition. Weakened tests: none found. Always a person: none. Risk is High (authorization gate) at Deep. check-ledger --ship exits 0 with no warnings. base-check exits 0: Base: current. Findings: CODE-4 REQUIRED stays answered (REQ-002, and auth.py matches it). CODE-5 REQUIRED is pre-existing (baselineState unchanged; the change does not touch or call export.py), so it becomes a follow-up tracked in WF-77. CODE-6 ADVISORY was declined by the author. review-noise --repeats lists no classes, so there is nothing to fix at the source. Both REQs have an implementing change and passing verify.py evidence. The §4 attestations, the rollback plan and the absence of an Escaped From section are given as passed. The order matters: ticket-stats.py runs only after §2 has written the resolutions and committed them as a ledger-only commit, so its row counts them. The trial ends before the verdict; on this evidence nothing blocks GO.",
+      "intake": "Target: WF-40, from the explicit argument. Re-read from disk: AGENTS.md (specs in requirements/, plans in work/, verify command `python3 verify.py`, no external tracker); requirements/WF-40-SPEC.md (Approved 2026-09-01; REQ-001 label must read Download; REQ-002 only admin or owner may export, and a viewer is refused with the callback not run); work/WF-40-plan.md (Approved; spec pinned at 8ff85e1; T001 [x]; Integrated verification: python3 verify.py). The candidate HEAD {spec_sha} is the reviewed commit, and the tree is clean.",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "python3 ~/.claude/skills/spec-driven-development/scripts/check-ledger.py WF-40 --ship\n~/.claude/skills/code-review-and-quality/scripts/base-check.sh --base origin/main -- \"python3 verify.py\"\npython3 ~/.claude/skills/code-review-and-quality/scripts/review-sarif.py resolve WF-40 CODE-5=follow-up CODE-6=declined\ngit add docs/reviews/WF-40.sarif\ngit commit -m \"chore(WF-40): record ship resolutions for review findings\"\npython3 ~/.claude/skills/code-review-and-quality/scripts/review-noise.py --repeats\npython3 ~/.claude/skills/spec-driven-development/scripts/ticket-stats.py WF-40",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "ship_stats_order",
+    "expected": {
+      "resolutions_written": true,
+      "stats_run": true,
+      "stats_after_resolutions": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "check-ledger.py WF-40 --ship\nticket-stats.py WF-40\nreview-sarif.py resolve WF-40 CODE-5=follow-up",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "ship_stats_order",
+    "expected": {
+      "resolutions_written": true,
+      "stats_run": true,
+      "stats_after_resolutions": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "check-ledger.py WF-40 --ship\nreview-sarif.py resolve WF-40 CODE-5=follow-up CODE-6=declined\nticket-stats.py WF-40",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "ship_stats_order",
+    "expected": {
+      "resolutions_written": true,
+      "stats_run": true,
+      "stats_after_resolutions": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "check-ledger.py WF-40 --ship\nreview-sarif.py resolve WF-40 CODE-5=follow-up",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "ship_stats_order",
+    "expected": {
+      "resolutions_written": true,
+      "stats_run": false,
+      "stats_after_resolutions": false
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "check-ledger.py WF-40 --ship\nticket-stats.py WF-40",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "ship_stats_order",
+    "expected": {
+      "resolutions_written": false,
+      "stats_run": true,
+      "stats_after_resolutions": false
+    }
+  }
+]

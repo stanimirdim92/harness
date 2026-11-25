@@ -1,0 +1,78 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "/spec WF-50 — the intake at docs/specs/WF-50-intake.md (fetched 2026-11-20) is complete and current, so I'm reusing it. It lists no blockers and no design references, so no Figma reads were needed.\n\nRepository evidence (a bounded check of AGENTS.md, users.py and reports.py):\n- The existing exports live in `reports.py`. `reports.py:2` `users_csv` writes name and email only, and leaves out archived users. This answers the intake's question about which module owns the existing exports.\n- `users.py:2` `active_users` also leaves out archived users.\n- The verification command is `python3 verify.py`, as written in AGENTS.md:1. I found it in the file; I have not run it.\n\nOne choice came up, and I decided it by default:\n\nDefaults taken (override by id)\n- DEC-001 — Archived users are included in the WF-50 export (ticket line, Risk: Low)\n\n### DEC-001 — Archived users are included in the export\n- Decision: The users.csv export includes archived users, one row per user, the same as active users.\n- Alternatives: Leave archived users out, as the existing exports do (`users.py:2`, `reports.py:2`). Rejected because that would drop a behavior the ticket asks for.\n- Reason: The ticket says \"The export includes archived users.\" (WF-50 intake, Requirements). Repository precedent does not outrank the ticket text (spec-quality-gates §1), and a default never takes an option that narrows a behavior the ticket asks for. The change is a read-only export that stores no data (Risk: Low). Affects REQ-003.\n- Source: WF-50 intake, Requirements line 3 (\"The export includes archived users.\")\n- Decided by: default (interactive)\n- Affects: REQ-003\n\nChange Impact will record that the existing `users_csv` in `reports.py:2` and `active_users` in `users.py:2` stay as they are. Each keeps leaving out archived users, and only the new WF-50 export includes them.\n\nNext, I draft docs/specs/WF-50-SPEC.md (compact form, Status: Draft), run the Approval Check and check-spec.py, and present it with a step-by-step example. The example walks one archived user through to their users.csv row. To override the default, send `the owner decides instead of the default: DEC-001=…`.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "1. Resolve WF-50 and reuse the complete, current intake at docs/specs/WF-50-intake.md (no jira-ticket invocation; no design references, so no Figma reads)\n2. Bounded repository check: read AGENTS.md, users.py, reports.py (existing export owner: reports.py; verification command found in source: python3 verify.py, not executed)\n3. Scope check and form selection: one capability, compact spec\n4. Raise and decide drafting choices per §Deciding by default\nQ1: default — include archived users in the export, as the ticket asks (ticket line \"The export includes archived users.\" settles it; Risk: Low; precedent at users.py:2/reports.py:2 does not outrank the ticket)\n5. Draft docs/specs/WF-50-SPEC.md (Status: Draft) with DEC-001, run Approval Check and check-spec.py, present with a step-by-step example and approval request",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "specgate_ticket_beats_precedent",
+    "expected": {
+      "decided_by_default": true,
+      "ticket_behavior_kept": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "Q1: open question — the ticket asks for archived users",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "specgate_ticket_beats_precedent",
+    "expected": {
+      "decided_by_default": false,
+      "ticket_behavior_kept": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "Q1: default — leave archived users out, as reports.py:2 does",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "specgate_ticket_beats_precedent",
+    "expected": {
+      "decided_by_default": true,
+      "ticket_behavior_kept": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "Q1: default — include archived users (the ticket line settles it)",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "specgate_ticket_beats_precedent",
+    "expected": {
+      "decided_by_default": true,
+      "ticket_behavior_kept": true
+    }
+  }
+]

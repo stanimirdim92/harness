@@ -1,0 +1,62 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "WF-50: your Q1 answer is now DEC-001 (owner-decided). The recon is done. Two new questions came up. Both are High risk, so the draft stays Draft and can't go up for approval until you answer them. No spec file has been written yet; this trial ends before the save.\n\n**Recorded decision**\n```\n### DEC-001 — Archived users are included in the export\n- Decision: The users CSV export includes archived users, as the ticket says.\n- Alternatives: Follow the linked design note (\"active users only\") and export active users only.\n- Reason: The ticket requirement \"The export includes archived users\" (intake line 10) conflicted with the design note (intake Blocker, line 26). The owner chose the ticket.\n- Source: Owner decision, `/spec WF-50 decisions: Q1=the ticket wins: archived users are exported`, 2026-11-25\n- Decided by: owner, 2026-11-25, /spec WF-50 decisions line\n- Affects: the export-contents requirement (archived and active users both exported)\n```\n\n**What the repository shows (bounded check; the whole tree is AGENTS.md, users.py, reports.py)**\n- **Where exports live:** `reports.py:2` `users_csv` is the existing users CSV export. That answers the intake question \"Which module owns the existing exports?\".\n- **Current behaviour:** `users_csv` writes name and email only, leaves out archived users, has no header row, and joins fields with plain commas (no quoting). `users.py:1-2` `active_users` is an active-only filter. Both disagree with the ticket (it wants role, and archived users included). The ticket wins (spec-quality-gates §1), so neither is reused as it stands.\n- **Precedent not found:**\n  - No admin page or \"Export users\" action exists in the tree.\n  - No user record has a `role` field (only `name`, `email`, `archived` are used).\n  - The spec states both as gaps, not as existing code.\n- **Verification command:** `AGENTS.md:1` names `python3 verify.py`, but no `verify.py` exists in the tree. The command was found in source but not run.\n- **Requirements taken from the ticket:**\n  - Columns are name, email, role (intake line 9).\n  - The file is named `users.csv` (line 13).\n  - Each user is one row (line 14).\n  - Names or emails containing a comma, quote or newline get a boundary scenario under the one-row criterion (the field is quoted so the user stays on one row), not a question.\n\n**Defaults taken (override by id)**\n- None. Neither open question can be decided by default because both are High risk.\n\n**Open questions**\n- **Q2: Header row in users.csv**\n  - Option A: no header row (recommended — matches `reports.py:2` and keeps the one-row-per-user count exact)\n  - Option B: first line is the header `name,email,role`\n  - Risk: High (file format of a downloaded file)\n- **Q3: What happens to the existing `users_csv` output**\n  - Option A: keep `users_csv` (name and email, active users only) unchanged and add the new export next to it (recommended — keeps existing behaviour and can be undone)\n  - Option B: change `users_csv` in place to name, email, role, archived users included\n  - Risk: High (changes an existing export format)\n\nExample for the riskiest rule (DEC-001). An archived user `{name: \"Ana\", email: \"ana@x.io\", role: \"admin\", archived: True}` is left out by today's `users_csv`. Under the new export it becomes the row `Ana,ana@x.io,admin` in `users.csv`.\n\n/spec WF-50 decisions: Q2=…, Q3=…",
+      "intake": "Reused docs/specs/WF-50-intake.md (fetched 2026-11-20 by jira-ticket; coverage 1/1 fully read; ticket unchanged since). No re-invocation of jira-ticket. Intake Blocker (ticket vs design note on archived users) resolved by owner as DEC-001.",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "1. Reuse saved intake docs/specs/WF-50-intake.md (complete and current; no jira-ticket invocation).\n2. No Figma step: intake lists Design references: None, so no Figma tools are called.\n3. Record owner answer Q1 as DEC-001 (Decided by: owner, 2026-11-25, /spec WF-50 decisions line); not re-asked.\n4. Repository evidence via bounded check (repository-precedent §1 option 2): read AGENTS.md, users.py, reports.py (entire tree). Owning module reports.py:2; no admin page, no role field, verify.py named in AGENTS.md but absent and not executed.\n5. Draft the spec with ticket requirements (columns name/email/role, users.csv, one row per user incl. quoting boundary, archived included) and keep remaining choices as OPEN QUESTION blocks; status Draft, not presented for approval.\nQ1: decided by owner — the ticket wins: archived users are exported (DEC-001)\nQ2: open question — header row in users.csv; ticket silent, file format is High risk, so no default\nQ3: open question — change existing reports.py users_csv in place vs keep it and add new export; changes existing export format, High risk, so no default",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "specgate_rerun_after_brief",
+    "expected": {
+      "run_goes_on": true,
+      "recon_runs": true,
+      "spec_is_drafted": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "No spec exists to revise.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "specgate_rerun_after_brief",
+    "expected": {
+      "run_goes_on": false,
+      "recon_runs": false,
+      "spec_is_drafted": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "Read the intake\nRepository recon for the export module\nDraft docs/specs/WF-50-SPEC.md with Q1 decided",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "specgate_rerun_after_brief",
+    "expected": {
+      "run_goes_on": true,
+      "recon_runs": true,
+      "spec_is_drafted": true
+    }
+  }
+]

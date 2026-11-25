@@ -1,0 +1,59 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "blocked",
+      "explanation": "/spec WF-50 stopped before repository recon or drafting: the intake is incomplete.\n\nThe `jira-ticket` skill discovered 2 tickets for WF-50 and could read only 1 of them. The child ticket WF-52, \"Export audit log\", returned HTTP 403 on 2026-11-20. It returned the same 403 when the skill ran again for this run. Nobody knows what WF-52 requires, so I can't check that the spec covers every requested behavior (spec-quality-gates §1). The /spec rules say an incomplete intake is reported and the run stops. It does not turn into an OPEN QUESTION or a decision brief.\n\nNo spec was written. No defaults were taken and no DEC-### was recorded, because drafting never started. docs/specs/ still holds only WF-50-intake.md.\n\nTo unblock, do one of these:\n1. Get read access to WF-52, then run `/spec WF-50` again. The `jira-ticket` skill will fetch it again and update docs/specs/WF-50-intake.md.\n2. Paste WF-52's contents here. The `jira-ticket` skill will use them as its source and save a complete intake.\n3. If WF-52 is out of scope for WF-50, say so. The `jira-ticket` skill will then record the intake again with that scope decision.\n\nAfter the intake is complete, the open intake question \"Which module owns the existing exports?\" will be answered from the repository during recon.",
+      "intake": "Reused docs/specs/WF-50-intake.md (fetched 2026-11-20, ticket unchanged). The `jira-ticket` skill ran again for this run and returned the same result. Incomplete: 2 tickets discovered, 1 fully read (WF-50), 1 unread (WF-52 \"Export audit log\", HTTP 403).",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "1. Resolve the ticket: WF-50.\n2. Read the saved intake docs/specs/WF-50-intake.md (the runner confirmed the ticket is unchanged; ls docs/specs/ shows no existing spec).\n3. Run the `jira-ticket` skill for WF-50 (done by the runner). It returned the same incomplete intake: WF-52 is still unread (HTTP 403).\n4. Check the intake: a discovered child ticket (WF-52) could not be read, so the intake is incomplete.\n5. Report the incomplete intake and stop. No repository recon, no Figma reads (the intake has no design references), no decision brief, no draft.",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "specgate_intake_incomplete",
+    "expected": {
+      "run_stops": true,
+      "names_the_unread_ticket": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "One question stays open.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "Draft\nQ1: open question — which roles may export",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "specgate_intake_incomplete",
+    "expected": {
+      "run_stops": false,
+      "names_the_unread_ticket": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "The intake is incomplete: WF-52 is unread.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "specgate_intake_incomplete",
+    "expected": {
+      "run_stops": true,
+      "names_the_unread_ticket": true
+    }
+  }
+]

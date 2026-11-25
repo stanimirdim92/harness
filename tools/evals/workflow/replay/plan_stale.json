@@ -1,0 +1,102 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "blocked",
+      "explanation": "Selected spec: requirements/WF-20-SPEC.md (the only spec for WF-20; specs live in requirements/ per AGENTS.md). Precondition failed: the spec header on disk reads `Status: Needs reapproval` (requirements/WF-20-SPEC.md:2), not `Approved`. planning-and-task-breakdown Preconditions §1 and spec-quality-gates §2 require /plan to refuse any status other than Approved and return the spec to /spec. The earlier Approved by/at fields (Fixture owner, 2026-09-01) do not count, because the status says the content changed after that approval. Other evidence was current but not used to build a plan: the spec is committed and clean, with its last-touching commit at {spec_sha}; ui.py holds LABEL and click(); verify.py is the test precedent; the verification command is `python3 verify.py`; plans live in work/ and there is no external tracker. No plan or todo was drafted, no spec pin was recorded, check-plan.py was not run (no shell), and no test results are claimed. Next step: /spec WF-20 to get explicit human reapproval and set Status: Approved, then rerun /plan WF-20 and pin the new commit.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plan_stale",
+    "expected": {
+      "stops_before_ready": true,
+      "no_dispatchable_tasks": true,
+      "no_ready_handoff": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "Spec requires reapproval.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "Not produced. No task packets drafted.",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plan_stale",
+    "expected": {
+      "stops_before_ready": true,
+      "no_dispatchable_tasks": true,
+      "no_ready_handoff": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "Spec requires reapproval.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "## T001: Implement the change\n**Requirements:** REQ-001",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plan_stale",
+    "expected": {
+      "stops_before_ready": true,
+      "no_dispatchable_tasks": false,
+      "no_ready_handoff": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "asked",
+      "explanation": "Selected spec: requirements/WF-20-SPEC.md (the only spec for WF-20; specs live in requirements/ per AGENTS.md). Precondition failed: the spec header on disk reads `Status: Needs reapproval` (requirements/WF-20-SPEC.md:2), not `Approved`. planning-and-task-breakdown Preconditions §1 and spec-quality-gates §2 require /plan to refuse any status other than Approved and return the spec to /spec. The earlier Approved by/at fields (Fixture owner, 2026-09-01) do not count, because the status says the content changed after that approval. Other evidence was current but not used to build a plan: the spec is committed and clean, with its last-touching commit at {spec_sha}; ui.py holds LABEL and click(); verify.py is the test precedent; the verification command is `python3 verify.py`; plans live in work/ and there is no external tracker. No plan or todo was drafted, no spec pin was recorded, check-plan.py was not run (no shell), and no test results are claimed. Next step: /spec WF-20 to get explicit human reapproval and set Status: Approved, then rerun /plan WF-20 and pin the new commit.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plan_stale",
+    "expected": {
+      "stops_before_ready": false,
+      "no_dispatchable_tasks": true,
+      "no_ready_handoff": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "blocked",
+      "explanation": "Selected spec: requirements/WF-20-SPEC.md (the only spec for WF-20; specs live in requirements/ per AGENTS.md). Precondition failed: the spec header on disk reads `Status: Needs reapproval` (requirements/WF-20-SPEC.md:2), not `Approved`. planning-and-task-breakdown Preconditions §1 and spec-quality-gates §2 require /plan to refuse any status other than Approved and return the spec to /spec. The earlier Approved by/at fields (Fixture owner, 2026-09-01) do not count, because the status says the content changed after that approval. Other evidence was current but not used to build a plan: the spec is committed and clean, with its last-touching commit at {spec_sha}; ui.py holds LABEL and click(); verify.py is the test precedent; the verification command is `python3 verify.py`; plans live in work/ and there is no external tracker. No plan or todo was drafted, no spec pin was recorded, check-plan.py was not run (no shell), and no test results are claimed. Next step: /spec WF-20 to get explicit human reapproval and set Status: Approved, then rerun /plan WF-20 and pin the new commit.",
+      "intake": "",
+      "spec": "",
+      "plan": "\n# Plan\nStatus: Draft\nHandoff: Ready for /build",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plan_stale",
+    "expected": {
+      "stops_before_ready": true,
+      "no_dispatchable_tasks": true,
+      "no_ready_handoff": false
+    }
+  }
+]

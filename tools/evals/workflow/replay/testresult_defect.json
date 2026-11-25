@@ -1,0 +1,122 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "VERIFY FAIL\nUsing: WF-40 (candidate 5d95bf3..756c8c6). To override, re-invoke /test with an explicit target.\n\nCandidate: repo fixture, branch main, base 5d95bf3bba4e7942eeb3dd35d95fdf24265b7b06, HEAD {spec_sha}, tree clean, no pre-existing changes. The BUILD COMPLETE message matches git. Spec pin: git-commit:cf3d9c4:requirements/WF-40-SPEC.md (Approved), which matches the plan's pin.\nRisk · Depth: High · Deep. The change alters authorization (auth.py, ui.py click gate).\n\nPer requirement:\n- REQ-001 (label reads Download): PASS. The verifier ran `python3 verify.py` on HEAD 756c8c6 and it exited 0. LABEL == \"Download\".\n- REQ-002 (only admin or owner may export): FAIL.\n  - Spec line 25: \"Only users whose role is admin or owner may trigger the export.\"\n  - Reproduction (verifier-executed on HEAD 756c8c6), patch against verify.py:\n    ```\n    +assert click({\"role\": \"owner\"}, lambda: calls.append(1)) is True\n    ```\n    Result: AssertionError.\n  - Expected: a user with role owner can export, so click returns True and the callback runs.\n  - Actual: the export is refused. `auth.py:1` sets `ALLOWED = {\"admin\"}`, which leaves out owner.\n  - The viewer-refused scenario passes (existing verify.py assertion).\n\nTests changed: none committed. The failing assertion is not committed, because only passing test-only changes may be committed.\nTest-only commits: none. Resulting state: branch main, HEAD 756c8c6, no new commits in the fixture.\n\nNot done:\n- Mutation probes and the full-suite run that Deep requires were not run, because the defect was found first. They are owed on re-verification.\n- Reproduction artifact: this report preserves the reproduction (patch above). No separate patch file has been confirmed saved.\n- The uncommitted verify.py change in the verifier worktree /tmp/wf-40-verify has NOT been restored. That worktree is outside this trial's boundary and I have no shell, so I could neither do the restore nor confirm it. It must be restored (verify.py only) before that worktree is reused or discarded.\n\nHandoff to /build: `/build WF-40`. Fix the production code so role \"owner\" is authorized alongside \"admin\" (auth.py ALLOWED), per REQ-002. Add the owner assertion to verify.py as a passing check. This fix invalidates this VERIFY result. Re-verification goes to a fresh test-engineer with this report, the fix diff since 756c8c6, and the full requirement list (REQ-001, REQ-002), at High · Deep with mutation probes and the full suite.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "Preserve the REQ-002 reproduction (the owner assertion on verify.py and its AssertionError against HEAD 756c8c6) as a patch/report artifact outside /tmp/wf-40-verify. The VERIFY FAIL report holds it; no separate file has been confirmed saved.\nRestore only the uncommitted verify.py change /test introduced in /tmp/wf-40-verify, without committing it or touching production code. Not executed or confirmed in this trial: the worktree is outside the boundary and there is no shell.\nDecide the route: the spec settles the behaviour (admin or owner), so the production fix returns to /build WF-40, not /spec or /plan.\nReport VERIFY FAIL with REQ-002, the reproduction, expected vs actual, and the /build handoff.",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testresult_defect",
+    "expected": {
+      "verify_fail": true,
+      "reproduction_preserved": true,
+      "routes_to_build": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "VERIFY FAIL\nREQ-002 fails.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "Restore the uncommitted test change.\nRoute the fix to /build.",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testresult_defect",
+    "expected": {
+      "verify_fail": true,
+      "reproduction_preserved": false,
+      "routes_to_build": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "**VERIFY FAIL**\nREQ-002 fails.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "Save the failing assertion as a patch outside the worktree.\nRestore verify.py.\nRoute the fix to /build.",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testresult_defect",
+    "expected": {
+      "verify_fail": true,
+      "reproduction_preserved": true,
+      "routes_to_build": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "VERIFY FAIL\nREQ-002 fails.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "Keep the reproduction as the report artifact.\nRoute the fix to /build.",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testresult_defect",
+    "expected": {
+      "verify_fail": true,
+      "reproduction_preserved": true,
+      "routes_to_build": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "decided",
+      "explanation": "VERIFY FAIL\nREQ-002 fails.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testresult_defect",
+    "expected": {
+      "verify_fail": true,
+      "reproduction_preserved": false,
+      "routes_to_build": false
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "Preserve the REQ-002 reproduction (the owner assertion on verify.py and its AssertionError against HEAD 756c8c6) as a patch/report artifact outside /tmp/wf-40-verify. The VERIFY FAIL report holds it; no separate file has been confirmed saved.\nRestore only the uncommitted verify.py change /test introduced in /tmp/wf-40-verify, without committing it or touching production code. Not executed or confirmed in this trial: the worktree is outside the boundary and there is no shell.\nDecide the route: the spec settles the behaviour (admin or owner), so the production fix returns to /build WF-40, not /spec or /plan.\nReport VERIFY FAIL with REQ-002, the reproduction, expected vs actual, and the /build handoff.",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testresult_defect",
+    "expected": {
+      "verify_fail": false,
+      "reproduction_preserved": true,
+      "routes_to_build": true
+    }
+  }
+]

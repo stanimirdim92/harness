@@ -1,0 +1,65 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "Using: WF-40, candidate HEAD {spec_sha} (branch main, tree clean). Review round 2 (review-sarif round: round=2 counted=2). Fix round, reviewed from a832b745b8d5221df19d85e16515ce459fe7268d.\n\nBUILD COMPLETE (review fixes) reconciles with git. It identifies HEAD 6a88c01 and the range a832b74..6a88c01, and commit 6a88c01 carries `Task: CODE-1`. The only post-BUILD commit is 4f882d1. It changes verify.py only, which makes it test-only, and the VERIFY PASS (fix diff) for this exact current candidate (final tree clean at 4f882d1) declares it. No production change came after BUILD, and the working tree has no undeclared changes.\n\nIndependent verification: PASS (fix diff). VERIFY PASS (fix diff) covers a832b74..6a88c01. It proves REQ-002 with `python3 verify.py` (exit 0): a request with no user is refused and the callback does not run. Its mutation probe at auth.py:4, removing `user is not None and`, was killed. Under ADR 0147 a fix-diff pass is not stale for the Deep depth rule. Round 1 already had a Deep VERIFY PASS: the full suite and a mutation probe on every changed condition.\n\nRisk: High — alters authorization (an export gate by role) · Depth: Deep.\n\nSpec and plan were re-read from disk, and both are Approved and unchanged. There is no REVIEW.md in the fixture; the report must say so. The runner did not supply the weakened-tests, always-person, stale-instructions, ledger, or `review-sarif.py latest` results; they must be run on the whole candidate before reporting. Built-in /code-review is skipped because this is a later round.\n\nNext step: if the round leaves no open BLOCKER or REQUIRED finding, run /test once at Deep depth on the whole candidate (full suite plus a mutation probe on every changed condition). Then run one closing round on the commits /test adds. The closing round does not count toward the round-4 stop.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": "code-reviewer: dispatched — always runs; gets the diff a832b74..HEAD (excluding docs/reviews), CODE-1 and its resolution (fixed in 6a88c01), the goal, REQ-002, and the VERIFY PASS (fix diff) evidence\nblind-reviewer: dispatched — always runs; gets only the diff a832b74..HEAD (excluding docs/reviews), with no goal, ticket, criteria or evidence; any finding that repeats resolved CODE-1 at the same location is dropped\nsecurity-auditor: dispatched — runs on every round, and the fix changes the authorization check in auth.py can_export (null-user refusal)\ndistributed-systems-reviewer: not dispatched — the fix diff touches no retries, idempotency, ordering, concurrency, queues or cross-process state, and no always-person path is reported"
+    },
+    "reads": [],
+    "fixture": "fixround_verified",
+    "expected": {
+      "gate_open": true,
+      "pass_fix_diff_recorded": true,
+      "not_called_stale": true,
+      "a_reviewer_dispatched": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "Independent verification: PASS (fix diff)",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": "code-reviewer: dispatched — fix round\nblind-reviewer: dispatched — fix round\nsecurity-auditor: dispatched — every round\ndistributed-systems-reviewer: not dispatched — none"
+    },
+    "reads": [],
+    "fixture": "fixround_verified",
+    "expected": {
+      "gate_open": true,
+      "pass_fix_diff_recorded": true,
+      "not_called_stale": true,
+      "a_reviewer_dispatched": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "Independent verification: STALE (depth). REVIEW BLOCKED; next step /test at Deep.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": "code-reviewer: not dispatched — fix round\nblind-reviewer: not dispatched — fix round\nsecurity-auditor: not dispatched — every round\ndistributed-systems-reviewer: not dispatched — none"
+    },
+    "reads": [],
+    "fixture": "fixround_verified",
+    "expected": {
+      "gate_open": false,
+      "pass_fix_diff_recorded": false,
+      "not_called_stale": false,
+      "a_reviewer_dispatched": false
+    }
+  }
+]

@@ -1,0 +1,56 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "Verification: satisfied\nUsing: WF-40 (candidate {spec_sha} on main). Re-invoke `/ship <target>` to override.\nReason: In review round 2, `/review` reviewed {spec_sha} and recorded Independent verification: PASS (fix diff). Per ship.md §1 (ADR 0147), that status needs the full-depth `/test` that follows it. The user supplied that VERIFY PASS after round 2, and it meets every condition:\n- It names this exact candidate, HEAD {spec_sha}, with a clean tree. It has no Scope line, so it covers the whole candidate.\n- It added no commits. It reports \"Test-only commits: none\" and \"Tests changed: none\", and its final tree is identical to the recorded candidate. `git log 321d3d1..HEAD` prints nothing, and the tree is clean.\n- It meets the Deep requirements (Risk · Depth: High · Deep, from an authorization gate). The full suite (`python3 verify.py`) ran and passed. A mutation probe ran on every changed condition in auth.py and ui.py, every probe was killed, and every file was restored.\n- It carries evidence for both requirements in requirements/WF-40-SPEC.md, which I re-read from disk. REQ-001: the label reads Download. REQ-002: viewer, no user and no role are refused; admin and owner can export.\nThe only test-only commit, 321d3d1, came from the earlier fix-diff `/test`. Review round 2 already reviewed it as the closing round, so no further review round is needed.\nNext step: /ship goes on to the rest of §1 (weakened tests, ledger `--ship`, Risk, Always a person, base check; the runner reports all of them passing). Then come §2 (CODE-1 resolved as fixed, 9c8434f), §3–§6, and the verdict.",
+      "intake": "Re-read from disk: AGENTS.md and requirements/WF-40-SPEC.md (Status: Approved; REQ-001 is the label, REQ-002 is the authorized-role gate).",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "shipgate_full_run",
+    "expected": {
+      "verification_satisfied": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "SHIP BLOCKED\nThe closing review round comes next.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "shipgate_full_run",
+    "expected": {
+      "verification_satisfied": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "Verification: satisfied\nThe full VERIFY PASS covers this candidate and added no commits.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "shipgate_full_run",
+    "expected": {
+      "verification_satisfied": true
+    }
+  }
+]

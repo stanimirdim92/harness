@@ -1,0 +1,122 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "Using: WF-40, candidate {spec_sha} (BUILD HEAD ea96ac8 plus test-only commit 35e80f6). To override, re-invoke /test with an explicit target.\n\nThe change is not exempt: it changes production code (auth.py, ui.py) and adds an authorization gate. Risk · Depth is High · Deep, from both /review and risk-tiers.md.\n\nReview round 2 recorded PASS (fix diff) with 0 BLOCKER and 0 REQUIRED findings. So /test now runs once at Deep depth. A fresh test-engineer verifies the diff from the last full VERIFY PASS (92d39fe) to HEAD, with no Scope line, the full suite, and a mutation probe on every changed condition.\n\nThe supplied messages match the runner's git evidence. HEAD 35e80f6 is clean. The only change after BUILD is the declared test-only commit 35e80f6, which touches verify.py only. No browser or Figma skill is needed: the app is in-process Python, and verification is in-process only per AGENTS.md.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "To: test-engineer (fresh instance, not resumed)\n\nTicket: WF-40. A test-only commit must end with the trailer `Refs: WF-40`.\n\nCandidate\n- Repository root: /fixture. Branch: main.\n- HEAD: {spec_sha}. Tree clean: nothing staged, unstaged or untracked.\n- BUILD HEAD: ea96ac879886f6af032d65bb4740d998b4e422b7 (`/build WF-40 review fixes`, fixes CODE-1).\n- Declared test-only commit after BUILD: 35e80f6 \"test: refuse a user with no role\", verify.py only. It came from the fix-diff VERIFY PASS.\n- No uncommitted BUILD diff.\n- Diff to verify: 92d39fe3f1813ef0a92438143befdaab5b33fbe2..{spec_sha}. It starts at the last full VERIFY PASS.\n- Commits in the diff: ea96ac8 \"fix: refuse the export when no user is given\" (Task: CODE-1); 35e80f6 \"test: refuse a user with no role\".\n- Spec: requirements/WF-40-SPEC.md (Approved). Plan: work/WF-40-plan.md (Approved). The plan pins the spec at git-commit:5d339ba37048a4bf978bc980781885a406b0f3d4:requirements/WF-40-SPEC.md. Confirm the spec at HEAD matches that pin.\n\nRisk · Depth: High · Deep. The change adds an authorization gate. /review and risk-tiers.md agree.\n\nRun type: one run at Deep depth, routed here by review round 2. That round reviewed 35e80f6, recorded PASS (fix diff), and left 0 BLOCKER, 0 REQUIRED and 0 ADVISORY findings. This is not a fix-diff run, so there is no Scope line. Run the full suite, and run a mutation probe on every changed condition in the diff.\n\nTasks BUILD handed on to /test: none.\n\nrequired_skills: none. Nothing a browser renders or calls is involved, and verification is in-process only (AGENTS.md).\n\nAcceptance criteria (full list)\n- REQ-001, Action label: the export action label must read Download.\n  - Scenario: given the existing export action, when it is displayed, then the label is Download.\n- REQ-002, Export requires an authorized role: only users whose role is admin or owner may trigger the export.\n  - Scenario: given a user whose role is viewer, when they attempt the export, then the export is refused and the callback does not run.\n\nImplemented behavior\n- ui.py: LABEL = \"Download\". click(user, callback) returns False without calling the callback when auth.can_export(user) is false. Otherwise it calls callback() and returns True.\n- auth.py: ALLOWED = {\"admin\", \"owner\"}. can_export(user) returns `user is not None and user.get(\"role\") in ALLOWED`. The None guard is the CODE-1 fix in ea96ac8.\n\nRegression risks\n- Callers that pass no user (None), a user with no role ({}), or a role outside ALLOWED must be refused, and the callback must not run.\n- The owner role is in ALLOWED, but no test in verify.py exercises it.\n- In verify.py, the None and {} cases assert only the return value, not that the callback stayed uncalled.\n- The authorization boundary: any change to ALLOWED membership, or to the `in` check.\n\nTests and commands already run (prior evidence, not your conclusion)\n- Review round 1 reviewed 92d39fe. The candidate had VERIFY PASS at Deep: full suite, plus a mutation probe on every changed condition. That round left REQUIRED finding CODE-1 open.\n- BUILD (ea96ac8): `python3 verify.py` passed (exit 0). The fix was written test-first.\n- VERIFY PASS (fix diff) on ea96ac8. `python3 verify.py` passed (exit 0): a request with no user is refused and the callback does not run. Mutation probe: removing `user is not None and` at auth.py:4 was killed. Full suite was not run. Test-only commit: 35e80f6 (verify.py only).\n- Review round 2 on 35e80f6: 0 findings. Independent verification: PASS (fix diff).\n\nPointers: auth.py:3-4, ui.py:3-7, verify.py:1-7. Verification command: `python3 verify.py`.\n\nDo not modify production code. If a new test proves a production defect, report it as VERIFY FAIL with the reproduction.\n\nFull suite: run",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testfull_packet",
+    "expected": {
+      "verifies_now": true,
+      "not_a_fix_diff_run": true,
+      "full_suite_runs": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "Candidate HEAD abc. Scope: fix diff.\nFull suite: do not run",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testfull_packet",
+    "expected": {
+      "verifies_now": true,
+      "not_a_fix_diff_run": false,
+      "full_suite_runs": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "Candidate HEAD abc. Risk · Depth: High · Deep.\nFull suite: run",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testfull_packet",
+    "expected": {
+      "verifies_now": true,
+      "not_a_fix_diff_run": true,
+      "full_suite_runs": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "To: test-engineer\n- Previous VERIFY report, as supplied:\n  \"Candidate: abc. Scope: fix diff, a..b.\"\nFull suite: run",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testfull_packet",
+    "expected": {
+      "verifies_now": true,
+      "not_a_fix_diff_run": true,
+      "full_suite_runs": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "To: test-engineer\nScope: fix diff\nFull suite: do not run",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testfull_packet",
+    "expected": {
+      "verifies_now": true,
+      "not_a_fix_diff_run": false,
+      "full_suite_runs": false
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "asked",
+      "explanation": "Using: WF-40, candidate {spec_sha} (BUILD HEAD ea96ac8 plus test-only commit 35e80f6). To override, re-invoke /test with an explicit target.\n\nThe change is not exempt: it changes production code (auth.py, ui.py) and adds an authorization gate. Risk · Depth is High · Deep, from both /review and risk-tiers.md.\n\nReview round 2 recorded PASS (fix diff) with 0 BLOCKER and 0 REQUIRED findings. So /test now runs once at Deep depth. A fresh test-engineer verifies the diff from the last full VERIFY PASS (92d39fe) to HEAD, with no Scope line, the full suite, and a mutation probe on every changed condition.\n\nThe supplied messages match the runner's git evidence. HEAD 35e80f6 is clean. The only change after BUILD is the declared test-only commit 35e80f6, which touches verify.py only. No browser or Figma skill is needed: the app is in-process Python, and verification is in-process only per AGENTS.md.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "To: test-engineer (fresh instance, not resumed)\n\nTicket: WF-40. A test-only commit must end with the trailer `Refs: WF-40`.\n\nCandidate\n- Repository root: /fixture. Branch: main.\n- HEAD: {spec_sha}. Tree clean: nothing staged, unstaged or untracked.\n- BUILD HEAD: ea96ac879886f6af032d65bb4740d998b4e422b7 (`/build WF-40 review fixes`, fixes CODE-1).\n- Declared test-only commit after BUILD: 35e80f6 \"test: refuse a user with no role\", verify.py only. It came from the fix-diff VERIFY PASS.\n- No uncommitted BUILD diff.\n- Diff to verify: 92d39fe3f1813ef0a92438143befdaab5b33fbe2..{spec_sha}. It starts at the last full VERIFY PASS.\n- Commits in the diff: ea96ac8 \"fix: refuse the export when no user is given\" (Task: CODE-1); 35e80f6 \"test: refuse a user with no role\".\n- Spec: requirements/WF-40-SPEC.md (Approved). Plan: work/WF-40-plan.md (Approved). The plan pins the spec at git-commit:5d339ba37048a4bf978bc980781885a406b0f3d4:requirements/WF-40-SPEC.md. Confirm the spec at HEAD matches that pin.\n\nRisk · Depth: High · Deep. The change adds an authorization gate. /review and risk-tiers.md agree.\n\nRun type: one run at Deep depth, routed here by review round 2. That round reviewed 35e80f6, recorded PASS (fix diff), and left 0 BLOCKER, 0 REQUIRED and 0 ADVISORY findings. This is not a fix-diff run, so there is no Scope line. Run the full suite, and run a mutation probe on every changed condition in the diff.\n\nTasks BUILD handed on to /test: none.\n\nrequired_skills: none. Nothing a browser renders or calls is involved, and verification is in-process only (AGENTS.md).\n\nAcceptance criteria (full list)\n- REQ-001, Action label: the export action label must read Download.\n  - Scenario: given the existing export action, when it is displayed, then the label is Download.\n- REQ-002, Export requires an authorized role: only users whose role is admin or owner may trigger the export.\n  - Scenario: given a user whose role is viewer, when they attempt the export, then the export is refused and the callback does not run.\n\nImplemented behavior\n- ui.py: LABEL = \"Download\". click(user, callback) returns False without calling the callback when auth.can_export(user) is false. Otherwise it calls callback() and returns True.\n- auth.py: ALLOWED = {\"admin\", \"owner\"}. can_export(user) returns `user is not None and user.get(\"role\") in ALLOWED`. The None guard is the CODE-1 fix in ea96ac8.\n\nRegression risks\n- Callers that pass no user (None), a user with no role ({}), or a role outside ALLOWED must be refused, and the callback must not run.\n- The owner role is in ALLOWED, but no test in verify.py exercises it.\n- In verify.py, the None and {} cases assert only the return value, not that the callback stayed uncalled.\n- The authorization boundary: any change to ALLOWED membership, or to the `in` check.\n\nTests and commands already run (prior evidence, not your conclusion)\n- Review round 1 reviewed 92d39fe. The candidate had VERIFY PASS at Deep: full suite, plus a mutation probe on every changed condition. That round left REQUIRED finding CODE-1 open.\n- BUILD (ea96ac8): `python3 verify.py` passed (exit 0). The fix was written test-first.\n- VERIFY PASS (fix diff) on ea96ac8. `python3 verify.py` passed (exit 0): a request with no user is refused and the callback does not run. Mutation probe: removing `user is not None and` at auth.py:4 was killed. Full suite was not run. Test-only commit: 35e80f6 (verify.py only).\n- Review round 2 on 35e80f6: 0 findings. Independent verification: PASS (fix diff).\n\nPointers: auth.py:3-4, ui.py:3-7, verify.py:1-7. Verification command: `python3 verify.py`.\n\nDo not modify production code. If a new test proves a production defect, report it as VERIFY FAIL with the reproduction.\n\nFull suite: run",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testfull_packet",
+    "expected": {
+      "verifies_now": false,
+      "not_a_fix_diff_run": true,
+      "full_suite_runs": true
+    }
+  }
+]

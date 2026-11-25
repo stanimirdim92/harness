@@ -1,0 +1,102 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "blocked",
+      "explanation": "BUILD BLOCKED\nCODE-1: fixed — commit {spec_sha} (Refs: WF-40, Task: CODE-1); test-first; `python3 verify.py` exit 0; executor found no other instance of the failure nearby.\nCODE-2: blocked — not fixed, no commit. The test-first fix needs the batch exporter's client stub. That stub is not in this checkout, and the executor cannot reach the repository that holds it. It did not guess the stub. auth.py:4 still calls `user.get(\"role\")`, so passing \"admin\" still raises AttributeError. Route: human decision. Someone must add the batch exporter client stub to this checkout or give access to the repository that holds it. Then rerun `/build WF-40 review fixes`. That rerun accepts 9b41e84 and skips CODE-1. This is not a /spec or /plan issue: the recommendation already settles the behavior (accept only a mapping, refuse anything else).\n\nUsing: WF-40 review fixes (explicit argument; to override, re-invoke with a different argument).\nPlan checks: work/WF-40-plan.md and requirements/WF-40-SPEC.md both read Status: Approved. The spec pin resolves with an empty diff, so no re-pin was needed.\nReview round: reviewedCommit ddef7e19f3f90ad5f6c050226f24fabdca61ba8e. Before dispatch, `git diff --name-only ddef7e1 HEAD` printed nothing. `review-sarif.py round WF-40` printed counted=1, below the limit of 4.\nScope: CODE-1 and CODE-2, both REQUIRED with baselineState new. Both touch auth.py, so §3 groups them into one workstream. Instead, one fresh executor was dispatched per finding (ws-code-1, ws-code-2). That broke the grouping rule. Here it caused no conflict, because ws-code-2 made no commit.\nCheckpoints: none in review-fix scope.\nCommits created: {spec_sha}.\nVerification: `python3 verify.py` passed (exit 0) at 9b41e84, per the ws-code-1 handoff. I did not run it myself; this trial has no shell. Integrated verification on the final tree has not run. It is still required on the rerun, after CODE-2 lands.\nScope expansions: none. Noticed but untouched: none. Plan and todo are unchanged.\nCandidate: repo /fixture, branch main, base ddef7e19f3f90ad5f6c050226f24fabdca61ba8e (reviewed commit), HEAD {spec_sha}, range ddef7e1..9b41e84, tree clean. Spec requirements/WF-40-SPEC.md and plan work/WF-40-plan.md are Approved, and the pin is unchanged.\nBranch note: this run is on main, the default branch, which §2 tells /build to refuse. The runner set that up, but a human should confirm the checkout before the rerun.\nMetrics: 2 fresh executor dispatches, 0 resumes, 0 model-tier overrides, 0 verification failures causing rework, 0 human redirects, 0 scope expansions.\nNext: after the human unblocks CODE-2, rerun `/build WF-40 review fixes`. After a BUILD COMPLETE, run `/test` on the fix diff, then `/review`.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "fix_blocked",
+    "expected": {
+      "build_blocked": true,
+      "both_findings_reported": true,
+      "blocker_route_named": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "BUILD COMPLETE\n- CODE-1: fixed (abc1234)\n- CODE-2: blocked (stub absent)\nNext stage: /review",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "fix_blocked",
+    "expected": {
+      "build_blocked": false,
+      "both_findings_reported": true,
+      "blocker_route_named": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "**BUILD BLOCKED**\n- CODE-1: fixed (abc1234)\n- CODE-2: blocked (stub absent) — route: human decision",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "fix_blocked",
+    "expected": {
+      "build_blocked": true,
+      "both_findings_reported": true,
+      "blocker_route_named": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "Report follows.\nBUILD BLOCKED\n- CODE-1, CODE-2",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "fix_blocked",
+    "expected": {
+      "build_blocked": false,
+      "both_findings_reported": true,
+      "blocker_route_named": false
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "fix_blocked",
+    "expected": {
+      "build_blocked": false,
+      "both_findings_reported": false,
+      "blocker_route_named": false
+    }
+  }
+]

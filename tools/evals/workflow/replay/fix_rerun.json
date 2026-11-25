@@ -1,0 +1,82 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "Using: WF-40 review fixes. To use a different target, run /build again with an explicit argument.\n\nThe run can start, and only CODE-2 gets dispatched:\n- **Plan and spec are current.** The plan and spec both read Status: Approved, the spec pin a5bd5f8 has an empty diff, and the tree is clean.\n- **Review rounds are under the limit.** `review-sarif.py round WF-40` printed counted=1, below the stop at 4.\n- **The candidate has not changed since the review.** After reviewedCommit a5f4ff7, HEAD adds only 44d0c6a, the fix commit from the earlier BUILD BLOCKED run (Task: CODE-1, Refs: WF-40). A rerun accepts that run's fix commits, so the changes to auth.py and verify.py do not require a new review first.\n- **CODE-1 is already fixed.** It is left out because 44d0c6a names it.\n- **CODE-2 is still open.** auth.py:4 calls `user.get(\"role\")` after checking only for None, so a string such as \"admin\" still raises AttributeError. Its earlier blocker was the missing batch-exporter client stub. That stub is now on the test path outside the repo, and `python3 verify.py` exits 0 on HEAD.\n- **Executor packet.** One workstream (auth.py, verify.py) goes to a fresh executor. The packet carries CODE-2's location (auth.py:4), failure scenario and recommendation. It also carries the candidate diff and the ticket's commit log, because this session has no handoff report. The skills are the baseline plus security-and-hardening, since this is an auth trust boundary. The executor fixes test-first and adds the trailers `Task: CODE-2` and `Refs: WF-40`. Before reporting, it checks the rest of the function, its callers and similar code for the same failure.\n- The plan and todo stay unchanged.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "CODE-1: skip — fixed in 44d0c6a (Task: CODE-1, Refs: WF-40) by the earlier BUILD BLOCKED run of /build WF-40 review fixes; this rerun leaves out findings named by that run's fix commits.\nCODE-2: dispatch — still open (REQUIRED, baselineState new). auth.py:4 still calls user.get() on a non-mapping, so user=\"admin\" raises AttributeError. The earlier blocker (missing batch-exporter client stub) is cleared now that the stub is on the test path. Fresh executor, test-first; the fix must accept only a mapping and refuse anything else.",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "fix_rerun",
+    "expected": {
+      "rerun_starts": true,
+      "fixed_finding_left_out": true,
+      "blocked_finding_dispatched": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "The candidate changed after the review: review it again first.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "fix_rerun",
+    "expected": {
+      "rerun_starts": false,
+      "fixed_finding_left_out": false,
+      "blocked_finding_dispatched": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "CODE-1: dispatch — still open\nCODE-2: dispatch — still open",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "fix_rerun",
+    "expected": {
+      "rerun_starts": true,
+      "fixed_finding_left_out": false,
+      "blocked_finding_dispatched": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "- `CODE-1`: skip — Task: CODE-1 on abc1234\n- `CODE-2`: dispatch — still blocked",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "fix_rerun",
+    "expected": {
+      "rerun_starts": true,
+      "fixed_finding_left_out": true,
+      "blocked_finding_dispatched": true
+    }
+  }
+]

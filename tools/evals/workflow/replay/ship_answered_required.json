@@ -1,0 +1,56 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "Ship Decision: GO\nCODE-4 REQUIRED · auth.py:1 — not a blocker. It keeps /review's `answered` resolution, which /ship does not change. REQ-002 (requirements/WF-40-SPEC.md:25) says only admin or owner may export. The code matches: auth.py:1 `ALLOWED = {\"admin\", \"owner\"}`, and ui.py:4 gates click(). This is not a refutation, an accepted risk or a deferral.\nCODE-5 REQUIRED · pre-existing (baselineState unchanged) · export.py:3 — does not block. It is a follow-up tracked in WF-77, \"Stream the CSV export\", and its SARIF resolution is `follow-up`. It stays REQUIRED and is not part of a /build fix round.\nCODE-6 ADVISORY · ui.py:2 — does not block. The author declined it, so its SARIF resolution is `declined`.\nNext step: the owner reads every changed file (auth.py, ui.py, verify.py) with a second person where the team has one, because Risk is High and Depth is Deep. Merging is the owner's decision. GO is a readiness verdict only and does not authorize merge, push, tag or deploy. Then comes the §7 owner question, and nothing happens until the owner selects. Option (1): send ADVISORY CODE-6 to a fix round. That round goes /build → /test → /review → /ship and produces a new candidate, so this verdict would no longer apply. CODE-5 stays on WF-77. Option (2), posting the summary to Jira, is not available: AGENTS.md says the project has no external tracker, and this trial has no access to external services.\n\n## Ship Decision: GO\n\n**Risk: High — the change adds an authorization gate · Depth: Deep** — before merging, read every changed file, with a second person.\n\n### Read these yourself\n- none (\"Always a person: none\")\n\n### Blockers\n- none\n\n### Required findings / refutations / accepted risks\n- none unresolved\n- Answered: CODE-4. REQ-002 settles it, and auth.py:1 and ui.py:4 match it.\n\n### Pre-existing findings (follow-ups)\n- CODE-5 REQUIRED, follow-up — tracked in WF-77, \"Stream the CSV export\". The owner created it on 2026-11-25.\n\n### Advisory\n- CODE-6 — declined by the author.\n\n### Fix at the source\n- none (`review-noise.py --repeats` printed nothing)\n\n### Human time\nNot produced. `ticket-stats.py WF-40` was not run because this trial has no shell, so there is no row to print. This does not affect GO.\n\n### Not run in this trial (no shell)\n- `review-sarif.py resolve WF-40 CODE-5=follow-up CODE-6=declined`, and the ledger-only commit of docs/reviews/WF-40.sarif. CODE-4 keeps `answered`.\n- `ticket-stats.py WF-40`.\n\n### Shipped-bug record\n- not an escaped bug (the spec has no `## Escaped From` section)\n\n### Requirement evidence\n- REQ-001: ui.py:2 `LABEL = \"Download\"` / `python3 verify.py`, label assertion, pass\n- REQ-002: auth.py:1-4 can_export() and ui.py:3-7 click() / `python3 verify.py`, role assertions, pass. A viewer is refused and the callback does not run; an admin runs it.\n\n### Release-readiness\n- Infrastructure: PASS (the runner attests it)\n- Documentation: PASS (the runner attests it)\n- Feature flag: PASS (the runner attests it)\n\n### Rollback plan\n- Trigger conditions: authorized users (admin or owner) cannot export, or the label or gate misbehaves after merge.\n- Procedure: revert commit {spec_sha}. There is no schema or data change.\n- Recovery target: the behavior at ce48647, with the previous label and no role gate.\n\n### Candidate\n- Base check: Base: current (`base-check.sh --base origin/main -- \"python3 verify.py\"` exit 0)\n- Branch: main\n- Commits: {spec_sha} \"feat: gate export behind an authorized role\". It matches the reviewed commit, and there are no commits after review.\n- Diff/status: tree clean. `check-ledger.py WF-40 --ship` exit 0, no warnings. Independent verification: PASS (VERIFY PASS at Deep, with the full suite and a mutation probe on every changed condition). Weakened tests: none found.\n\n### Note outside the review (not a finding; does not affect the verdict)\n- export.py:2 writes `session.token` into the CSV header line. That code is at the base, this change does not touch it, and /review did not raise it. The owner may want to look at it under WF-77 or a new ticket.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "ship_answered_required",
+    "expected": {
+      "go": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "Ship Decision: GO\nSEC-1: follow-up.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "ship_answered_required",
+    "expected": {
+      "go": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "Ship Decision: NO-GO\nNext: `/build`, then `/test` and `/review`.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "ship_answered_required",
+    "expected": {
+      "go": false
+    }
+  }
+]

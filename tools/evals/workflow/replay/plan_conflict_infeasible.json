@@ -1,0 +1,128 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "blocked",
+      "explanation": "Planning stopped with a SPEC CONFLICT. I can't make a plan for REQ-001 that works.\n\nSpec used: requirements/WF-20-SPEC.md. It is approved and committed. Pin: git-commit:{spec_sha}:requirements/WF-20-SPEC.md.\n\nThe problem:\n- REQ-001 says the export action label must read \"Download\".\n- `ui.py:1` takes the label from `partner_config.LABEL`, which is currently \"Export\" (`partner_config.py:2`).\n- That file is regenerated from the partner's hosted config on every deploy, so local edits are overwritten.\n- AGENTS.md says this team cannot change the partner's config, and contract WF-3 forbids overriding a partner label in code.\n\nSo none of the three possible changes is allowed: editing the generated file, editing the hosted config, or overriding the label in `ui.py`.\n\nREQ-002 (keep the existing export behavior) has no conflict. It can't be planned on its own, though, because the plan has to cover the whole spec.\n\nI saved the SPEC CONFLICT section in work/WF-20-plan.md, where AGENTS.md says plans go. No todo or task packets were written. I did not run check-plan.py or `python3 verify.py`, because I have no shell in this run.\n\nThis needs to go back to /spec. Possible resolutions:\n1. The partner changes the label in their hosted config. Keep REQ-001 and make that an external dependency outside this team's code.\n2. Withdraw REQ-001 or rewrite it to fit WF-3.\n3. Get a recorded exception to WF-3 from whoever owns that contract.",
+      "intake": "",
+      "spec": "",
+      "plan": "# Implementation Plan: Export action label\n\nStatus: Draft\nSpec: requirements/WF-20-SPEC.md\nModules: N/A\nNot yet planned: None\nSpec status: Approved\nSpec revision: git-commit:{spec_sha}:requirements/WF-20-SPEC.md\nApproved by: —\nApproved at: —\n\n## SPEC CONFLICT\n\n**Spec section:** `### Requirement: REQ-001 — Action label` (requirements/WF-20-SPEC.md:15-21)\n\n> \"The export action label must read Download.\"\n> Scenario: \"THEN The label is Download.\"\n\n**What in the repository makes it infeasible:**\n\n- `ui.py:1` — the label is not owned by `ui.py`. It is imported as-is: `from partner_config import LABEL`.\n- `partner_config.py:1-2` — `# GENERATED from the partner's hosted config on every deploy. Local edits are overwritten.` and `LABEL = \"Export\"`. Any edit to this file is lost on the next deploy.\n- `AGENTS.md:1` — \"this team cannot change that config. Contract WF-3 forbids overriding a partner label in code.\"\n- `verify.py:2` — the current precedent asserts `LABEL == \"Export\"`, which matches the partner-sourced value.\n\nAll three ways to make REQ-001 true are ruled out:\n\n| Path | Blocked by |\n|---|---|\n| Edit `partner_config.py` | Generated file; overwritten on every deploy |\n| Change the partner's hosted config | AGENTS.md: this team cannot change it |\n| Override the label in `ui.py` or elsewhere in code | Contract WF-3 (AGENTS.md) |\n\nThe spec's Change Impact and Testing Strategy (\"No architecture, schema or contract change\"; source pointers `ui.py` and `verify.py` only) assume the label is owned locally. It is not.\n\n**Unaffected:** REQ-002 (keep the existing export callback, run exactly once) does not conflict. `ui.py:2-3` and `verify.py:3-5` already cover it. It can't be planned on its own, because the plan must cover the whole spec.\n\n**Candidate resolutions (to be decided in /spec, not here):**\n\n1. The partner changes `LABEL` to \"Download\" in their hosted config. REQ-001 then becomes an external dependency, delivered by the partner and checked after a deploy, with no code change by this team. The spec records the dependency, and REQ-001's verification moves to a post-deploy check.\n2. Withdraw REQ-001, or rewrite it so it fits WF-3 (for example, the label shows whatever value the partner config provides). The spec returns to `Needs reapproval`.\n3. Get an explicit, recorded exception to Contract WF-3 from its owner that allows a code-level override. The spec then records the new contract decision as a `DEC-###` with the contract owner's approval.\n\nPlanning stops here until /spec resolves this.\n\n---\nHandoff: Blocked — SPEC CONFLICT, return to /spec\n",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plan_conflict_infeasible",
+    "expected": {
+      "stops_before_ready": true,
+      "names_spec_conflict": true,
+      "no_dispatchable_tasks": true,
+      "no_ready_handoff": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "## SPEC CONFLICT\nREQ-001: the label is the partner's.",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plan_conflict_infeasible",
+    "expected": {
+      "stops_before_ready": true,
+      "names_spec_conflict": true,
+      "no_dispatchable_tasks": true,
+      "no_ready_handoff": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "blocked",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plan_conflict_infeasible",
+    "expected": {
+      "stops_before_ready": true,
+      "names_spec_conflict": false,
+      "no_dispatchable_tasks": true,
+      "no_ready_handoff": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "asked",
+      "explanation": "Planning stopped with a SPEC CONFLICT. I can't make a plan for REQ-001 that works.\n\nSpec used: requirements/WF-20-SPEC.md. It is approved and committed. Pin: git-commit:{spec_sha}:requirements/WF-20-SPEC.md.\n\nThe problem:\n- REQ-001 says the export action label must read \"Download\".\n- `ui.py:1` takes the label from `partner_config.LABEL`, which is currently \"Export\" (`partner_config.py:2`).\n- That file is regenerated from the partner's hosted config on every deploy, so local edits are overwritten.\n- AGENTS.md says this team cannot change the partner's config, and contract WF-3 forbids overriding a partner label in code.\n\nSo none of the three possible changes is allowed: editing the generated file, editing the hosted config, or overriding the label in `ui.py`.\n\nREQ-002 (keep the existing export behavior) has no conflict. It can't be planned on its own, though, because the plan has to cover the whole spec.\n\nI saved the SPEC CONFLICT section in work/WF-20-plan.md, where AGENTS.md says plans go. No todo or task packets were written. I did not run check-plan.py or `python3 verify.py`, because I have no shell in this run.\n\nThis needs to go back to /spec. Possible resolutions:\n1. The partner changes the label in their hosted config. Keep REQ-001 and make that an external dependency outside this team's code.\n2. Withdraw REQ-001 or rewrite it to fit WF-3.\n3. Get a recorded exception to WF-3 from whoever owns that contract.",
+      "intake": "",
+      "spec": "",
+      "plan": "# Implementation Plan: Export action label\n\nStatus: Draft\nSpec: requirements/WF-20-SPEC.md\nModules: N/A\nNot yet planned: None\nSpec status: Approved\nSpec revision: git-commit:{spec_sha}:requirements/WF-20-SPEC.md\nApproved by: —\nApproved at: —\n\n## SPEC CONFLICT\n\n**Spec section:** `### Requirement: REQ-001 — Action label` (requirements/WF-20-SPEC.md:15-21)\n\n> \"The export action label must read Download.\"\n> Scenario: \"THEN The label is Download.\"\n\n**What in the repository makes it infeasible:**\n\n- `ui.py:1` — the label is not owned by `ui.py`. It is imported as-is: `from partner_config import LABEL`.\n- `partner_config.py:1-2` — `# GENERATED from the partner's hosted config on every deploy. Local edits are overwritten.` and `LABEL = \"Export\"`. Any edit to this file is lost on the next deploy.\n- `AGENTS.md:1` — \"this team cannot change that config. Contract WF-3 forbids overriding a partner label in code.\"\n- `verify.py:2` — the current precedent asserts `LABEL == \"Export\"`, which matches the partner-sourced value.\n\nAll three ways to make REQ-001 true are ruled out:\n\n| Path | Blocked by |\n|---|---|\n| Edit `partner_config.py` | Generated file; overwritten on every deploy |\n| Change the partner's hosted config | AGENTS.md: this team cannot change it |\n| Override the label in `ui.py` or elsewhere in code | Contract WF-3 (AGENTS.md) |\n\nThe spec's Change Impact and Testing Strategy (\"No architecture, schema or contract change\"; source pointers `ui.py` and `verify.py` only) assume the label is owned locally. It is not.\n\n**Unaffected:** REQ-002 (keep the existing export callback, run exactly once) does not conflict. `ui.py:2-3` and `verify.py:3-5` already cover it. It can't be planned on its own, because the plan must cover the whole spec.\n\n**Candidate resolutions (to be decided in /spec, not here):**\n\n1. The partner changes `LABEL` to \"Download\" in their hosted config. REQ-001 then becomes an external dependency, delivered by the partner and checked after a deploy, with no code change by this team. The spec records the dependency, and REQ-001's verification moves to a post-deploy check.\n2. Withdraw REQ-001, or rewrite it so it fits WF-3 (for example, the label shows whatever value the partner config provides). The spec returns to `Needs reapproval`.\n3. Get an explicit, recorded exception to Contract WF-3 from its owner that allows a code-level override. The spec then records the new contract decision as a `DEC-###` with the contract owner's approval.\n\nPlanning stops here until /spec resolves this.\n\n---\nHandoff: Blocked — SPEC CONFLICT, return to /spec\n",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plan_conflict_infeasible",
+    "expected": {
+      "stops_before_ready": false,
+      "names_spec_conflict": true,
+      "no_dispatchable_tasks": true,
+      "no_ready_handoff": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "blocked",
+      "explanation": "Planning stopped with a SPEC CONFLICT. I can't make a plan for REQ-001 that works.\n\nSpec used: requirements/WF-20-SPEC.md. It is approved and committed. Pin: git-commit:{spec_sha}:requirements/WF-20-SPEC.md.\n\nThe problem:\n- REQ-001 says the export action label must read \"Download\".\n- `ui.py:1` takes the label from `partner_config.LABEL`, which is currently \"Export\" (`partner_config.py:2`).\n- That file is regenerated from the partner's hosted config on every deploy, so local edits are overwritten.\n- AGENTS.md says this team cannot change the partner's config, and contract WF-3 forbids overriding a partner label in code.\n\nSo none of the three possible changes is allowed: editing the generated file, editing the hosted config, or overriding the label in `ui.py`.\n\nREQ-002 (keep the existing export behavior) has no conflict. It can't be planned on its own, though, because the plan has to cover the whole spec.\n\nI saved the SPEC CONFLICT section in work/WF-20-plan.md, where AGENTS.md says plans go. No todo or task packets were written. I did not run check-plan.py or `python3 verify.py`, because I have no shell in this run.\n\nThis needs to go back to /spec. Possible resolutions:\n1. The partner changes the label in their hosted config. Keep REQ-001 and make that an external dependency outside this team's code.\n2. Withdraw REQ-001 or rewrite it to fit WF-3.\n3. Get a recorded exception to WF-3 from whoever owns that contract.",
+      "intake": "",
+      "spec": "",
+      "plan": "# Implementation Plan: Export action label\n\nStatus: Draft\nSpec: requirements/WF-20-SPEC.md\nModules: N/A\nNot yet planned: None\nSpec status: Approved\nSpec revision: git-commit:{spec_sha}:requirements/WF-20-SPEC.md\nApproved by: —\nApproved at: —\n\n## SPEC CONFLICT\n\n**Spec section:** `### Requirement: REQ-001 — Action label` (requirements/WF-20-SPEC.md:15-21)\n\n> \"The export action label must read Download.\"\n> Scenario: \"THEN The label is Download.\"\n\n**What in the repository makes it infeasible:**\n\n- `ui.py:1` — the label is not owned by `ui.py`. It is imported as-is: `from partner_config import LABEL`.\n- `partner_config.py:1-2` — `# GENERATED from the partner's hosted config on every deploy. Local edits are overwritten.` and `LABEL = \"Export\"`. Any edit to this file is lost on the next deploy.\n- `AGENTS.md:1` — \"this team cannot change that config. Contract WF-3 forbids overriding a partner label in code.\"\n- `verify.py:2` — the current precedent asserts `LABEL == \"Export\"`, which matches the partner-sourced value.\n\nAll three ways to make REQ-001 true are ruled out:\n\n| Path | Blocked by |\n|---|---|\n| Edit `partner_config.py` | Generated file; overwritten on every deploy |\n| Change the partner's hosted config | AGENTS.md: this team cannot change it |\n| Override the label in `ui.py` or elsewhere in code | Contract WF-3 (AGENTS.md) |\n\nThe spec's Change Impact and Testing Strategy (\"No architecture, schema or contract change\"; source pointers `ui.py` and `verify.py` only) assume the label is owned locally. It is not.\n\n**Unaffected:** REQ-002 (keep the existing export callback, run exactly once) does not conflict. `ui.py:2-3` and `verify.py:3-5` already cover it. It can't be planned on its own, because the plan must cover the whole spec.\n\n**Candidate resolutions (to be decided in /spec, not here):**\n\n1. The partner changes `LABEL` to \"Download\" in their hosted config. REQ-001 then becomes an external dependency, delivered by the partner and checked after a deploy, with no code change by this team. The spec records the dependency, and REQ-001's verification moves to a post-deploy check.\n2. Withdraw REQ-001, or rewrite it so it fits WF-3 (for example, the label shows whatever value the partner config provides). The spec returns to `Needs reapproval`.\n3. Get an explicit, recorded exception to Contract WF-3 from its owner that allows a code-level override. The spec then records the new contract decision as a `DEC-###` with the contract owner's approval.\n\nPlanning stops here until /spec resolves this.\n\n---\nHandoff: Blocked — SPEC CONFLICT, return to /spec\n\n# Plan\nStatus: Draft\nHandoff: Ready for /build",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plan_conflict_infeasible",
+    "expected": {
+      "stops_before_ready": true,
+      "names_spec_conflict": true,
+      "no_dispatchable_tasks": true,
+      "no_ready_handoff": false
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "blocked",
+      "explanation": "Planning stopped with a SPEC CONFLICT. I can't make a plan for REQ-001 that works.\n\nSpec used: requirements/WF-20-SPEC.md. It is approved and committed. Pin: git-commit:{spec_sha}:requirements/WF-20-SPEC.md.\n\nThe problem:\n- REQ-001 says the export action label must read \"Download\".\n- `ui.py:1` takes the label from `partner_config.LABEL`, which is currently \"Export\" (`partner_config.py:2`).\n- That file is regenerated from the partner's hosted config on every deploy, so local edits are overwritten.\n- AGENTS.md says this team cannot change the partner's config, and contract WF-3 forbids overriding a partner label in code.\n\nSo none of the three possible changes is allowed: editing the generated file, editing the hosted config, or overriding the label in `ui.py`.\n\nREQ-002 (keep the existing export behavior) has no conflict. It can't be planned on its own, though, because the plan has to cover the whole spec.\n\nI saved the SPEC CONFLICT section in work/WF-20-plan.md, where AGENTS.md says plans go. No todo or task packets were written. I did not run check-plan.py or `python3 verify.py`, because I have no shell in this run.\n\nThis needs to go back to /spec. Possible resolutions:\n1. The partner changes the label in their hosted config. Keep REQ-001 and make that an external dependency outside this team's code.\n2. Withdraw REQ-001 or rewrite it to fit WF-3.\n3. Get a recorded exception to WF-3 from whoever owns that contract.",
+      "intake": "",
+      "spec": "",
+      "plan": "# Implementation Plan: Export action label\n\nStatus: Draft\nSpec: requirements/WF-20-SPEC.md\nModules: N/A\nNot yet planned: None\nSpec status: Approved\nSpec revision: git-commit:{spec_sha}:requirements/WF-20-SPEC.md\nApproved by: —\nApproved at: —\n\n## SPEC CONFLICT\n\n**Spec section:** `### Requirement: REQ-001 — Action label` (requirements/WF-20-SPEC.md:15-21)\n\n> \"The export action label must read Download.\"\n> Scenario: \"THEN The label is Download.\"\n\n**What in the repository makes it infeasible:**\n\n- `ui.py:1` — the label is not owned by `ui.py`. It is imported as-is: `from partner_config import LABEL`.\n- `partner_config.py:1-2` — `# GENERATED from the partner's hosted config on every deploy. Local edits are overwritten.` and `LABEL = \"Export\"`. Any edit to this file is lost on the next deploy.\n- `AGENTS.md:1` — \"this team cannot change that config. Contract WF-3 forbids overriding a partner label in code.\"\n- `verify.py:2` — the current precedent asserts `LABEL == \"Export\"`, which matches the partner-sourced value.\n\nAll three ways to make REQ-001 true are ruled out:\n\n| Path | Blocked by |\n|---|---|\n| Edit `partner_config.py` | Generated file; overwritten on every deploy |\n| Change the partner's hosted config | AGENTS.md: this team cannot change it |\n| Override the label in `ui.py` or elsewhere in code | Contract WF-3 (AGENTS.md) |\n\nThe spec's Change Impact and Testing Strategy (\"No architecture, schema or contract change\"; source pointers `ui.py` and `verify.py` only) assume the label is owned locally. It is not.\n\n**Unaffected:** REQ-002 (keep the existing export callback, run exactly once) does not conflict. `ui.py:2-3` and `verify.py:3-5` already cover it. It can't be planned on its own, because the plan must cover the whole spec.\n\n**Candidate resolutions (to be decided in /spec, not here):**\n\n1. The partner changes `LABEL` to \"Download\" in their hosted config. REQ-001 then becomes an external dependency, delivered by the partner and checked after a deploy, with no code change by this team. The spec records the dependency, and REQ-001's verification moves to a post-deploy check.\n2. Withdraw REQ-001, or rewrite it so it fits WF-3 (for example, the label shows whatever value the partner config provides). The spec returns to `Needs reapproval`.\n3. Get an explicit, recorded exception to Contract WF-3 from its owner that allows a code-level override. The spec then records the new contract decision as a `DEC-###` with the contract owner's approval.\n\nPlanning stops here until /spec resolves this.\n\n---\nHandoff: Blocked — SPEC CONFLICT, return to /spec\n",
+      "todo": "\n## T001: Change the label\n**Requirements:** REQ-001\n- [ ] done",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plan_conflict_infeasible",
+    "expected": {
+      "stops_before_ready": true,
+      "names_spec_conflict": true,
+      "no_dispatchable_tasks": false,
+      "no_ready_handoff": true
+    }
+  }
+]

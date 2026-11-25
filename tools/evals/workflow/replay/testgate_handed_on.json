@@ -1,0 +1,82 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "Using: WF-40, candidate 439bb15..a517748 on main (override by re-invoking /test with an explicit target). This candidate is not exempt from verification because it changes production code in auth.py and ui.py. The BUILD COMPLETE message reconciles with git: HEAD a517748, base 439bb15, tree clean, no uncommitted BUILD diff. The plan's spec pin (b5bf812:requirements/WF-40-SPEC.md, Approved) still matches the spec, because no later commit touches it. Risk is High because the change adds an authorization gate (REQ-002) and changes the click() signature from click(callback) to click(user, callback). That makes the depth Deep: a mutation probe on every changed condition, plus the full suite. The change has no browser surface, so no browser skill is needed. BUILD handed T002, a median-time measurement, on to /test, so it is in scope and needs its own runtime line. I'm dispatching one fresh test-engineer.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "To: test-engineer\nTicket: WF-40. Use it in the `Refs: WF-40` trailer of any test-only `test:` commit.\n\nCandidate\n- Repo: /fixture, branch main\n- Base 439bb15d074ff56810e14e5e9597d003558d8910. HEAD/BUILD commit {spec_sha}. Range 439bb15..a517748.\n- Tree at dispatch: clean, with no staged, unstaged or untracked paths. There is no uncommitted BUILD diff.\n- Spec: git-commit:b5bf812a3218e5a114ef09e0cf5398c0ef17e4d4:requirements/WF-40-SPEC.md (Approved; still matches the plan's pin). Plan: git-commit:439bb15:work/WF-40-plan.md (Approved).\n- Scope: T001 (built) plus T002, which BUILD handed on to /test.\n\nRisk · Depth: High · Deep. The change adds an authorization gate (auth.can_export) and changes the signature of ui.click from click(callback) to click(user, callback). Run a mutation probe on every changed condition and run the full suite.\n\nrequired_skills: none. Nothing here is rendered or called by a browser.\n\nAcceptance criteria\n- REQ-001: Action label. The export action label must read \"Download\".\n  - Scenario: Given the existing export action, when it is displayed, then the label is Download.\n- REQ-002: Export requires an authorized role. Only users whose role is admin or owner may trigger the export.\n  - Scenario: Given a user whose role is viewer, when they attempt the export, then the export is refused and the callback does not run.\n\nTask BUILD handed on to /test (give it its own runtime line)\n- T002 (measurement): call click() 1000 times with an admin user and report the median time per call. It is not in the plan's task index and maps to no REQ, and it has no pass threshold. Report the measured value, the method and the environment.\n\nImplemented behavior\n- auth.py (new): ALLOWED = {\"admin\", \"owner\"}; can_export(user) returns user.get(\"role\") in ALLOWED.\n- ui.py: LABEL = \"Download\". click(user, callback) returns False without calling the callback when can_export(user) is false. Otherwise it calls callback() and returns True.\n\nRegression risks\n- Gate boundaries: owner (allowed, but verify.py does not assert it), viewer, a missing role key, a None or empty role, and case variants such as \"Admin\". Also check a user that is not a dict, if any caller could pass one.\n- Callers or contracts that still use the old click(callback) signature or the old \"Export\" label.\n- The callback must never run on refusal. On success it must run exactly once.\n\nAlready run by BUILD (prior evidence, not your conclusion)\n- python3 verify.py passed (exit 0). Its assertions: LABEL == \"Download\"; viewer → False and no call; admin → True and one call.\n\nPointers: auth.py, ui.py, verify.py. AGENTS.md sets the verification command to python3 verify.py (in-process only).\n\nOwnership: test-only changes only (tests, fixtures, test configuration). Do not change production code. Restore every production file after the mutation probes.\n\nFull suite: run",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testgate_handed_on",
+    "expected": {
+      "verifies_now": true,
+      "handed_on_task_in_packet": true,
+      "ticket_key_for_the_refs_trailer": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "To: test-engineer\nCandidate HEAD abc for WF-40.\nFull suite: do not run",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testgate_handed_on",
+    "expected": {
+      "verifies_now": true,
+      "handed_on_task_in_packet": false,
+      "ticket_key_for_the_refs_trailer": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "To: test-engineer\nTicket: WF-40 (trailer `Refs: WF-40`).\nHanded on: T002, median time of 1000 click() calls.\nFull suite: do not run",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testgate_handed_on",
+    "expected": {
+      "verifies_now": true,
+      "handed_on_task_in_packet": true,
+      "ticket_key_for_the_refs_trailer": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "asked",
+      "explanation": "Using: WF-40, candidate 439bb15..a517748 on main (override by re-invoking /test with an explicit target). This candidate is not exempt from verification because it changes production code in auth.py and ui.py. The BUILD COMPLETE message reconciles with git: HEAD a517748, base 439bb15, tree clean, no uncommitted BUILD diff. The plan's spec pin (b5bf812:requirements/WF-40-SPEC.md, Approved) still matches the spec, because no later commit touches it. Risk is High because the change adds an authorization gate (REQ-002) and changes the click() signature from click(callback) to click(user, callback). That makes the depth Deep: a mutation probe on every changed condition, plus the full suite. The change has no browser surface, so no browser skill is needed. BUILD handed T002, a median-time measurement, on to /test, so it is in scope and needs its own runtime line. I'm dispatching one fresh test-engineer.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "To: test-engineer\nTicket: WF-40. Use it in the `Refs: WF-40` trailer of any test-only `test:` commit.\n\nCandidate\n- Repo: /fixture, branch main\n- Base 439bb15d074ff56810e14e5e9597d003558d8910. HEAD/BUILD commit {spec_sha}. Range 439bb15..a517748.\n- Tree at dispatch: clean, with no staged, unstaged or untracked paths. There is no uncommitted BUILD diff.\n- Spec: git-commit:b5bf812a3218e5a114ef09e0cf5398c0ef17e4d4:requirements/WF-40-SPEC.md (Approved; still matches the plan's pin). Plan: git-commit:439bb15:work/WF-40-plan.md (Approved).\n- Scope: T001 (built) plus T002, which BUILD handed on to /test.\n\nRisk · Depth: High · Deep. The change adds an authorization gate (auth.can_export) and changes the signature of ui.click from click(callback) to click(user, callback). Run a mutation probe on every changed condition and run the full suite.\n\nrequired_skills: none. Nothing here is rendered or called by a browser.\n\nAcceptance criteria\n- REQ-001: Action label. The export action label must read \"Download\".\n  - Scenario: Given the existing export action, when it is displayed, then the label is Download.\n- REQ-002: Export requires an authorized role. Only users whose role is admin or owner may trigger the export.\n  - Scenario: Given a user whose role is viewer, when they attempt the export, then the export is refused and the callback does not run.\n\nTask BUILD handed on to /test (give it its own runtime line)\n- T002 (measurement): call click() 1000 times with an admin user and report the median time per call. It is not in the plan's task index and maps to no REQ, and it has no pass threshold. Report the measured value, the method and the environment.\n\nImplemented behavior\n- auth.py (new): ALLOWED = {\"admin\", \"owner\"}; can_export(user) returns user.get(\"role\") in ALLOWED.\n- ui.py: LABEL = \"Download\". click(user, callback) returns False without calling the callback when can_export(user) is false. Otherwise it calls callback() and returns True.\n\nRegression risks\n- Gate boundaries: owner (allowed, but verify.py does not assert it), viewer, a missing role key, a None or empty role, and case variants such as \"Admin\". Also check a user that is not a dict, if any caller could pass one.\n- Callers or contracts that still use the old click(callback) signature or the old \"Export\" label.\n- The callback must never run on refusal. On success it must run exactly once.\n\nAlready run by BUILD (prior evidence, not your conclusion)\n- python3 verify.py passed (exit 0). Its assertions: LABEL == \"Download\"; viewer → False and no call; admin → True and one call.\n\nPointers: auth.py, ui.py, verify.py. AGENTS.md sets the verification command to python3 verify.py (in-process only).\n\nOwnership: test-only changes only (tests, fixtures, test configuration). Do not change production code. Restore every production file after the mutation probes.\n\nFull suite: run",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testgate_handed_on",
+    "expected": {
+      "verifies_now": false,
+      "handed_on_task_in_packet": true,
+      "ticket_key_for_the_refs_trailer": true
+    }
+  }
+]

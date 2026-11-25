@@ -1,0 +1,78 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "Independent verification: PASS (fix diff)\nNext stage: /test WF-40 at Deep depth on the whole candidate, 6836395..bb25d8f (full suite and a mutation probe on every changed condition). A closing /review round follows it.",
+      "intake": "Using: WF-40, review round 2 (fix round), candidate main at {spec_sha}. The fix diff starts at 8ae9030182593ee49657829f4ce39daa482aeca4.\n\n**Findings: 0 BLOCKER · 0 REQUIRED · 0 ADVISORY** (Nothing to fix.)\n\n- Review round: 2 (fix round). `review-sarif.py round WF-40` printed round=2 counted=2, so the round-4 stop does not apply. Reviewed from 8ae9030 (round 1's reviewedCommit).\n- Candidate scope: 8ae9030..bb25d8f, without docs/reviews.\n- BUILD candidate: 39150c2dc51f7d4fbf4b48a13792c2d318c180c8, from `/build WF-40 review fixes`. Its CODE-1 fix carries the Task trailer CODE-1.\n- Accepted post-BUILD test-only commit: bb25d8f \"test: refuse a user with no role\". It changes verify.py only and is declared in the VERIFY PASS (fix diff). The tree is clean at HEAD.\n- **Independent verification: PASS (fix diff)**. REQ-002 `python3 verify.py` passed (exit 0). Mutation probe at auth.py:4, removing `user is not None and`: killed. This result covers the fix diff only. Under ADR 0147, the depth rule does not make it stale.\n- **Risk: High — the change adds an authorization gate · Depth: Deep**\n- Reviewers: code-reviewer, blind-reviewer and security-auditor ran on the fix diff. code-reviewer also had round 1's findings and their resolutions. distributed-systems-reviewer was not triggered because the fix diff has no distributed-systems surface. Every reviewer has returned, and none reported a finding.\n- Built-in code review: skipped. It is not run after round 1 because it cannot review a fix diff alone.\n- Independent check: no new findings, so nothing to check.\n- Gap sweep: not run. It is skipped after round 1.\n- REVIEW.md: there is none in the repository, so none was used.\n- Runner evidence did not cover these checks: Always a person, the REVIEW.md checklist, stale instructions, weakened tests and the ledger. Each of them is: Not verified.\n- Earlier findings: CODE-1 (REQUIRED, auth.py:4). A request with no user was not refused. Resolution: **fixed** in 39150c2, test-first. The round has no open BLOCKER or REQUIRED finding.\n- Requirement evidence:\n  - REQ-001 (the label reads Download): implemented in ui.py by 8ae9030. Round 1's VERIFY PASS at Deep proves it (full suite, `python3 verify.py`).\n  - REQ-002 (only the admin and owner roles may export): implemented by auth.py `can_export` and the click() gate (8ae9030), hardened for a missing user in 39150c2. Round 1's Deep VERIFY PASS and this round's VERIFY PASS (fix diff) prove it: verify.py exit 0, and the auth.py:4 mutant was killed. The full-depth re-verification of the whole candidate is still to come.\n- SARIF: docs/reviews/WF-40.sarif. The runner reports that round 2 is written and committed. It is not a closing round.\n- 0 found and not reported in this round.\n\nNext step: run `/test` once at Deep on the whole candidate. Then run one closing `/review` round on the commits `/test` adds, or none if it adds none. That closing round records PASS and does not count toward the round-4 stop. After that comes `/ship`.",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "reviewend_fix_round",
+    "expected": {
+      "pass_fix_diff_recorded": true,
+      "next_stage_is_test": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "Independent verification: PASS (fix diff)\nNext stage: `/ship`",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "reviewend_fix_round",
+    "expected": {
+      "pass_fix_diff_recorded": true,
+      "next_stage_is_test": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "Independent verification: PASS (fix diff)\nNext stage: `/test` once at Deep, then `/ship`",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "reviewend_fix_round",
+    "expected": {
+      "pass_fix_diff_recorded": true,
+      "next_stage_is_test": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "reviewend_fix_round",
+    "expected": {
+      "pass_fix_diff_recorded": false,
+      "next_stage_is_test": false
+    }
+  }
+]

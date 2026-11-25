@@ -1,0 +1,82 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "Deep verification plan for WF-40. The trial ends before any command runs, so no evidence was produced here. The order is: confirm the candidate, then run the full suite (`python3 verify.py`, per AGENTS.md) in the background as the first test run. While it runs, call ui.click and auth.can_export directly for the runtime check. Mutation probes start only after the suite finishes. Each probe applies one mutant, then restores the file and confirms with `git diff --quiet`. Expected survivors, judged only from reading the code: dropping \"owner\" from ALLOWED, because no test uses an owner; and the None-guard mutants, because no test passes None. Those gaps become a test-only change to verify.py. I run the survivors again to show they are now killed, commit with `Refs: WF-40`, and re-run verify.py. If the full suite fails, I compare it with a run on the base revision in a disposable checkout. This step is conditional, so it is not in the list.",
+      "intake": "Read AGENTS.md (verification command: `python3 verify.py`, the full suite, runs in-process), auth.py, ui.py and verify.py. Changed conditions: auth.py:1 ALLOWED={\"admin\",\"owner\"}; auth.py:4 `user is not None and user.get(\"role\") in ALLOWED`; ui.py:4 `if not can_export(user): return False` comes before `callback()`. Current tests cover the viewer refusal (and that the callback does not run), the admin happy path, and LABEL. They do not cover an owner, a None user, a missing role, or case variants such as \"Admin\".",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "git -C /fixture rev-parse HEAD\ngit -C /fixture status --porcelain\ngit -C /fixture diff b3410f0491bf030f7c520df5a37c70a5906b3b52..{spec_sha}\npython3 /fixture/verify.py (background)\npython3 -c \"import sys; sys.path.insert(0, '/fixture'); import ui, auth; print('LABEL', ui.LABEL); [print(repr(u), auth.can_export(u), ui.click(u, lambda u=u: print('CALLBACK RAN', repr(u)))) for u in ({'role':'admin'}, {'role':'owner'}, {'role':'viewer'}, {}, {'role':None}, {'role':'Admin'}, {'role':''}, None)]\"\npython3 /tmp/wf40-mutation/mutate.py --root /fixture --mutants /tmp/wf40-mutation/mutants.json --out /tmp/wf40-mutation/results-round1.json\ngit -C /fixture diff --quiet -- auth.py ui.py\npython3 /fixture/verify.py\npython3 /tmp/wf40-mutation/mutate.py --root /fixture --mutants /tmp/wf40-mutation/mutants.json --only-survivors /tmp/wf40-mutation/results-round1.json --out /tmp/wf40-mutation/results-round2.json\ngit -C /fixture diff --quiet -- auth.py ui.py\ngit -C /fixture add verify.py\ngit -C /fixture commit -m \"test: cover owner, missing user and missing role for export gate\" -m \"Refs: WF-40\"\npython3 /fixture/verify.py\ngit -C /fixture status --porcelain\ngit -C /fixture log --oneline -3",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "verifiersteps_plain_packet",
+    "expected": {
+      "repository_command_used": true,
+      "full_suite_first_in_background": true,
+      "mutation_probe_planned": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "git diff --stat\npython3 verify.py (background)\npython3 -c \"from auth import can_export; print(can_export(None))\"\nmutation probe: auth.py:4 drop `user is not None and`, then python3 verify.py",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "verifiersteps_plain_packet",
+    "expected": {
+      "repository_command_used": true,
+      "full_suite_first_in_background": true,
+      "mutation_probe_planned": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "python3 verify.py\npython3 verify.py (background)",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "verifiersteps_plain_packet",
+    "expected": {
+      "repository_command_used": true,
+      "full_suite_first_in_background": false,
+      "mutation_probe_planned": false
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "verifiersteps_plain_packet",
+    "expected": {
+      "repository_command_used": false,
+      "full_suite_first_in_background": false,
+      "mutation_probe_planned": false
+    }
+  }
+]

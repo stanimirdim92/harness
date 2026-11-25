@@ -1,0 +1,146 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "ready_for_review",
+      "explanation": "Selected spec: requirements/WF-20-SPEC.md (the only WF-20 spec). Preconditions pass: Status: Approved, stable REQ-001/REQ-002, committed with an empty diff against HEAD, pinned at {spec_sha}. AGENTS.md says plans and tasks go in work/, so the targets are work/WF-20-plan.md and work/WF-20-todo.md. Neither exists yet. I used a bounded check of AGENTS.md, ui.py and verify.py. It found no SPEC CONFLICT. ui.py:1 defines LABEL = \"Export\", ui.py:2-3 runs the callback once, and verify.py:2-5 asserts both. I drafted a compact plan with one task, T001. T001 changes the label (REQ-001) and also proves the export behavior stays the same (REQ-002), because T001 is the task that could break it. Not run: I have no shell, so check-plan.py was not run and its result is unknown. No tests were run either; python3 verify.py has not been executed for this plan. git log for ui.py comes only from the supplied evidence: the one commit c1112c1 'Fixture baseline'. That commit gives no reason for the label \"Export\", so nothing records it as a deliberate fix. The plan is Draft and awaits explicit human approval. It has not been approved, and no implementation or /build was started.",
+      "intake": "Spec found by Glob: requirements/WF-20-SPEC.md (only candidate). Read: AGENTS.md, requirements/WF-20-SPEC.md, ui.py, verify.py. Git evidence (from the runner): the spec is committed, git diff HEAD on it is empty, and the last commit to touch it is {spec_sha}. Project rules (AGENTS.md:1): plans and tasks go in work/; verification command is python3 verify.py; no external tracker; no schema, public-contract or lifecycle change.",
+      "spec": "",
+      "plan": "# Implementation Plan: Export action label\n\nStatus: Draft\nSpec: requirements/WF-20-SPEC.md\nModules: N/A\nNot yet planned: None\nSpec status: Approved\nSpec revision: git-commit:{spec_sha}:requirements/WF-20-SPEC.md\nApproved by: —\nApproved at: —\n\n## Technical Approach\nCurrent: `ui.py:1` sets `LABEL = \"Export\"`. `ui.py:2-3` `click(callback)` calls the callback once. `verify.py:2` asserts the label is \"Export\", and `verify.py:3-5` asserts that the callback runs exactly once.\n\nProposed: change the value of `LABEL` in `ui.py` to \"Download\" and leave `click` alone. Update `verify.py:2` to expect \"Download\" and keep the callback assertion (`verify.py:3-5`) as it is. That assertion is the proof that REQ-002 still holds.\n\nReversal note: the \"Export\" value comes from c1112c1 \"Fixture baseline\" (supplied git evidence), the only commit. That commit gives no reason for this label, and REQ-001 asks for the rename.\n\nAffected paths: `ui.py`, `verify.py`.\n\n## Task Index\n- [ ] T001 (XS, ws-main, deps: —) [REQ-001, REQ-002]: The export action shows \"Download\", and clicking it still runs the existing callback exactly once\n\n## Requirement Coverage\n- REQ-001 → T001 → verify.py label assertion (\"Download\")\n- REQ-002 → T001 → verify.py callback-once assertion, kept unchanged and passing (preserved behavior)\n\nUnmapped requirements: None\nOrphan tasks: None\n\n## Verification Strategy\n- Integrated: `python3 verify.py` (AGENTS.md:1, spec Testing Strategy)\n\n---\nHandoff: Awaiting plan approval\n",
+      "todo": "# WF-20 Task Packets\n\n## T001: Rename the export action label to Download, preserving its callback\n\n**Status:** Pending\n\n**Requirements:** REQ-001, REQ-002\n\n**Acceptance criteria:**\n- [ ] `ui.LABEL` equals \"Download\" (REQ-001)\n- [ ] `ui.click(callback)` still calls the callback exactly once; `click` is unchanged (REQ-002)\n- [ ] `verify.py` asserts the label \"Download\" and keeps its existing callback-once assertion unchanged\n\n**Verification:**\n- [ ] Tests pass: `python3 verify.py`\n\n**Dependencies:** None\n\n**Workstream:** ws-main\n\n**Context pointers:**\n- Project/module rules: `AGENTS.md`\n- Closest precedent: `verify.py` (existing label and callback assertions)\n- Shared contract/invariant: the callback runs exactly once per click (REQ-002, `ui.py:2-3`)\n- The current label \"Export\" comes from c1112c1 \"Fixture baseline\"; that commit gives no reason for it, and REQ-001 asks for the rename.\n\n**Files/areas likely touched:**\n- `ui.py`\n- `verify.py`\n\n**Change-surface search:** `rg -n \"LABEL|Export\" .` The /plan file listing (Glob) found only ui.py and verify.py, and the reads show only verify.py using LABEL. /build should rerun the search; any other consumer it finds is a stop condition.\n\n**Estimated scope:** XS\n",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plan_preserved_req",
+    "expected": {
+      "draft_only": true,
+      "awaiting_human": true,
+      "valid_committed_spec_pin": true,
+      "requirements_in_packet": true,
+      "verification_in_packet": true,
+      "context_in_packet": true,
+      "preserved_req_has_task": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "ready_for_review",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "- [ ] T001 (S, ws-main, deps: —) [REQ-001, REQ-002]: label",
+      "todo": "REQ-001 REQ-002 python3 verify.py ui.py verify.py",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plan_preserved_req",
+    "expected": {
+      "draft_only": false,
+      "awaiting_human": false,
+      "valid_committed_spec_pin": false,
+      "requirements_in_packet": true,
+      "verification_in_packet": true,
+      "context_in_packet": true,
+      "preserved_req_has_task": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "ready_for_review",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "- [ ] T001 (S, ws-main, deps: —) [REQ-001]: label\n- REQ-002 → verification only → verify.py",
+      "todo": "REQ-001 REQ-002 python3 verify.py ui.py verify.py",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plan_preserved_req",
+    "expected": {
+      "draft_only": false,
+      "awaiting_human": false,
+      "valid_committed_spec_pin": false,
+      "requirements_in_packet": true,
+      "verification_in_packet": true,
+      "context_in_packet": true,
+      "preserved_req_has_task": false
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "ready_for_review",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "- [ ] T001 (S, ws-main, deps: —) [REQ-001, REQ-002]: label",
+      "todo": "REQ-002 python3 verify.py ui.py verify.py",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plan_preserved_req",
+    "expected": {
+      "draft_only": false,
+      "awaiting_human": false,
+      "valid_committed_spec_pin": false,
+      "requirements_in_packet": false,
+      "verification_in_packet": true,
+      "context_in_packet": true,
+      "preserved_req_has_task": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "ready_for_review",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "- [ ] T001 (S, ws-main, deps: —) [REQ-001, REQ-002]: label",
+      "todo": "REQ-001 REQ-002 verify.py ui.py verify.py",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plan_preserved_req",
+    "expected": {
+      "draft_only": false,
+      "awaiting_human": false,
+      "valid_committed_spec_pin": false,
+      "requirements_in_packet": true,
+      "verification_in_packet": false,
+      "context_in_packet": true,
+      "preserved_req_has_task": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "ready_for_review",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "- [ ] T001 (S, ws-main, deps: —) [REQ-001, REQ-002]: label",
+      "todo": "REQ-001 REQ-002 python3 verify.py verify.py",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plan_preserved_req",
+    "expected": {
+      "draft_only": false,
+      "awaiting_human": false,
+      "valid_committed_spec_pin": false,
+      "requirements_in_packet": true,
+      "verification_in_packet": true,
+      "context_in_packet": false,
+      "preserved_req_has_task": true
+    }
+  }
+]

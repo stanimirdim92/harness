@@ -1,0 +1,59 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "The WF-50 intake (docs/specs/WF-50-intake.md, fetched 2026-11-20) is complete and current, so I'm reusing it. The jira-ticket skill isn't re-run. The intake lists one Blocker: the ticket doesn't say which roles may run the export. A Blocker in a complete intake doesn't stop /spec. It becomes OPEN QUESTION Q1 in the draft. It decides who can use the export, not whether the export exists, so no decision brief comes first. The intake lists no design references, so no Figma read is needed.\n\nWhat I checked in the repository (AGENTS.md, reports.py, users.py):\n- **Which module owns exports (the intake's question):** `reports.py:1`. Its `users_csv(users)` already builds a users CSV.\n- **The existing export doesn't match the ticket.** It leaves out archived users and writes only name and email. It has no header row and no CSV quoting. The ticket asks for archived users and a name, email, role column set. The ticket wins, because repository precedent doesn't outrank the ticket text.\n- **Not found in the repository:** the admin page, routes, and any role or permission model. These are recorded in the spec as **Not surveyed / No precedent found**.\n- **Verification command:** `python3 verify.py` (AGENTS.md:1). I found it in source and did not run it.\n\nThe spec will be a Full draft (Change kind: Modify) at docs/specs/WF-50-SPEC.md, Status: Draft. It covers four things:\n- the Export users action\n- the users.csv file name\n- the name, email, role columns\n- one row per user, archived users included\n\nNames that contain a comma are written with RFC 4180 quoting, so each name stays one field. This isn't a separate decision: without quoting, a comma in a name would break the required columns.\n\nDefaults taken (override by id): none. None of the questions is Low risk, and nothing in the ticket or repository settles them, so no `DEC-###` was decided by default.\n\nOpen questions. Each one blocks approval:\n\nQ1 (Blocker from the intake): Which roles may run the export\n- Option A: admins only (recommended — the smallest change that can be undone; the ticket puts the action on the admin page, and the export holds personal data such as emails)\n- Option B: every user who can open the admin page\n- Option C: a new permission that is assigned explicitly\n- Risk: High (authorization and privacy)\n→ Decision needed before this spec can be approved.\n\nQ2: Header row in users.csv\n- Option A: no header row, one line per user (recommended — matches the existing `reports.users_csv` at reports.py:2)\n- Option B: a header row `name,email,role`, then one row per user\n- Risk: High (a downloaded file format used outside this change)\n→ Decision needed before this spec can be approved.\n\nQ3: What happens to the existing `reports.users_csv`\n- Option A: leave it unchanged and add the WF-50 export beside it in reports.py (recommended — keeps existing behavior and can be undone)\n- Option B: change `users_csv` itself to include archived users and the role column\n- Risk: Medium\n→ Decision needed before this spec can be approved.\n\nStep-by-step example: users `{name: \"Ann\", email: \"ann@x.io\", role: \"admin\", archived: false}` and `{name: \"Lee, Bo\", email: \"bo@x.io\", role: \"viewer\", archived: true}`.\n1. An admin clicks \"Export users\". Who is allowed to do this depends on Q1.\n2. The archived user is kept. Today's `users_csv` would drop them.\n3. Each user becomes one row in the order name, email, role. \"Lee, Bo\" is quoted as `\"Lee, Bo\"`.\n4. The browser downloads `users.csv` containing `Ann,ann@x.io,admin` and `\"Lee, Bo\",bo@x.io,viewer`. A `name,email,role` header line comes first only if Q2=B.\n\nThe spec stays Draft and can't be presented for approval while Q1–Q3 are open. This run ended before the spec was written, so the shape check (check-spec.py) has not run.\n\n/spec WF-50 decisions: Q1=…, Q2=…, Q3=…",
+      "intake": "Reused docs/specs/WF-50-intake.md (fetched 2026-11-20 by the jira-ticket skill; ticket unchanged since). Coverage: 1 ticket discovered and fully read (WF-50), 0 partial, 0 unread, so the intake is complete. The ticket asks for an \"Export users\" action on the admin page that downloads a CSV with columns name, email and role, with archived users included. Acceptance criteria: the file is named users.csv, and each user is one row. Design references: none. Intake question: which module owns the existing exports? Answered: reports.py (reports.py:1, `users_csv`). Blocker: the ticket does not say which roles may run the export. It goes into the spec as OPEN QUESTION Q1 and does not stop /spec.",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "1. Reuse the saved intake docs/specs/WF-50-intake.md. It is complete and current, so the jira-ticket skill is not invoked.\n2. Design references: none in the intake, so no Figma tools are called.\n3. Decision-brief check: the intake Blocker (who may run the export) does not decide whether a requirement exists, so it becomes an OPEN QUESTION in the draft. No brief comes first.\n4. Repository evidence, bounded check (Read/Glob): AGENTS.md, reports.py, users.py. Owning module is reports.py. Precedent `users_csv` leaves out archived users and the role column, and the ticket overrides it. Admin page and role model: Not surveyed / no precedent found. Verification command `python3 verify.py` found in source, not run.\n5. Draft the Full-form spec docs/specs/WF-50-SPEC.md (Status: Draft, Change kind: Modify) with Q1–Q3 as OPEN QUESTION blocks. The trial ends before the spec is written.\nQ1: open question — which roles may run the export is an unanswered product decision on authorization and privacy (Risk: High)\nQ2: open question — header row in users.csv changes the downloaded file format; precedent says no header, but a High-risk choice is never taken by default (Risk: High)\nQ3: open question — whether to change the existing reports.users_csv or leave it as it is; nothing in the ticket or repository settles it (Risk: Medium)",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "specgate_intake_blocker",
+    "expected": {
+      "run_goes_on": true,
+      "roles_question_is_asked": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "One question stays open.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "Draft\nQ1: open question — which roles may export",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "specgate_intake_blocker",
+    "expected": {
+      "run_goes_on": true,
+      "roles_question_is_asked": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "The intake is incomplete: WF-52 is unread.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "specgate_intake_blocker",
+    "expected": {
+      "run_goes_on": false,
+      "roles_question_is_asked": false
+    }
+  }
+]

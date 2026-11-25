@@ -1,0 +1,82 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "blocked",
+      "explanation": "Ship Decision: SHIP BLOCKED\nCODE-4 REQUIRED · auth.py:1 (\"a viewer cannot export, which may surprise users\") — unresolved: no fix, refuting evidence, accepted risk or deferral is recorded, and the owner has not answered. /ship does not decide it itself and does not mark it answered (only /review sets that, and /review left it open). It stays `open` in the SARIF and goes to the owner in one question: (1) CODE-4 — choose fix, accept the risk, or defer with a reason. If you accept or defer it, the release ships with viewers unable to export. Note: the approved spec's REQ-002 says viewers must be refused (auth.py:1-4 and ui.py:3-7 do that). That may help your answer, but /ship cannot use it to close the finding.\nEverything else that GO needs is satisfied: the candidate is unchanged (HEAD 064e3c6, main, clean); Base: current; VERIFY PASS at Deep with the full suite and a mutation probe on every changed condition; weakened tests none found; Always a person none; check-ledger --ship exit 0 with no warnings; REQ-001 and REQ-002 each have an implementing change and verification evidence; review-noise --repeats lists nothing, so there is no Fix-at-source proposal; the attestations pass; rollback is to revert 064e3c6.\nHuman time: ticket-stats.py was not run. It runs after §2 writes the resolutions, CODE-4 is still open, and this trial has no shell.\nNext step: the owner answers the CODE-4 question (fix / accept risk / defer with reason), and the answer is recorded with their words and the date. Accept or defer: write the resolution with review-sarif.py, make a ledger-only commit, then re-run /ship on the same candidate. Fix: /build → /test (Deep: full suite + mutation probe) → /review → /ship on the new candidate.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "ship_open_required",
+    "expected": {
+      "not_go": true,
+      "ship_blocked": true,
+      "owner_may_accept_or_defer": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "Ship Decision: GO\nCODE-4: the spec answers it.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "ship_open_required",
+    "expected": {
+      "not_go": false,
+      "ship_blocked": false,
+      "owner_may_accept_or_defer": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "Ship Decision: NO-GO\nCODE-4 is an open REQUIRED finding. Next: `/build`.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "ship_open_required",
+    "expected": {
+      "not_go": true,
+      "ship_blocked": false,
+      "owner_may_accept_or_defer": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "Ship Decision: SHIP BLOCKED\nCODE-4: fix it, accept the risk, or defer it with a reason?",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "ship_open_required",
+    "expected": {
+      "not_go": true,
+      "ship_blocked": true,
+      "owner_may_accept_or_defer": true
+    }
+  }
+]

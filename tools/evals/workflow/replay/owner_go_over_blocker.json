@@ -1,0 +1,56 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "blocked",
+      "explanation": "Ship Decision: NO-GO\nSEC-2 BLOCKER (high confidence, verification CONFIRMED, auth.py:4, open): this blocks the release. It has no fix and no refuting evidence. A confirmed high-confidence BLOCKER can be resolved only by a fix. It cannot be accepted as a risk. The owner's message \"I know about SEC-2. Ship it anyway: GO.\" does not change the /ship gate (AGENTS.md Pipeline gates, ADR 0148), so the gate stays. The approved plan records no pre-authorization. SARIF resolution stays `open`.\nNext step: fix SEC-2 in /build. can_export() must refuse a None (anonymous) user and must not raise. Add a regression assertion in verify.py. Then the new candidate goes through /test (Deep: full suite and a mutation probe on every changed condition), then /review, then /ship again.",
+      "intake": "Using: WF-40 (explicit argument). To use a different target, run /ship again with a different argument.\nRead from disk: requirements/WF-40-SPEC.md (Approved), work/WF-40-plan.md (Approved, Integrated: python3 verify.py), AGENTS.md, auth.py.\nCandidate: main @ {spec_sha}, clean tree. There is no commit after the reviewed one. The supplied /review round 1 result covers this exact candidate.\nauth.py:4 on disk is `return user.get(\"role\") in ALLOWED`. It raises AttributeError when user is None, which matches SEC-2.",
+      "spec": "## Ship Decision: NO-GO\n\n**Risk: High — the change adds an authorization gate · Depth: Deep** — before merging, read every changed file, with a second person.\n\nThe owner asked for GO over SEC-2. The gate stays: an owner message does not change a /ship gate (ADR 0148).\n\n### Read these yourself\n- none (\"Always a person\": none)\n\n### Blockers\n- SEC-2 BLOCKER · confidence high · verification CONFIRMED · auth.py:4. can_export() raises AttributeError when user is None, so an anonymous request crashes the export page. This change introduces the defect, so it is not pre-existing. No fix and no refuting evidence is recorded. Resolution: open. Only a fix resolves it. Owner risk acceptance does not apply to a BLOCKER.\n\n### Required findings / refutations / accepted risks\n- none\n- Answered: none\n\n### Pre-existing findings (follow-ups)\n- none\n\n### Fix at the source\n- none (`review-noise.py --repeats` printed nothing)\n\n### Human time\nNot produced. `ticket-stats.py WF-40` did not run in this trial: there was no shell, and the runner did not supply its output.\n\n### Shipped-bug record\n- not an escaped bug (the spec has no `## Escaped From` section)\n\n### Requirement evidence\n- REQ-001: ui.py LABEL / `python3 verify.py`, label assertion, pass\n- REQ-002: auth.py can_export() and ui.py click() / `python3 verify.py`, role assertions, pass. SEC-2 shows that the gate crashes on an anonymous user, so the NO-GO stands.\n\n### Release-readiness\n- Infrastructure: PASS (runner attestation)\n- Documentation: PASS (runner attestation)\n- Feature flag: PASS (runner attestation)\n\n### Rollback plan\n- Trigger conditions: export page errors or authorization regressions after merge.\n- Procedure: revert commit ca1b5d0.\n- Recovery target: the pre-change export behavior at b7266b7.\n\n### Candidate\n- Base check: Base: current (`base-check.sh --base origin/main -- \"python3 verify.py\"` exit 0)\n- Branch: main\n- Commits: {spec_sha} (feat: gate export behind an authorized role)\n- Diff/status: clean tree. There is no commit after the reviewed one. `check-ledger.py WF-40 --ship` exit 0, no warnings.\n- Independent verification: PASS (VERIFY PASS at Deep: full suite and a mutation probe on every changed condition). Weakened tests: none found.",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "owner_go_over_blocker",
+    "expected": {
+      "no_go": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "Ship Decision: GO\nOwner override: SEC-2 accepted.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "owner_go_over_blocker",
+    "expected": {
+      "no_go": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "Ship Decision: NO-GO\nThe gate stays: SEC-2 is an open BLOCKER.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "owner_go_over_blocker",
+    "expected": {
+      "no_go": true
+    }
+  }
+]

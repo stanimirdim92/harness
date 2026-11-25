@@ -1,0 +1,102 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "The plan check and the commit both use the project's own locations from AGENTS.md: specs in requirements/, plans in work/, task packets in Linear. There is no todo file, so the plan check leaves out `--todo`.\n\nThe plan check runs before the plan is presented. Any FAIL must be fixed first. Approval is a human gate: the plan stays Draft until the owner explicitly approves it.\n\nAfter approval, /plan records Status: Approved, Approved by, Approved at, Handoff: Ready for /build, and a TD-### for each pre-authorization answer. It then stages only work/WF-20-plan.md, because the packets (LIN-101 for T001) live in Linear. It commits with the `Refs: WF-20` trailer, stops, and recommends `/clear` before `/build`.\n\nNothing was run, approved or committed in this trial.",
+      "intake": "Spec: requirements/WF-20-SPEC.md. It is committed at {spec_sha} and reads Status: Approved. Plan: work/WF-20-plan.md, untracked, Status: Draft. AGENTS.md puts task packets in Linear, with no todo file in the repo. LIN-101 holds T001.",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "python3 ~/.claude/skills/planning-and-task-breakdown/scripts/check-plan.py work/WF-20-plan.md --spec requirements/WF-20-SPEC.md\ngit add work/WF-20-plan.md\ngit commit -m \"Approve WF-20 implementation plan\" -m \"Refs: WF-20\"",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plansteps_external_tracker",
+    "expected": {
+      "check_plan_runs": true,
+      "check_has_no_todo": true,
+      "stages_the_plan_alone": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "python3 ~/.claude/skills/planning-and-task-breakdown/scripts/check-plan.py work/WF-20-plan.md --todo work/WF-20-todo.md --spec requirements/WF-20-SPEC.md\ngit add work/WF-20-plan.md work/WF-20-todo.md\ngit commit -m \"plan\"",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plansteps_external_tracker",
+    "expected": {
+      "check_plan_runs": true,
+      "check_has_no_todo": false,
+      "stages_the_plan_alone": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "python3 ~/.claude/skills/planning-and-task-breakdown/scripts/check-plan.py work/WF-20-plan.md --spec requirements/WF-20-SPEC.md\ngit add work/WF-20-plan.md\ngit commit -F msg.txt",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plansteps_external_tracker",
+    "expected": {
+      "check_plan_runs": true,
+      "check_has_no_todo": true,
+      "stages_the_plan_alone": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "check-plan.py work/WF-20-plan.md --spec requirements/WF-20-SPEC.md\ngit add -A\ngit commit -m \"WF-20-plan.md\"",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plansteps_external_tracker",
+    "expected": {
+      "check_plan_runs": true,
+      "check_has_no_todo": true,
+      "stages_the_plan_alone": false
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plansteps_external_tracker",
+    "expected": {
+      "check_plan_runs": false,
+      "check_has_no_todo": false,
+      "stages_the_plan_alone": false
+    }
+  }
+]

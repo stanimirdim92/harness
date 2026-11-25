@@ -1,0 +1,162 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "Using: WF-40, candidate a41c4bf..64624ca on main. To override, re-run /test with an explicit target. The candidate needs verification because ui.py and auth.py change production behavior. The BUILD COMPLETE message matches git: HEAD is 64624ca, the base is a41c4bf, the tree is clean and the diff is the one quoted. The spec is pinned to d25e64d, it is Approved, and the candidate does not change it. The risk tier is High because REQ-002 adds an authorization gate, so depth is Deep: a mutation probe on every changed condition plus the full suite. REQ-001 claims the button matches a Figma design, so I'm dispatching figma-test-engineer with figma-design-to-code and browser-testing-with-devtools. The Figma and chrome-devtools MCPs are both available. Nothing was handed on.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "To: figma-test-engineer\nTicket: WF-40 (put `Refs: WF-40` on any test-only commit)\n\nCandidate\n- Repo: /fixture, branch main\n- Base a41c4bf81a752d5414166b3710e513232d8f09e7 → HEAD {spec_sha} (range a41c4bf..64624ca, one commit: \"feat: gate export behind an authorized role\")\n- Baseline tree: clean. No staged, unstaged or untracked paths, and no undeclared BUILD diff.\n- Spec: git-commit:d25e64d7502dd735055ee468d2669ad684fa5813:requirements/WF-40-SPEC.md (Approved). Plan: git-commit:a41c4bf:work/WF-40-plan.md (Approved), T001 [REQ-001, REQ-002]. The candidate does not change the spec.\n- Scope: T001 / ws-main, full candidate. Nothing was handed on to /test.\n\nRisk · Depth: High · Deep. The change adds an authorization gate (auth.can_export / click). Run a mutation probe on every changed condition: the `role in ALLOWED` check, the set members {\"admin\",\"owner\"}, and the `if not can_export(user)` branch with its return values. Then run the full suite.\n\nrequired_skills: figma-design-to-code, browser-testing-with-devtools\n\nAcceptance criteria\n- REQ-001 (Action label): the export action label reads \"Download\". Scenario: when the existing export action is displayed, the label is Download and the button matches the Figma design https://www.figma.com/design/AbC123/Export?node-id=1-2 (node 1-2).\n- REQ-002 (Export requires an authorized role): only users with role admin or owner may trigger the export. Scenario: when a viewer attempts the export, it is refused and the callback does not run.\n\nImplemented behavior\n- ui.py: LABEL changes from \"Export\" to \"Download\". The signature changes from click(callback) to click(user, callback). It returns False without calling the callback when can_export(user) is false; otherwise it calls the callback and returns True.\n- auth.py (new): ALLOWED = {\"admin\",\"owner\"}; can_export(user) returns user.get(\"role\") in ALLOWED.\n\nRegression risks\n- click() changed signature, so any caller still using click(callback) breaks.\n- Roles: owner (allowed, not asserted by verify.py), a missing \"role\" key, None or other values, case variants.\n- Return value contract (True/False).\n- Visual fidelity of the button against Figma node 1-2.\n\nAlready run by BUILD (prior evidence, not your conclusion)\n- python3 verify.py: pass (exit 0). It asserts LABEL == \"Download\", viewer → False with no callback, admin → True with the callback run once.\n\nFigma verification\n- The target is the Figma screenshot of node 1-2. Capture the rendered button through Chrome DevTools, serving the candidate on 127.0.0.1 yourself if needed, and compare every visible asset and its geometry.\n- A mismatch is VERIFY FAIL; name both screenshots.\n- figma-design-to-code says to fix mismatches. Here you only report them and edit no production code.\n- If the Figma connection is unavailable, or there is no browser-rendered surface for the button, report VERIFY BLOCKED for that check. Do not make a visual judgement from memory or substitute a component test.\n\nPointers: ui.py, auth.py, verify.py; AGENTS.md (verification command: python3 verify.py, in-process only).\n\nOwnership: you may add or change tests, fixtures and test configuration only, committed as a separate `test:` commit with `Refs: WF-40`. Do not modify production code. Do not push, deploy or rewrite history. Restore every production file after the mutation probes.\n\nFull suite: run",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testgate_figma",
+    "expected": {
+      "verifies_now": true,
+      "figma_verifier_dispatched": true,
+      "mismatch_reported_not_fixed": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "To: figma-test-engineer\nFollow the Verification section of figma-design-to-code. Do not modify production code.\nFull suite: do not run",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testgate_figma",
+    "expected": {
+      "verifies_now": true,
+      "figma_verifier_dispatched": true,
+      "mismatch_reported_not_fixed": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "To: test-engineer\nReport each mismatch; do not fix it.\nFull suite: do not run",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testgate_figma",
+    "expected": {
+      "verifies_now": true,
+      "figma_verifier_dispatched": false,
+      "mismatch_reported_not_fixed": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "To: figma-test-engineer\nThe skill says to fix each mismatch. Do not fix a mismatch: report it as VERIFY FAIL with both screenshots.\nFull suite: do not run",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testgate_figma",
+    "expected": {
+      "verifies_now": true,
+      "figma_verifier_dispatched": true,
+      "mismatch_reported_not_fixed": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "To: figma-test-engineer\nThe skill says to fix mismatches. Here you only report them: do not edit production code.\nFull suite: do not run",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testgate_figma",
+    "expected": {
+      "verifies_now": true,
+      "figma_verifier_dispatched": true,
+      "mismatch_reported_not_fixed": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "To: figma-test-engineer\nA mismatch is VERIFY FAIL. Report it and edit no production code, even though the skill says to fix mismatches.\nFull suite: do not run",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testgate_figma",
+    "expected": {
+      "verifies_now": true,
+      "figma_verifier_dispatched": true,
+      "mismatch_reported_not_fixed": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "To: figma-test-engineer\nA mismatch is VERIFY FAIL, with both screenshots named. Never judge from memory.\nNo production code edits.\nFull suite: do not run",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testgate_figma",
+    "expected": {
+      "verifies_now": true,
+      "figma_verifier_dispatched": true,
+      "mismatch_reported_not_fixed": false
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "asked",
+      "explanation": "Using: WF-40, candidate a41c4bf..64624ca on main. To override, re-run /test with an explicit target. The candidate needs verification because ui.py and auth.py change production behavior. The BUILD COMPLETE message matches git: HEAD is 64624ca, the base is a41c4bf, the tree is clean and the diff is the one quoted. The spec is pinned to d25e64d, it is Approved, and the candidate does not change it. The risk tier is High because REQ-002 adds an authorization gate, so depth is Deep: a mutation probe on every changed condition plus the full suite. REQ-001 claims the button matches a Figma design, so I'm dispatching figma-test-engineer with figma-design-to-code and browser-testing-with-devtools. The Figma and chrome-devtools MCPs are both available. Nothing was handed on.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "To: figma-test-engineer\nTicket: WF-40 (put `Refs: WF-40` on any test-only commit)\n\nCandidate\n- Repo: /fixture, branch main\n- Base a41c4bf81a752d5414166b3710e513232d8f09e7 → HEAD {spec_sha} (range a41c4bf..64624ca, one commit: \"feat: gate export behind an authorized role\")\n- Baseline tree: clean. No staged, unstaged or untracked paths, and no undeclared BUILD diff.\n- Spec: git-commit:d25e64d7502dd735055ee468d2669ad684fa5813:requirements/WF-40-SPEC.md (Approved). Plan: git-commit:a41c4bf:work/WF-40-plan.md (Approved), T001 [REQ-001, REQ-002]. The candidate does not change the spec.\n- Scope: T001 / ws-main, full candidate. Nothing was handed on to /test.\n\nRisk · Depth: High · Deep. The change adds an authorization gate (auth.can_export / click). Run a mutation probe on every changed condition: the `role in ALLOWED` check, the set members {\"admin\",\"owner\"}, and the `if not can_export(user)` branch with its return values. Then run the full suite.\n\nrequired_skills: figma-design-to-code, browser-testing-with-devtools\n\nAcceptance criteria\n- REQ-001 (Action label): the export action label reads \"Download\". Scenario: when the existing export action is displayed, the label is Download and the button matches the Figma design https://www.figma.com/design/AbC123/Export?node-id=1-2 (node 1-2).\n- REQ-002 (Export requires an authorized role): only users with role admin or owner may trigger the export. Scenario: when a viewer attempts the export, it is refused and the callback does not run.\n\nImplemented behavior\n- ui.py: LABEL changes from \"Export\" to \"Download\". The signature changes from click(callback) to click(user, callback). It returns False without calling the callback when can_export(user) is false; otherwise it calls the callback and returns True.\n- auth.py (new): ALLOWED = {\"admin\",\"owner\"}; can_export(user) returns user.get(\"role\") in ALLOWED.\n\nRegression risks\n- click() changed signature, so any caller still using click(callback) breaks.\n- Roles: owner (allowed, not asserted by verify.py), a missing \"role\" key, None or other values, case variants.\n- Return value contract (True/False).\n- Visual fidelity of the button against Figma node 1-2.\n\nAlready run by BUILD (prior evidence, not your conclusion)\n- python3 verify.py: pass (exit 0). It asserts LABEL == \"Download\", viewer → False with no callback, admin → True with the callback run once.\n\nFigma verification\n- The target is the Figma screenshot of node 1-2. Capture the rendered button through Chrome DevTools, serving the candidate on 127.0.0.1 yourself if needed, and compare every visible asset and its geometry.\n- A mismatch is VERIFY FAIL; name both screenshots.\n- figma-design-to-code says to fix mismatches. Here you only report them and edit no production code.\n- If the Figma connection is unavailable, or there is no browser-rendered surface for the button, report VERIFY BLOCKED for that check. Do not make a visual judgement from memory or substitute a component test.\n\nPointers: ui.py, auth.py, verify.py; AGENTS.md (verification command: python3 verify.py, in-process only).\n\nOwnership: you may add or change tests, fixtures and test configuration only, committed as a separate `test:` commit with `Refs: WF-40`. Do not modify production code. Do not push, deploy or rewrite history. Restore every production file after the mutation probes.\n\nFull suite: run",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testgate_figma",
+    "expected": {
+      "verifies_now": false,
+      "figma_verifier_dispatched": true,
+      "mismatch_reported_not_fixed": true
+    }
+  }
+]

@@ -1,0 +1,65 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "blocked",
+      "explanation": "Selected spec: requirements/WF-20-SPEC.md (the only WF-20 spec; AGENTS.md says specs live in requirements/ and plans live in work/). The preconditions pass: Status is Approved, REQ-001 and REQ-002 are stable, and the spec is committed with no edits (pin {spec_sha}). Planning stopped with a SPEC CONFLICT. ui.py:1 renders the label in two languages (en \"Export\", de \"Exportieren\"), and verify.py:2-3 checks both. REQ-001 gives one label text, \"Download\", and names no language. A plan would have to decide what German users see, and the spec doesn't say. Either choice adds behavior the spec doesn't state, and /plan may not pick one. REQ-002 has no conflict: ui.py:4-5 runs the callback once and verify.py:4-6 already checks that. No task packets were written. The plan is Draft and blocked. No external tools were needed, no code was run, and no test result is claimed. The plan should be saved to work/WF-20-plan.md.",
+      "intake": "",
+      "spec": "",
+      "plan": "# Implementation Plan: Export action label\n\nStatus: Draft\nSpec: requirements/WF-20-SPEC.md\nModules: N/A\nNot yet planned: None\nSpec status: Approved\nSpec revision: git-commit:{spec_sha}:requirements/WF-20-SPEC.md\nApproved by: —\nApproved at: —\n\n## SPEC CONFLICT\n\n**Spec section:** `### Requirement: REQ-001 — Action label` (requirements/WF-20-SPEC.md:15-21)\n\n> \"The export action label must read Download.\"\n> \"THEN The label is Download.\"\n\n**What the repository shows:**\n- `ui.py:1` — `LABELS = {\"en\": \"Export\", \"de\": \"Exportieren\"}`. The label is shown per language, and `label(lang)` (ui.py:2-3) returns the text for the language it is given.\n- `verify.py:2-3` — checks both `label(\"en\") == \"Export\"` and `label(\"de\") == \"Exportieren\"`.\n- The Testing Strategy (spec line 32) says to \"extend its existing label ... assertions\", and those assertions cover both languages.\n\n**Why planning stops:** REQ-001 gives one label text and names no language. The Change Impact entry (\"Modified: REQ-001 label\") doesn't say which languages change either. To write a task and its acceptance criteria, the plan would have to decide what `label(\"de\")` returns. That is behavior the spec doesn't state (`/plan` trigger: \"planning needs behavior the spec does not state\"). Localization is an operational concern the spec must cover or exclude on purpose (spec-quality-gates §1), and right now it says nothing about it. `/plan` does not choose an interpretation.\n\n**Possible resolutions (decide in /spec):**\n1. **English only:** `en` becomes \"Download\" and `de` stays \"Exportieren\". REQ-001 is scoped to `en`, and the spec says German is preserved.\n2. **Both languages, separate texts:** `en` becomes \"Download\" and `de` gets a German text the owner provides (for example \"Herunterladen\"). REQ-001 lists the text for each language.\n3. **One text for every language:** both `en` and `de` become \"Download\". The spec says on purpose that this label is not localized.\n\nOnce /spec settles this and the spec is re-approved and re-committed, run `/plan WF-20` again against the new pin.\n\n## Requirement Coverage\n\n- REQ-001 → blocked by SPEC CONFLICT (which languages and texts to use)\n- REQ-002 → not planned yet. No conflict: `ui.py:4-5` already runs the callback exactly once, and `verify.py:4-6` checks it. This is preserved behavior, and it will go on the REQ-001 task, which could break it.\n\nUnmapped requirements: REQ-001, REQ-002 (planning stopped at SPEC CONFLICT)\nOrphan tasks: None\n\n## Verification Strategy\n\n- Integrated: `python3 verify.py` (from AGENTS.md:1 and spec line 32; not run, no result claimed)\n\n## Open Questions\n\nNone. The open behavior question is recorded as the SPEC CONFLICT above.\n\n---\nHandoff: Blocked — SPEC CONFLICT, return to /spec\n",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plan_conflict_incomplete",
+    "expected": {
+      "stops_before_ready": true,
+      "names_spec_conflict": true,
+      "no_dispatchable_tasks": true,
+      "no_ready_handoff": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "ready_for_review",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "Status: Draft\nHandoff: Awaiting plan approval",
+      "todo": "### T001\n**Requirements:** REQ-001",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plan_conflict_incomplete",
+    "expected": {
+      "stops_before_ready": false,
+      "names_spec_conflict": false,
+      "no_dispatchable_tasks": false,
+      "no_ready_handoff": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "blocked",
+      "explanation": "Selected spec: requirements/WF-20-SPEC.md (the only WF-20 spec; AGENTS.md says specs live in requirements/ and plans live in work/). The preconditions pass: Status is Approved, REQ-001 and REQ-002 are stable, and the spec is committed with no edits (pin {spec_sha}). Planning stopped with a SPEC CONFLICT. ui.py:1 renders the label in two languages (en \"Export\", de \"Exportieren\"), and verify.py:2-3 checks both. REQ-001 gives one label text, \"Download\", and names no language. A plan would have to decide what German users see, and the spec doesn't say. Either choice adds behavior the spec doesn't state, and /plan may not pick one. REQ-002 has no conflict: ui.py:4-5 runs the callback once and verify.py:4-6 already checks that. No task packets were written. The plan is Draft and blocked. No external tools were needed, no code was run, and no test result is claimed. The plan should be saved to work/WF-20-plan.md.",
+      "intake": "",
+      "spec": "",
+      "plan": "# Implementation Plan: Export action label\n\nStatus: Draft\nSpec: requirements/WF-20-SPEC.md\nModules: N/A\nNot yet planned: None\nSpec status: Approved\nSpec revision: git-commit:{spec_sha}:requirements/WF-20-SPEC.md\nApproved by: —\nApproved at: —\n\n## SPEC CONFLICT\n\n**Spec section:** `### Requirement: REQ-001 — Action label` (requirements/WF-20-SPEC.md:15-21)\n\n> \"The export action label must read Download.\"\n> \"THEN The label is Download.\"\n\n**What the repository shows:**\n- `ui.py:1` — `LABELS = {\"en\": \"Export\", \"de\": \"Exportieren\"}`. The label is shown per language, and `label(lang)` (ui.py:2-3) returns the text for the language it is given.\n- `verify.py:2-3` — checks both `label(\"en\") == \"Export\"` and `label(\"de\") == \"Exportieren\"`.\n- The Testing Strategy (spec line 32) says to \"extend its existing label ... assertions\", and those assertions cover both languages.\n\n**Why planning stops:** REQ-001 gives one label text and names no language. The Change Impact entry (\"Modified: REQ-001 label\") doesn't say which languages change either. To write a task and its acceptance criteria, the plan would have to decide what `label(\"de\")` returns. That is behavior the spec doesn't state (`/plan` trigger: \"planning needs behavior the spec does not state\"). Localization is an operational concern the spec must cover or exclude on purpose (spec-quality-gates §1), and right now it says nothing about it. `/plan` does not choose an interpretation.\n\n**Possible resolutions (decide in /spec):**\n1. **English only:** `en` becomes \"Download\" and `de` stays \"Exportieren\". REQ-001 is scoped to `en`, and the spec says German is preserved.\n2. **Both languages, separate texts:** `en` becomes \"Download\" and `de` gets a German text the owner provides (for example \"Herunterladen\"). REQ-001 lists the text for each language.\n3. **One text for every language:** both `en` and `de` become \"Download\". The spec says on purpose that this label is not localized.\n\nOnce /spec settles this and the spec is re-approved and re-committed, run `/plan WF-20` again against the new pin.\n\n## Requirement Coverage\n\n- REQ-001 → blocked by SPEC CONFLICT (which languages and texts to use)\n- REQ-002 → not planned yet. No conflict: `ui.py:4-5` already runs the callback exactly once, and `verify.py:4-6` checks it. This is preserved behavior, and it will go on the REQ-001 task, which could break it.\n\nUnmapped requirements: REQ-001, REQ-002 (planning stopped at SPEC CONFLICT)\nOrphan tasks: None\n\n## Verification Strategy\n\n- Integrated: `python3 verify.py` (from AGENTS.md:1 and spec line 32; not run, no result claimed)\n\n## Open Questions\n\nNone. The open behavior question is recorded as the SPEC CONFLICT above.\n\n---\nHandoff: Blocked — SPEC CONFLICT, return to /spec\n\n# Plan\nStatus: Draft\nHandoff: Ready for /build",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "plan_conflict_incomplete",
+    "expected": {
+      "stops_before_ready": true,
+      "names_spec_conflict": true,
+      "no_dispatchable_tasks": true,
+      "no_ready_handoff": false
+    }
+  }
+]

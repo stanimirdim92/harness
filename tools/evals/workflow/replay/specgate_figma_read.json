@@ -1,0 +1,116 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "WF-50: the saved intake is complete and current, so /spec reuses it. The one gap is the Figma node, which is next. After that the run drafts the spec. Nothing is written yet, and no approval is requested in this run.\n\n**Intake reuse.** `docs/specs/WF-50-intake.md` (fetched 2026-11-20) reads 1 of 1 tickets and lists no Blockers. The ticket has not changed, so `jira-ticket` is not run again.\n\n**Design reference.** Figma node `AbC123` `1-2` (export button and dialog) was unread at intake. /spec reads it now with `get_metadata` and `get_screenshot`. It does not call `get_design_context` because no code is generated, and it does not call `use_figma` because the owner asked for no design edit. Each state the node shows becomes its own scenario with `Source:` naming node 1-2. That includes the button, the dialog, and any loading, empty and error states with their copy. A state the design leaves out becomes an Objective exclusion. If the design conflicts with the ticket or drops a ticket feature, a decision brief comes before the draft. If the node still cannot be read, it stays an explicit Assumption naming node 1-2 and saying what would confirm it.\n\n**Repository evidence (bounded check).** The repo is two one-line modules plus `AGENTS.md`, so no repo-recon is needed.\n- The intake asked which module owns existing exports: `reports.py`, through `users_csv` (`reports.py:1-2`).\n- `users_csv` leaves out archived users and writes only name and email, with no header and no quoting (`reports.py:2`).\n- `users.active_users` filters out archived users the same way (`users.py:1-2`).\n- `AGENTS.md:1` names the command `python3 verify.py`, but `verify.py` is not in the fixture and the command was not run.\n- Change kind: Modify.\n\n**Defaults taken (override by id)**\n- DEC-001: the export includes archived users (ticket requirement, intake line 10). This overrides `reports.py:2`.\n- DEC-002: the columns are name, email, role, in that order (intake line 9). This adds role to what `reports.py:2` writes.\n\n### DEC-001 — Export includes archived users\n- Decision: The \"Export users\" CSV includes every user, archived or not.\n- Alternatives: Leave out archived users, as `reports.py:2` and `users.py:2` do today.\n- Reason: The ticket asks for it (intake line 10: \"The export includes archived users.\"). Repository precedent does not outrank the ticket text, and a default may not narrow a requested behavior. Affects the row-selection requirement.\n- Source: WF-50 ticket via `docs/specs/WF-50-intake.md:10`; precedent `reports.py:2` overridden\n- Decided by: default (interactive)\n- Affects: REQ-002\n\n### DEC-002 — Columns are name, email, role\n- Decision: Each row holds name, email and role, in that order.\n- Alternatives: Name and email only, as `reports.py:2` writes today.\n- Reason: The ticket names the columns (intake line 9: \"The columns are name, email and role.\"). Dropping role would narrow requested behavior. Affects the column requirement.\n- Source: WF-50 ticket via `docs/specs/WF-50-intake.md:9`; precedent `reports.py:2` extended\n- Decided by: default (interactive)\n- Affects: REQ-003\n\n**Open questions (stay as OPEN QUESTION blocks in the draft, which therefore stays Draft and is not offered for approval)**\n- Q1: Change `users_csv` in place or add a new export next to it. Changing it in place changes output for any existing caller of a function that may be consumed outside this change. Risk: High. Recommended: add a new export and keep `users_csv` unchanged, because that keeps existing behavior and can be undone.\n- Q2: CSV format, covering the header row and quoting. Precedent writes no header and does not quote, so a name containing a comma or newline would break \"Each user is one row\" (intake line 14). Risk: High, because the downloaded file format is consumed outside the system. Recommended: no header (precedent `reports.py:2`), with RFC 4180 quoting so every user stays one row.\n\nAfter drafting, /spec saves `docs/specs/WF-50-SPEC.md` as Draft and runs `check-spec.py`. It reports the result, the path, the status and the remaining blockers, then ends with:\n`/spec WF-50 decisions: Q1=…, Q2=…`",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "1. Reuse intake docs/specs/WF-50-intake.md (complete, current, no Blockers); do not invoke jira-ticket.\n2. Finish the unread design reference: read Figma node AbC123 1-2 with get_metadata, then get_screenshot (no get_design_context, no use_figma).\n3. Bounded repository check: read AGENTS.md, reports.py, users.py; answer intake question (exports owned by reports.py:users_csv); note verify.py named in AGENTS.md:1 but absent and not executed.\n4. Branch on the Figma read: ticket/design conflict or dropped feature → decision brief (Q-shaped, ends with decisions line); otherwise draft; unreadable node → explicit Assumption naming node 1-2.\n5. Draft docs/specs/WF-50-SPEC.md (full form, Change kind: Modify, Status: Draft) with design states as scenarios citing node 1-2, DEC-001/DEC-002, and OPEN QUESTION blocks Q1/Q2.\n6. Run Approval Check and spec-quality-gates §1 checks; run check-spec.py and fix FAILs.\n7. Report path, Draft status, Defaults taken, open questions, and `/spec WF-50 decisions: Q1=…, Q2=…`; stop (no approval, no /plan).\nQ1: open question — changing reports.py:users_csv in place may alter a shared contract for existing callers; Risk High (recommended: new export, preserve users_csv)\nQ2: open question — CSV header/quoting defines a downloaded file format consumed outside the system; Risk High (recommended: no header per reports.py:2, RFC 4180 quoting to keep one row per user)\nQ3: default — include archived users (ticket, intake line 10; overrides reports.py:2) → DEC-001\nQ4: default — columns name, email, role in that order (ticket, intake line 9) → DEC-002",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "specgate_figma_read",
+    "expected": {
+      "design_is_read": true,
+      "no_code_generation_tool": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "Figma: get_design_context on node 1-2",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "specgate_figma_read",
+    "expected": {
+      "design_is_read": false,
+      "no_code_generation_tool": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "Figma: get_metadata and get_screenshot on node 1-2",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "specgate_figma_read",
+    "expected": {
+      "design_is_read": true,
+      "no_code_generation_tool": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "get_metadata, then get_screenshot. Do not call get_design_context or use_figma.",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "specgate_figma_read",
+    "expected": {
+      "design_is_read": true,
+      "no_code_generation_tool": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "tools get_metadata, get_screenshot (no get_design_context, no use_figma)",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "specgate_figma_read",
+    "expected": {
+      "design_is_read": true,
+      "no_code_generation_tool": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "get_screenshot for the picture, get_design_context for the layout; no use_figma",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "specgate_figma_read",
+    "expected": {
+      "design_is_read": true,
+      "no_code_generation_tool": false
+    }
+  }
+]

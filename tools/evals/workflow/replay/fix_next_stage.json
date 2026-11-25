@@ -1,0 +1,78 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "BUILD COMPLETE\nCODE-1: fixed — commit {spec_sha} (Refs: WF-40, Task: CODE-1). It was fixed test-first: verify.py:6 asserts that click(None, …) is False, and auth.py:4 now returns `user is not None and user.get(\"role\") in ALLOWED`. The executor found no other instance nearby. Its only caller, ui.py:4, gets the guard through can_export.\nNext stage: /test on the fix diff 73a83b7f68f369b05e56c021d7da5dc0191d5119..{spec_sha}, then /review WF-40.\n\nScope: open BLOCKER/REQUIRED findings that are not pre-existing → CODE-1 (REQUIRED, baselineState new). Round counted=1, under the limit of 4. Before dispatch, HEAD equalled reviewedCommit (git diff --name-only was empty).\nPlan checks: the plan (work/WF-40-plan.md) and spec (requirements/WF-40-SPEC.md) both read Status: Approved. The spec pin git-commit:e72ad96744dc8638b5dc99e3da6927829d03d55c resolves with an empty diff, so no re-pin was needed. The plan and todo are unchanged.\nWorkstreams: ws-code-1 had 1 fresh executor dispatch, 0 resumes and 0 model-tier overrides. There were 0 verification failures causing rework, 0 human redirects and 0 scope expansions.\nVerification: executor ran `python3 verify.py` → exit 0 at 76ed52d. Plan Integrated command is the same `python3 verify.py`. With no change after 76ed52d, the executor's run counts as the integrated result; I did not rerun it myself. Checkpoints: none in scope. No browser-dependent criteria.\nNoticed, not touched: the candidate sits on `main`, which is the repository's default branch. /build readiness refuses the default branch for a ticket checkout. The human should confirm this branch is intended before /test or /ship.\nCandidate identity: repo /fixture, branch main. Reviewed base is 73a83b7f68f369b05e56c021d7da5dc0191d5119 and HEAD is {spec_sha}; the fix range is 73a83b7..76ed52d (1 commit) and the ticket range is e72ad96..76ed52d. Tree clean. Spec pin is e72ad96744dc8638b5dc99e3da6927829d03d55c:requirements/WF-40-SPEC.md, and the plan was committed at 9846c03.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "fix_next_stage",
+    "expected": {
+      "build_complete": true,
+      "test_is_the_next_stage": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "BUILD COMPLETE\n- CODE-1: fixed (abc1234)\nNext stage: /review.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "fix_next_stage",
+    "expected": {
+      "build_complete": true,
+      "test_is_the_next_stage": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "BUILD COMPLETE\n- CODE-1: fixed (abc1234)\nNext stage: `/test` on the fix diff, then `/review`.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "fix_next_stage",
+    "expected": {
+      "build_complete": true,
+      "test_is_the_next_stage": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "asked",
+      "explanation": "BUILD COMPLETE\nCODE-1: fixed — commit {spec_sha} (Refs: WF-40, Task: CODE-1). It was fixed test-first: verify.py:6 asserts that click(None, …) is False, and auth.py:4 now returns `user is not None and user.get(\"role\") in ALLOWED`. The executor found no other instance nearby. Its only caller, ui.py:4, gets the guard through can_export.\nNext stage: /test on the fix diff 73a83b7f68f369b05e56c021d7da5dc0191d5119..{spec_sha}, then /review WF-40.\n\nScope: open BLOCKER/REQUIRED findings that are not pre-existing → CODE-1 (REQUIRED, baselineState new). Round counted=1, under the limit of 4. Before dispatch, HEAD equalled reviewedCommit (git diff --name-only was empty).\nPlan checks: the plan (work/WF-40-plan.md) and spec (requirements/WF-40-SPEC.md) both read Status: Approved. The spec pin git-commit:e72ad96744dc8638b5dc99e3da6927829d03d55c resolves with an empty diff, so no re-pin was needed. The plan and todo are unchanged.\nWorkstreams: ws-code-1 had 1 fresh executor dispatch, 0 resumes and 0 model-tier overrides. There were 0 verification failures causing rework, 0 human redirects and 0 scope expansions.\nVerification: executor ran `python3 verify.py` → exit 0 at 76ed52d. Plan Integrated command is the same `python3 verify.py`. With no change after 76ed52d, the executor's run counts as the integrated result; I did not rerun it myself. Checkpoints: none in scope. No browser-dependent criteria.\nNoticed, not touched: the candidate sits on `main`, which is the repository's default branch. /build readiness refuses the default branch for a ticket checkout. The human should confirm this branch is intended before /test or /ship.\nCandidate identity: repo /fixture, branch main. Reviewed base is 73a83b7f68f369b05e56c021d7da5dc0191d5119 and HEAD is {spec_sha}; the fix range is 73a83b7..76ed52d (1 commit) and the ticket range is e72ad96..76ed52d. Tree clean. Spec pin is e72ad96744dc8638b5dc99e3da6927829d03d55c:requirements/WF-40-SPEC.md, and the plan was committed at 9846c03.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "fix_next_stage",
+    "expected": {
+      "build_complete": false,
+      "test_is_the_next_stage": true
+    }
+  }
+]

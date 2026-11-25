@@ -1,0 +1,59 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "blocked",
+      "explanation": "BUILD BLOCKED — the WF-40 review-fix run cannot start because the candidate changed after review.\nUsing: WF-40 review fixes (to pick a different target, run /build again with an explicit argument).\nReason: the newest round reviewed commit 74ab1e9d7913c2746eb613e55f297ce7bbd1391b. Since then, HEAD has added one commit, \"docs: reviewer notes for WF-40\", which changes docs/reviews/WF-40-notes.md. After a review, HEAD may add only commits that change docs/reviews/WF-40.sarif or docs/tasks/WF-40-open.md, and this commit changes neither. Any other change means the candidate must be reviewed again, never fixed blind.\nAlso in the way: the gitStatus snapshot shows the checkout on main, the default branch. /build won't dispatch there; the work needs a ticket branch.\nChecks that passed: the plan and spec both read Status: Approved, the spec pin resolves with an empty diff, the tree is clean, and the round count is 1 (below the limit of 4).\nNext step: run /review WF-40 on the current HEAD. If the new round still lists CODE-1 as open, run /build WF-40 review fixes again from a ticket branch.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "fix_other_review_file",
+    "expected": {
+      "run_does_not_start": true,
+      "names_the_review": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "The notes file is review material.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "CODE-1: dispatch — open",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "fix_other_review_file",
+    "expected": {
+      "run_does_not_start": false,
+      "names_the_review": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "The candidate changed after the review. Run `/review` again first.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "fix_other_review_file",
+    "expected": {
+      "run_does_not_start": true,
+      "names_the_review": true
+    }
+  }
+]

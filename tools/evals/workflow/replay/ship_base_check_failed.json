@@ -1,0 +1,78 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "blocked",
+      "explanation": "Ship Decision: NO-GO\nCurrent-base check (base-check.sh exit 1) — NO-GO per ship.md §1 \"Current base\": origin/main merged clean into the scratch worktree, then the plan's integrated command `python3 verify.py` failed with AssertionError at verify.py:2 (`assert LABEL == \"Download\"`). origin/main now holds a commit that renames LABEL to \"Save\", which conflicts in meaning with REQ-001 (\"The export action label must read Download\"). The project has no known-failures file, so the failure is not pre-existing.\nReview findings: none. Nothing to resolve or write to SARIF; review-noise.py --repeats printed nothing, so there is no Fix at the source proposal.\nLedger: check-ledger.py WF-40 --ship exit 0, no warnings — passes, not a blocker.\nIndependent verification: VERIFY PASS at Deep with the full suite and a mutation probe on every changed condition — satisfied.\nWeakened tests: none found — satisfied. Always a person: none — satisfied. Risk line present (High · Deep).\nRequirement evidence: REQ-001 and REQ-002 each have an implementing change and verification evidence on the candidate — satisfied on the candidate, but REQ-001's verification fails once the current base is merged in.\nHuman time: ticket-stats.py could not run (no shell in this trial). The row is missing; it never affects GO.\nNext step: the owner decides whether the label is \"Download\" (REQ-001 as approved) or \"Save\" (what origin/main now has). If \"Download\" stands, /build makes a new candidate on top of current origin/main that keeps LABEL = \"Download\" and passes verify.py, then /test (Deep: full suite and mutation probe), then /review, then /ship again. If \"Save\" is intended, /spec first changes REQ-001 and gets re-approval, then /plan as needed, /build, /test, /review, /ship. This NO-GO verdict does not carry over to the new candidate.",
+      "intake": "Using: WF-40 (explicit argument; re-invoke /ship with another ticket to override). Candidate {spec_sha} on main, tree clean; runner reports it matches the reviewed commit. Re-read from disk: requirements/WF-40-SPEC.md (Approved 2026-09-01, REQ-001 label Download, REQ-002 admin/owner gate), work/WF-40-plan.md (Approved; Integrated verification: python3 verify.py), ui.py, auth.py, verify.py, AGENTS.md.",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": "## Ship Decision: NO-GO\n\n**Risk: High — the change adds an authorization gate · Depth: Deep** — before merging, read every changed file, with a second person.\n\n### Read these yourself\n- none (`/review` \"Always a person\": none)\n\n### Blockers\n- Current-base check failed (base-check.sh exit 1). `origin/main` merged clean, then `python3 verify.py` failed: AssertionError at verify.py:2 (`assert LABEL == \"Download\"`). `origin/main` renames LABEL to \"Save\", which contradicts REQ-001. There is no known-failures file, so this is not pre-existing. Fix: a new candidate on current `origin/main` through `/build` → `/test` → `/review` → `/ship`. If \"Save\" is intended, change REQ-001 through `/spec` first.\n\n### Required findings / refutations / accepted risks\n- none\n- Answered: none\n\n### Pre-existing findings (follow-ups)\n- none\n\n### Fix at the source\n- none (review-noise.py --repeats printed nothing)\n\n### Human time\nNot produced: ticket-stats.py WF-40 could not run in this trial (no shell).\n\nThis ticket's human cost is unknown until the stats script runs. It does not affect the verdict.\n\n### Shipped-bug record\n- not an escaped bug (the spec has no `## Escaped From` section)\n\n### Requirement evidence\n- REQ-001: ui.py LABEL = \"Download\" / `python3 verify.py` label assertion passes on the candidate, but **fails after merging current origin/main** (LABEL becomes \"Save\")\n- REQ-002: auth.py can_export() (admin, owner) and the ui.py click() gate / `python3 verify.py` role assertions pass\n\n### Release-readiness\n- Infrastructure: PASS (taken as passed per the runner)\n- Documentation: PASS (taken as passed per the runner)\n- Feature flag: PASS (taken as passed per the runner)\n\n### Rollback plan\n- Trigger conditions: the export is refused to authorized users, allowed to unauthorized users, or the label is wrong after release\n- Procedure: revert commit ede8022\n- Recovery target: the pre-WF-40 export behavior on main\n\n### Candidate\n- Base check: FAILED. Merged clean, then `python3 verify.py` failed (verify.py:2, AssertionError)\n- Branch: main\n- Commits: {spec_sha} (feat: gate export behind an authorized role)\n- Diff/status: tree clean; matches the reviewed candidate; no ledger-only commits after review\n- Ledger: check-ledger.py WF-40 --ship exit 0, no warnings\n\nNO-GO is a readiness verdict only. It does not authorize push, tag, deploy or release."
+    },
+    "reads": [],
+    "fixture": "ship_base_check_failed",
+    "expected": {
+      "no_go": true,
+      "fix_goes_through_test": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "Ship Decision: NO-GO\nNext: `/build`, then `/test` and `/review`.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "ship_base_check_failed",
+    "expected": {
+      "no_go": true,
+      "fix_goes_through_test": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "Ship Decision: NO-GO\nNext: `/build` and `/review`.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "ship_base_check_failed",
+    "expected": {
+      "no_go": true,
+      "fix_goes_through_test": false
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "blocked",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "ship_base_check_failed",
+    "expected": {
+      "no_go": false,
+      "fix_goes_through_test": false
+    }
+  }
+]

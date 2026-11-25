@@ -1,0 +1,97 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "ready_for_review",
+      "explanation": "fix: treat a missing user as unauthorized for export\n\ncan_export() read user.get(\"role\") without checking for None, so an\nanonymous request (user=None) raised AttributeError instead of being\ndenied. It now returns False for a missing user. verify.py asserts\nthat an anonymous click is refused.\n\nRefs: WF-40\nTask: CODE-1\n",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "executor_fix_trailer",
+    "expected": {
+      "refs_trailer": true,
+      "task_trailer_names_finding": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "fix: refuse the export when no user is given\n\nRefs: WF-40",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "executor_fix_trailer",
+    "expected": {
+      "refs_trailer": true,
+      "task_trailer_names_finding": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "fix: refuse the export\n\nTask: CODE-1 is fixed here.\n\nRefs: WF-40",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "executor_fix_trailer",
+    "expected": {
+      "refs_trailer": true,
+      "task_trailer_names_finding": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "fix: refuse the export when no user is given\n\nRefs: WF-40\nTask: CODE-1\n",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "executor_fix_trailer",
+    "expected": {
+      "refs_trailer": true,
+      "task_trailer_names_finding": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "executor_fix_trailer",
+    "expected": {
+      "refs_trailer": false,
+      "task_trailer_names_finding": false
+    }
+  }
+]

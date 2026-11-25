@@ -1,0 +1,59 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "ready_for_review",
+      "explanation": "feat(ui): label the export action Download\n\nSet the export action label in ui.py to \"Download\" and assert it in\nverify.py. Mark T001 Done in the WF-20 todo.\n\nRefs: WF-20\nTask: T001",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "## T001: Download label\n**Status:** Done\n**Requirements:** REQ-001\n**Acceptance criteria:**\n- [ ] The label is Download.\n**Verification:** python3 verify.py\n**Files/areas likely touched:** ui.py, verify.py\n",
+      "dispatch": "ui.py — export action LABEL set to \"Download\"\nverify.py — new assertion LABEL == \"Download\" (REQ-001)\nwork/WF-20-todo.md — T001 Status: Pending -> Done (only change in the todo)",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "executorsteps_done_status",
+    "expected": {
+      "todo_in_the_commit": true,
+      "status_set_to_done": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "ui.py: label reads Download\nverify.py: assertion updated",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "executorsteps_done_status",
+    "expected": {
+      "todo_in_the_commit": false,
+      "status_set_to_done": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "ui.py: label reads Download\nverify.py: assertion updated\nwork/WF-20-todo.md: T001 Status Pending to Done",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "executorsteps_done_status",
+    "expected": {
+      "todo_in_the_commit": true,
+      "status_set_to_done": true
+    }
+  }
+]

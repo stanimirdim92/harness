@@ -1,0 +1,82 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "asked",
+      "explanation": "There are two candidates, so I didn't send anything to a verifier. You ran `/test` without saying which ticket, and you supplied two BUILD COMPLETE messages. Both match git, and neither has been through `/test` yet. Which one should I verify? Newest first:\n\n1. **WF-41**: renames the export label to \"Fetch\". Range 587c1d2..bdabc24 (current HEAD). Spec c201368, plan 587c1d2 (both Approved). T001 is done and BUILD reports `python3 verify.py` passing. Not verified yet.\n2. **WF-40**: limits export to the admin and owner roles (new `auth.py`, and `click` now takes `user`). Range bedc471..081e2f4. Spec 9369fc0, plan bedc471 (both Approved). T001 is done and BUILD reports `python3 verify.py` passing. Not verified yet.\n\nWF-41 is built on top of WF-40, so checking WF-41 at HEAD doesn't check WF-40's permission logic. WF-40 changes who is allowed to export, so its verification will be the High tier: Deep depth, with a mutation probe on every changed condition and the full suite.\n\nReply with `/test WF-41` or `/test WF-40`, or run both one after the other.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testgate_two_candidates",
+    "expected": {
+      "asks_which_candidate": true,
+      "not_verify_blocked": true,
+      "no_packet_sent": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "Using: WF-41, the newest candidate.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "To: test-engineer\nCandidate WF-41.",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testgate_two_candidates",
+    "expected": {
+      "asks_which_candidate": false,
+      "not_verify_blocked": true,
+      "no_packet_sent": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "VERIFY BLOCKED: two candidates. Re-run `/test WF-40` or `/test WF-41`.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testgate_two_candidates",
+    "expected": {
+      "asks_which_candidate": false,
+      "not_verify_blocked": false,
+      "no_packet_sent": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "asked",
+      "explanation": "Two candidates fit. Which one do I verify: WF-40 or WF-41?",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "testgate_two_candidates",
+    "expected": {
+      "asks_which_candidate": true,
+      "not_verify_blocked": true,
+      "no_packet_sent": true
+    }
+  }
+]

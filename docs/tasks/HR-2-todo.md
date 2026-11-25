@@ -234,7 +234,7 @@ case. The old `cases()` path keeps working until T008.
 
 ## T007: The replay set covers every check, true and false
 
-**Status:** Pending
+**Status:** Done
 
 **Requirements:** REQ-012, TD-003
 

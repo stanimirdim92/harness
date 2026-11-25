@@ -1,0 +1,86 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "blocked",
+      "explanation": "BUILD BLOCKED\nBlocker: the spec pin is stale and the change is behavioral. The plan pins git-commit:82311ca4c35b388b9de77a1cb53d9be9d12e1855:requirements/WF-30-SPEC.md. Commit 0146e26 (\"Spec: the label reads Save\") later changed REQ-001 from \"The export action label must read Download.\" to \"The export action label must read Save.\" It also changed the scenario THEN line from \"the label is Download.\" to \"the label is Save.\" That changes the outcome the user sees, so it is not an editorial fix. The plan still describes T001 as \"Download label\" (work/WF-30-plan.md:13). The spec header still reads Status: Approved even though its requirements changed after the plan was approved. Path taken: I diffed the pin against the working copy and classified the change as behavioral. That makes the plan stale, so I did not re-pin it. I dispatched nothing for T001 (ws-label) or T002 (ws-report). The whole plan is stale, so T002 does not go ahead on its own either. No checkpoints ran, no commits were made, and no verification was run. The tree is clean on main at 0146e26.\nRoutes to: /spec to re-approve WF-30-SPEC.md with REQ-001 = Save, then /plan to replan and re-pin to the newly approved spec commit, then /build again.\nPlan status: Needs replan\nSpec status: Needs reapproval",
+      "intake": "Using: WF-30, tasks T001 and T002. To change this, run /build again with an explicit argument. Plan: work/WF-30-plan.md, Status: Approved, Handoff: Ready for /build. Spec: requirements/WF-30-SPEC.md, Status: Approved. Spec pin: git-commit:82311ca4c35b388b9de77a1cb53d9be9d12e1855:requirements/WF-30-SPEC.md. The pin resolves, but it differs from the working copy: REQ-001 changed from Download to Save in the requirement and in its scenario. This is a behavioral change, so the gate fails. I stopped before reading the task packets or running dispatch.",
+      "spec": "Status line changes from \"Status: Approved\" to \"Status: Needs reapproval\". Nothing else in requirements/WF-30-SPEC.md changes.",
+      "plan": "Status line changes from \"Status: Approved\" to \"Status: Needs replan\". Nothing else in work/WF-30-plan.md changes.",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "gate_spec_pin",
+    "expected": {
+      "build_blocked": true,
+      "nothing_dispatched": true,
+      "plan_needs_replan": true,
+      "spec_needs_reapproval": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "BUILD BLOCKED\nThe spec changed behavior. Route: /plan\nPlan status: Needs replan\nSpec status: unchanged",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "gate_spec_pin",
+    "expected": {
+      "build_blocked": true,
+      "nothing_dispatched": true,
+      "plan_needs_replan": true,
+      "spec_needs_reapproval": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "blocked",
+      "explanation": "BUILD BLOCKED\nThe spec changed behavior. Route: /plan\nPlan status: Needs replan\n- **Spec status:** `Needs reapproval`.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "gate_spec_pin",
+    "expected": {
+      "build_blocked": true,
+      "nothing_dispatched": true,
+      "plan_needs_replan": true,
+      "spec_needs_reapproval": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "ws-label: concurrent — fine\nws-report: concurrent — fine",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "gate_spec_pin",
+    "expected": {
+      "build_blocked": false,
+      "nothing_dispatched": false,
+      "plan_needs_replan": false,
+      "spec_needs_reapproval": false
+    }
+  }
+]

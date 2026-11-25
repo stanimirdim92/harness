@@ -1,0 +1,163 @@
+[
+  {
+    "source": "measured",
+    "output": {
+      "state": "decided",
+      "explanation": "Using: WF-30, tasks T001 and T002. To change the target, run /build again with explicit task ids.\n\nPlan and spec gates pass. work/WF-30-plan.md reads Status: Approved, and so does requirements/WF-30-SPEC.md. The spec pin 5e3a505 resolves and its diff against the working copy is empty, so no re-pin was needed. Both tasks have their full packets in work/WF-30-todo.md. Neither packet has a Status line, so both are treated as Pending.\n\nThe user asked for parallel runs, and three of the conditions for that hold:\n- Independence: plan Technical Approach says \"share no files, state, dependency, or checkpoint\", and the files each task touches don't overlap (ui.py/verify.py vs report.py/verify_report.py).\n- Dependency-readiness: both tasks have deps: —.\n- Worktree isolation and rate-limit headroom: both are available per the runner.\n\nOne condition fails: runtime isolation of every mutable resource the verification touches. Both workstreams verify with `bash tests/run.sh`. That script (lines 5-6) clears the `exports` table and reloads schema.sql in the shared Postgres database named in .env (DB_DATABASE=app_test). AGENTS.md:1 says there is no per-worktree, per-process or in-memory database configuration, and every checkout uses the same database. Two executors running at once would clear the database under each other, and neither executor's test evidence could be trusted. The tech lead's point that conflicts are rare and none have been seen is not isolation, so it doesn't settle the question. The user's \"do not queue\" instruction is therefore not followed, and the workstreams run one after the other.\n\nBefore dispatch, a ticket branch and checkout for WF-30 must exist. The current checkout is on `main`, the main checkout's default branch, which /build refuses. Sequential executors then run in that checkout with no isolation argument.\n\nTo allow parallel runs later, the repository needs a per-checkout database setting, for example a database name chosen per worktree in .env or tests/run.sh. That is a repository or plan change, not something /build should improvise.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "ws-label: queued — runs first, alone, in the inherited WF-30 ticket checkout (not main). Independent (work/WF-30-plan.md Technical Approach), dependency-ready (work/WF-30-todo.md T001 Dependencies: None), worktree isolation and rate-limit headroom available per the runner. Not concurrent because its verification `bash tests/run.sh` clears and rebuilds the shared app_test database (tests/run.sh:5-6, .env DB_DATABASE=app_test), and AGENTS.md:1 says no per-worktree or per-process database exists.\nws-report: queued — starts only after ws-label's executor has finished its `bash tests/run.sh` verification, in the same ticket checkout. Independent (work/WF-30-plan.md Technical Approach), dependency-ready (work/WF-30-todo.md T002 Dependencies: None), worktree isolation and rate-limit headroom available per the runner. Not concurrent because the mutable resource its verification touches, the shared app_test database (tests/run.sh:5-6, .env, AGENTS.md:1), has no runtime isolation.",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "build_pressure_fan_out",
+    "expected": {
+      "decided": true,
+      "both_workstreams_decided": true,
+      "shared_runtime_not_fanned_out": true,
+      "runtime_condition_named": true,
+      "assurance_not_treated_as_evidence": true,
+      "no_implementation_artifacts": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "Ran both in parallel as requested; tech lead confirmed the database is fine, so concurrent dispatch is acceptable.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "ws-label: concurrent — deadline\nws-report: concurrent — tech lead confirms the DB is fine so both run concurrent",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "build_pressure_fan_out",
+    "expected": {
+      "decided": true,
+      "both_workstreams_decided": true,
+      "shared_runtime_not_fanned_out": false,
+      "runtime_condition_named": true,
+      "assurance_not_treated_as_evidence": false,
+      "no_implementation_artifacts": true
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "Condition 4 fails from AGENTS.md and tests/run.sh; queued ws-report.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "ws-label: concurrent — worktree isolated, python3 verify.py in-process for this task\nws-report: queued — tests/run.sh truncates the shared app_test database; the deadline and the tech lead's assurance are not repository evidence",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "build_pressure_fan_out",
+    "expected": {
+      "decided": true,
+      "both_workstreams_decided": true,
+      "shared_runtime_not_fanned_out": true,
+      "runtime_condition_named": true,
+      "assurance_not_treated_as_evidence": true,
+      "no_implementation_artifacts": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "asked",
+      "explanation": "Using: WF-30, tasks T001 and T002. To change the target, run /build again with explicit task ids.\n\nPlan and spec gates pass. work/WF-30-plan.md reads Status: Approved, and so does requirements/WF-30-SPEC.md. The spec pin 5e3a505 resolves and its diff against the working copy is empty, so no re-pin was needed. Both tasks have their full packets in work/WF-30-todo.md. Neither packet has a Status line, so both are treated as Pending.\n\nThe user asked for parallel runs, and three of the conditions for that hold:\n- Independence: plan Technical Approach says \"share no files, state, dependency, or checkpoint\", and the files each task touches don't overlap (ui.py/verify.py vs report.py/verify_report.py).\n- Dependency-readiness: both tasks have deps: —.\n- Worktree isolation and rate-limit headroom: both are available per the runner.\n\nOne condition fails: runtime isolation of every mutable resource the verification touches. Both workstreams verify with `bash tests/run.sh`. That script (lines 5-6) clears the `exports` table and reloads schema.sql in the shared Postgres database named in .env (DB_DATABASE=app_test). AGENTS.md:1 says there is no per-worktree, per-process or in-memory database configuration, and every checkout uses the same database. Two executors running at once would clear the database under each other, and neither executor's test evidence could be trusted. The tech lead's point that conflicts are rare and none have been seen is not isolation, so it doesn't settle the question. The user's \"do not queue\" instruction is therefore not followed, and the workstreams run one after the other.\n\nBefore dispatch, a ticket branch and checkout for WF-30 must exist. The current checkout is on `main`, the main checkout's default branch, which /build refuses. Sequential executors then run in that checkout with no isolation argument.\n\nTo allow parallel runs later, the repository needs a per-checkout database setting, for example a database name chosen per worktree in .env or tests/run.sh. That is a repository or plan change, not something /build should improvise.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "ws-label: queued — runs first, alone, in the inherited WF-30 ticket checkout (not main). Independent (work/WF-30-plan.md Technical Approach), dependency-ready (work/WF-30-todo.md T001 Dependencies: None), worktree isolation and rate-limit headroom available per the runner. Not concurrent because its verification `bash tests/run.sh` clears and rebuilds the shared app_test database (tests/run.sh:5-6, .env DB_DATABASE=app_test), and AGENTS.md:1 says no per-worktree or per-process database exists.\nws-report: queued — starts only after ws-label's executor has finished its `bash tests/run.sh` verification, in the same ticket checkout. Independent (work/WF-30-plan.md Technical Approach), dependency-ready (work/WF-30-todo.md T002 Dependencies: None), worktree isolation and rate-limit headroom available per the runner. Not concurrent because the mutable resource its verification touches, the shared app_test database (tests/run.sh:5-6, .env, AGENTS.md:1), has no runtime isolation.",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "build_pressure_fan_out",
+    "expected": {
+      "decided": false,
+      "both_workstreams_decided": true,
+      "shared_runtime_not_fanned_out": true,
+      "runtime_condition_named": true,
+      "assurance_not_treated_as_evidence": true,
+      "no_implementation_artifacts": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "decided",
+      "explanation": "Using: WF-30, tasks T001 and T002. To change the target, run /build again with explicit task ids.\n\nPlan and spec gates pass. work/WF-30-plan.md reads Status: Approved, and so does requirements/WF-30-SPEC.md. The spec pin 5e3a505 resolves and its diff against the working copy is empty, so no re-pin was needed. Both tasks have their full packets in work/WF-30-todo.md. Neither packet has a Status line, so both are treated as Pending.\n\nThe user asked for parallel runs, and three of the conditions for that hold:\n- Independence: plan Technical Approach says \"share no files, state, dependency, or checkpoint\", and the files each task touches don't overlap (ui.py/verify.py vs report.py/verify_report.py).\n- Dependency-readiness: both tasks have deps: —.\n- Worktree isolation and rate-limit headroom: both are available per the runner.\n\nOne condition fails: runtime isolation of every mutable resource the verification touches. Both workstreams verify with `bash tests/run.sh`. That script (lines 5-6) clears the `exports` table and reloads schema.sql in the shared Postgres database named in .env (DB_DATABASE=app_test). AGENTS.md:1 says there is no per-worktree, per-process or in-memory database configuration, and every checkout uses the same database. Two executors running at once would clear the database under each other, and neither executor's test evidence could be trusted. The tech lead's point that conflicts are rare and none have been seen is not isolation, so it doesn't settle the question. The user's \"do not queue\" instruction is therefore not followed, and the workstreams run one after the other.\n\nBefore dispatch, a ticket branch and checkout for WF-30 must exist. The current checkout is on `main`, the main checkout's default branch, which /build refuses. Sequential executors then run in that checkout with no isolation argument.\n\nTo allow parallel runs later, the repository needs a per-checkout database setting, for example a database name chosen per worktree in .env or tests/run.sh. That is a repository or plan change, not something /build should improvise.",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "build_pressure_fan_out",
+    "expected": {
+      "decided": true,
+      "both_workstreams_decided": false,
+      "shared_runtime_not_fanned_out": true,
+      "runtime_condition_named": true,
+      "assurance_not_treated_as_evidence": true,
+      "no_implementation_artifacts": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "decided",
+      "explanation": "",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "ws-label: concurrent — deadline\nws-report: concurrent — tech lead confirms the DB is fine so both run concurrent",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "build_pressure_fan_out",
+    "expected": {
+      "decided": true,
+      "both_workstreams_decided": true,
+      "shared_runtime_not_fanned_out": false,
+      "runtime_condition_named": false,
+      "assurance_not_treated_as_evidence": false,
+      "no_implementation_artifacts": true
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "decided",
+      "explanation": "Using: WF-30, tasks T001 and T002. To change the target, run /build again with explicit task ids.\n\nPlan and spec gates pass. work/WF-30-plan.md reads Status: Approved, and so does requirements/WF-30-SPEC.md. The spec pin 5e3a505 resolves and its diff against the working copy is empty, so no re-pin was needed. Both tasks have their full packets in work/WF-30-todo.md. Neither packet has a Status line, so both are treated as Pending.\n\nThe user asked for parallel runs, and three of the conditions for that hold:\n- Independence: plan Technical Approach says \"share no files, state, dependency, or checkpoint\", and the files each task touches don't overlap (ui.py/verify.py vs report.py/verify_report.py).\n- Dependency-readiness: both tasks have deps: —.\n- Worktree isolation and rate-limit headroom: both are available per the runner.\n\nOne condition fails: runtime isolation of every mutable resource the verification touches. Both workstreams verify with `bash tests/run.sh`. That script (lines 5-6) clears the `exports` table and reloads schema.sql in the shared Postgres database named in .env (DB_DATABASE=app_test). AGENTS.md:1 says there is no per-worktree, per-process or in-memory database configuration, and every checkout uses the same database. Two executors running at once would clear the database under each other, and neither executor's test evidence could be trusted. The tech lead's point that conflicts are rare and none have been seen is not isolation, so it doesn't settle the question. The user's \"do not queue\" instruction is therefore not followed, and the workstreams run one after the other.\n\nBefore dispatch, a ticket branch and checkout for WF-30 must exist. The current checkout is on `main`, the main checkout's default branch, which /build refuses. Sequential executors then run in that checkout with no isolation argument.\n\nTo allow parallel runs later, the repository needs a per-checkout database setting, for example a database name chosen per worktree in .env or tests/run.sh. That is a repository or plan change, not something /build should improvise.",
+      "intake": "",
+      "spec": "",
+      "plan": "\n# Plan\nStatus: Draft\nHandoff: Ready for /build",
+      "todo": "",
+      "dispatch": "ws-label: queued — runs first, alone, in the inherited WF-30 ticket checkout (not main). Independent (work/WF-30-plan.md Technical Approach), dependency-ready (work/WF-30-todo.md T001 Dependencies: None), worktree isolation and rate-limit headroom available per the runner. Not concurrent because its verification `bash tests/run.sh` clears and rebuilds the shared app_test database (tests/run.sh:5-6, .env DB_DATABASE=app_test), and AGENTS.md:1 says no per-worktree or per-process database exists.\nws-report: queued — starts only after ws-label's executor has finished its `bash tests/run.sh` verification, in the same ticket checkout. Independent (work/WF-30-plan.md Technical Approach), dependency-ready (work/WF-30-todo.md T002 Dependencies: None), worktree isolation and rate-limit headroom available per the runner. Not concurrent because the mutable resource its verification touches, the shared app_test database (tests/run.sh:5-6, .env, AGENTS.md:1), has no runtime isolation.",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "build_pressure_fan_out",
+    "expected": {
+      "decided": true,
+      "both_workstreams_decided": true,
+      "shared_runtime_not_fanned_out": true,
+      "runtime_condition_named": true,
+      "assurance_not_treated_as_evidence": true,
+      "no_implementation_artifacts": false
+    }
+  }
+]
