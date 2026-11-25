@@ -26,6 +26,7 @@ not. A change is accepted only when no holdout case the baseline passed is lost
 (ADR 0117). Producing drives the real model and costs money: never in CI.
 """
 import argparse
+import hashlib
 import importlib.util
 import json
 import re
@@ -278,6 +279,76 @@ def produce(case, repo, budget, out=None):
             keep(out, meta, sarifs)
         findings, source = review_findings(meta, [s.read_text() for s in sarifs])
         return findings, meta, source
+
+
+# ---------------------------------------------------------------- suite
+
+def harness_hashes(harness=sandbox.HARNESS):
+    """{path relative to the harness: sha256} of every file `install_harness()` copies into a review project."""
+    files = [harness / 'AGENTS.md', harness / 'settings.json']
+    for name in sandbox.HARNESS_DIRS:
+        files += sorted(p for p in (harness / name).rglob('*') if p.is_file() and 'evals' not in p.parts)
+    return {str(p.relative_to(harness)): hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
+
+
+def kept_cost(folder):
+    """What a review that raised still spent, read from the `meta.json` `keep()` saved. 0 when none was saved."""
+    try:
+        return json.loads((Path(folder) / 'meta.json').read_text()).get('total_cost_usd') or 0
+    except (OSError, ValueError):
+        return 0
+
+
+def verdict_word(kind, result):
+    if kind == 'bug':
+        return 'CAUGHT' if result['caught'] else 'LOCATED' if result['located'] else 'MISSED'
+    return 'QUIET' if result['blocking'] == 0 else 'NOISY'
+
+
+class BugsSuite:
+    """The shipped-bug cases as a suite for the eval core (`core.py` describes the interface). A trial is
+    one `/review` of one case in `repo`, judged by `judge()`. A bug trial passes when it is CAUGHT; a
+    clean trial passes when it has no BLOCKER or REQUIRED finding."""
+    name = 'bugs'
+    kind = 'case'
+    model = None
+
+    def __init__(self, repo=None, budget=10):
+        self.repo, self.budget = repo, budget
+        self.spent = {}
+
+    def all_cases(self):
+        out = []
+        for name in selected([], every=True):
+            case = load(name)
+            out.append({'id': name, 'split': case.get('split', 'optimization'), 'tags': case.get('tags', []),
+                        'kind': case['kind']})
+        return out
+
+    def instruction_hashes(self, cases):
+        return harness_hashes()
+
+    def run_trial(self, case, folder):
+        """The core retries a trial that raises, so what the first attempt spent comes off the budget of the retry."""
+        full = load(case['id'])
+        key = str(folder)
+        left = float(self.budget) - self.spent.get(key, 0)
+        if left <= 0:
+            raise RuntimeError('the trial budget was spent by the first attempt')
+        try:
+            findings, meta, source = produce(full, self.repo, left, Path(folder))
+        except Exception:
+            self.spent[key] = self.spent.get(key, 0) + kept_cost(folder)
+            raise
+        result = judge(full, findings)
+        return {'checks': None, 'kind': full['kind'], 'verdict': verdict_word(full['kind'], result),
+                'source': source, 'cost_usd': meta.get('total_cost_usd'), 'duration_ms': meta.get('duration_ms'),
+                **{k: result[k] for k in ('caught', 'located', 'blocking', 'findings', 'by')}}
+
+    def state(self, trial):
+        if not trial.get('kind'):
+            return 'errored'
+        return 'pass' if item(trial, trial) else 'fail'
 
 
 # ---------------------------------------------------------------- cli

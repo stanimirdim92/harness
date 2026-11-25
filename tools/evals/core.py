@@ -197,6 +197,26 @@ def eval_line(doc, run_dir, base=None, word=None, selection=None):
             f'flaky {before_flaky} -> {flaky} ({word}); {run_dir}')
 
 
+def review_eval_line(doc, run_dir, base=None, word=None):
+    """The `Review-eval:` trailer line of the bugs report (ADR 0111, `check-rescore.py`). It counts the
+    cases at PASS: bug cases, clean cases and holdout cases. The kind of a case comes from its scored
+    trials, so a case with none is left out. A baseline is compared on the cases the run ran."""
+    kinds = {c['id']: t['kind'] for c in doc['cases'] for t in c['trials'] if t['state'] != 'errored' and t.get('kind')}
+    holdout = {c['id'] for c in doc['cases'] if c['split'] == 'holdout'}
+    groups = [('bugs', [n for n, kind in kinds.items() if kind == 'bug']),
+              ('clean', [n for n, kind in kinds.items() if kind == 'clean']),
+              ('holdout', [n for n in kinds if n in holdout])]
+    now = {c['id']: c['result']['state'] for c in doc['cases']}
+    before = {c['id']: c['result']['state'] for c in base['cases']} if base else None
+
+    def passing(names, states):
+        return sum(states.get(n) == PASS for n in names)
+
+    parts = [f'{label} {passing(names, before)}/{len(names)} -> {passing(names, now)}/{len(names)}' if base
+             else f'{label} {passing(names, now)}/{len(names)}' for label, names in groups if names]
+    return f'Review-eval: {", ".join(parts)}' + (f' ({word})' if base else '') + f'; {run_dir}'
+
+
 def _tasks_lines(doc, run_dir):
     """What the `tasks` report adds to the generic one (REQ-020, REQ-031): whether prevention was on,
     the trials that passed every check, and the trials that leaked or stopped early."""
@@ -275,6 +295,8 @@ def render_report(doc, run_dir, base=None, diff=None, word=None, why=None, selec
         lines.append(f'- {entry["id"]}: ' + ', '.join(f'{run_dir}/{f}' for f in folders))
     if suite == 'gates':
         lines.append(eval_line(doc, run_dir, None if is_baseline else base, word, selection))
+    if suite == 'bugs':
+        lines.append(review_eval_line(doc, run_dir, None if is_baseline else base, word))
     if tasks_head:
         lines.insert(0, tasks_head)
     return '\n'.join(lines)

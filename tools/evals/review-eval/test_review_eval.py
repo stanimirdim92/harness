@@ -14,6 +14,7 @@ import tempfile
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
+from unittest import mock
 
 HERE = Path(__file__).resolve().parent
 spec = importlib.util.spec_from_file_location('re_run', HERE / 'run.py')
@@ -291,6 +292,121 @@ class TagsAndSplit(unittest.TestCase):
         self.assertIn('lost   q1 (holdout)', out.getvalue())
         self.assertIn('Holdout: 1/1 -> 0/1', out.getvalue())
         self.assertIn('WORSE: a holdout case the baseline passed is now lost', out.getvalue())
+
+
+BUG = {'kind': 'bug', 'change': 'c1', 'targets': {'feed.py': [3]}, 'defect': ['drops the first'],
+       'tags': ['order'], 'split': 'holdout'}
+CLEAN = {'kind': 'clean', 'change': 'c2', 'targets': {}, 'tags': [], 'split': 'optimization'}
+NEAR = ('feed.py', 3, 'BLOCKER', 'The slice drops the first post.')
+NEAR_OTHER = ('feed.py', 3, 'REQUIRED', 'Leading spaces are not trimmed.')
+FAR = ('feed.py', 40, 'BLOCKER', 'The slice drops the first post.')
+ADVISORY = ('feed.py', 3, 'ADVISORY', 'The slice drops the first post.')
+
+
+class BugsSuite(unittest.TestCase):
+    """The review eval as a suite for the eval core: one `/review` per trial, judged by `judge()`."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        base = Path(self.tmp.name)
+        self.fixtures = base / 'fixtures'
+        saved, rev.FIXTURES = rev.FIXTURES, self.fixtures
+        self.addCleanup(setattr, rev, 'FIXTURES', saved)
+        for name, case in (('shipped', BUG), ('quiet', CLEAN)):
+            (self.fixtures / name).mkdir(parents=True)
+            (self.fixtures / name / 'case.json').write_text(json.dumps({'name': name, **case}))
+        self.folder = base / 'run' / 'shipped' / 't1'
+        self.folder.mkdir(parents=True)
+        self.calls = []
+        self.suite = rev.BugsSuite(Path('/repo'), 10)
+
+    def play(self, *outcomes, cost=1.25):
+        """Make `produce()` return, or raise, each outcome in turn: a findings list, or an exception."""
+        plan = list(outcomes)
+
+        def produce(case, repo, budget, out):
+            self.calls.append((case['change'], repo, budget, out))
+            outcome = plan.pop(0)
+            if isinstance(outcome, Exception):
+                (out / 'meta.json').write_text(json.dumps({'total_cost_usd': cost}))
+                raise outcome
+            return outcome, {'total_cost_usd': cost, 'duration_ms': 4200}, 'sarif'
+
+        patch = mock.patch.object(rev, 'produce', produce)
+        patch.start()
+        self.addCleanup(patch.stop)
+
+    def trial(self, name='shipped'):
+        return self.suite.run_trial({'id': name}, self.folder)
+
+    def test_every_fixture_is_a_case_with_its_split_and_tags(self):
+        cases = {c['id']: c for c in self.suite.all_cases()}
+        self.assertEqual(sorted(cases), ['quiet', 'shipped'])
+        self.assertEqual((cases['shipped']['split'], cases['shipped']['tags']), ('holdout', ['order']))
+        self.assertEqual((cases['quiet']['split'], cases['quiet']['tags']), ('optimization', []))
+
+    def test_a_finding_at_the_lines_that_names_the_defect_is_a_caught_trial_that_passes(self):
+        self.play([NEAR])
+        trial = self.trial()
+        self.assertEqual((trial['verdict'], trial['kind'], trial['caught']), ('CAUGHT', 'bug', True))
+        self.assertEqual(self.suite.state(trial), 'pass')
+        self.assertEqual((trial['cost_usd'], trial['duration_ms'], trial['source']), (1.25, 4200, 'sarif'))
+
+    def test_a_finding_at_the_lines_about_something_else_is_located_and_fails(self):
+        self.play([NEAR_OTHER])
+        trial = self.trial()
+        self.assertEqual((trial['verdict'], self.suite.state(trial)), ('LOCATED', 'fail'))
+
+    def test_a_review_with_no_finding_at_the_lines_is_missed_and_fails(self):
+        self.play([FAR, ADVISORY])
+        trial = self.trial()
+        self.assertEqual((trial['verdict'], self.suite.state(trial)), ('MISSED', 'fail'))
+
+    def test_a_clean_case_passes_without_a_blocking_finding_and_fails_with_one(self):
+        self.play([ADVISORY], [FAR])
+        quiet, noisy = self.trial('quiet'), self.trial('quiet')
+        self.assertEqual((quiet['verdict'], quiet['kind'], self.suite.state(quiet)), ('QUIET', 'clean', 'pass'))
+        self.assertEqual((noisy['verdict'], noisy['blocking'], self.suite.state(noisy)), ('NOISY', 1, 'fail'))
+
+    def test_the_trial_folder_and_the_budget_go_to_produce(self):
+        self.play([NEAR])
+        self.trial()
+        self.assertEqual(self.calls, [('c1', Path('/repo'), 10, self.folder)])
+
+    def test_a_trial_with_no_judgement_is_errored(self):
+        self.assertEqual(self.suite.state({}), 'errored')
+
+    def test_a_review_that_did_not_finish_raises_so_the_core_records_errored(self):
+        self.play(RuntimeError('review did not finish'))
+        with self.assertRaises(RuntimeError):
+            self.trial()
+
+    def test_the_retry_gets_only_what_the_first_attempt_left_of_the_budget(self):
+        self.play(RuntimeError('review did not finish'), [NEAR], cost=7)
+        with self.assertRaises(RuntimeError):
+            self.trial()
+        self.assertEqual(self.trial()['verdict'], 'CAUGHT')
+        self.assertEqual([c[2] for c in self.calls], [10, 3])
+
+    def test_a_retry_with_nothing_left_is_not_started(self):
+        self.play(RuntimeError('review did not finish'), cost=10)
+        with self.assertRaises(RuntimeError):
+            self.trial()
+        with self.assertRaisesRegex(RuntimeError, 'budget'):
+            self.trial()
+        self.assertEqual(len(self.calls), 1)
+
+    def test_each_installed_harness_file_is_hashed_and_the_evals_are_not(self):
+        harness = Path(self.tmp.name) / 'claude'
+        for rel in ('AGENTS.md', 'settings.json', 'commands/review.md', 'skills/a/SKILL.md', 'evals/hidden/check.sh', 'other/x.md'):
+            (harness / rel).parent.mkdir(parents=True, exist_ok=True)
+            (harness / rel).write_text(rel)
+        before = rev.harness_hashes(harness)
+        self.assertEqual(sorted(before), ['AGENTS.md', 'commands/review.md', 'settings.json', 'skills/a/SKILL.md'])
+        (harness / 'commands/review.md').write_text('changed')
+        after = rev.harness_hashes(harness)
+        self.assertEqual([k for k in before if before[k] != after[k]], ['commands/review.md'])
 
 
 if __name__ == '__main__':

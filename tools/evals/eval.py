@@ -3,6 +3,7 @@
 
     eval.py                                  print the suites
     eval.py gates|tasks|bugs [--case ID] [--tag TAG] [--split S] [--trials N] [--jobs N]
+    eval.py bugs --repo <project> [--budget USD]   the shipped-bug cases need the project they came from
     eval.py gates --write-watched            write the watched list, run nothing
     eval.py recall <recall.py flags>         plan-recall, flags passed on unchanged
     eval.py baseline <suite> [<run>]         make a run the suite's baseline
@@ -49,6 +50,14 @@ def build_tasks():
     return module.TasksSuite()
 
 
+def build_bugs():
+    """`review-eval/run.py` shares its name with the other suites' runners, so it loads under its own."""
+    spec = importlib.util.spec_from_file_location('bugs_run', HERE / 'review-eval' / 'run.py')
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.BugsSuite()
+
+
 class RecallSuite:
     """plan-recall's `recall.py`, run as it is. It reads git and the plan: no model, no trials."""
 
@@ -69,7 +78,7 @@ SUITES = {
               'cost': None, 'build': build_tasks},
     'bugs': {'question': 'Does /review catch bugs that really shipped?',
              'when': 'after you change /review or a reviewer',
-             'cost': None, 'build': None},
+             'cost': None, 'build': build_bugs},
     'recall': {'question': 'Did the plan name the files that really changed?',
                'when': 'after a ticket ships',
                'cost': 'free', 'build': build_recall},
@@ -137,6 +146,9 @@ def parser_for(suites):
                          help=f'trials per case (default {core.DEFAULT_TRIALS})')
         jobs = suites[name].get('jobs', 1)
         sub.add_argument('--jobs', type=positive, default=jobs, help=f'trials to run at the same time (default {jobs})')
+        if name == 'bugs':
+            sub.add_argument('--repo', type=Path, required=True, help='the project the cases come from')
+            sub.add_argument('--budget', type=float, default=10, help='dollars one /review may spend (default 10)')
         if name == 'gates':
             sub.add_argument('--write-watched', action='store_true',
                              help='write workflow/watched.txt, the harness files the cases read; run nothing')
@@ -188,6 +200,8 @@ def main(argv=None, suites=None, root=core.ROOT, readme=README):
         return core.baseline(args.suite, [c['id'] for c in suite.all_cases()], run=args.run, root=root)
     if getattr(args, 'write_watched', False):
         return suite.write_watched()
+    if args.command == 'bugs':
+        suite.repo, suite.budget = args.repo, args.budget
     every = suite.all_cases()
     try:
         cases = select(every, args.case, args.tag, args.split)

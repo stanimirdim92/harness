@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """The eval core, with a fake suite and a throwaway git repository. `claude` is never invoked. Runs in CI."""
+import contextlib
+import importlib.util
 import io
 import json
 import subprocess
@@ -550,8 +552,94 @@ class EvalLine(CoreCase):
         self.assertEqual(self.last_line(saved), self.last_line(out))
 
     def test_another_suite_gets_no_eval_line(self):
-        _, out, _ = self.run_core(FakeSuite(name='bugs'), [case('a')])
+        _, out, _ = self.run_core(FakeSuite(name='tasks'), [case('a')])
         self.assertNotIn('Eval:', out)
+
+
+def judged(kind, ok):
+    """A `bugs` trial the fake plays: its kind, and whether it was CAUGHT (bug) or quiet (clean)."""
+    return [{'ok': ok, 'kind': kind}]
+
+
+class ReviewEvalLine(CoreCase):
+    """The bugs report ends with a ready `Review-eval:` trailer line (ADR 0111)."""
+
+    def last_line(self, out):
+        return out.rstrip('\n').splitlines()[-1]
+
+    def shown(self):
+        return f'tools/evals/results/bugs/{self.runs("bugs")[-1].name}'
+
+    def script(self, kinds, lost=(), trials=3):
+        return {(name, n): judged(kind, name not in lost) for name, kind in kinds.items() for n in range(1, trials + 1)}
+
+    def test_with_a_baseline_the_line_counts_bug_clean_and_holdout_cases_that_pass(self):
+        kinds = {'b1': 'bug', 'b2': 'bug', 'b3': 'bug', 'b4': 'bug', 'c1': 'clean'}
+        cases = [case(n, 'holdout' if n == 'b4' else 'optimization') for n in kinds]
+        self.run_core(FakeSuite(name='bugs', script=self.script(kinds, lost=('b2', 'b3', 'b4'))), cases)
+        self.promote('bugs', list(kinds))
+        _, out, _ = self.run_core(FakeSuite(name='bugs', script=self.script(kinds, lost=('b2',))), cases)
+        self.assertEqual(self.last_line(out), 'Review-eval: bugs 1/4 -> 3/4, clean 1/1 -> 1/1, holdout 0/1 -> 1/1 '
+                                              f'(BETTER); {self.shown()}')
+
+    def test_without_a_baseline_the_arrows_and_the_verdict_are_left_out(self):
+        kinds = {'b1': 'bug', 'c1': 'clean'}
+        _, out, _ = self.run_core(FakeSuite(name='bugs', script=self.script(kinds)), [case(n) for n in kinds])
+        self.assertEqual(self.last_line(out), f'Review-eval: bugs 1/1, clean 1/1; {self.shown()}')
+
+    def test_a_case_that_is_flaky_is_not_counted_as_passing(self):
+        script = {('b1', 1): judged('bug', True), ('b1', 2): judged('bug', False), ('b1', 3): judged('bug', True)}
+        _, out, _ = self.run_core(FakeSuite(name='bugs', script=script), [case('b1')])
+        self.assertEqual(self.last_line(out), f'Review-eval: bugs 0/1; {self.shown()}')
+
+    def test_a_lost_holdout_case_prints_worse(self):
+        kinds = {'b1': 'bug', 'h1': 'bug'}
+        cases = [case('b1'), case('h1', 'holdout')]
+        self.run_core(FakeSuite(name='bugs', script=self.script(kinds)), cases)
+        self.promote('bugs', list(kinds))
+        _, out, _ = self.run_core(FakeSuite(name='bugs', script=self.script(kinds, lost=('h1',))), cases)
+        self.assertEqual(self.last_line(out), 'Review-eval: bugs 2/2 -> 1/2, holdout 1/1 -> 0/1 '
+                                              f'(WORSE); {self.shown()}')
+
+    def test_a_case_with_no_scored_trial_is_left_out_of_the_counts(self):
+        script = {('b1', n): judged('bug', True) for n in (1, 2, 3)}
+        script.update({('b2', n): [RuntimeError('claude exited 1')] for n in (1, 2, 3)})
+        _, out, _ = self.run_core(FakeSuite(name='bugs', script=script), [case('b1'), case('b2')])
+        self.assertEqual(self.last_line(out), f'Review-eval: bugs 1/1; {self.shown()}')
+
+    def test_the_saved_report_ends_with_the_same_line(self):
+        _, out, _ = self.run_core(FakeSuite(name='bugs', script=self.script({'b1': 'bug'})), [case('b1')])
+        saved = (self.runs('bugs')[-1] / 'report.md').read_text()
+        self.assertEqual(self.last_line(saved), self.last_line(out))
+
+    def test_the_regenerated_baseline_report_still_ends_with_the_line(self):
+        self.run_core(FakeSuite(name='bugs', script=self.script({'b1': 'bug'})), [case('b1')])
+        self.promote('bugs', ['b1'])
+        saved = (self.runs('bugs')[-1] / 'report.md').read_text()
+        self.assertEqual(self.last_line(saved), f'Review-eval: bugs 1/1; {self.shown()}')
+
+    def test_the_gates_report_gets_no_review_eval_line(self):
+        _, out, _ = self.run_core(FakeSuite(), [case('a')])
+        self.assertNotIn('Review-eval:', out)
+
+    def test_check_rescore_accepts_the_line_as_a_trailer_and_rejects_its_absence(self):
+        kinds = {'b1': 'bug'}
+        _, out, _ = self.run_core(FakeSuite(name='bugs', script=self.script(kinds)), [case('b1')])
+        trailer = self.last_line(out)
+        spec = importlib.util.spec_from_file_location('cr', Path(core.ROOT) / 'tools/checks/check-rescore.py')
+        rescore = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(rescore)
+        git(self.root, 'checkout', '-q', '-b', 'work')
+        review = self.root / 'claude/commands/review.md'
+        review.parent.mkdir(parents=True)
+        review.write_text('one\n')
+        git(self.root, 'add', '-A')
+        git(self.root, 'commit', '-qm', f'Tune review\n\n{trailer}')
+        with contextlib.chdir(self.root):
+            self.assertEqual(rescore.missing(f'{self.sha}..HEAD'), [])
+            review.write_text('two\n')
+            git(self.root, 'commit', '-qam', 'Tune review again')
+            self.assertEqual([subject for _, subject, _ in rescore.missing(f'{self.sha}..HEAD')], ['Tune review again'])
 
 
 class BaselineReport(CoreCase):
@@ -820,10 +908,10 @@ class EvalEntry(CoreCase):
         text = eval_cli.suite_table(eval_cli.SUITES, eval_cli.README.read_text())
         self.assertRegex(text, r'gates\n.*\n.*\n  last measured cost: \$\d+\.\d\d')
 
-    def test_the_real_registry_lists_four_suites_and_gates_tasks_and_recall_are_built(self):
+    def test_the_real_registry_lists_four_suites_and_every_one_is_built(self):
         self.assertEqual(list(eval_cli.SUITES), ['gates', 'tasks', 'bugs', 'recall'])
         self.assertEqual([name for name, entry in eval_cli.SUITES.items() if entry['build'] is not None],
-                         ['gates', 'tasks', 'recall'])
+                         ['gates', 'tasks', 'bugs', 'recall'])
         self.assertEqual(eval_cli.SUITES['recall']['cost'], 'free')
 
     def test_a_suite_not_built_yet_says_so_and_exits_2(self):
@@ -897,11 +985,31 @@ class EvalEntry(CoreCase):
         self.assertEqual(self.cli('tasks', '--write-watched')[0], 2)
 
     def test_tasks_and_bugs_take_the_same_flags(self):
-        for name in ('tasks', 'bugs'):
+        for name, extra in (('tasks', ()), ('bugs', ('--repo', 'app'))):
             suite = BuiltSuite(CASES, name=name)
-            code, _, _ = self.cli(name, '--tag', 'fix', '--split', 'holdout', '--trials', '1', '--jobs', '2', suite=suite)
+            code, _, _ = self.cli(name, '--tag', 'fix', '--split', 'holdout', '--trials', '1', '--jobs', '2', *extra,
+                                  suite=suite)
             self.assertEqual(code, 0)
             self.assertEqual(sorted({c for c, _ in suite.calls}), ['b'])
+
+    def test_bugs_hands_its_repo_and_budget_to_the_suite(self):
+        suite = BuiltSuite(CASES, name='bugs')
+        self.cli('bugs', '--repo', 'app', '--budget', '7.5', '--trials', '1', suite=suite)
+        self.assertEqual((suite.repo, suite.budget), (Path('app'), 7.5))
+
+    def test_bugs_budget_is_10_dollars_a_trial_unless_the_flag_says_otherwise(self):
+        suite = BuiltSuite(CASES, name='bugs')
+        self.cli('bugs', '--repo', 'app', '--trials', '1', suite=suite)
+        self.assertEqual(suite.budget, 10)
+
+    def test_bugs_without_a_repo_exits_2_before_any_run(self):
+        code, _, err = self.cli('bugs', suite=BuiltSuite(CASES, name='bugs'))
+        self.assertEqual(code, 2)
+        self.assertIn('--repo', err)
+        self.assertFalse((self.root / 'tools/evals/results').exists())
+
+    def test_repo_belongs_to_bugs_only(self):
+        self.assertEqual(self.cli('gates', '--repo', 'app')[0], 2)
 
     def test_unknown_case_exits_2_before_any_run(self):
         code, _, err = self.cli('gates', '--case', 'nope')
