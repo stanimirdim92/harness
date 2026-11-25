@@ -32,6 +32,11 @@ P=/path/to/project
 python3 run.py --new feed-order --repo $P --fix <bugfix sha> --defect 'order|sort' --defect 'newest'
 python3 run.py --new quiet-1    --repo $P --clean <sha of a commit that needed no fix>
 
+# The same from the repository root, through the entry point. `--from-log` reads the fix
+# commit's row in docs/observation-log.md ("Shipped bugs") and keeps its bug text as the
+# description. A bugfix case needs a --defect term. `bugs add` also takes run.py --new's flags.
+python3 tools/evals/eval.py bugs add --repo $P --from-log <fix sha> --defect 'order|sort'
+
 # Baseline, then after a harness change (each case is one paid /review run)
 python3 run.py --fixture feed-order --fixture quiet-1 --repo $P --output ./before
 python3 run.py --fixture feed-order --fixture quiet-1 --repo $P --output ./after --baseline ./before/results.json

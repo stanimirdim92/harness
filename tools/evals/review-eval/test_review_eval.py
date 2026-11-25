@@ -459,6 +459,113 @@ class BugsSuite(unittest.TestCase):
         self.assertEqual(self.trial()['leaked'], False)
 
 
+LOG = """# Observation log
+
+## Shipped bugs
+
+Intro text with `leadbuster deadbee0` in prose, outside the table.
+
+| Found | Ticket that shipped it | Bug | Fix commit | Should have caught it | Why it missed | Eval case |
+|---|---|---|---|---|---|---|
+| 2026-11-01 | FIX-9 `{fix}` | An unrelated bug that names the fix only in its ticket column | project `0000000a` | 2 | x | none |
+| 2026-11-18 | none | The feed drops the first post, with a `[1:]` slice | project `{short}` | 2 AI review | y | `feed-first` |
+
+## Per ticket
+
+| Shipped | Ticket | Bug | Fix commit |
+|---|---|---|---|
+| 2026-11-20 | FIX-10 | Not a shipped bug | project `1234abcd` |
+"""
+
+
+class AddCase(unittest.TestCase):
+    """`bugs add`: a case from a fix commit, or from the "Shipped bugs" row that names it (REQ-022)."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        base = Path(self.tmp.name)
+        self.repo = base / 'repo'
+        self.repo.mkdir()
+        git(self.repo, 'init', '-q')
+        (self.repo / 'feed.py').write_text('def order(posts):\n    posts = list(posts)\n    return sorted(posts)[1:]\n')
+        git(self.repo, 'add', '-A')
+        git(self.repo, 'commit', '-qm', 'B')
+        self.bug = git(self.repo, 'rev-parse', 'HEAD')
+        (self.repo / 'feed.py').write_text('def order(posts):\n    posts = list(posts)\n    return sorted(posts)\n')
+        git(self.repo, 'commit', '-qam', 'F')
+        self.fix = git(self.repo, 'rev-parse', 'HEAD')
+        self.log = base / 'observation-log.md'
+        self.log.write_text(LOG.format(fix=self.fix[:8], short=self.fix[:8]))
+        self.fixtures = base / 'fixtures'
+        self.fixtures.mkdir()
+        saved, rev.FIXTURES = rev.FIXTURES, self.fixtures
+        self.addCleanup(setattr, rev, 'FIXTURES', saved)
+
+    def add(self, *args):
+        out, err = io.StringIO(), io.StringIO()
+        with redirect_stdout(out), redirect_stderr(err):
+            code = rev.BugsSuite().add(['--repo', str(self.repo), '--log', str(self.log), *args])
+        return code, out.getvalue(), err.getvalue()
+
+    def case(self, name):
+        return json.loads((self.fixtures / name / 'case.json').read_text())
+
+    def test_the_row_is_found_by_its_fix_commit_column_only(self):
+        row = rev.shipped_bug(self.log.read_text(), self.fix)
+        self.assertEqual(row['bug'], 'The feed drops the first post, with a `[1:]` slice')
+        self.assertIsNone(rev.shipped_bug(self.log.read_text(), 'deadbee'))   # in prose, not in a row
+        self.assertIsNone(rev.shipped_bug(self.log.read_text(), '1234abcd'))  # a row of another table
+
+    def test_a_short_or_full_sha_names_the_same_row(self):
+        text = self.log.read_text()
+        self.assertEqual(rev.shipped_bug(text, self.fix[:8])['bug'], rev.shipped_bug(text, self.fix)['bug'])
+        self.assertIsNone(rev.shipped_bug(text, self.fix[:3]))                # too short to name a commit
+
+    def test_from_log_builds_the_case_from_that_fix_with_the_row_text_as_its_description(self):
+        code, out, _ = self.add('--from-log', self.fix, '--defect', 'drops the first')
+        case = self.case(f'fix-{self.fix[:8]}')
+        self.assertEqual((code, case['kind'], case['change'], case['fix']), (0, 'bug', self.bug, self.fix))
+        self.assertEqual(case['targets'], {'feed.py': [3]})
+        self.assertEqual((case['defect'], case['description']),
+                         (['drops the first'], 'The feed drops the first post, with a `[1:]` slice'))
+        self.assertIn(f'fix-{self.fix[:8]}', out)
+
+    def test_from_log_takes_the_case_name_when_one_is_given(self):
+        self.add('--from-log', self.fix, '--defect', 'x', '--new', 'feed-first')
+        self.assertEqual(self.case('feed-first')['kind'], 'bug')
+
+    def test_no_row_exits_2_says_so_and_writes_no_case(self):
+        code, _, err = self.add('--from-log', 'deadbee', '--defect', 'x')
+        self.assertEqual(code, 2)
+        self.assertIn('no Shipped bugs row names deadbee', err)
+        self.assertEqual(list(self.fixtures.iterdir()), [])
+
+    def test_a_fix_without_a_defect_term_is_refused_and_writes_no_case(self):
+        for args in (('--from-log', self.fix), ('--new', 'plain', '--fix', self.fix)):
+            code, _, err = self.add(*args)
+            self.assertEqual(code, 2)
+            self.assertIn('--defect', err)
+        self.assertEqual(list(self.fixtures.iterdir()), [])
+
+    def test_without_from_log_it_takes_the_arguments_of_run_py_new(self):
+        code, _, _ = self.add('--new', 'feed-order', '--fix', self.fix, '--defect', 'sorted', '--tag', 'order', '--holdout')
+        case = self.case('feed-order')
+        self.assertEqual((code, case['change'], case['defect'], case['tags'], case['split']),
+                         (0, self.bug, ['sorted'], ['order'], 'holdout'))
+        self.assertNotIn('description', case)
+
+    def test_a_clean_case_needs_no_defect_term(self):
+        code, _, _ = self.add('--new', 'quiet', '--clean', self.fix)
+        self.assertEqual((code, self.case('quiet')['kind']), (0, 'clean'))
+
+    def test_an_unknown_log_file_exits_2(self):
+        self.log.unlink()
+        code, _, err = self.add('--from-log', self.fix, '--defect', 'x')
+        self.assertEqual(code, 2)
+        self.assertIn('observation log', err)
+
+
 class BugsEndToEnd(unittest.TestCase):
     """`eval.py bugs` through the real core and the real BugsSuite, with a stub `claude` on PATH."""
 

@@ -311,6 +311,106 @@ def verdict_word(kind, result):
     return 'QUIET' if result['blocking'] == 0 else 'NOISY'
 
 
+LOG = HERE.parents[2] / 'docs' / 'observation-log.md'
+MIN_SHA = 7   # a shorter prefix does not name a commit
+
+
+def shipped_bug(text, sha):
+    """The row of the observation log's "Shipped bugs" table whose fix-commit column names `sha`, as
+    `{'bug', 'fix'}` (the cell texts), or None. The column holds a short sha, so `sha` names it when
+    either is a prefix of the other. Prose and other tables do not count."""
+    section = re.search(r'^## Shipped bugs\n(.*?)(?=^## |\Z)', text, re.M | re.S)
+    header = None
+    for line in section.group(1).splitlines() if section else []:
+        if not line.startswith('|'):
+            continue
+        cells = [c.strip() for c in line.strip().strip('|').split('|')]
+        if header is None:
+            header = {c.lower(): i for i, c in enumerate(cells)}
+            if 'bug' not in header or 'fix commit' not in header:
+                return None
+            continue
+        if len(cells) <= max(header['bug'], header['fix commit']):
+            continue
+        fix = cells[header['fix commit']]
+        if len(sha) >= MIN_SHA and any(t.startswith(sha) or sha.startswith(t)
+                                       for t in re.findall(rf'\b[0-9a-f]{{{MIN_SHA},40}}\b', fix)):
+            return {'bug': cells[header['bug']], 'fix': fix}
+    return None
+
+
+def creation_flags(parser):
+    """The flags that make a case; `run.py --new` and `bugs add` take the same."""
+    parser.add_argument('--new', metavar='NAME')
+    parser.add_argument('--fix', help='with --new: the bugfix commit')
+    parser.add_argument('--bug', help='with --new --fix: the commit that introduced the bug (default: found by blame)')
+    parser.add_argument('--clean', help='with --new: a commit nobody had to fix')
+    parser.add_argument('--tag', action='append', default=[],
+                        help='with --new: a behavior tag for the case; otherwise run only cases carrying any given tag')
+    parser.add_argument('--holdout', action='store_true', help='with --new: the case is holdout, never read while tuning')
+    parser.add_argument('--defect', action='append', default=[],
+                        help='with --new --fix: a regex the finding must contain to count as caught (repeatable)')
+
+
+def create_case(args, description=None):
+    """Write `fixtures/<args.new>/case.json` for a bugfix (`args.fix`) or a clean commit (`args.clean`)."""
+    case = bug_case(args.repo, args.fix, args.bug) if args.fix else clean_case(args.repo, args.clean)
+    out = FIXTURES / args.new
+    out.mkdir(parents=True, exist_ok=True)
+    case.update(tags=sorted(set(args.tag)), split='holdout' if args.holdout else 'optimization')
+    if description:
+        case['description'] = description
+    if case['kind'] == 'bug':
+        case['defect'] = args.defect
+        if not args.defect:
+            print('Warning: no --defect terms. The case cannot score CAUGHT until you add a '
+                  '"defect" list to case.json.', file=sys.stderr)
+    (out / 'case.json').write_text(json.dumps({'name': args.new, **case}, indent=2) + '\n')
+    where = ', '.join(f'{p} ({len(v)} line(s))' for p, v in case['targets'].items()) or 'none (clean case)'
+    print(f'Case {out}: {case["kind"]}, {case["split"]}, tags {", ".join(case["tags"]) or "-"}, '
+          f'change {case["change"][:10]}, targets: {where}.')
+    return 0
+
+
+def add_case(argv):
+    """`eval.py bugs add`: `run.py --new`'s arguments, and `--from-log <fix sha>` to take the fix and the
+    description from the "Shipped bugs" row. A bugfix needs a `--defect` term. Exit 2 when it cannot
+    build the case."""
+    parser = argparse.ArgumentParser(prog='eval.py bugs add', description=add_case.__doc__.split('\n')[0])
+    creation_flags(parser)
+    parser.add_argument('--repo', type=Path, required=True, help='the project the fix is in')
+    parser.add_argument('--from-log', metavar='SHA', help='the fix commit of a "Shipped bugs" row')
+    parser.add_argument('--log', type=Path, default=LOG, help='the observation log (default: docs/observation-log.md)')
+    try:
+        args = parser.parse_args(argv)
+    except SystemExit as stop:
+        return stop.code or 0
+    description = None
+    if args.from_log:
+        if args.fix or args.clean:
+            print('--from-log gives the fix commit: leave out --fix and --clean', file=sys.stderr)
+            return 2
+        try:
+            text = args.log.read_text()
+        except OSError as err:
+            print(f'cannot read the observation log: {err}', file=sys.stderr)
+            return 2
+        row = shipped_bug(text, args.from_log)
+        if row is None:
+            print(f'no Shipped bugs row names {args.from_log}', file=sys.stderr)
+            return 2
+        args.fix, description = args.from_log, row['bug']
+        args.new = args.new or f'fix-{args.from_log[:8]}'
+    if not args.new or not (args.fix or args.clean):
+        print('bugs add needs --from-log, or --new with --fix or --clean', file=sys.stderr)
+        return 2
+    if args.fix and not args.defect:
+        print('a bugfix case needs at least one --defect term: the regex a finding must match to count as caught',
+              file=sys.stderr)
+        return 2
+    return create_case(args, description)
+
+
 class BugsSuite:
     """The shipped-bug cases as a suite for the eval core (`core.py` describes the interface). A trial is
     one `/review` of one case in `repo`, judged by `judge()`. A bug trial passes when it is CAUGHT; a
@@ -333,6 +433,9 @@ class BugsSuite:
 
     def instruction_hashes(self, cases):
         return sandbox.harness_hashes()
+
+    def add(self, argv):
+        return add_case(argv)
 
     def run_trial(self, case, folder):
         """The core retries a trial that raises, so what the first attempt spent comes off the budget of the retry."""
@@ -368,15 +471,7 @@ class BugsSuite:
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.split('\n')[0])
-    parser.add_argument('--new', metavar='NAME')
-    parser.add_argument('--fix', help='with --new: the bugfix commit')
-    parser.add_argument('--bug', help='with --new --fix: the commit that introduced the bug (default: found by blame)')
-    parser.add_argument('--clean', help='with --new: a commit nobody had to fix')
-    parser.add_argument('--tag', action='append', default=[],
-                        help='with --new: a behavior tag for the case; otherwise run only cases carrying any given tag')
-    parser.add_argument('--holdout', action='store_true', help='with --new: the case is holdout, never read while tuning')
-    parser.add_argument('--defect', action='append', default=[],
-                        help='with --new --fix: a regex the finding must contain to count as caught (repeatable)')
+    creation_flags(parser)
     parser.add_argument('--fixture', action='append', default=[])
     parser.add_argument('--all', action='store_true', help='every case under fixtures/')
     parser.add_argument('--split', choices=('optimization', 'holdout'), help='run only this split')
@@ -390,20 +485,7 @@ def main(argv=None):
     if args.new:
         if not args.repo or not (args.fix or args.clean):
             parser.error('--new needs --repo and --fix or --clean')
-        case = bug_case(args.repo, args.fix, args.bug) if args.fix else clean_case(args.repo, args.clean)
-        out = FIXTURES / args.new
-        out.mkdir(parents=True, exist_ok=True)
-        case.update(tags=sorted(set(args.tag)), split='holdout' if args.holdout else 'optimization')
-        if case['kind'] == 'bug':
-            case['defect'] = args.defect
-            if not args.defect:
-                print('Warning: no --defect terms. The case cannot score CAUGHT until you add a '
-                      '"defect" list to case.json.', file=sys.stderr)
-        (out / 'case.json').write_text(json.dumps({'name': args.new, **case}, indent=2) + '\n')
-        where = ', '.join(f'{p} ({len(v)} line(s))' for p, v in case['targets'].items()) or 'none (clean case)'
-        print(f'Case {out}: {case["kind"]}, {case["split"]}, tags {", ".join(case["tags"]) or "-"}, '
-              f'change {case["change"][:10]}, targets: {where}.')
-        return 0
+        return create_case(args)
 
     if not args.fixture and not args.all:
         parser.error('give --new, or one or more --fixture, or --all')

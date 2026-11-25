@@ -4,6 +4,8 @@
     eval.py                                  print the suites
     eval.py gates|tasks|bugs [--case ID] [--tag TAG] [--split S] [--trials N] [--jobs N]
     eval.py bugs --repo <project> [--budget USD]   the shipped-bug cases need the project they came from
+    eval.py bugs add --repo <project> --from-log <fix sha> --defect <re>   a case from a Shipped bugs row
+    eval.py bugs add --new <name> --repo <project> --fix <sha> --defect <re>   the flags of run.py --new
     eval.py gates --write-watched            write the watched list, run nothing
     eval.py recall <recall.py flags>         plan-recall, flags passed on unchanged
     eval.py baseline <suite> [<run>]         make a run the suite's baseline
@@ -181,6 +183,9 @@ def main(argv=None, suites=None, root=core.ROOT, readme=README):
     if argv[:1] == ['recall']:  # argparse cannot pass on a leading flag such as `--repo`
         suite = build(suites, 'recall')
         return 2 if suite is None else suite.run(argv[1:])
+    if argv[:2] == ['bugs', 'add']:  # its flags are `run.py --new`'s, not the run flags
+        suite = build(suites, 'bugs')
+        return 2 if suite is None else suite.add(argv[2:])
     parser = parser_for(suites)
     try:
         args = parser.parse_args(argv)

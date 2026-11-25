@@ -1020,6 +1020,21 @@ class EvalEntry(CoreCase):
         self.assertIn('--repo', err)
         self.assertFalse((self.root / 'tools/evals/results').exists())
 
+    def test_bugs_add_hands_every_argument_to_the_suite_and_runs_no_trial(self):
+        class Adder(BuiltSuite):
+            def add(self, argv):
+                self.added = argv
+                return 7
+
+        suite = Adder(CASES, name='bugs')
+        argv = ['--repo', 'app', '--from-log', 'a47f7cfd', '--defect', 'accent', '--tag', 'search', '-h']
+        code, _, _ = self.cli('bugs', 'add', *argv, suite=suite)
+        self.assertEqual((code, suite.added, suite.calls), (7, argv, []))
+        self.assertFalse((self.root / 'tools/evals/results').exists())
+
+    def test_bugs_add_belongs_to_bugs_only(self):
+        self.assertEqual(self.cli('gates', 'add', '--repo', 'app')[0], 2)
+
     def test_repo_belongs_to_bugs_only(self):
         self.assertEqual(self.cli('gates', '--repo', 'app')[0], 2)
 

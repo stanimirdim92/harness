@@ -653,7 +653,7 @@ same rule applies to the `/plan` Draft.
 
 ## T017: Add a bug case from the log, and `/release` prints that command
 
-**Status:** Pending
+**Status:** Done
 
 **Requirements:** REQ-022, REQ-023
 

@@ -84,7 +84,7 @@ the base branch once already. After GO, print under "Shipped-bug record" the
 row for the harness's `observation-log.md` "Shipped bugs" table (found, the
 ticket that shipped it, the bug, this fix's commit, the layer, why it
 missed). Also print the eval command for the fix:
-`python3 tools/evals/review-eval/run.py --new <short-name> --repo <project> --fix <fix sha>`.
+`python3 tools/evals/eval.py bugs add --repo <project> --from-log <fix sha> --defect <term>`.
 The owner adds both to the harness repository; `/release` does not write them.
 
 ### Risk
@@ -295,7 +295,7 @@ Return:
 [One sentence: what these numbers mean for this ticket.]
 
 ### Shipped-bug record
-- [observation-log row] · eval: `python3 tools/evals/review-eval/run.py --new [name] --repo [project] --fix [sha]` (or: not an escaped bug)
+- [observation-log row] · eval: `python3 tools/evals/eval.py bugs add --repo [project] --from-log [fix sha] --defect [term]` (or: not an escaped bug)
 
 ### Requirement evidence
 - REQ-001: [implementing change] / [verification evidence]

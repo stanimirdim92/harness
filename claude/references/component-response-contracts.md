@@ -448,7 +448,7 @@ property are defined in `findings.md` §Review SARIF.
 [One sentence: what these numbers mean for this ticket.]
 
 ### Shipped-bug record
-- [observation-log row] · eval: `python3 tools/evals/review-eval/run.py --new [name] --repo [project] --fix [sha]` (or: not an escaped bug)
+- [observation-log row] · eval: `python3 tools/evals/eval.py bugs add --repo [project] --from-log [fix sha] --defect [term]` (or: not an escaped bug)
 
 ### Requirement evidence
 - REQ-001: [implementing change] / [verification evidence]

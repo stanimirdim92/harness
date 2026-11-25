@@ -237,8 +237,12 @@ it, and `/ship` prints this row when the fix ships. Every row becomes a review-e
 the next reviewer change is scored against the bugs that really shipped:
 
 ```bash
-python3 tools/evals/review-eval/run.py --new <short-name> --repo <project> --fix <fix sha>
+python3 tools/evals/eval.py bugs add --repo <project> --from-log <fix sha> --defect <term>
 ```
+
+The command reads the row below whose "Fix commit" names that sha and keeps its
+"Bug" text as the case description. `--defect` takes a regex from the fix and
+is required: without one a case cannot score CAUGHT (ADR 0143).
 
 Layers: 1 verification before review ·
 2 AI review · 3 security review · 4 automated checks · 5 human approval ·
