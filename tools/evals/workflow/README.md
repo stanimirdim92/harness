@@ -202,8 +202,8 @@ path and the task id. Its completing commit holds the todo, with the task's
 
 To compare two versions of the harness text, extract the older one
 (`git archive <sha> claude tools/evals/workflow | tar -x -C <dir>`), copy the
-current `run.py` over the extracted one, and run that copy: it reads the
-`claude/` next to it.
+current `run.py`, `cases.py` and `cases/` over the extracted ones, and run
+that copy: it reads the `claude/` next to it.
 
 `plan_stale` tests an unapproved spec status, not revision-pin drift.
 `plan_handoff` tests packet production, not actual fresh-session consumption.
@@ -211,3 +211,24 @@ Source requirement retention, truthful counts, decision fidelity and the reason
 for stopping require semantic review. A generic refusal is not a semantic pass.
 Human approval, material-revision transitions, required attachments and actual
 build dispatch need additional cases before claiming coverage of those paths.
+
+## Case folders
+
+Each case is a folder, `cases/<id>/`. `cases.py` documents the format: the
+`case.json` fields, the setup steps (`copy`, `write`, `git_init`, `commit`,
+`stage`, `capture`), the `{name}` placeholders and the check rules. To add a
+case, copy a folder, then edit `case.json` and its files. A case needs a
+`check.py` only for a check that no declared rule states.
+
+Two stored sets keep the cases honest. Both run in CI with
+`python3 -m unittest -q test_runner test_migration`, and neither calls a model.
+
+- `replay/<case>.json` holds structured outputs with the check map that the
+  first, code-based checks gave on each. For every check of every case, one
+  output gives true and one gives false. Never edit an `expected` map to make
+  a changed check pass.
+- `fixture_manifest.json` holds the file hashes, commits, git status and
+  evidence hash of the fixture that the first, code-based builder made for
+  each case. If you change a case's files, setup or evidence on purpose, run
+  `python3 -c "import test_migration; test_migration.write_manifest()"` here
+  and review the diff.

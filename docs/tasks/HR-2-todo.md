@@ -269,7 +269,7 @@ each output as `expected`.
 
 ## T008: All gate cases are folders, proven equal, and the old code is gone
 
-**Status:** Pending
+**Status:** Done
 
 **Requirements:** REQ-012
 

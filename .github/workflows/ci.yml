@@ -180,11 +180,12 @@ jobs:
       - name: Review noise count
         run: python3 tools/tests/test-review-noise.py
 
-      # Orchestration: the workflow runner's own assertion and fixture logic.
+      # Orchestration: the workflow runner's own assertion and fixture logic,
+      # and the replay of every gate case's fixture and checks.
       # NOT the live cases — those spend tokens and stay manual.
       - name: Workflow runner logic
         working-directory: tools/evals/workflow
-        run: python3 -m unittest -q test_runner
+        run: python3 -m unittest -q test_runner test_migration
 
       # Installation: preflight conflict detection and injected-failure rollback.
       - name: Codex skill installer

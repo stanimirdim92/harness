@@ -123,6 +123,11 @@ def build_from_folder(case):
 CASES = casefolders.load_cases()
 
 
+def write_manifest():
+    """Rebuild `fixture_manifest.json` from the folders. Run it only for a deliberate fixture change, then review the diff."""
+    MANIFEST.write_text(json.dumps({case: build_from_folder(case) for case in CASES}, indent=1, sort_keys=True) + '\n')
+
+
 class ReplayShapeTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -204,22 +209,6 @@ class FixtureParityTests(unittest.TestCase):
         want = {'files': {'a': '1', 'b': '2'}, 'commits': ['x m'], 'status': [], 'evidence': 'e'}
         got = {'files': {'a': '1', 'b': '3', 'c': '4'}, 'commits': ['y m'], 'status': [], 'evidence': 'e'}
         self.assertEqual(differences(got, want), ['commits', 'file b', 'file c'])
-
-
-class OldBuilderParityTests(unittest.TestCase):
-    """Runs while the old builder exists: the stored manifest is what that builder makes now."""
-
-    def test_the_stored_manifest_equals_what_the_old_builder_makes(self):
-        stored = json.loads(MANIFEST.read_text())
-        for case in run.cases():
-            with self.subTest(case=case), tempfile.TemporaryDirectory() as tmp, fixed_dates():
-                evidence = run.prepare(Path(tmp), case)
-                self.assertEqual(differences(tree_manifest(Path(tmp), evidence), stored[case]), [], case)
-
-    def test_the_old_and_new_case_lists_are_the_same(self):
-        self.assertEqual(sorted(run.cases()), sorted(CASES))
-        for case, (stage, request) in run.cases().items():
-            self.assertEqual((CASES[case]['stage'], CASES[case]['request']), (stage, request), case)
 
 
 if __name__ == '__main__':
