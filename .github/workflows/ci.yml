@@ -81,6 +81,8 @@ jobs:
       # branch -- because both hooks decide from git state.
       - name: Hooks — worktree base guards
         run: bash tools/tests/test-worktree-hooks.sh
+      - name: Hooks — eval catch-up hint
+        run: bash tools/tests/test-eval-todo-hint.sh
       - name: Post-compaction ticket pointer hook
         run: bash tools/tests/test-reinject-ticket-files.sh
       - name: Failure-logging hook

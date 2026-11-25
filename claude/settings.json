@@ -171,6 +171,10 @@
           {
             "type": "command",
             "command": "$HOME/.claude/hooks/warn-stale-base.sh --report"
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/eval-todo-hint.sh --report"
           }
         ]
       },

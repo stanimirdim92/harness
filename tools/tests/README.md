@@ -15,6 +15,7 @@ push.
 | `test-commit-trailers.sh` | The hook that refuses a writer's commit without a `Refs:` trailer |
 | `test-handoff-hook.sh` | The hook that stops a writer agent from finishing without its handoff report |
 | `test-worktree-hooks.sh` | The stale-base warning and the rule that writers work in a worktree |
+| `test-eval-todo-hint.sh` | The session-start line that counts shipped tickets and bugs without their eval step |
 | `test-isolated-test-runner.sh` | The rule that a project's tests run in isolation |
 | `test-filter-test-output.sh` | The hook that shortens the output of a long, passing test run |
 | `validate-frontmatter-test.py`, `validate-artifact-paths-test.py`, `check-references-test.py`, `check-writing-test.py` | The checks in `../checks/` |

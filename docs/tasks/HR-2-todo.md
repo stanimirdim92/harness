@@ -751,7 +751,7 @@ same rule applies to the `/plan` Draft.
 
 ## T020: SessionStart prints the catch-up count
 
-**Status:** Pending
+**Status:** Done
 
 **Requirements:** REQ-030, TD-004
 

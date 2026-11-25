@@ -14,7 +14,7 @@ sources — review it whenever a file listed below changes shape.
 
 ## 1. Claude hooks
 
-Fifteen files live in `../hooks/`: fourteen hooks and one sourced library. Each hook is a
+Sixteen files live in `../hooks/`: fifteen hooks and one sourced library. Each hook is a
 `PreToolUse`, `PostToolUse`, `SubagentStop`, or `SessionStart` script that reads one JSON object on stdin and prints one JSON
 decision object on stdout, always exiting 0 — the decision, not the exit code,
 is what the host runtime acts on (per
@@ -34,6 +34,7 @@ is what the host runtime acts on (per
 | `limit-recon-write.sh` | `PreToolUse` (`Write`) | `repo-recon` only (via its frontmatter `hooks:`) | `permissionDecision: "deny"` for any path but its own report, or silent allow (ADR 0127) |
 | `require-handoff-report.sh` | `SubagentStop` | `executor`, `test-engineer` only | `decision: "block"` or silent allow |
 | `warn-stale-base.sh` | `SessionStart` (`startup`\|`resume`) | global | `systemMessage` + `additionalContext`, or silent |
+| `eval-todo-hint.sh` | `SessionStart` (`startup`\|`resume`) | global | same envelope as `warn-stale-base.sh` with the one line `evals: <n> tickets without recall, <m> bugs without a case — run eval.py todo`; silent on zero, failure or more than 2 seconds |
 | `reinject-ticket-files.sh` | `SessionStart` (`compact`) | global | plain stdout naming the ticket's `docs/tasks/<TICKET>-{open,todo,plan}.md`, or silent |
 | `log-failure-event.sh` | `StopFailure`, `PermissionDenied` | global | silent; appends one JSON line to `~/.claude/logs/failures.jsonl` (never `tool_input`) |
 | `worktree-readiness.sh` | not a hook — a sourced shell function | shared library | `0`/`1` return + one line on stdout |
