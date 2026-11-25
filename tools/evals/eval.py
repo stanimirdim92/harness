@@ -29,10 +29,17 @@ import core
 HERE = Path(__file__).resolve().parent
 README = HERE / 'README.md'
 
+
+def build_gates():
+    sys.path.append(str(HERE / 'workflow'))
+    from run import GatesSuite
+    return GatesSuite()
+
+
 SUITES = {
     'gates': {'question': 'Does the pipeline make the right calls on small made-up cases?',
               'when': 'after you change a command, agent, skill or reference',
-              'cost': None, 'build': None},
+              'cost': None, 'build': build_gates, 'jobs': 4},
     'tasks': {'question': 'Does the pipeline build a working feature from a ticket?',
               'when': 'after you change how build, review or test behave',
               'cost': None, 'build': None},
@@ -92,10 +99,11 @@ def parser_for(suites):
         sub = commands.add_parser(name, help=suites[name]['question'])
         sub.add_argument('--case', action='append', default=[], help='run this case (repeatable)')
         sub.add_argument('--tag', action='append', default=[], help='run the cases with this tag (repeatable)')
-        sub.add_argument('--split', choices=('optimization', 'holdout'), help='keep only this split')
+        sub.add_argument('--split', choices=('dev', 'optimization', 'holdout'), help='keep only this split')
         sub.add_argument('--trials', type=positive, default=core.DEFAULT_TRIALS,
                          help=f'trials per case (default {core.DEFAULT_TRIALS})')
-        sub.add_argument('--jobs', type=positive, default=1, help='trials to run at the same time (default 1)')
+        jobs = suites[name].get('jobs', 1)
+        sub.add_argument('--jobs', type=positive, default=jobs, help=f'trials to run at the same time (default {jobs})')
     commands.add_parser('recall', help=suites['recall']['question'])
     sub = commands.add_parser('baseline', help='make a run the suite baseline')
     sub.add_argument('suite', choices=list(suites))

@@ -1,14 +1,24 @@
+import hashlib
+import io
 import json
 import shutil
 import subprocess
 import sys
 import tempfile
+import threading
+import time
 import unittest
+from contextlib import redirect_stderr, redirect_stdout
+from datetime import datetime
 from pathlib import Path
 from unittest import mock
 
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 import cases as casefolders
-from run import MUTANTS, audit_reads, parse_decisions
+import core
+import eval as eval_cli
+from run import HARNESS, MUTANTS, GatesSuite, audit_reads, parse_decisions
 from run import main as run_main
 
 
@@ -123,6 +133,237 @@ class MainTests(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertFalse(report['checks']['fixture_unchanged'])
         self.assertTrue(report['checks']['check_goes_to_the_verifier'])
+
+
+class StubClaude:
+    """Stands in for the `claude` call and passes every other command through.
+
+    `answer(case, n, attempt)` is the structured output for one call, or None
+    when `claude` prints no result event. `case` and `n` come from the trial
+    folder the call runs in."""
+
+    def __init__(self, answer, pause=0.0):
+        self.answer = answer
+        self.pause = pause
+        self.real = subprocess.run
+        self.lock = threading.Lock()
+        self.running = 0
+        self.peak = 0
+        self.seen = {}
+        self.fixtures = []
+
+    def __call__(self, command, **kwargs):
+        if command[0] != 'claude':
+            return self.real(command, **kwargs)
+        fixture = Path(kwargs['cwd'])
+        case, n = fixture.parent.parent.name, int(fixture.parent.name[1:].split('-')[0])
+        with self.lock:
+            self.fixtures.append(fixture)
+            self.seen[(case, n)] = attempt = self.seen.get((case, n), 0) + 1
+            self.running += 1
+            self.peak = max(self.peak, self.running)
+        time.sleep(self.pause)
+        with self.lock:
+            self.running -= 1
+        output = self.answer(case, n, attempt)
+        if output is not None:
+            event = {'type': 'result', 'is_error': False, 'structured_output': output, 'duration_ms': 7,
+                     'total_cost_usd': 0.25, 'modelUsage': {'stub': {}}}
+            kwargs['stdout'].write(json.dumps(event) + '\n')
+        return subprocess.CompletedProcess(command, 0)
+
+
+class GatesRunTests(unittest.TestCase):
+    """`GatesSuite` through the core, with a stubbed `claude`: 3 cases of 3 trials."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name) / 'repo'
+        self.root.mkdir()
+        for args in (('init', '-q'), ('commit', '-q', '--allow-empty', '-m', 'base')):
+            subprocess.run(['git', '-C', str(self.root), '-c', 'user.name=t', '-c', 'user.email=t@t', *args], check=True)
+        (self.root / '.gitignore').write_text('tools/evals/results/\n')
+        self.cases = casefolders.load_cases(self.make_cases())
+        self.suite = GatesSuite()
+
+    def make_cases(self):
+        root = Path(self.tmp.name) / 'cases'
+        for case_id in ('a_pass', 'b_flaky', 'c_fail'):
+            make_case(root, case_id, tags=[case_id[0]])
+        return root
+
+    @staticmethod
+    def answer(case, n, attempt):
+        decided = {'a_pass': True, 'b_flaky': n != 2, 'c_fail': False}[case]
+        return result(state='decided' if decided else 'blocked')
+
+    def run_gates(self, stub, jobs=4, trials=3, cases=None):
+        out, err = io.StringIO(), io.StringIO()
+        with mock.patch.object(subprocess, 'run', stub), redirect_stdout(out), redirect_stderr(err):
+            code = core.run(self.suite, cases or list(self.cases.values()), trials=trials, jobs=jobs,
+                            root=self.root, now=datetime(2026, 12, 1, 10, 0, jobs))
+        runs = sorted((self.root / 'tools/evals/results/gates').iterdir())
+        return code, runs[-1], json.loads((runs[-1] / 'results.json').read_text()), out.getvalue()
+
+    def test_three_cases_of_three_trials_make_nine_separate_trial_folders(self):
+        stub = StubClaude(self.answer)
+        _, run, _, _ = self.run_gates(stub)
+        folders = sorted(p.relative_to(run).as_posix() for p in run.glob('*/t*'))
+        self.assertEqual(folders, [f'{c}/t{n}' for c in ('a_pass', 'b_flaky', 'c_fail') for n in (1, 2, 3)])
+        for folder in folders:
+            for name in ('fixture', 'prompt.txt', 'trace.jsonl', 'trial.json'):
+                self.assertTrue((run / folder / name).exists(), f'{folder}/{name}')
+        self.assertEqual(len({str(f) for f in stub.fixtures}), 9)
+
+    def test_a_trial_builds_its_fixture_inside_its_own_folder(self):
+        case = make_case(Path(self.tmp.name) / 'own', 'own', files={'AGENTS.md': 'rules\n'})
+        stub = StubClaude(lambda *_: result())
+        _, run, _, _ = self.run_gates(stub, trials=2, cases=[casefolders.load_case(case)])
+        for n in (1, 2):
+            self.assertEqual((run / f'own/t{n}/fixture/AGENTS.md').read_text(), 'rules\n')
+
+    def test_jobs_run_trials_at_the_same_time_and_one_job_does_not(self):
+        parallel = StubClaude(self.answer, pause=0.1)
+        self.run_gates(parallel, jobs=4)
+        serial = StubClaude(self.answer, pause=0.01)
+        self.run_gates(serial, jobs=1)
+        self.assertGreater(parallel.peak, 1)
+        self.assertLessEqual(parallel.peak, 4)
+        self.assertEqual(serial.peak, 1)
+
+    def test_jobs_do_not_change_the_structure_of_the_results(self):
+        shapes = []
+        for jobs in (1, 4):
+            _, _, doc, _ = self.run_gates(StubClaude(self.answer), jobs=jobs)
+            shapes.append([(c['id'], c['result'], [(t['n'], t['state'], t['checks'], t['folder']) for t in c['trials']])
+                           for c in doc['cases']])
+        self.assertEqual(shapes[0], shapes[1])
+
+    def test_a_case_is_pass_flaky_or_fail_from_its_trials(self):
+        _, _, doc, _ = self.run_gates(StubClaude(self.answer))
+        states = {c['id']: (c['result']['state'], c['result']['passed'], c['result']['scored']) for c in doc['cases']}
+        self.assertEqual(states, {'a_pass': ('PASS', 3, 3), 'b_flaky': ('FLAKY', 2, 3), 'c_fail': ('FAIL', 0, 3)})
+        self.assertEqual([t['state'] for t in doc['cases'][1]['trials']], ['pass', 'fail', 'pass'])
+
+    def test_a_trial_keeps_its_checks_and_the_cost_the_cli_reports(self):
+        _, _, doc, _ = self.run_gates(StubClaude(self.answer), trials=1)
+        trial = doc['cases'][0]['trials'][0]
+        self.assertEqual(trial['checks'], {'is_decided': True})
+        self.assertEqual((trial['cost_usd'], trial['duration_ms']), (0.25, 7))
+        self.assertEqual(doc['cost_usd'], 0.75)
+        self.assertEqual(doc['trials_without_cost'], 0)
+
+    def test_the_model_answer_is_kept_under_its_own_name(self):
+        _, _, doc, _ = self.run_gates(StubClaude(self.answer), trials=1)
+        by_case = {c['id']: c['trials'][0] for c in doc['cases']}
+        self.assertEqual(by_case['a_pass']['answer_state'], 'decided')
+        self.assertEqual(by_case['c_fail']['answer_state'], 'blocked')
+
+    def test_a_trial_without_a_result_event_is_retried_and_the_first_attempt_is_kept(self):
+        stub = StubClaude(lambda case, n, attempt: None if attempt == 1 else result())
+        _, run, doc, _ = self.run_gates(stub, trials=1, cases=[self.cases['a_pass']])
+        trial = doc['cases'][0]['trials'][0]
+        self.assertEqual((trial['state'], trial['retried']), ('pass', True))
+        self.assertTrue((run / 'a_pass/t1-attempt1').is_dir())
+
+    def test_an_empty_structured_output_is_errored_after_the_retry(self):
+        stub = StubClaude(lambda *_: {})
+        _, run, doc, text = self.run_gates(stub, trials=1, cases=[self.cases['a_pass']])
+        trial = doc['cases'][0]['trials'][0]
+        self.assertEqual((trial['state'], trial['retried']), ('errored', True))
+        self.assertEqual(stub.seen[('a_pass', 1)], 2)
+        self.assertIsNone(doc['cases'][0]['result']['state'])
+        self.assertIn('ERRORED after retry', text)
+
+    def test_a_check_that_cannot_run_is_errored_not_failed(self):
+        make_case(Path(self.tmp.name) / 'broken', 'broken', checks={'c': {'fixture_unchanged': True}},
+                  setup=[{'step': 'write', 'path': 'a.txt', 'text': 'a'}])
+        case = casefolders.load_case(Path(self.tmp.name) / 'broken' / 'broken')
+        with mock.patch.object(casefolders, 'snapshot', return_value=None):
+            stub = StubClaude(lambda *_: result())
+            _, _, doc, _ = self.run_gates(stub, trials=1, cases=[case])
+        trial = doc['cases'][0]['trials'][0]
+        self.assertEqual(trial['state'], 'errored')
+        self.assertIn('fixture_unchanged', trial['error'])
+
+    def test_a_change_to_the_fixture_fails_the_trial_not_the_run(self):
+        case = casefolders.load_case(make_case(Path(self.tmp.name) / 'edit', 'edit', checks={'u': {'fixture_unchanged': True}},
+                                               files={'a.txt': 'a'}))
+
+        def edit(case_id, n, attempt):
+            (stub.fixtures[-1] / 'a.txt').write_text('changed')
+            return result()
+
+        stub = StubClaude(edit)
+        _, _, doc, _ = self.run_gates(stub, trials=1, jobs=1, cases=[case])
+        self.assertEqual(doc['cases'][0]['trials'][0]['checks'], {'u': False})
+        self.assertEqual(doc['cases'][0]['result']['state'], 'FAIL')
+
+    def test_the_run_records_the_hash_of_each_instruction_file_the_cases_read(self):
+        _, _, doc, _ = self.run_gates(StubClaude(self.answer), trials=1)
+        hashes = doc['instruction_hashes']
+        self.assertEqual(sorted(hashes), sorted(['commands/ship.md', 'references/target-selection.md',
+                                                  'references/findings.md', 'references/risk-tiers.md']))
+        for rel, digest in hashes.items():
+            self.assertEqual(digest, hashlib.sha256((HARNESS / rel).read_bytes()).hexdigest())
+
+
+class GatesSuiteTests(unittest.TestCase):
+    def setUp(self):
+        self.suite = GatesSuite()
+
+    def test_the_suite_follows_the_core_contract_for_gates(self):
+        self.assertEqual((self.suite.name, self.suite.kind, self.suite.any_loss_is_worse), ('gates', 'case', True))
+
+    def test_every_check_true_is_a_pass_and_any_false_is_a_fail(self):
+        self.assertEqual(self.suite.state({'checks': {'a': True, 'b': True}}), 'pass')
+        self.assertEqual(self.suite.state({'checks': {'a': True, 'b': False}}), 'fail')
+        self.assertEqual(self.suite.state({'checks': {'a': False, 'b': False}}), 'fail')
+
+    def test_no_checks_is_errored(self):
+        for trial in ({}, {'checks': None}, {'checks': {}}):
+            self.assertEqual(self.suite.state(trial), 'errored', trial)
+
+    def test_all_cases_lists_the_case_folders_with_their_split_and_tags(self):
+        listed = {c['id']: c for c in self.suite.all_cases()}
+        self.assertEqual(len(listed), 60)
+        self.assertEqual((listed['ship_open_blocker']['split'], listed['ship_open_blocker']['tags']), ('dev', ['shipverdict']))
+
+
+class GatesCommandTests(unittest.TestCase):
+    def cli(self, *argv):
+        out, err = io.StringIO(), io.StringIO()
+        with redirect_stdout(out), redirect_stderr(err):
+            code = eval_cli.main(list(argv))
+        return code, out.getvalue(), err.getvalue()
+
+    def test_the_gates_suite_is_built_in_the_registry(self):
+        suite = eval_cli.build(eval_cli.SUITES, 'gates')
+        self.assertEqual(suite.name, 'gates')
+
+    def test_an_unknown_case_exits_2_and_names_it(self):
+        code, _, err = self.cli('gates', '--case', 'nope')
+        self.assertEqual(code, 2)
+        self.assertIn('unknown case: nope', err)
+
+    def test_split_dev_keeps_every_gate_case_and_another_split_keeps_none(self):
+        cases = eval_cli.build(eval_cli.SUITES, 'gates').all_cases()
+        self.assertEqual(len(eval_cli.select(cases, [], [], 'dev')), 60)
+        self.assertEqual(eval_cli.select(cases, [], [], 'holdout'), [])
+
+    def test_the_three_case_selection_of_the_real_run_resolves(self):
+        cases = eval_cli.build(eval_cli.SUITES, 'gates').all_cases()
+        picked = eval_cli.select(cases, ['ship_open_blocker', 'fix_rerun', 'testgate_figma'], [], None)
+        self.assertEqual([c['id'] for c in picked], ['fix_rerun', 'ship_open_blocker', 'testgate_figma'])
+
+    def test_split_dev_is_accepted_by_the_parser(self):
+        args = eval_cli.parser_for(eval_cli.SUITES).parse_args(['gates', '--split', 'dev'])
+        self.assertEqual(args.split, 'dev')
+
+    def test_jobs_default_to_4_for_gates(self):
+        args = eval_cli.parser_for(eval_cli.SUITES).parse_args(['gates'])
+        self.assertEqual(args.jobs, 4)
 
 
 def make_case(root, case_id, files=None, check_py=None, templates=None, **fields):

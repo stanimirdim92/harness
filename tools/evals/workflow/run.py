@@ -134,8 +134,17 @@ DECISION_BOUNDARY = {
 }
 
 
+def stage_files(stage):
+    """The harness files, relative to `claude/`, that a case of this stage reads."""
+    return STAGES[stage] + (COMMON_FILES if stage not in ('jira', 'build', 'review') + PROBE_STAGES else [])
+
+
+def file_hashes(files):
+    return {p: hashlib.sha256((HARNESS / p).read_bytes()).hexdigest() for p in files}
+
+
 def prompt(stage, request, directory, evidence):
-    files = STAGES[stage] + (COMMON_FILES if stage not in ('jira', 'build', 'review') + PROBE_STAGES else [])
+    files = stage_files(stage)
     chunks = [request, f'Fixture directory: {directory}', evidence,
               'Execution boundary: Read/Glob only, confined to the fixture directory. Do not implement, invoke another stage, simulate human approval, or access external services. Return the actual stage artifact text in the structured output instead of writing files; the runner will save it. Empty strings for artifacts not produced. ready_for_review means a draft may be presented for approval, not that approval exists. For intake it means required intake reading is complete. Report blockers truthfully.']
     stage = {'ownertest': 'testgate', 'ownerverdict': 'shipverdict'}.get(stage, stage)
@@ -206,6 +215,66 @@ def audit_reads(events, directory):
     return source_names, confined
 
 
+def run_claude(body, directory, destination):
+    """Run one `claude` turn on `body` in `directory`. The trace and stderr go to `destination`.
+    Returns the stream events and the final result event."""
+    command=['claude','-p','--safe-mode','--tools','Read,Glob','--allowedTools','Read','Glob','--permission-mode','dontAsk','--no-session-persistence','--output-format','stream-json','--verbose','--json-schema',json.dumps(SCHEMA)]
+    with (destination/'trace.jsonl').open('w') as trace, (destination/'stderr.txt').open('w') as err:
+        run=subprocess.run(command,input=body,text=True,cwd=directory,stdout=trace,stderr=err,timeout=240)
+    events=[json.loads(line) for line in (destination/'trace.jsonl').read_text().splitlines() if line.startswith('{')]
+    final=next((e for e in reversed(events) if e.get('type')=='result'),None)
+    if final is None: raise RuntimeError('claude printed no result event')
+    if run.returncode or final.get('is_error'): raise RuntimeError(str(final.get('result',final.get('subtype'))))
+    return events,final
+
+
+def run_trial(case, folder):
+    """Run one trial of a gate case in `folder`, which exists. Build its own fixture in `folder/fixture`.
+
+    Returns the trial record: `checks`, `cost_usd`, `duration_ms`, `answer_state`
+    (the `state` of the model's answer), `explanation` and `model_usage`.
+    Raises when the trial cannot be scored: a timeout, a CLI error, an empty
+    answer or a check that cannot run."""
+    import cases
+    folder=Path(folder)
+    directory=folder/'fixture';directory.mkdir(parents=True)
+    evidence=cases.build_fixture(case,directory)
+    body,_=prompt(case['stage'],case['request'],directory,evidence)
+    write(folder/'prompt.txt',body)
+    before=cases.snapshot(directory)
+    events,final=run_claude(body,directory,folder)
+    result=final.get('structured_output')
+    if not isinstance(result,dict) or not result: raise RuntimeError('claude returned an empty structured output')
+    read_names,confined=audit_reads(events,directory)
+    checks=cases.evaluate(case,result,read_names,directory,before=before,confined=confined)
+    for key in ['intake','spec','plan','todo','dispatch','reviewers']:
+        if result.get(key):write(folder/(key+'.md'),result[key])
+    return {'checks':checks,'cost_usd':final.get('total_cost_usd'),'duration_ms':final.get('duration_ms'),'answer_state':result['state'],'explanation':result['explanation'],'model_usage':final.get('modelUsage')}
+
+
+class GatesSuite:
+    """The gate cases as a suite for the eval core (`core.py` describes the interface)."""
+    name='gates'
+    kind='case'
+    any_loss_is_worse=True
+    model=None
+
+    def all_cases(self):
+        import cases
+        return list(cases.load_cases().values())
+
+    def instruction_hashes(self, cases):
+        return file_hashes(sorted({p for c in cases for p in stage_files(c['stage'])}))
+
+    def run_trial(self, case, folder):
+        return run_trial(case,folder)
+
+    def state(self, trial):
+        checks=trial.get('checks')
+        if not checks: return 'errored'
+        return 'pass' if all(checks.values()) else 'fail'
+
+
 def main():
     import cases
     case_map=cases.load_cases()
@@ -221,27 +290,14 @@ def main():
     for name in args.case or case_map:
         destination=output/name
         if destination.exists(): raise SystemExit(f'Refusing to overwrite case evidence: {destination}')
-        directory=destination/'fixture';directory.mkdir(parents=True)
+        destination.mkdir(parents=True)
         case=case_map[name]
-        evidence=cases.build_fixture(case,directory)
-        body,files=prompt(case['stage'],case['request'],directory,evidence)
-        write(destination/'prompt.txt',body)
-        before=cases.snapshot(directory)
-        command=['claude','-p','--safe-mode','--tools','Read,Glob','--allowedTools','Read','Glob','--permission-mode','dontAsk','--no-session-persistence','--output-format','stream-json','--verbose','--json-schema',json.dumps(SCHEMA)]
         print(f'Running {name}',flush=True)
         try:
-            with (destination/'trace.jsonl').open('w') as trace, (destination/'stderr.txt').open('w') as err:
-                run=subprocess.run(command,input=body,text=True,cwd=directory,stdout=trace,stderr=err,timeout=240)
-            events=[json.loads(line) for line in (destination/'trace.jsonl').read_text().splitlines() if line.startswith('{')]
-            final=next(e for e in reversed(events) if e.get('type')=='result')
-            if run.returncode or final.get('is_error'): raise RuntimeError(str(final.get('result',final.get('subtype'))))
-            result=final['structured_output']
-            read_names, confined = audit_reads(events, directory)
-            assertions=cases.evaluate(case,result,read_names,directory,before=before,confined=confined)
-            for key in ['intake','spec','plan','todo','dispatch','reviewers']:
-                if result.get(key):write(destination/(key+'.md'),result[key])
-            report={'case':name,'checks':assertions,'assertions_passed':all(assertions.values()),'state':result['state'],'explanation':result['explanation'],'duration_ms':final.get('duration_ms'),'model_usage':final.get('modelUsage'),'instruction_hashes':{p:hashlib.sha256((HARNESS/p).read_bytes()).hexdigest() for p in files},'semantic_review':'pending'}
-        except (subprocess.TimeoutExpired,KeyError,ValueError,RuntimeError,StopIteration) as exc:
+            trial=run_trial(case,destination)
+            checks=trial['checks']
+            report={'case':name,'checks':checks,'assertions_passed':all(checks.values()),'state':trial['answer_state'],'explanation':trial['explanation'],'duration_ms':trial['duration_ms'],'model_usage':trial['model_usage'],'instruction_hashes':file_hashes(stage_files(case['stage'])),'semantic_review':'pending'}
+        except (subprocess.TimeoutExpired,KeyError,ValueError,RuntimeError) as exc:
             report={'case':name,'assertions_passed':False,'execution_error':str(exc)}
         write(destination/'result.json',json.dumps(report,indent=2)+'\n')
         reports.append(report)

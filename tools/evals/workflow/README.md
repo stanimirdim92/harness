@@ -5,6 +5,10 @@ authenticated Claude CLI. These calls consume normal account usage. Use
 `--case NAME` for a focused rerun and `--output DIRECTORY` to retain evidence.
 No model override is applied. Each case starts a new session.
 
+`python3 tools/evals/eval.py gates` runs the same cases with trials, `--jobs`
+(default 4) and a PASS, FLAKY or FAIL result per case. Each trial builds its own
+fixture in `<case>/t<n>/fixture/`. `run.py` stays as the single-trial runner.
+
 The runner supplies current harness files explicitly, disables ambient Claude
 customizations, and allows only Read and Glob. All source and output artifacts
 live in a temporary directory unless an explicit output directory is supplied.

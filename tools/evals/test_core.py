@@ -706,9 +706,9 @@ class EvalEntry(CoreCase):
         text = eval_cli.suite_table(eval_cli.SUITES, eval_cli.README.read_text())
         self.assertRegex(text, r'gates\n.*\n.*\n  last measured cost: \$\d+\.\d\d')
 
-    def test_the_real_registry_lists_four_suites_none_built(self):
+    def test_the_real_registry_lists_four_suites_and_only_gates_is_built(self):
         self.assertEqual(list(eval_cli.SUITES), ['gates', 'tasks', 'bugs', 'recall'])
-        self.assertTrue(all(entry['build'] is None for entry in eval_cli.SUITES.values()))
+        self.assertEqual([name for name, entry in eval_cli.SUITES.items() if entry['build'] is not None], ['gates'])
 
     def test_a_suite_not_built_yet_says_so_and_exits_2(self):
         for argv in (('gates',), ('baseline', 'gates'), ('recall',)):
