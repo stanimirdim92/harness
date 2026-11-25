@@ -4,8 +4,8 @@ Status: Approved
 Ticket: N/A (harness work; key HR-2 for the eval rebuild)
 Change kind: Modify
 Supersedes: N/A (ADR 0079's comparison rules are superseded in part by the ADR in REQ-028)
-Approved by: the owner (reply "approved, commit on main" in the Claude Code session, 2026-11-24; reapproved after the REQ-031 revision, same reply, 2026-11-24)
-Approved at: 2026-11-24
+Approved by: the owner (reply "approved, commit on main" in the Claude Code session, 2026-11-24; reapproved after the REQ-031 revision, same reply, 2026-11-24; reapproved after the DEC-013 revision, same reply, 2026-11-25)
+Approved at: 2026-11-25
 
 Index: [Objective](#objective) · [Capability Map](#capability-map) ·
 [Change Impact](#change-impact) · [Requirements](#requirements) ·
@@ -530,16 +530,20 @@ listed in `tools/checks/README.md`. It MUST NOT read or require the
 ### tasks
 
 ### Requirement: REQ-018 — Driver with a scripted owner turn
-Source: owner decision Q2, 2026-11-24 ("Scripted owner turn"); ADR 0148; workflow case `owner_approves_read_spec`
+Source: owner decision Q2, 2026-11-24 ("Scripted owner turn"); ADR 0148; workflow case `owner_approves_read_spec`; DEC-013
 
 `eval.py tasks` MUST build a sandbox with `claude/evals/add-business/setup.sh`,
 install the harness (REQ-008), and run `/spec ADD-1`, `/plan ADD-1`,
 `/build ADD-1`, `/test ADD-1` and `/review ADD-1` headless, in order. When
 `/spec` or `/plan` presents a draft for approval, the driver MUST send a
 separate turn in that session: "I read the whole spec. I approve it." (or
-"plan"). No prompt the driver sends before a draft exists MUST contain
-approval or pre-approval text. When `/review` reports REQUIRED or BLOCKER
-findings, the driver MUST run one fix round as the pipeline routes it.
+"plan"). If the draft holds `OPEN QUESTION` blocks and every block marks one
+option `(recommended)`, then the driver MUST first send one decision turn in
+that session: "For every open question, take the recommended option.", and
+send the approval turn only after the revised draft holds no `OPEN QUESTION`
+block. No prompt the driver sends before a draft exists MUST contain
+approval, pre-approval or decision text. When `/review` reports REQUIRED or
+BLOCKER findings, the driver MUST run one fix round as the pipeline routes it.
 
 #### Scenario: Approval after the draft
 - GIVEN `/spec ADD-1` returned a Draft spec and asked for approval
@@ -549,20 +553,32 @@ findings, the driver MUST run one fix round as the pipeline routes it.
 #### Scenario: No pre-approval
 - GIVEN the driver's prompt texts
 - WHEN a unit test scans every turn sent before a draft exists
-- THEN none contains "approve"
+- THEN none contains "approve" or "recommended option"
+
+#### Scenario: Open questions with a recommendation
+- GIVEN `/spec ADD-1` returned a Draft with `OPEN QUESTION` Q1 and Q2, each with one option marked `(recommended)`
+- WHEN the driver continues
+- THEN it sends the decision turn, then, once the revised Draft holds no `OPEN QUESTION`, the approval turn, and the spec header reads `Status: Approved`
 
 ### Requirement: REQ-019 — The driver stops and says why
 Source: plan §5.8
 
 The driver MUST stop a trial when: a stage reports BLOCKED; a stage asks the
-owner a question other than the approval of REQ-018; a single stage exceeds
-its time limit; or the trial exceeds 90 minutes of wall time. The trial
-record MUST hold the stop reason and the last stage reached.
+owner a question other than the approval and the decision turn of REQ-018; an
+`OPEN QUESTION` block has no `(recommended)` option; a draft still holds an
+`OPEN QUESTION` after the one decision turn; a single stage exceeds its time
+limit; or the trial exceeds 90 minutes of wall time. The trial record MUST
+hold the stop reason and the last stage reached.
 
 #### Scenario: Question
 - GIVEN `/plan` returns a SPEC CONFLICT question to the owner
 - WHEN the driver reads it
 - THEN the trial stops with reason `question` and stage `/plan`, and grading still runs
+
+#### Scenario: Open question without a recommendation
+- GIVEN `/spec ADD-1` returned a Draft whose `OPEN QUESTION` Q1 marks no option `(recommended)`
+- WHEN the driver reads it
+- THEN no decision or approval turn is sent, the trial stops with reason `question` and stage `/spec`, and grading still runs
 
 #### Scenario: Wall clock
 - GIVEN 90 minutes have passed during `/build`
@@ -848,6 +864,7 @@ the session beyond that limit.
 - Source: owner, 2026-11-24, Claude Code session (plan Q2)
 - Decided by: owner, 2026-11-24, plan Q2
 - Affects: REQ-018
+- Amended by: DEC-013 (the owner turn also answers open questions)
 
 ### DEC-003 — Three trials by default
 - Decision: 3 trials by default, `--trials N` to change; a run below the default never becomes a baseline.
@@ -929,6 +946,15 @@ the session beyond that limit.
 - Decided by: owner, 2026-11-24, `/spec HR-2 decisions: REQ-031=1`
 - Affects: REQ-031
 
+### DEC-013 — The scripted owner takes the recommended option
+- Decision: When a `/spec` or `/plan` Draft holds `OPEN QUESTION` blocks that each mark one option `(recommended)`, the driver sends one decision turn, "For every open question, take the recommended option.", then the approval turn. A block with no recommended option, or a question left after the decision turn, stops the trial with `question`.
+- Alternatives: scripted answers per task case (someone must predict each question; an unmatched one still stops the trial); keep stopping at `/spec` (build, test and review stay unmeasured).
+- Reason: the first real task trial (`tools/evals/results/tasks/2026-11-25-130631-9209f99`) stopped at `/spec` on two open questions, Q1 and Q2, each with a recommended Option A, so no later stage was measured. The decision turn comes after the draft, so no text pre-approves a spec or plan (ADR 0148).
+- Amends: DEC-002
+- Source: owner, 2026-11-25, Claude Code session ("Pick recommended")
+- Decided by: owner, 2026-11-25
+- Affects: REQ-018, REQ-019
+
 ## Tech Stack
 
 Python 3 standard library only, as every current eval (`argparse`, `json`,
@@ -988,7 +1014,7 @@ docstring that states usage and exit codes (see `check-rescore.py`), tests in
 | REQ-014 | the measurement run's README entry; the baseline folder; observation-log rows | manual run, recorded |
 | REQ-015–REQ-017 | unit tests: staleness; trailer line format; check cases (missing, bare not run, reason, result, unwatched, both trailers, zero range) | `tools/tests/test-check-eval-trailer.py` |
 | REQ-031 | probe record in the README; one real probe session plus subagent, recorded, showing both eval reads refused and `check-spec.py` run; a unit test that the probe records `fail` when the stage script is refused; a unit test that the driver writes the setting only when the record says pass | manual probe, `tools/evals/tasks` tests |
-| REQ-018–REQ-020 | unit tests with a stubbed `claude`: approval only after draft, each stop rule; one real trial run, recorded | `tools/evals/tasks` tests (path is a plan TD) |
+| REQ-018–REQ-020 | unit tests with a stubbed `claude`: approval only after draft, the decision turn only after a draft with recommended options, each stop rule; one real trial run, recorded | `tools/evals/tasks` tests (path is a plan TD) |
 | REQ-021, REQ-022 | `test_review_eval.py` unchanged and passing; row parser test; `test-check-rescore.py` unchanged | existing + new unit tests |
 | REQ-023, REQ-027 | `rg` searches named in the requirements | command output |
 | REQ-024 | same output from both commands on one ticket | manual run, recorded |
