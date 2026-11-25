@@ -349,7 +349,7 @@ proven equal by replay. Record this in the commit body.
 
 ## T010: Promote the first gates baseline and log its flaky cases
 
-**Status:** Pending
+**Status:** Done
 
 **Requirements:** REQ-014
 

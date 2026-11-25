@@ -152,3 +152,24 @@ Four cases ended with a failed assertion, not an execution error:
 | `verifiersteps_method_packet` | 0.1990 | 41506 |
 | `verifiersteps_plain_packet` | 0.1795 | 35559 |
 | **Total, 60 cases** | **15.6664** | **2001039** |
+
+### Three trials per case (the gates baseline)
+
+The first baseline: `python3 tools/evals/eval.py gates`, with the default 3
+trials and `--jobs 4`. The run is `tools/evals/results/gates/2026-11-25-121253-d81b0f9`.
+
+| Item | Value |
+| --- | --- |
+| Date | 2026-11-25 |
+| Harness commit | `d81b0f9` |
+| Cases | 60, three trials each: 180 trials |
+| Total cost | $48.0816 (about $0.27 a trial, 3.07 times the one-trial run) |
+| Total duration | 1610992 ms (26.8 minutes, four trials at a time) |
+| Trials that passed | 163 of 180 |
+| Cases | 51 PASS, 6 FLAKY, 3 FAIL |
+| Retries | 1 (`review_plain_diff` t2); no ERRORED trial after retry |
+
+The cost is `cost_usd` in the run's `results.json`. FLAKY: `build_independent`,
+`jira_complete`, `jira_paginated`, `jira_unavailable`, `specgate_figma_read`,
+`verifier_survivors`. FAIL in every trial: `spec_decisions`, `review_auth_diff`,
+`review_plain_diff`. Each has a row in `docs/observation-log.md`.
