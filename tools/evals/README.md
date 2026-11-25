@@ -207,10 +207,10 @@ Eval: gates [--tag shipverdict --tag shipgate --tag shipsteps] 9/9 PASS -> 8/9 P
 **When.** A ticket you planned with `/plan` has merged. Run this each time, or
 when the session-start hint says that tickets wait.
 
-**Command.** From the project checkout (or add `--repo <project>`):
+**Command.** From the harness checkout, name the project:
 
 ```bash
-python3 tools/evals/eval.py todo
+python3 tools/evals/eval.py todo --repo <project>
 ```
 
 It reads git and `docs/observation-log.md`, and costs nothing. For each shipped
@@ -236,7 +236,7 @@ changed surface.
 1. Add one row to the "Plan recall" table in `docs/observation-log.md`.
 2. For each miss, ask whether it was a consumer or a registration the plan
    should have found. If so, add a row to the failures table.
-3. Run `python3 tools/evals/eval.py todo --count`. It prints
+3. Run `python3 tools/evals/eval.py todo --count --repo <project>`. It prints
    `<tickets> <bugs>`, for example `0 0` when nothing is left.
 
 `todo` finds a ticket only when a commit subject holds `(<TICKET> T`
@@ -416,8 +416,8 @@ Nothing to add. Each shipped ticket gets one row in the observation log.
 
 ## Catch up with `eval.py todo`
 
-You may skip the end of a ticket. `python3 tools/evals/eval.py todo` lists what
-you skipped, without a model and without network access:
+You may skip the end of a ticket. `python3 tools/evals/eval.py todo --repo <project>`
+lists what you skipped, without a model and without network access:
 
 - each shipped ticket with an Approved plan and no Plan recall row, with the
   `eval.py recall` command that scores it;
@@ -487,15 +487,16 @@ delete it or build it back. The private fixture `LD-380` is copied to
 
 ## Free checks
 
-These cost nothing and need no model. CI runs the first four.
+These cost nothing and need no model. Run each line from the repository root.
+CI runs every line but the fifth and the sixth.
 
 ```bash
-cd tools/evals/workflow && python3 -m unittest -q test_runner test_migration
-cd tools/evals/review-eval && python3 test_review_eval.py
-cd tools/evals/plan-recall && python3 test_recall.py
-cd tools/evals/archive/spec-eval && python3 test_judge.py && python3 test_produce.py
-cd tools/evals && python3 -m unittest -q test_core test_sandbox test_todo
-cd tools/evals/tasks && python3 -m unittest -q test_tasks
+(cd tools/evals/workflow && python3 -m unittest -q test_runner test_migration)
+(cd tools/evals/review-eval && python3 test_review_eval.py)
+(cd tools/evals/plan-recall && python3 test_recall.py)
+(cd tools/evals/archive/spec-eval && python3 test_judge.py && python3 test_produce.py)
+(cd tools/evals && python3 -m unittest -q test_core test_sandbox test_todo)
+(cd tools/evals/tasks && python3 -m unittest -q test_tasks)
 python3 tools/tests/test-check-eval-trailer.py
 ```
 

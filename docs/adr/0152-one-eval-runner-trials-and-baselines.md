@@ -33,8 +33,14 @@ reported, and blocks promotion to a baseline.
 **Rejected — *one trial per case.*** The spec-eval scores of 23/35 and 26/35
 came from one harness. One trial cannot tell a change from noise.
 
-**Rejected — *five trials by default.*** It costs two thirds more than three,
-and no measurement showed that three was too few. The first full run of 60 cases
+**Rejected — *run each side twice, by hand.*** This is the advice of
+[0079](0079-eval-integrity-and-paired-comparison.md). Nothing counted the two
+runs. Two runs cannot show a stable PASS, and the owner compared the numbers by
+eye.
+
+**Rejected — *five trials by default.*** The owner chose three by default on
+2026-11-24 (plan question Q3). Five costs two thirds more, and no measurement
+showed that three was too few. The first full run of 60 cases
 with 3 trials cost $48.08 and took 26.8 minutes (run
 `2026-11-25-121253-d81b0f9`). `--trials` raises the number for a close case.
 
@@ -81,6 +87,8 @@ now, and it is still too small for a test to mean anything:
   consistency, not a distribution.
 - The cases are a hand-made list, not a random sample of tickets. A p-value
   would report more certainty than the design supports.
+- The rebuild plan reached the same view: three trials are too few for a
+  significance test, so the rule is consistency and a named list of losses.
 - The list of cases gained and lost is still the useful part. Each lost case
   comes with a trial folder to read.
 
@@ -88,8 +96,7 @@ So the report says that three trials measure consistency and that a change of
 one trial is not proof of a gain. [0079](0079-eval-integrity-and-paired-comparison.md)
 is superseded only where it said "run each side twice".
 
-**Rejected — *a significance test on the verdict.*** The reasons are the four
-above. Nothing in the data now lets a test tell a change from chance.
+**Rejected — *a significance test on the verdict.*** The reasons are above. Nothing in the data now lets a test tell a change from chance.
 
 **Decision — gate cases are folders.** Each gate case is a folder,
 `tools/evals/workflow/cases/<id>/`, with `case.json` and an optional `files/`
@@ -195,5 +202,5 @@ it or build it back. A host where the Bash sandbox starts would let a new
 probe turn prevention on. A significance test is worth another look once a suite
 holds enough items that move between runs.
 
-Run through `eval.py`: every command in the ADRs 0067, 0093, 0100, 0111, 0117
-and 0143 now has an `eval.py` form.
+Each of the ADRs 0067, 0093, 0100, 0111, 0117 and 0143 now has one line that
+names the `eval.py` form of its command.
