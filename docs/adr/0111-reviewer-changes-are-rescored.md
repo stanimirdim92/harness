@@ -23,3 +23,5 @@ $10). A rescore reuses the stored baseline: one run per case, two to trust a
 small difference. Eight cases cost 8 to 16 runs, at most $80 to $160 at the
 cap. The real figure is the `Cost:` line the first run prints. Cases are
 gitignored and come from the "Shipped bugs" table (ADR 0100, 0110).
+
+Run through `eval.py` (ADR 0152): `python3 tools/evals/eval.py bugs --repo <project>` ends with the `Review-eval:` line.

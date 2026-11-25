@@ -340,8 +340,9 @@ failed too. The model's answer in `t2` had the right counts: 5 unique tickets,
 4 read, 1 unread. It wrote "5 unique tickets found". The check wants the words
 "unique discovered". In `t3` the answer said "unconfirmed", and the check wants
 "unverified". So the check is narrower than the rule. The harness did the right
-thing, and the check judged the wording. All six FLAKY baseline cases turned out
-to be of this kind or close to it.
+thing, and the check judged the wording. Five of the six FLAKY baseline cases
+are of this kind. `build_independent` is not: its answers queued both
+workstreams, which is a decision.
 
 **What to do next.**
 
@@ -452,8 +453,8 @@ the message only, so put every trailer there.
 - **No suite proves a change is good.** They show that results moved or did not
   move on the cases you have. Three trials show consistency, not significance.
   ADR 0079 rejected a significance test and ADR 0152 keeps that.
-- **The `gates` checks are rules, not judges.** The six FLAKY baseline cases
-  failed on wording that the check did not accept. The three FAIL cases fail
+- **The `gates` checks are rules, not judges.** Five of the six FLAKY
+  baseline cases failed on wording that the check did not accept. The three FAIL cases fail
   every trial: `spec_decisions`, `review_auth_diff` and `review_plain_diff`.
   Read the "Read these" folders before you trust a number.
 - **`tasks` runs with detection only.** The Bash sandbox probe failed on this

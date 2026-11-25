@@ -27,3 +27,5 @@ adds cost and its own variance to every run. Terms written from the fix are
 cheap and repeatable. Read `report.md` when a verdict looks wrong.
 
 **Cost.** Writing two or three terms per case, from the fix commit.
+
+Run through `eval.py` (ADR 0152): `python3 tools/evals/eval.py bugs --repo <project>`.

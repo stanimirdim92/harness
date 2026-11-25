@@ -18,3 +18,5 @@ They also turn incidents and reverts into the reviewer's eval set (claude.dev,
 
 **Cost.** One row and one case per shipped bug. The table is only as complete
 as the owner keeps it.
+
+Run through `eval.py` (ADR 0152): `python3 tools/evals/eval.py bugs add --repo <project> --from-log <fix sha> --defect <term>`.

@@ -874,7 +874,7 @@ same rule applies to the `/plan` Draft.
 
 ## T023: The ADR records the rebuild
 
-**Status:** Pending
+**Status:** Done
 
 **Requirements:** REQ-028
 

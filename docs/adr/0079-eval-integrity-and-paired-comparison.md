@@ -44,3 +44,7 @@ gain.
 - *Filtering the intake by date in code.* The intake is prose written by the
   skill; a date in it does not always mark a whole comment. Flagging the
   lines and letting a person delete them is more reliable.
+
+Superseded in part by [0152](0152-one-eval-runner-trials-and-baselines.md):
+trials and a k-of-k rule replace "run each side twice", and one verdict rule
+runs through `eval.py`. The rejection of a significance test still stands.

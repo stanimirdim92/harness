@@ -27,3 +27,5 @@ Anthropic", 2026-10).
 **Cost.** Each review-eval case is one paid `/review` run. A bug that only
 shows with production data is not a fair case; the README says how to pick
 cases. The noise count is only as good as the resolutions `/ship` records.
+
+Run through `eval.py` (ADR 0152): `python3 tools/evals/eval.py bugs --repo <project>`.

@@ -33,3 +33,5 @@ gate, at the cost of speed.
 
 **Cost.** None at run time: the fields are read from the case files. A holdout
 run is the same price per case as any other.
+
+Run through `eval.py` (ADR 0152): `eval.py gates` and `eval.py bugs` take `--tag` and `--split`. spec-eval is frozen.

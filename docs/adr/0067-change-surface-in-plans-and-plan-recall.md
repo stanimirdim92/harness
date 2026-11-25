@@ -42,3 +42,5 @@ have. The search-backed change surface is the closest available equivalent.
 **Rejected — raising `/spec` and `/plan` effort now.** The paper ran models at
 their second-highest effort and did not vary it. ADR 0066's `medium` stands
 until plan recall or the observation log shows perception misses.
+
+Run through `eval.py` (ADR 0152): `python3 tools/evals/eval.py recall <flags>`.

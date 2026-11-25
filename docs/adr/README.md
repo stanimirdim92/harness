@@ -86,7 +86,7 @@ that explanation here, just the index.
 | [0076](0076-ears-requirement-statements.md) | EARS requirement statements | Accepted |
 | [0077](0077-writing-rule-checked-in-ci.md) | Writing rule checked in CI | Accepted |
 | [0078](0078-mutation-probes-weakened-test-guard-section-references.md) | Mutation probes, a weakened-test guard, and checked section references | Accepted |
-| [0079](0079-eval-integrity-and-paired-comparison.md) | Eval integrity and paired comparison | Accepted |
+| [0079](0079-eval-integrity-and-paired-comparison.md) | Eval integrity and paired comparison | Partially superseded by [0152](0152-one-eval-runner-trials-and-baselines.md) ("run each side twice" became trials with a k-of-k rule; the rejected significance test stands) |
 | [0080](0080-reviewer-turn-cap-raised-to-100.md) | Reviewer turn cap raised to 100 | Accepted |
 | [0081](0081-spec-plan-checks-and-trailer-hook.md) | Spec and plan checks, and a commit trailer hook | Accepted |
 | [0082](0082-reviewers-label-with-dispositions.md) | Reviewers label findings with the release dispositions | Accepted |
@@ -159,6 +159,7 @@ that explanation here, just the index.
 | [0149](0149-laravel-kit-mirrors-leadbuster-verbatim.md) | The Laravel kit mirrors Leadbuster verbatim | Partially superseded by [0150](0150-harness-private-laravel-kit-complete.md) (repository visibility, SECURITY.md and ARCHITECTURE.md) |
 | [0150](0150-harness-private-laravel-kit-complete.md) | The harness is private; the Laravel kit mirrors the security and architecture docs | Accepted |
 | [0151](0151-ship-renamed-release.md) | `/ship` is renamed `/release`, so the built-in `/ship` no longer hides it | Accepted |
+| [0152](0152-one-eval-runner-trials-and-baselines.md) | One eval runner, with trials, baselines and a verdict | Accepted |
 
 Adding a new decision: create the next-numbered `NNNN-kebab-title.md`
 (4-digit, zero-padded — MADR-style, matches the files already here) and
