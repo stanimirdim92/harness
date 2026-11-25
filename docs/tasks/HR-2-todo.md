@@ -573,7 +573,7 @@ then `/spec`, `/plan`, `/build`, `/test`, `/review` with `claude -p` and
 
 ## T024: The driver takes the recommended option, then approves
 
-**Status:** Pending
+**Status:** Done
 
 **Requirements:** REQ-018, REQ-019
 

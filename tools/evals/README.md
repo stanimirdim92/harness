@@ -183,7 +183,49 @@ What happened:
   failed with `browserType.launch: Executable doesn't exist`. Run
   `npx playwright install chromium` in `claude/evals/add-business/hidden/` once
   before a trial that builds the feature. This trial built nothing, so it is
-  not affected.
+  not affected. The install ran later on 2026-11-25 (TD-014), and `grade.sh`
+  then scored `claude/evals/add-business/reference` at 49 of 49.
+
+### Second trial: the decision turn
+
+The driver now answers open questions that carry a recommended option with one
+decision turn, then approves (DEC-013). One trial ran on 2026-11-25. It shows
+that a trial gets past `/spec`. It is not a pass target.
+
+| Item | Value |
+| --- | --- |
+| Command | `python3 tools/evals/eval.py tasks --trials 1` (a session may spend $10, the trial $30) |
+| Harness commit | `1f4e66b` |
+| Cost | $4.05 |
+| Duration | 11.5 min (11.1 min in the pipeline) |
+| Result | 2 of 49 checks passed (the two baseline checks of the untouched seed), 0 of 1 trials passed every check |
+| Stopped | `question` at `/plan`: a `SPEC CONFLICT` in the plan |
+| Prevention | off: detection only (the sandbox probe says `fail`). Not LEAKED. |
+| Run folder | `tools/evals/results/tasks/2026-11-25-135608-1f4e66b/` (git ignores it) |
+
+Turns, from the trace:
+
+| Turn | Session | Cost | Time |
+| --- | --- | --- | --- |
+| `/spec ADD-1` | new | $2.25 | 8.0 min |
+| "For every open question, take the recommended option." | resumed | $0.36 | 0.6 min |
+| "I read the whole spec. I approve it." | resumed | $0.23 | 0.3 min |
+| `/plan ADD-1` | new | $1.21 | 2.1 min |
+
+What happened:
+
+- `/spec` left a Draft with open questions. The decision turn picked the
+  recommended option of each. The spec header then read `Status: Approved`.
+  The earlier trial stopped here.
+- `/plan` read the approved spec and found two conflicts it could not settle:
+  the `mission` search of the REQ-014 scenario "Existing badge" returns one
+  place, so its "a new place shows no badge" clause cannot be tested (C1); and
+  the spec does not say what a query with no words, such as `,,`, returns (C2).
+  It wrote a `## SPEC CONFLICT` and the handoff "Blocked, return to /spec".
+- The driver stops on a `SPEC CONFLICT` (REQ-019). No build, test or review
+  ran, so the grade is the grade of the untouched seed.
+- The conflict is a finding about the spec that `/spec` wrote, not a driver
+  fault. The trial was not rerun for a better result.
 
 ## Measured
 
