@@ -10,6 +10,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+import core
+import eval as eval_cli
 import probe_sandbox as probe
 import run
 
@@ -578,6 +580,318 @@ class SetupTrial(unittest.TestCase):
             self.assertTrue((dest / 'docs/specs/ADD-1-intake.md').is_file())
             self.assertTrue((dest / '.git').is_dir())
             self.assertFalse((dest / 'hidden').exists())
+
+
+def fake_grader(folder, fixture, exit_code=1, stdout=None):
+    """A shell script that prints a recorded `grade.sh` JSON, so grading needs no PHP."""
+    script = Path(folder) / 'grade.sh'
+    body = stdout if stdout is not None else (FIXTURES / f'{fixture}.json').read_text()
+    (Path(folder) / 'grade-output.json').write_text(body)
+    script.write_text(f'#!/bin/sh\ncat "$(dirname "$0")/grade-output.json"\necho "grade note" >&2\nexit {exit_code}\n')
+    script.chmod(0o755)
+    return script
+
+
+def graded(fixture='grade_two_failed'):
+    return json.loads((FIXTURES / f'{fixture}.json').read_text())
+
+
+def driver_record(**fields):
+    return {'prevention': False, 'leaked': False, 'leaks': [], 'cost_usd': 1.5, 'wall_s': 12.0, 'last_stage': 'review',
+            'stop_reason': 'complete', 'stop_stage': None, 'stop_detail': '', 'fix_round': False, 'turns': [], **fields}
+
+
+class Grade(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.dir = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_the_grade_json_is_stored_in_the_trial_folder(self):
+        out = self.dir / 'out'
+        out.mkdir()
+        doc = run.grade(self.dir, out, fake_grader(self.dir, 'grade_two_failed'))
+        self.assertEqual(doc['passed'], 4)
+        self.assertEqual(json.loads((out / 'grade.json').read_text()), graded())
+
+    def test_a_grader_that_exits_0_is_read(self):
+        out = self.dir / 'out'
+        out.mkdir()
+        doc = run.grade(self.dir, out, fake_grader(self.dir, 'grade_all_pass', exit_code=0))
+        self.assertTrue(doc['pass'])
+
+    def test_a_grader_that_cannot_run_raises_with_its_message(self):
+        out = self.dir / 'out'
+        out.mkdir()
+        grader = fake_grader(self.dir, 'grade_two_failed', exit_code=2, stdout='')
+        with self.assertRaisesRegex(RuntimeError, r'grade.sh exited 2.*grade note'):
+            run.grade(self.dir, out, grader)
+
+    def test_output_that_is_not_a_grade_raises(self):
+        out = self.dir / 'out'
+        out.mkdir()
+        with self.assertRaisesRegex(RuntimeError, 'no checks'):
+            run.grade(self.dir, out, fake_grader(self.dir, 'x', stdout='{"passed": 3}'))
+
+    def test_the_trial_holds_checks_passed_of_total_and_the_failed_ids(self):
+        trial = run.trial_record(driver_record(), graded())
+        self.assertEqual((trial['passed'], trial['total']), (4, 6))
+        self.assertEqual(trial['failed'], ['API-01', 'UI-01'])
+        self.assertEqual(trial['checks']['API-01'], False)
+        self.assertEqual(trial['checks']['BASE-1'], True)
+
+    def test_the_trial_holds_the_stop_reason_the_stage_and_the_leak_flag(self):
+        trial = run.trial_record(driver_record(stop_reason='question', stop_stage='plan', last_stage='plan'), graded())
+        self.assertEqual((trial['stop_reason'], trial['stop_stage'], trial['last_stage']), ('question', 'plan', 'plan'))
+        self.assertIs(trial['leaked'], False)
+
+    def test_the_trial_carries_the_cost_and_the_duration(self):
+        trial = run.trial_record(driver_record(), graded())
+        self.assertEqual((trial['cost_usd'], trial['duration_ms']), (1.5, 12000))
+
+    def test_a_leaked_trial_fails_every_check(self):
+        leak = [{'tool': 'Bash', 'text': 'cat /x/claude/evals/add-business/hidden/a', 'subagent': True}]
+        trial = run.trial_record(driver_record(leaked=True, leaks=leak), graded('grade_all_pass'))
+        self.assertFalse(any(trial['checks'].values()))
+        self.assertEqual((trial['passed'], trial['total']), (0, 6))
+        self.assertEqual(trial['grade_passed'], 6)
+        self.assertEqual(run.TasksSuite.state(None, trial), 'fail')
+
+    def test_a_trial_that_passes_every_check_is_pass(self):
+        trial = run.trial_record(driver_record(), graded('grade_all_pass'))
+        self.assertEqual(run.TasksSuite.state(None, trial), 'pass')
+
+    def test_a_trial_with_one_failed_check_is_fail(self):
+        trial = run.trial_record(driver_record(), graded())
+        self.assertEqual(run.TasksSuite.state(None, trial), 'fail')
+
+    def test_a_trial_with_no_checks_is_errored(self):
+        self.assertEqual(run.TasksSuite.state(None, {'checks': None}), 'errored')
+        self.assertEqual(run.TasksSuite.state(None, {}), 'errored')
+
+
+class Preflight(unittest.TestCase):
+    @staticmethod
+    def ok(code):
+        return lambda *a, **k: subprocess.CompletedProcess(a, code)
+
+    def test_a_missing_tool_is_named(self):
+        problem = run.grader_problem(which=lambda tool: None if tool == 'node' else '/bin/' + tool, run=self.ok(0))
+        self.assertIn('node', problem)
+
+    def test_php_without_pdo_sqlite_is_named(self):
+        problem = run.grader_problem(which=lambda tool: '/bin/' + tool, run=self.ok(1))
+        self.assertIn('pdo_sqlite', problem)
+
+    def test_nothing_is_wrong_when_the_tools_and_the_driver_are_there(self):
+        self.assertIsNone(run.grader_problem(which=lambda tool: '/bin/' + tool, run=self.ok(0)))
+
+
+class SuiteTrial(unittest.TestCase):
+    """One trial through `TasksSuite.run_trial`: the real `setup.sh`, a replayed `claude`, a recorded grade."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        tmp = Path(self.tmp.name)
+        self.harness = tmp / 'repo' / 'claude'
+        (self.harness / 'commands').mkdir(parents=True)
+        (self.harness / 'evals').mkdir()
+        (self.harness / 'AGENTS.md').write_text('rules\n')
+        (self.harness / 'settings.json').write_text(json.dumps({'model': 'opus', 'env': {}}))
+        self.folder = tmp / 'results' / 'add-business' / 't1'
+        self.folder.mkdir(parents=True)
+        self.case = {'id': 'add-business', 'split': 'optimization', 'tags': []}
+        self.grader = fake_grader(tmp, 'grade_two_failed')
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def suite(self, names, readme=README_FAIL, **options):
+        self.replay = Replay(names)
+        return run.TasksSuite(runner=self.replay, grader=self.grader, readme_text=readme, harness=self.harness,
+                              clock=self.replay.clock, preflight=lambda: None, **options)
+
+    def test_a_trial_is_graded_and_holds_its_record(self):
+        trial = self.suite([*HAPPY_TO_REVIEW, 'review_clean']).run_trial(self.case, self.folder)
+        self.assertEqual((trial['passed'], trial['total']), (4, 6))
+        self.assertEqual(trial['stop_reason'], 'complete')
+        self.assertAlmostEqual(trial['cost_usd'], 0.7)
+        self.assertTrue((self.folder / 'grade.json').is_file())
+        self.assertTrue((self.folder / 'driver.json').is_file())
+
+    def test_a_trial_that_stopped_early_is_still_graded(self):
+        trial = self.suite(['spec_question']).run_trial(self.case, self.folder)
+        self.assertEqual((trial['stop_reason'], trial['stop_stage']), ('question', 'spec'))
+        self.assertEqual(trial['total'], 6)
+        self.assertTrue((self.folder / 'grade.json').is_file())
+
+    def test_the_specs_and_the_plan_the_stages_wrote_are_kept_with_the_trial(self):
+        self.suite([*HAPPY_TO_REVIEW, 'review_clean']).run_trial(self.case, self.folder)
+        self.assertIn('Status: Approved', (self.folder / 'artifacts/docs/specs/ADD-1-SPEC.md').read_text())
+
+    def test_the_trial_says_whether_prevention_was_on(self):
+        self.assertIs(self.suite(['spec_question']).run_trial(self.case, self.folder)['prevention'], False)
+
+    def test_a_grader_that_cannot_run_makes_the_trial_raise(self):
+        self.grader = fake_grader(self.tmp.name, 'x', exit_code=2, stdout='')
+        with self.assertRaises(RuntimeError):
+            self.suite(['spec_question']).run_trial(self.case, self.folder)
+
+    def test_a_preflight_problem_raises_before_any_session_starts(self):
+        suite = self.suite([])
+        suite.preflight = lambda: 'php has no pdo_sqlite driver'
+        with self.assertRaisesRegex(RuntimeError, 'pdo_sqlite'):
+            suite.run_trial(self.case, self.folder)
+        self.assertEqual(self.replay.calls, [])
+
+    def test_a_retry_of_the_same_trial_gets_only_the_budget_the_first_attempt_left(self):
+        suite = self.suite([*HAPPY_TO_REVIEW, 'review_clean', 'spec_question'], trial_budget=0.8)
+        suite.run_trial(self.case, self.folder)
+        suite.run_trial(self.case, self.folder)
+        caps = [call['args'][call['args'].index('--max-budget-usd') + 1] for call in self.replay.calls]
+        self.assertEqual(caps[-1], '0.1')
+
+    def test_a_retry_with_no_budget_left_raises_and_starts_no_session(self):
+        suite = self.suite([*HAPPY_TO_REVIEW, 'review_clean'], trial_budget=0.7)
+        suite.run_trial(self.case, self.folder)
+        calls = len(self.replay.calls)
+        with self.assertRaisesRegex(RuntimeError, 'budget'):
+            suite.run_trial(self.case, self.folder)
+        self.assertEqual(len(self.replay.calls), calls)
+
+
+def trial(checks, state=None, **fields):
+    record = {'n': 1, 'checks': checks, 'cost_usd': 1.0, 'duration_ms': 1000, 'retried': False, 'error': None,
+              'folder': 'add-business/t1', 'prevention': False, 'leaked': False, 'stop_reason': 'complete',
+              'stop_stage': None, **fields}
+    record['state'] = state or ('pass' if all(checks.values()) else 'fail')
+    return record
+
+
+class CheckStates(unittest.TestCase):
+    """REQ-020: a state per hidden check over the trials, and the trials that passed every check."""
+
+    def result(self, *trials):
+        return core.case_result('check', 'add-business', list(trials))
+
+    def test_a_check_every_trial_passed_is_pass(self):
+        result = self.result(trial({'A': True}), trial({'A': True}), trial({'A': True}))
+        self.assertEqual(result['items']['A'], 'PASS')
+
+    def test_a_check_some_trials_passed_is_flaky(self):
+        result = self.result(trial({'A': True}), trial({'A': False}), trial({'A': True}))
+        self.assertEqual(result['items']['A'], 'FLAKY')
+
+    def test_a_check_no_trial_passed_is_fail(self):
+        result = self.result(trial({'A': False}), trial({'A': False}))
+        self.assertEqual(result['items']['A'], 'FAIL')
+
+    def test_the_case_result_counts_the_trials_that_passed_every_check(self):
+        result = self.result(trial({'A': True, 'B': True}), trial({'A': True, 'B': False}), trial({'A': True, 'B': True}))
+        self.assertEqual((result['passed'], result['scored']), (2, 3))
+        self.assertEqual(result['items'], {'A': 'PASS', 'B': 'FLAKY'})
+
+    def test_an_errored_trial_is_not_scored(self):
+        result = self.result(trial({'A': True}), trial({'A': None}, state='errored'))
+        self.assertEqual(result['scored'], 1)
+
+    def test_the_tasks_suite_items_are_checks_and_a_lost_check_is_not_a_lost_gate(self):
+        suite = run.TasksSuite(preflight=lambda: None)
+        self.assertEqual((suite.name, suite.kind, bool(getattr(suite, 'any_loss_is_worse', False))),
+                         ('tasks', 'check', False))
+        self.assertEqual(suite.all_cases(), [{'id': 'add-business', 'split': 'optimization', 'tags': []}])
+
+
+def report_doc(trials, prevention=False):
+    entries = [{'id': 'add-business', 'split': 'optimization', 'tags': [], 'semantic_review': 'pending',
+                'result': core.case_result('check', 'add-business', trials), 'trials': trials}]
+    return {'schema': 1, 'suite': 'tasks', 'run': '2026-11-25-120000-abc1234', 'item_kind': 'check',
+            'harness_commit': 'abc1234', 'dirty': False, 'instruction_hashes': None, 'model': None,
+            'trials': len(trials), 'started': '2026-11-25T12:00:00', 'duration_ms': 60000, 'cost_usd': 3.0,
+            'trials_without_cost': 0, 'cases': entries}
+
+
+class TasksReport(unittest.TestCase):
+    def report(self, trials):
+        trials = [{**t, 'prevention': t.get('prevention', False)} for t in trials]
+        return core.render_report(report_doc(trials), 'tools/evals/results/tasks/run')
+
+    def test_the_report_starts_with_prevention_off_when_a_trial_ran_without_it(self):
+        text = self.report([trial({'A': True})])
+        self.assertEqual(text.splitlines()[0], 'prevention off: detection only')
+
+    def test_the_report_says_prevention_is_on_only_when_every_trial_had_it(self):
+        text = self.report([trial({'A': True}, prevention=True), trial({'A': True}, prevention=True)])
+        self.assertNotIn('detection only', text)
+        self.assertTrue(text.splitlines()[0].startswith('prevention on'))
+
+    def test_one_trial_without_prevention_makes_the_whole_report_say_detection_only(self):
+        text = self.report([trial({'A': True}, prevention=True), trial({'A': True}, prevention=False)])
+        self.assertEqual(text.splitlines()[0], 'prevention off: detection only')
+
+    def test_the_report_says_three_trials_measure_consistency_and_one_change_is_no_proof(self):
+        text = self.report([trial({'A': True})])
+        self.assertIn('3 trials measure consistency', text)
+        self.assertIn('A change of one trial is not proof of a gain', text)
+
+    def test_the_report_gives_the_trials_that_passed_every_check_and_the_check_states(self):
+        text = self.report([trial({'A': True, 'B': True, 'C': False}), trial({'A': True, 'B': False, 'C': False})])
+        self.assertIn('Trials that passed every check: 0 of 2', text)
+        self.assertIn('Checks: 1 PASS, 1 FLAKY, 1 FAIL', text)
+        self.assertIn('Failed in every trial: C', text)
+
+    def test_the_report_names_a_leaked_trial(self):
+        text = self.report([trial({'A': False}, leaked=True, folder='add-business/t2')])
+        self.assertIn('LEAKED (counted as a fail): tools/evals/results/tasks/run/add-business/t2', text)
+
+    def test_the_report_gives_the_stop_reason_and_stage_of_a_trial_that_did_not_finish(self):
+        text = self.report([trial({'A': False}, stop_reason='question', stop_stage='plan')])
+        self.assertIn('add-business/t1 stopped: question at /plan', text)
+
+    def test_a_finished_trial_is_not_listed_as_stopped(self):
+        self.assertNotIn('stopped:', self.report([trial({'A': True})]))
+
+    def test_other_suites_reports_are_unchanged(self):
+        doc = report_doc([trial({'A': True})])
+        doc['suite'] = 'gates'
+        text = core.render_report(doc, 'x')
+        self.assertTrue(text.startswith('# gates run'))
+        self.assertNotIn('consistency', text)
+
+
+class EntryPoint(unittest.TestCase):
+    def test_eval_py_builds_the_tasks_suite(self):
+        self.assertIsNotNone(eval_cli.SUITES['tasks']['build'])
+        suite = eval_cli.build(eval_cli.SUITES, 'tasks')
+        self.assertEqual(suite.name, 'tasks')
+        self.assertEqual([c['id'] for c in suite.all_cases()], ['add-business'])
+
+    def test_the_tasks_flags_are_the_gates_flags(self):
+        args = eval_cli.parser_for(eval_cli.SUITES).parse_args(['tasks', '--trials', '1', '--case', 'add-business'])
+        self.assertEqual((args.command, args.trials, args.case), ('tasks', 1, ['add-business']))
+
+    def test_eval_py_runs_the_tasks_suite_through_the_core(self):
+        seen = {}
+
+        class Stub:
+            name, kind = 'tasks', 'check'
+
+            def all_cases(self):
+                return [{'id': 'add-business', 'split': 'optimization', 'tags': []}]
+
+        def fake_run(suite, cases, trials, jobs, root, selection):
+            seen.update(suite=suite.name, cases=[c['id'] for c in cases], trials=trials, jobs=jobs)
+            return 0
+
+        suites = {**eval_cli.SUITES, 'tasks': {**eval_cli.SUITES['tasks'], 'build': Stub}}
+        original, core.run = core.run, fake_run
+        try:
+            code = eval_cli.main(['tasks', '--trials', '1'], suites=suites)
+        finally:
+            core.run = original
+        self.assertEqual((code, seen), (0, {'suite': 'tasks', 'cases': ['add-business'], 'trials': 1, 'jobs': 1}))
 
 
 if __name__ == '__main__':

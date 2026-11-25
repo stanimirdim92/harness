@@ -197,10 +197,36 @@ def eval_line(doc, run_dir, base=None, word=None, selection=None):
             f'flaky {before_flaky} -> {flaky} ({word}); {run_dir}')
 
 
+def _tasks_lines(doc, run_dir):
+    """What the `tasks` report adds to the generic one (REQ-020, REQ-031): whether prevention was on,
+    the trials that passed every check, and the trials that leaked or stopped early."""
+    trials = [(entry, t) for entry in doc['cases'] for t in entry['trials']]
+    prevented = bool(trials) and all(t.get('prevention') for _, t in trials)
+    head = ('prevention on: Bash reads under claude/evals/ are denied' if prevented
+            else 'prevention off: detection only')
+    lines = []
+    for entry in doc['cases']:
+        result = entry['result']
+        states = list(result['items'].values())
+        lines.append(f'Trials that passed every check: {result["passed"]} of {result["scored"]} ({entry["id"]})')
+        lines.append('Checks: ' + ', '.join(f'{states.count(s)} {s}' for s in (PASS, FLAKY, FAIL)))
+        every = [n for n, s in result['items'].items() if s == FAIL]
+        lines.append(f'Failed in every trial: {", ".join(every) or "none"}')
+    leaked = [t for _, t in trials if t.get('leaked')]
+    lines.append('LEAKED (counted as a fail): ' + (', '.join(f'{run_dir}/{t["folder"]}' for t in leaked)
+                                                  if leaked else 'none'))
+    lines += [f'{t["folder"]} stopped: {t["stop_reason"]} at /{t.get("stop_stage")}'
+              for _, t in trials if t.get('stop_reason') not in (None, 'complete')]
+    lines.append('3 trials measure consistency: a check that passes in some trials and fails in others is FLAKY. '
+                 'A change of one trial is not proof of a gain.')
+    return head, lines
+
+
 def render_report(doc, run_dir, base=None, diff=None, word=None, why=None, selection=None, is_baseline=False):
     """The report as text. `run_dir` is the run folder as printed, relative to the repository.
     `is_baseline` is true when the run is the suite's baseline: it has no verdict."""
     suite = doc['suite']
+    tasks_head, tasks_lines = _tasks_lines(doc, run_dir) if suite == 'tasks' else (None, [])
     lines = [f'# {suite} run {doc["run"]}',
              f'Harness commit {doc["harness_commit"]}{" (dirty)" if doc["dirty"] else ""}, '
              f'{doc["trials"]} trials per case, {len(doc["cases"])} cases.']
@@ -238,6 +264,7 @@ def render_report(doc, run_dir, base=None, diff=None, word=None, why=None, selec
     pending = [c['id'] for c in doc['cases'] if c['semantic_review'] == 'pending']
     if pending:
         lines.append(f'semantic review pending: {", ".join(pending)}')
+    lines += tasks_lines
     changed = set((diff['gained'] + diff['lost']) if diff else [])
     lines.append('Read these:')
     for entry in doc['cases']:
@@ -248,6 +275,8 @@ def render_report(doc, run_dir, base=None, diff=None, word=None, why=None, selec
         lines.append(f'- {entry["id"]}: ' + ', '.join(f'{run_dir}/{f}' for f in folders))
     if suite == 'gates':
         lines.append(eval_line(doc, run_dir, None if is_baseline else base, word, selection))
+    if tasks_head:
+        lines.insert(0, tasks_head)
     return '\n'.join(lines)
 
 

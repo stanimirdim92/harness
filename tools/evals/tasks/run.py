@@ -29,12 +29,19 @@ The trial stops with a reason and the stage it stopped at:
 
 `run_trial()` takes the session runner and the clock as arguments. The tests
 pass a replay of recorded stage outputs and need no `claude`.
+
+`TasksSuite` is the suite `eval.py tasks` runs through the eval core. A trial
+runs the pipeline, then `grade.sh` on the project, whatever the stop reason.
+Each hidden check is an item of the case (REQ-020). A trial whose trace named
+the eval files is LEAKED and fails every check (REQ-009).
 """
 import argparse
 import json
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -45,6 +52,7 @@ import sandbox
 
 TICKET = 'ADD-1'
 ADD_BUSINESS = sandbox.HARNESS / 'evals' / 'add-business'
+GRADER = ADD_BUSINESS / 'grade.sh'
 README = Path(__file__).resolve().parents[1] / 'README.md'
 SPEC = f'docs/specs/{TICKET}-SPEC.md'
 PLAN = f'docs/tasks/{TICKET}-plan.md'
@@ -205,6 +213,107 @@ def run_trial(project, out, runner=sandbox.run_session, clock=time.monotonic, se
     """Run the pipeline in `project`. Traces go to `out`. Returns the trial record."""
     Path(out).mkdir(parents=True, exist_ok=True)
     return Trial(project, out, runner, clock, session_budget, trial_budget, prevention).run()
+
+
+GRADER_TOOLS = ('php', 'node', 'npm', 'git', 'claude')
+
+
+def grader_problem(which=shutil.which, run=subprocess.run):
+    """Why `grade.sh` could not run, or None. A trial costs real money, so the
+    suite checks this before it starts one."""
+    for tool in GRADER_TOOLS:
+        if not which(tool):
+            return f'missing tool: {tool}'
+    has = run(['php', '-r', 'exit(in_array("sqlite", PDO::getAvailableDrivers(), true) ? 0 : 1);'],
+              capture_output=True)
+    return None if has.returncode == 0 else 'php has no pdo_sqlite driver'
+
+
+def grade(project, out, grader=GRADER, timeout=1200):
+    """Run `grade.sh` on the project and store its JSON in `out/grade.json`.
+    Exit 0 and 1 are a grade; anything else raises."""
+    done = subprocess.run([str(grader), str(project)], capture_output=True, text=True, timeout=timeout)
+    (Path(out) / 'grade.json').write_text(done.stdout)
+    if done.returncode not in (0, 1):
+        raise RuntimeError(f'grade.sh exited {done.returncode}: {done.stderr[-300:]}')
+    try:
+        doc = json.loads(done.stdout)
+    except json.JSONDecodeError as err:
+        raise RuntimeError(f'grade.sh printed no JSON: {err}')
+    if not isinstance(doc, dict) or not isinstance(doc.get('checks'), list) or not doc['checks']:
+        raise RuntimeError('grade.sh printed no checks')
+    return doc
+
+
+def trial_record(record, doc):
+    """The trial the core stores: the hidden checks as `{id: bool}`, how many passed of the
+    total, the failed ids, and the driver's stop reason, stage and LEAKED flag. A LEAKED
+    trial fails every check; the grade it earned stays in `grade_passed`."""
+    graded = {check['id']: bool(check['pass']) for check in doc['checks']}
+    checks = {check_id: False for check_id in graded} if record['leaked'] else graded
+    return {'checks': checks, 'passed': sum(checks.values()), 'total': len(checks),
+            'failed': sorted(check_id for check_id, ok in checks.items() if not ok),
+            'grade_passed': sum(graded.values()), 'cost_usd': record['cost_usd'],
+            'duration_ms': int(record['wall_s'] * 1000), 'prevention': record['prevention'],
+            'leaked': record['leaked'], 'leaks': record['leaks'], 'stop_reason': record['stop_reason'],
+            'stop_stage': record['stop_stage'], 'stop_detail': record['stop_detail'],
+            'last_stage': record['last_stage'], 'fix_round': record['fix_round']}
+
+
+def keep_artifacts(project, out):
+    """Copy what the stages wrote into the trial folder, so a person can read it."""
+    kept = Path(out) / 'artifacts'
+    for rel in ('docs/specs', 'docs/tasks', 'docs/reviews'):
+        if (Path(project) / rel).is_dir():
+            shutil.copytree(Path(project) / rel, kept / rel, dirs_exist_ok=True)
+    kept.mkdir(parents=True, exist_ok=True)
+    log = subprocess.run(['git', '-C', str(project), 'log', '--format=%h %s'], capture_output=True, text=True)
+    (kept / 'git-log.txt').write_text(log.stdout)
+
+
+class TasksSuite:
+    """The add-business pipeline as a suite for the eval core (`core.py` describes the interface).
+    One case; its items are the hidden checks."""
+    name = 'tasks'
+    kind = 'check'
+    model = None
+
+    def __init__(self, runner=sandbox.run_session, grader=GRADER, readme_text=None, harness=sandbox.HARNESS,
+                 clock=time.monotonic, preflight=grader_problem, trial_budget=TRIAL_BUDGET):
+        self.runner, self.grader, self.harness, self.clock = runner, grader, harness, clock
+        self.readme_text, self.preflight, self.trial_budget = readme_text, preflight, trial_budget
+        self.spent = {}
+
+    def all_cases(self):
+        return [{'id': 'add-business', 'split': 'optimization', 'tags': []}]
+
+    def run_trial(self, case, folder):
+        """One trial in `folder`: the pipeline, then the grade. The core retries a trial that raises,
+        so what the first attempt spent comes off the budget of the retry."""
+        problem = self.preflight()
+        if problem:
+            raise RuntimeError(problem)
+        key = str(folder)
+        left = self.trial_budget - self.spent.get(key, 0)
+        if left <= 0:
+            raise RuntimeError('the trial budget was spent by the first attempt')
+        readme = self.readme_text if self.readme_text is not None else README.read_text()
+        with tempfile.TemporaryDirectory(prefix='add-business-') as tmp:
+            project = setup_trial(Path(tmp) / 'project')
+            prevention = prepare(project, readme, self.harness)
+            record = run_trial(project, folder, runner=self.runner, clock=self.clock, trial_budget=left,
+                               prevention=prevention)
+            self.spent[key] = self.spent.get(key, 0) + record['cost_usd']
+            (Path(folder) / 'driver.json').write_text(json.dumps(record, indent=2) + '\n')
+            keep_artifacts(project, folder)
+            doc = grade(project, folder, self.grader)
+        return trial_record(record, doc)
+
+    def state(self, trial):
+        checks = trial.get('checks')
+        if not checks:
+            return 'errored'
+        return 'pass' if all(checks.values()) else 'fail'
 
 
 def render_report(record):

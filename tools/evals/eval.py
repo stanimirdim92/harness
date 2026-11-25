@@ -22,6 +22,7 @@ or it carries any `--tag`; with neither flag every case is selected.
 `--split` then keeps the cases of that split.
 """
 import argparse
+import importlib.util
 import re
 import subprocess
 import sys
@@ -37,6 +38,15 @@ def build_gates():
     sys.path.append(str(HERE / 'workflow'))
     from run import GatesSuite
     return GatesSuite()
+
+
+def build_tasks():
+    """`tasks/run.py` shares its name with the other suites' runners, so it loads under its own."""
+    sys.path.append(str(HERE / 'tasks'))
+    spec = importlib.util.spec_from_file_location('tasks_run', HERE / 'tasks' / 'run.py')
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.TasksSuite()
 
 
 class RecallSuite:
@@ -56,7 +66,7 @@ SUITES = {
               'cost': None, 'build': build_gates, 'jobs': 4},
     'tasks': {'question': 'Does the pipeline build a working feature from a ticket?',
               'when': 'after you change how build, review or test behave',
-              'cost': None, 'build': None},
+              'cost': None, 'build': build_tasks},
     'bugs': {'question': 'Does /review catch bugs that really shipped?',
              'when': 'after you change /review or a reviewer',
              'cost': None, 'build': None},

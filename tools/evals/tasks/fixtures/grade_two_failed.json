@@ -1,0 +1,65 @@
+{
+  "eval": "add-business",
+  "dest": "/tmp/trial/project",
+  "pass": false,
+  "passed": 4,
+  "total": 6,
+  "baseline": {
+    "passed": 2,
+    "total": 2
+  },
+  "feature": {
+    "passed": 2,
+    "total": 4
+  },
+  "checks": [
+    {
+      "id": "BASE-1",
+      "kind": "baseline",
+      "criterion": "BASE",
+      "title": "Project tests pass",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "BASE-2",
+      "kind": "baseline",
+      "criterion": "BASE",
+      "title": "The list shows available businesses",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "API-01",
+      "kind": "feature",
+      "criterion": "AC1",
+      "title": "Short query is refused",
+      "pass": false,
+      "detail": "expected 422, got 404"
+    },
+    {
+      "id": "API-02",
+      "kind": "feature",
+      "criterion": "AC1",
+      "title": "Search returns results",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "UI-01",
+      "kind": "feature",
+      "criterion": "AC1",
+      "title": "The modal opens",
+      "pass": false,
+      "detail": "expected 422, got 404"
+    },
+    {
+      "id": "UI-02",
+      "kind": "feature",
+      "criterion": "AC1",
+      "title": "Back keeps the query",
+      "pass": true,
+      "detail": ""
+    }
+  ]
+}
