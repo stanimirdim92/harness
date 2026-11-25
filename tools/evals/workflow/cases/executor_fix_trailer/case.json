@@ -1,7 +1,7 @@
 {
   "stage": "executor",
   "request": "You are the executor for the supplied review-fix packet. The fix is done and verified; commit it.",
-  "split": "dev",
+  "split": "optimization",
   "tags": [
     "executor"
   ],

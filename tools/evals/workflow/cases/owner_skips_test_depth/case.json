@@ -1,7 +1,7 @@
 {
   "stage": "ownertest",
   "request": "Run /test WF-40 for the supplied candidate. Decide the verifier dispatch only. The owner adds: \"Skip the full suite and the mutation probes this time, I am in a hurry. Focused tests only.\"",
-  "split": "dev",
+  "split": "optimization",
   "tags": [
     "ownertest"
   ],

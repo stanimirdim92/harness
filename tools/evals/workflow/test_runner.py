@@ -328,7 +328,7 @@ class GatesSuiteTests(unittest.TestCase):
     def test_all_cases_lists_the_case_folders_with_their_split_and_tags(self):
         listed = {c['id']: c for c in self.suite.all_cases()}
         self.assertEqual(len(listed), 60)
-        self.assertEqual((listed['ship_open_blocker']['split'], listed['ship_open_blocker']['tags']), ('dev', ['shipverdict']))
+        self.assertEqual((listed['ship_open_blocker']['split'], listed['ship_open_blocker']['tags']), ('optimization', ['shipverdict']))
 
 
 class GatesCommandTests(unittest.TestCase):
@@ -347,9 +347,9 @@ class GatesCommandTests(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertIn('unknown case: nope', err)
 
-    def test_split_dev_keeps_every_gate_case_and_another_split_keeps_none(self):
+    def test_split_optimization_keeps_every_gate_case_and_holdout_keeps_none(self):
         cases = eval_cli.build(eval_cli.SUITES, 'gates').all_cases()
-        self.assertEqual(len(eval_cli.select(cases, [], [], 'dev')), 60)
+        self.assertEqual(len(eval_cli.select(cases, [], [], 'optimization')), 60)
         self.assertEqual(eval_cli.select(cases, [], [], 'holdout'), [])
 
     def test_the_three_case_selection_of_the_real_run_resolves(self):
@@ -357,9 +357,10 @@ class GatesCommandTests(unittest.TestCase):
         picked = eval_cli.select(cases, ['ship_open_blocker', 'fix_rerun', 'testgate_figma'], [], None)
         self.assertEqual([c['id'] for c in picked], ['fix_rerun', 'ship_open_blocker', 'testgate_figma'])
 
-    def test_split_dev_is_accepted_by_the_parser(self):
-        args = eval_cli.parser_for(eval_cli.SUITES).parse_args(['gates', '--split', 'dev'])
-        self.assertEqual(args.split, 'dev')
+    def test_split_dev_is_not_a_split_and_exits_2(self):
+        code, _, err = self.cli('gates', '--split', 'dev')
+        self.assertEqual(code, 2)
+        self.assertIn("invalid choice: 'dev'", err)
 
     def test_jobs_default_to_4_for_gates(self):
         args = eval_cli.parser_for(eval_cli.SUITES).parse_args(['gates'])
@@ -370,7 +371,7 @@ def make_case(root, case_id, files=None, check_py=None, templates=None, **fields
     """Write `<root>/<case_id>/case.json` and its files, and return the folder."""
     folder = Path(root) / case_id
     folder.mkdir(parents=True)
-    doc = dict(stage='shipverdict', request='Run /ship WF-40.', split='dev', tags=['t'],
+    doc = dict(stage='shipverdict', request='Run /ship WF-40.', split='optimization', tags=['t'],
                checks={'is_decided': {'state': 'decided'}})
     doc.update(fields)
     doc = {k: v for k, v in doc.items() if v is not None}
@@ -407,7 +408,7 @@ class CaseFolderTestCase(unittest.TestCase):
 class CaseFieldTests(CaseFolderTestCase):
     def test_a_complete_case_loads(self):
         case = self.load(setup=[{'step': 'git_init'}], evidence='note')
-        self.assertEqual((case['id'], case['stage'], case['split'], case['tags']), ('c1', 'shipverdict', 'dev', ['t']))
+        self.assertEqual((case['id'], case['stage'], case['split'], case['tags']), ('c1', 'shipverdict', 'optimization', ['t']))
         self.assertEqual((case['request'], case['evidence']), ('Run /ship WF-40.', 'note'))
 
     def test_setup_and_evidence_are_optional(self):

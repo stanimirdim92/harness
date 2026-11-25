@@ -1,7 +1,7 @@
 {
   "stage": "gate",
   "request": "Run /build WF-30 for tasks T001 and T002 using the supplied plan, task packets, and repository evidence.",
-  "split": "dev",
+  "split": "optimization",
   "tags": [
     "gate"
   ],

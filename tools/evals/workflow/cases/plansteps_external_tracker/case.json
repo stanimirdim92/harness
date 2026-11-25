@@ -1,7 +1,7 @@
 {
   "stage": "plansteps",
   "request": "Run /plan WF-20. The draft plan is saved. Give the commands for the plan check before you present it, and for the commit after the owner approves it.",
-  "split": "dev",
+  "split": "optimization",
   "tags": [
     "plansteps"
   ],

@@ -1,7 +1,7 @@
 {
   "stage": "fixreview",
   "request": "Run /review WF-40 for the supplied candidate. Decide the verification gate and reviewer dispatch only.",
-  "split": "dev",
+  "split": "optimization",
   "tags": [
     "fixreview"
   ],

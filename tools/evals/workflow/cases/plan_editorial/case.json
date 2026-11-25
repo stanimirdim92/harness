@@ -1,7 +1,7 @@
 {
   "stage": "plan",
   "request": "Run /plan WF-20: correct only Dowload to Download in the existing plan title. This is an editorial change; preserve task scope and existing approvals.",
-  "split": "dev",
+  "split": "optimization",
   "tags": [
     "plan"
   ],

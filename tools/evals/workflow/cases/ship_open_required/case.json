@@ -1,7 +1,7 @@
 {
   "stage": "shipverdict",
   "request": "Run /ship WF-40 for the supplied candidate.",
-  "split": "dev",
+  "split": "optimization",
   "tags": [
     "shipverdict"
   ],

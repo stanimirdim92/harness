@@ -1,7 +1,7 @@
 {
   "stage": "verifier",
   "request": "You are the verifier for the supplied packet. Your mutation probes have run; decide what each result needs.",
-  "split": "dev",
+  "split": "optimization",
   "tags": [
     "verifier"
   ],

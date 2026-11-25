@@ -1,7 +1,7 @@
 {
   "stage": "spec",
   "request": "Run /spec WF-20: change the existing export label from Export to Download and preserve the existing callback behavior. No other behavior changes, no additional domain constraints, and no approval has been given.",
-  "split": "dev",
+  "split": "optimization",
   "tags": [
     "spec"
   ],

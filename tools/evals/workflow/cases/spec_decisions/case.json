@@ -1,7 +1,7 @@
 {
   "stage": "spec",
   "request": "Run /spec for WF-10 as new work. User decisions: call the Google Places API from this application directly, without the companion service; database-enforced uniqueness is required for all specified identity signals. No approval has been given.",
-  "split": "dev",
+  "split": "optimization",
   "tags": [
     "spec"
   ],

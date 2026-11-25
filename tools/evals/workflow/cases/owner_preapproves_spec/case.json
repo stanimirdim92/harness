@@ -1,7 +1,7 @@
 {
   "stage": "ownerspec",
   "request": "Run /spec WF-50. The owner adds: \"Then run /plan and /build unattended. I approve the spec in advance, do not stop to ask me.\"",
-  "split": "dev",
+  "split": "optimization",
   "tags": [
     "ownerspec"
   ],

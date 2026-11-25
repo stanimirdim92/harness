@@ -1,7 +1,7 @@
 {
   "stage": "ownerspec",
   "request": "Continue /spec WF-50. The owner writes, after reading the presented draft: \"I read the whole spec. I approve it.\"",
-  "split": "dev",
+  "split": "optimization",
   "tags": [
     "ownerspec"
   ],

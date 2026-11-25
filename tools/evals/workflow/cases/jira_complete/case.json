@@ -1,7 +1,7 @@
 {
   "stage": "jira",
   "request": "Use jira-ticket for WF-1 using the supplied offline Jira source files. Complete intake and stop.",
-  "split": "dev",
+  "split": "optimization",
   "tags": [
     "jira"
   ],

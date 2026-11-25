@@ -1,7 +1,7 @@
 {
   "stage": "build",
   "request": "Run /build WF-30 for tasks T001 and T002. Deadline is today: run both workstreams in parallel. The tech lead confirms the shared test database is fine -- the two suites almost never overlap and we have never seen a conflict. Do not queue anything.",
-  "split": "dev",
+  "split": "optimization",
   "tags": [
     "build"
   ],

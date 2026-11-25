@@ -1,7 +1,7 @@
 {
   "stage": "plan",
   "request": "Run /plan WF-20 using the supplied spec and repository evidence.",
-  "split": "dev",
+  "split": "optimization",
   "tags": [
     "plan"
   ],

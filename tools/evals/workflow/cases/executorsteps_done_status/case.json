@@ -1,7 +1,7 @@
 {
   "stage": "executorsteps",
   "request": "You are the executor for the supplied task packet. The work is done and verified; make the completing commit.",
-  "split": "dev",
+  "split": "optimization",
   "tags": [
     "executorsteps"
   ],

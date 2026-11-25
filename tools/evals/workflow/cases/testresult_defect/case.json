@@ -1,7 +1,7 @@
 {
   "stage": "testresult",
   "request": "Run /test WF-40. The verifier has reported; finish the run.",
-  "split": "dev",
+  "split": "optimization",
   "tags": [
     "testresult"
   ],

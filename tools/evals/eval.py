@@ -99,7 +99,7 @@ def parser_for(suites):
         sub = commands.add_parser(name, help=suites[name]['question'])
         sub.add_argument('--case', action='append', default=[], help='run this case (repeatable)')
         sub.add_argument('--tag', action='append', default=[], help='run the cases with this tag (repeatable)')
-        sub.add_argument('--split', choices=('dev', 'optimization', 'holdout'), help='keep only this split')
+        sub.add_argument('--split', choices=('optimization', 'holdout'), help='keep only this split')
         sub.add_argument('--trials', type=positive, default=core.DEFAULT_TRIALS,
                          help=f'trials per case (default {core.DEFAULT_TRIALS})')
         jobs = suites[name].get('jobs', 1)

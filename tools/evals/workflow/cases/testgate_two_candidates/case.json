@@ -1,7 +1,7 @@
 {
   "stage": "testgate",
   "request": "Run /test. Decide the verifier dispatch only.",
-  "split": "dev",
+  "split": "optimization",
   "tags": [
     "testgate"
   ],

@@ -1,7 +1,7 @@
 {
   "stage": "verifiersteps",
   "request": "You are the verifier. Verify the candidate in the supplied packet.",
-  "split": "dev",
+  "split": "optimization",
   "tags": [
     "verifiersteps"
   ],

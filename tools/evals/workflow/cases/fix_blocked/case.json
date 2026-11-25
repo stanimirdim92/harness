@@ -1,7 +1,7 @@
 {
   "stage": "fix",
   "request": "Run /build WF-40 review fixes. The executors have reported; finish the run.",
-  "split": "dev",
+  "split": "optimization",
   "tags": [
     "fix"
   ],

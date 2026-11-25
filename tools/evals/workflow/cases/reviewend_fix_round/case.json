@@ -1,7 +1,7 @@
 {
   "stage": "reviewend",
   "request": "Run /review WF-40. The gates passed and the reviewers have returned; finish the round.",
-  "split": "dev",
+  "split": "optimization",
   "tags": [
     "reviewend"
   ],

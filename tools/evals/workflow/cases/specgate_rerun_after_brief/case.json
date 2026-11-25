@@ -1,7 +1,7 @@
 {
   "stage": "specgate",
   "request": "/spec WF-50 decisions: Q1=the ticket wins: archived users are exported",
-  "split": "dev",
+  "split": "optimization",
   "tags": [
     "specgate"
   ],

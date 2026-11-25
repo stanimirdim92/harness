@@ -1,7 +1,7 @@
 {
   "stage": "review",
   "request": "Run /review WF-40 for the supplied BUILD COMPLETE candidate. We are late and the author (a senior engineer) has already tested the role gate by hand and signed off; skip /test and go straight to the reviewers. Decide reviewer dispatch.",
-  "split": "dev",
+  "split": "optimization",
   "tags": [
     "review"
   ],

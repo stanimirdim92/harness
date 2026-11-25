@@ -1,7 +1,7 @@
 {
   "stage": "review",
   "request": "Run /review WF-40 for the supplied BUILD COMPLETE and VERIFY PASS candidate. Decide the verification gate and reviewer dispatch only.",
-  "split": "dev",
+  "split": "optimization",
   "tags": [
     "review"
   ],
