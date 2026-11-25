@@ -571,6 +571,52 @@ then `/spec`, `/plan`, `/build`, `/test`, `/review` with `claude -p` and
 
 **Estimated scope:** M
 
+## T024: The driver takes the recommended option, then approves
+
+**Status:** Pending
+
+**Requirements:** REQ-018, REQ-019
+
+**Description:** Spec DEC-013 (amends DEC-002). The first real trial
+(`tools/evals/results/tasks/2026-11-25-130631-9209f99`) stopped at `/spec`:
+the Draft held `OPEN QUESTION` Q1 and Q2, each with a `(recommended)` option.
+`tools/evals/tasks/run.py` already detects an `OPEN QUESTION` line in a Draft
+(`fe65445`) and stops with `question`. Change that branch: when every block
+marks exactly one option `(recommended)`, send one decision turn in the same
+session, "For every open question, take the recommended option.", re-read the
+Draft, and send the approval turn only when no `OPEN QUESTION` remains. The
+same rule applies to the `/plan` Draft.
+
+**Acceptance criteria:**
+- [ ] A Draft whose open questions all mark one `(recommended)` option gets the decision turn with `--resume` of that session, then the approval turn; the spec header reads Approved (REQ-018 "Open questions with a recommendation")
+- [ ] A Draft with a block that marks no `(recommended)` option gets no decision and no approval turn; the trial stops with `question` at that stage (REQ-019 "Open question without a recommendation")
+- [ ] A Draft that still holds an `OPEN QUESTION` after the one decision turn stops with `question`; no second decision turn is sent (REQ-019)
+- [ ] The no-pre-approval scan also finds no "recommended option" text in any turn sent before a draft exists (REQ-018 "No pre-approval")
+- [ ] The same three behaviors hold for the `/plan` Draft
+- [ ] One real trial, `eval.py tasks --trials 1`, is recorded in `tools/evals/README.md` with its cost, stop reason and stage, and checks passed; it is evidence that the trial gets past `/spec`, not a pass target (TD-013)
+
+**Verification:**
+- [ ] Tests pass: `cd tools/evals/tasks && python3 -m unittest -q test_tasks`
+- [ ] Tests pass: `cd tools/evals && python3 -m unittest -q test_core test_sandbox`
+- [ ] Manual check: the real trial record
+
+**Dependencies:** T015
+
+**Workstream:** ws-tasks
+
+**Context pointers:**
+- Project/module rules: spec REQ-018, REQ-019, DEC-013; ADR 0148
+- Closest precedent: `tools/evals/tasks/run.py` approval turn and the `OPEN QUESTION` stop (`fe65445`); `/spec`'s `OPEN QUESTION` block shape in `claude/skills/spec-driven-development/SKILL.md` §Phase 1
+- Shared contract/invariant: no approval, pre-approval or decision text before a draft exists
+
+**Files/areas likely touched:**
+- `tools/evals/tasks/run.py`
+- `tools/evals/tasks/test_tasks.py`
+- `tools/evals/tasks/fixtures/`
+- `tools/evals/README.md`
+
+**Estimated scope:** S
+
 ## T016: `eval.py bugs` runs shipped-bug cases with trials
 
 **Status:** Pending
@@ -605,7 +651,7 @@ then `/spec`, `/plan`, `/build`, `/test`, `/review` with `claude -p` and
 
 **Estimated scope:** M
 
-## T017: Add a bug case from the log, and `/ship` prints that command
+## T017: Add a bug case from the log, and `/release` prints that command
 
 **Status:** Pending
 
@@ -615,8 +661,8 @@ then `/spec`, `/plan`, `/build`, `/test`, `/review` with `claude -p` and
 - [ ] `eval.py bugs add --repo <p> --from-log <sha> --defect <re>...` finds the "Shipped bugs" row whose fix-commit column names the sha, uses its bug text as the description, and builds the case as `run.py --new --fix` does (REQ-022)
 - [ ] No row → exit 2 with "no Shipped bugs row names <sha>"; no `--defect` → refused (REQ-022)
 - [ ] Without `--from-log`, `bugs add` accepts `run.py --new`'s arguments (REQ-022)
-- [ ] `claude/commands/ship.md:86-87, 298`, `claude/references/component-response-contracts.md:451` and `docs/observation-log.md:227-231` show `python3 tools/evals/eval.py bugs add --repo <project> --from-log <fix sha> --defect <term>` (REQ-023)
-- [ ] The commit that edits `ship.md` carries an `Eval:` line per TD-010
+- [ ] `claude/commands/release.md` (its bug-case lines; the file was `ship.md` before ADR 0151), `claude/references/component-response-contracts.md` and `docs/observation-log.md:227-231` show `python3 tools/evals/eval.py bugs add --repo <project> --from-log <fix sha> --defect <term>` (REQ-023)
+- [ ] The commit that edits `release.md` carries an `Eval:` line per TD-010
 
 **Verification:**
 - [ ] Tests pass: `cd tools/evals/review-eval && python3 test_review_eval.py && cd ../../.. && python3 tools/tests/test-contracts-doc.py && python3 tools/checks/check-references.py`
@@ -635,7 +681,7 @@ then `/spec`, `/plan`, `/build`, `/test`, `/review` with `claude -p` and
 - `tools/evals/eval.py`
 - `tools/evals/review-eval/run.py`
 - `tools/evals/review-eval/test_review_eval.py`
-- `claude/commands/ship.md`
+- `claude/commands/release.md`
 - `claude/references/component-response-contracts.md`
 - `docs/observation-log.md`
 
@@ -790,9 +836,9 @@ then `/spec`, `/plan`, `/build`, `/test`, `/review` with `claude -p` and
 - [ ] `tools/evals/README.md` covers every point of REQ-025, in plain words, and lists spec-eval under "Archived" with a review date one month after T021 (REQ-025, REQ-026)
 - [ ] Each suite README starts by pointing to `eval.py` (REQ-025)
 - [ ] Every command on the page was run as written; the task report lists each with its exit code (REQ-025)
-- [ ] References updated in `.github/workflows/ci.yml` (header comment), `README.md`, `ARCHITECTURE.md`, `tools/README.md`, `docs/HANDOFF.md`, `docs/observation-log.md`, `claude/commands/ship.md`, `claude/references/component-response-contracts.md` (REQ-027)
+- [ ] References updated in `.github/workflows/ci.yml` (header comment), `README.md`, `ARCHITECTURE.md`, `tools/README.md`, `docs/HANDOFF.md`, `docs/observation-log.md`, `claude/commands/release.md`, `claude/references/component-response-contracts.md` (REQ-027)
 - [ ] `rg -n "tools/evals/(spec-eval|review-eval|workflow)/run.py"` matches only suite READMEs, the archive, ADRs and dated logs or audits (REQ-027)
-- [ ] Commits stage only this task's hunks of `docs/HANDOFF.md`; any commit editing `claude/commands/ship.md` carries an `Eval:` line per TD-010
+- [ ] Commits stage only this task's hunks of `docs/HANDOFF.md`; any commit editing `claude/commands/release.md` carries an `Eval:` line per TD-010
 - [ ] Manual: the owner runs `gates` from the README alone and states the verdict; recorded in the task report (REQ-025)
 
 **Verification:**
@@ -819,7 +865,7 @@ then `/spec`, `/plan`, `/build`, `/test`, `/review` with `claude -p` and
 - `tools/README.md`
 - `docs/HANDOFF.md`
 - `docs/observation-log.md`
-- `claude/commands/ship.md`
+- `claude/commands/release.md`
 - `claude/references/component-response-contracts.md`
 
 **Change-surface search:** `rg -n "tools/evals/(spec-eval|review-eval|workflow|plan-recall)|evals/add-business" --glob '!docs/adr/**' --glob '!tools/evals/**'`
@@ -833,9 +879,9 @@ then `/spec`, `/plan`, `/build`, `/test`, `/review` with `claude -p` and
 **Requirements:** REQ-028
 
 **Acceptance criteria:**
-- [ ] `docs/adr/0149-one-eval-runner-trials-and-baselines.md` records every point of REQ-028 in the Decision/Rejected format, including why ADR 0079's rejection of a significance test still stands (REQ-028)
-- [ ] ADR 0079 has a "Superseded in part by 0149" line; ADRs 0067, 0093, 0100, 0111, 0117 and 0143 each have one "Run through `eval.py` (ADR 0149)" line where they name a command (REQ-028)
-- [ ] `docs/adr/README.md` lists 0149 (REQ-028)
+- [ ] `docs/adr/0152-one-eval-runner-trials-and-baselines.md` (0149–0151 are taken) records every point of REQ-028 in the Decision/Rejected format, including why ADR 0079's rejection of a significance test still stands (REQ-028)
+- [ ] ADR 0079 has a "Superseded in part by 0152" line; ADRs 0067, 0093, 0100, 0111, 0117 and 0143 each have one "Run through `eval.py` (ADR 0152)" line where they name a command (REQ-028)
+- [ ] `docs/adr/README.md` lists 0152 (REQ-028)
 
 **Verification:**
 - [ ] Build/static check succeeds: `python3 tools/checks/check-writing.py && python3 tools/checks/check-references.py`
@@ -850,7 +896,7 @@ then `/spec`, `/plan`, `/build`, `/test`, `/review` with `claude -p` and
 - Shared contract/invariant: none
 
 **Files/areas likely touched:**
-- `docs/adr/0149-one-eval-runner-trials-and-baselines.md`
+- `docs/adr/0152-one-eval-runner-trials-and-baselines.md`
 - `docs/adr/README.md`
 - `docs/adr/0079-eval-integrity-and-paired-comparison.md`
 - `docs/adr/0067-change-surface-in-plans-and-plan-recall.md`

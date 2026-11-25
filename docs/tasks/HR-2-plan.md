@@ -5,9 +5,9 @@ Spec: docs/specs/HR-2-SPEC.md
 Modules: eval-core, gates, gate-trailer, tasks, bugs, recall, todo, docs-archive
 Not yet planned: None
 Spec status: Approved
-Spec revision: git-commit:1bd1c2e91f44d824f6e8e1f8c7dabc115c90576a:docs/specs/HR-2-SPEC.md
-Approved by: the owner (reply "approved, commit on main" in the Claude Code session, 2026-11-24)
-Approved at: 2026-11-24
+Spec revision: git-commit:9a4d4dd965d1c4f98f17f2f1ee88c05aa0c8f6b6:docs/specs/HR-2-SPEC.md
+Approved by: the owner (reply "approved, commit on main" in the Claude Code session, 2026-11-24; reapproved after the DEC-013 replan, same reply, 2026-11-25)
+Approved at: 2026-11-25
 
 ## Technical Approach
 
@@ -62,7 +62,7 @@ Approved at: 2026-11-24
 ### Affected Areas
 - `tools/evals/` (all suites, new core, README)
 - `tools/checks/`, `tools/tests/`, `.github/workflows/ci.yml`
-- `claude/hooks/`, `claude/settings.json`, `claude/commands/ship.md`,
+- `claude/hooks/`, `claude/settings.json`, `claude/commands/release.md` (was `ship.md`, ADR 0151),
   `claude/references/component-response-contracts.md`
 - `docs/observation-log.md`, `docs/HANDOFF.md`, `README.md`,
   `ARCHITECTURE.md`, `tools/README.md`, `docs/adr/`, `docs/harness-map.html`
@@ -159,22 +159,40 @@ Approved at: 2026-11-24
 - Source: owner approval, 2026-11-24
 - Affects: all tasks; T020, T022 in particular
 
+### TD-013 — Pre-authorized: T024's real trial
+- Stop condition: T024's one real `tasks` trial costs money.
+- Answer: one trial, `--max-budget-usd` keeping it at or below $30.
+- Source: owner approval, 2026-11-25
+- Affects: T024
+
+### TD-014 — Pre-authorized: Playwright browser for the UI checks
+- Stop condition: `grade.sh` UI checks need Playwright's `chromium_headless_shell-1243`; only `chromium-1255` is installed.
+- Answer: before T024's real trial, run `npx playwright install chromium` in `claude/evals/add-business/hidden/` (downloads into `~/.cache/ms-playwright`).
+- Source: owner approval, 2026-11-25
+- Affects: T024
+
+### TD-015 — Pre-authorized: build branch and `main`
+- Stop condition: the executor dispatch hook refuses writers on `main`, and the owner asked for the work on `main` (OPEN-003).
+- Answer: build on branch `HR-2`; fast-forward `main` to `HR-2` after each checkpoint and at the end.
+- Source: owner approval, 2026-11-25
+- Affects: all remaining tasks
+
 ## External Tool Access
 
 | Tool | Access needed | Probe and result | Date |
 |---|---|---|---|
 | Claude CLI (`claude -p`) | headless runs, account usage | `claude -p "Reply with the single word ok." --max-budget-usd 0.05 --output-format json` — authenticated and charged $0.224; `is_error: true`, error subtype not read. A bare call costs more than $0.05. Version 2.1.331 | 2026-11-24 |
-| PHP with `pdo_sqlite` | `grade.sh` for `tasks` | `php -v` → 8.5.13; `php -m \| grep -i pdo_sqlite` → **not loaded**. `grade.sh` cannot run here until it is installed | 2026-11-24 |
-| Node, Playwright Chromium | `grade.sh` UI checks | `node --version` → v26.9.0; `hidden/node_modules/.bin/playwright` present; `~/.cache/ms-playwright/chromium-1255` present | 2026-11-24 |
+| PHP with `pdo_sqlite` | `grade.sh` for `tasks` | 2026-11-24: `php -m \| grep -i pdo_sqlite` → not loaded. 2026-11-25, after the owner installed `php8.5-sqlite3`: `php -m` lists `pdo_sqlite` and `sqlite3`; T015's real trial ran `grade.sh` | 2026-11-25 |
+| Node, Playwright Chromium | `grade.sh` UI checks | `node --version` → v26.9.0; `hidden/node_modules/.bin/playwright` present. 2026-11-25: `grade.sh` on `reference` scored 26/49; all 23 `UI-` checks failed with `Executable doesn't exist`: Playwright wants `chromium_headless_shell-1243`, only `chromium-1255` is installed | 2026-11-25 |
 | Leadbuster checkout | `bugs` cases, `todo` | `/var/www/html/leadbuster` exists; `git cat-file -t a47f7cfd` → commit | 2026-11-24 |
-| Claude Code Bash sandbox setting | deny Bash reads under `claude/evals/` only (spec DEC-012) | not probed: the probe is task T013, by the spec (REQ-031) | — |
+| Claude Code Bash sandbox setting | deny Bash reads under `claude/evals/` only (spec DEC-012) | T013 probe (`tools/evals/tasks/probe_sandbox.py`): **fail**. The sandbox cannot start on this host (`apply-seccomp: ... nested userns is capability-restricted`); every Bash command, `check-spec.py` included, is refused. Trials run with detection only. CLI 2.1.331 | 2026-11-25 |
 
 ## Workstreams
 Sequential by default; `/build` runs them in parallel only when asked.
 - ws-core: eval-core (T002–T005)
 - ws-gates: gates (T001, T006–T010)
 - ws-trailer: gate-trailer (T011, T012)
-- ws-tasks: tasks (T013–T015)
+- ws-tasks: tasks (T013–T015, T024)
 - ws-bugs: bugs (T016, T017)
 - ws-recall: recall (T018)
 - ws-todo: todo (T019, T020)
@@ -207,13 +225,14 @@ Sequential by default; `/build` runs them in parallel only when asked.
 - [ ] T013 (S, ws-tasks, deps: T005) [REQ-031]: the probe shows whether the sandbox blocks eval reads while the stage scripts still run, and its record decides prevention
 - [ ] T014 (M, ws-tasks, deps: T013) [REQ-018, REQ-019, TD-001]: the tasks driver runs the five stages headless, approves only after a draft, and stops with a reason
 - [ ] T015 (M, ws-tasks, deps: T014) [REQ-007, REQ-020]: task trials are graded by the hidden tests into per-check states; one real trial is recorded
+- [ ] T024 (S, ws-tasks, deps: T015) [REQ-018, REQ-019]: the driver answers open questions that carry a recommended option with one decision turn, then approves; one real trial shows a trial passes `/spec`
 - [ ] T016 (M, ws-bugs, deps: T005) [REQ-007, REQ-021]: `eval.py bugs` runs review-eval cases with trials and prints a `Review-eval:` line
-- [ ] T017 (S, ws-bugs, deps: T016, T012) [REQ-022, REQ-023]: `eval.py bugs add --from-log` builds a case from a log row, and `/ship` prints that command
+- [ ] T017 (S, ws-bugs, deps: T016, T012) [REQ-022, REQ-023]: `eval.py bugs add --from-log` builds a case from a log row, and `/release` prints that command
 - [ ] T018 (XS, ws-recall, deps: CP-001) [REQ-007, REQ-024]: `eval.py recall` passes through to `recall.py`
 - [ ] T019 (S, ws-todo, deps: T017, T018) [REQ-029]: `eval.py todo` lists skipped recall rows and bugs without a case
 - [ ] T020 (S, ws-todo, deps: T019) [REQ-030, TD-004]: a SessionStart hook prints the catch-up count when it is not zero
 - [ ] T021 (S, ws-docs, deps: T005) [REQ-026]: spec-eval is frozen under the archive, with its private fixture copied out and still ignored
-- [ ] T022 (M, ws-docs, deps: T010, T012, T015, T017, T018, T020, T021) [REQ-025, REQ-027]: one README explains the evals, and no live file names an old command
+- [ ] T022 (M, ws-docs, deps: T010, T012, T015, T017, T018, T020, T021, T024) [REQ-025, REQ-027]: one README explains the evals, and no live file names an old command
 - [ ] T023 (S, ws-docs, deps: T022) [REQ-028]: the ADR records the rebuild and the old ADRs point to it
 
 ## Requirement Coverage
@@ -234,12 +253,12 @@ Sequential by default; `/build` runs them in parallel only when asked.
 - REQ-015 → T011 → staleness test
 - REQ-016 → T011 → trailer line format test
 - REQ-017 → T012 → `tools/tests/test-check-eval-trailer.py`; CI step
-- REQ-018 → T014 → stubbed driver: approval only after a draft; no pre-approval text
-- REQ-019 → T014 → stubbed driver: each stop rule and its reason
+- REQ-018 → T014, T024 → stubbed driver: approval only after a draft; no pre-approval or decision text before a draft; the decision turn only for a draft whose open questions all carry a recommended option
+- REQ-019 → T014, T024 → stubbed driver: each stop rule and its reason, including no recommended option and a question left after the decision turn
 - REQ-020 → T015 → grading tests on a recorded `grade.sh` JSON; one real trial; CI grader self-test unchanged
 - REQ-021 → T016 → `test_review_eval.py` unchanged and passing; roll-up and trailer tests; `test-check-rescore.py` unchanged
 - REQ-022 → T017 → row parser and `--from-log` tests
-- REQ-023 → T017 → `rg` for the new command in `ship.md`, contracts and the log
+- REQ-023 → T017 → `rg` for the new command in `release.md`, contracts and the log
 - REQ-024 → T018 → same output and exit code from both commands
 - REQ-025 → T022 → every README command run; owner run from the README (manual)
 - REQ-026 → T021 → CI step on the new path; `git check-ignore`; copy listed
@@ -288,9 +307,9 @@ Orphan tasks: None
 | Replay passes with a weak check | a check with only true examples | coverage test fails such a check; hand-written false outputs added | T007 |
 | Migration changes a gate's expected answer | replay map differs | old code stays; a changed expected answer is an owner question (spec Boundaries) | T008 |
 | Measurement cost is high | T001 total cost | T010 waits for the pre-authorized limit; `--tag` for later runs | T001, T010 |
-| `grade.sh` cannot run here | `pdo_sqlite` not loaded (probed) | unit work proceeds on a recorded `grade.sh` JSON; the real trial waits for the owner's install | T015 |
+| `grade.sh` UI checks cannot run here | Playwright wants `chromium_headless_shell-1243`; only 1255 is installed (2026-11-25) | per TD-014 | T024 |
 | Owner's uncommitted edits in `claude/settings.json` and `docs/HANDOFF.md` get committed | `git diff --cached` shows hunks the task did not write | stage only the task's own hunks (TD per pre-authorization); inspect `git diff --cached` before each commit | T020, T022 |
-| The new `Eval:` check blocks this plan's own later commits | T017 and T022 edit `claude/commands/ship.md` after T012 | those commits carry `Eval:` per the pre-authorization | T017, T022 |
+| The new `Eval:` check blocks this plan's own later commits | T017 and T022 edit `claude/commands/release.md` after T012 | those commits carry `Eval:` per the pre-authorization | T017, T022 |
 | Private output committed | `git status` lists a results or fixture path | ignore guard; `git check-ignore` tests | T003, T021 |
 
 ## Open Questions
