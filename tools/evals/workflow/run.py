@@ -273,9 +273,12 @@ class GatesSuite:
     any_loss_is_worse=True
     model=None
 
+    def __init__(self, root=None):
+        self.root=root
+
     def all_cases(self):
         import cases
-        return list(cases.load_cases().values())
+        return list(cases.load_cases(self.root or cases.CASES).values())
 
     def instruction_hashes(self, cases):
         return file_hashes(sorted({p for c in cases for p in stage_files(c['stage'])}))

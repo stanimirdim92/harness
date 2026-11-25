@@ -309,6 +309,10 @@ class GatesRunTests(unittest.TestCase):
             self.assertEqual(digest, hashlib.sha256((HARNESS / rel).read_bytes()).hexdigest())
 
 
+def case_folder_ids():
+    return sorted(path.name for path in casefolders.CASES.iterdir() if path.is_dir())
+
+
 class GatesSuiteTests(unittest.TestCase):
     def setUp(self):
         self.suite = GatesSuite()
@@ -327,7 +331,7 @@ class GatesSuiteTests(unittest.TestCase):
 
     def test_all_cases_lists_the_case_folders_with_their_split_and_tags(self):
         listed = {c['id']: c for c in self.suite.all_cases()}
-        self.assertEqual(len(listed), 60)
+        self.assertEqual(sorted(listed), case_folder_ids())
         self.assertEqual((listed['ship_open_blocker']['split'], listed['ship_open_blocker']['tags']), ('optimization', ['shipverdict']))
 
 
@@ -391,10 +395,13 @@ class GatesCommandTests(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertIn('unknown case: nope', err)
 
-    def test_split_optimization_keeps_every_gate_case_and_holdout_keeps_none(self):
+    def test_a_split_keeps_the_cases_whose_case_json_names_it(self):
         cases = eval_cli.build(eval_cli.SUITES, 'gates').all_cases()
-        self.assertEqual(len(eval_cli.select(cases, [], [], 'optimization')), 60)
-        self.assertEqual(eval_cli.select(cases, [], [], 'holdout'), [])
+        for split in ('optimization', 'holdout'):
+            declared = [case_id for case_id in case_folder_ids()
+                        if json.loads((casefolders.CASES / case_id / 'case.json').read_text())['split'] == split]
+            self.assertEqual([c['id'] for c in eval_cli.select(cases, [], [], split)], declared, split)
+        self.assertTrue(eval_cli.select(cases, [], [], 'optimization'))
 
     def test_the_three_case_selection_of_the_real_run_resolves(self):
         cases = eval_cli.build(eval_cli.SUITES, 'gates').all_cases()
@@ -409,6 +416,45 @@ class GatesCommandTests(unittest.TestCase):
     def test_jobs_default_to_4_for_gates(self):
         args = eval_cli.parser_for(eval_cli.SUITES).parse_args(['gates'])
         self.assertEqual(args.jobs, 4)
+
+
+class NewCaseTests(unittest.TestCase):
+    """A new gate case is a copied folder with an edited `case.json`, and no `.py` edit (REQ-010)."""
+    NEW = 'build_independent_copy'
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name) / 'cases'
+        shutil.copytree(casefolders.CASES / 'build_independent', self.root / self.NEW, ignore=shutil.ignore_patterns('__pycache__'))
+        path = self.root / self.NEW / 'case.json'
+        doc = json.loads(path.read_text())
+        doc['request'] += ' This is the copy.'
+        path.write_text(json.dumps(doc))
+
+    def test_the_suite_lists_the_copied_case_with_the_edited_request(self):
+        listed = {c['id']: c for c in GatesSuite(root=self.root).all_cases()}
+        self.assertEqual(sorted(listed), ['build_independent_copy'])
+        self.assertTrue(listed[self.NEW]['request'].endswith(' This is the copy.'))
+
+    def test_the_copied_case_builds_its_fixture(self):
+        case = GatesSuite(root=self.root).all_cases()[0]
+        with tempfile.TemporaryDirectory() as tmp:
+            casefolders.build_fixture(case, Path(tmp))
+            self.assertTrue((Path(tmp) / '.git').is_dir())
+
+    def test_the_gates_command_selects_the_copied_case_by_id(self):
+        gates = dict(eval_cli.SUITES['gates'], build=lambda: GatesSuite(root=self.root))
+        with mock.patch('core.run', return_value=0) as run, redirect_stderr(io.StringIO()):
+            code = eval_cli.main(['gates', '--case', self.NEW], suites=dict(eval_cli.SUITES, gates=gates))
+        self.assertEqual(code, 0)
+        self.assertEqual([c['id'] for c in run.call_args.args[1]], [self.NEW])
+
+    def test_the_default_suite_does_not_know_the_copy(self):
+        err = io.StringIO()
+        with redirect_stderr(err):
+            code = eval_cli.main(['gates', '--case', self.NEW])
+        self.assertEqual((code, 'unknown case'), (2, err.getvalue()[:12]))
 
 
 def make_case(root, case_id, files=None, check_py=None, templates=None, **fields):

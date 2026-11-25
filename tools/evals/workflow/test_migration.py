@@ -16,6 +16,10 @@ those by a single edit, to give a check the value it lacked).
 hashes, the commits, the git status and the evidence hash of the tree that the
 first, code-based builder made. Every commit in a build has one fixed date, so
 the commit ids are the same on every build.
+
+Both sets guard the migration, so they guard the `MIGRATED` cases. A case that
+is not in `MIGRATED` needs no replay file and no manifest entry. A case that
+has one is checked like a migrated case.
 """
 import contextlib
 import hashlib
@@ -37,6 +41,68 @@ SOURCES = ('measured', 'test_runner', 'hand')
 FIXED_DATE = '2026-01-01T00:00:00+0000'
 ENTRY_KEYS = {'source', 'output', 'reads', 'fixture', 'expected'}
 RUNNER_CHECKS = ('fixture_unchanged', 'tool_access_confined_to_fixture')
+MIGRATED = frozenset({
+    'build_independent',
+    'build_pressure_fan_out',
+    'build_shared_db',
+    'executor_fix_trailer',
+    'executorsteps_done_status',
+    'fix_blocked',
+    'fix_next_stage',
+    'fix_other_review_file',
+    'fix_rerun',
+    'fixround_unverified',
+    'fixround_verified',
+    'gate_setup_failure',
+    'gate_spec_pin',
+    'jira_complete',
+    'jira_paginated',
+    'jira_unavailable',
+    'owner_accepts_required',
+    'owner_approves_read_spec',
+    'owner_go_over_blocker',
+    'owner_preapproves_spec',
+    'owner_skips_test_depth',
+    'plan_conflict_incomplete',
+    'plan_conflict_infeasible',
+    'plan_editorial',
+    'plan_handoff',
+    'plan_preserved_req',
+    'plan_stale',
+    'plansteps_external_tracker',
+    'review_auth_diff',
+    'review_plain_diff',
+    'review_pressure_skip_test',
+    'reviewend_fix_round',
+    'route_browser_check',
+    'ship_answered_required',
+    'ship_base_check_failed',
+    'ship_open_blocker',
+    'ship_open_required',
+    'ship_preexisting_blocker',
+    'ship_stats_order',
+    'shipgate_full_run',
+    'shipgate_full_run_added_tests',
+    'shipgate_no_full_run',
+    'spec_conflict',
+    'spec_decisions',
+    'spec_simple',
+    'specgate_default_dec',
+    'specgate_figma_read',
+    'specgate_intake_blocker',
+    'specgate_intake_incomplete',
+    'specgate_rerun_after_brief',
+    'specgate_ticket_beats_precedent',
+    'testfix_packet',
+    'testfull_packet',
+    'testgate_figma',
+    'testgate_handed_on',
+    'testgate_two_candidates',
+    'testresult_defect',
+    'verifier_survivors',
+    'verifiersteps_method_packet',
+    'verifiersteps_plain_packet',
+})
 
 
 def current_checks(case, output, reads, directory):
@@ -113,6 +179,16 @@ def differences(got, want):
     return out
 
 
+def migration_gaps(migrated, cases, replay, manifest):
+    """Name what leaves a migrated case unguarded, from the sets of case ids. A case outside `migrated` is no gap."""
+    gaps = [f'{case}: migrated case has no case folder' for case in sorted(migrated - cases)]
+    gaps += [f'{case}: migrated case has no replay file' for case in sorted(migrated - replay)]
+    gaps += [f'{case}: migrated case has no manifest entry' for case in sorted(migrated - manifest)]
+    gaps += [f'{case}: replay file has no case folder' for case in sorted(replay - cases)]
+    gaps += [f'{case}: manifest entry has no case folder' for case in sorted(manifest - cases)]
+    return gaps
+
+
 def build_from_folder(case):
     with tempfile.TemporaryDirectory() as tmp, fixed_dates():
         directory = Path(tmp)
@@ -133,8 +209,9 @@ class ReplayShapeTests(unittest.TestCase):
     def setUpClass(cls):
         cls.replay = load_replay()
 
-    def test_there_is_one_replay_file_per_case(self):
-        self.assertEqual(sorted(self.replay), sorted(CASES))
+    def test_every_migrated_case_keeps_its_replay_file_and_manifest_entry(self):
+        stored = json.loads(MANIFEST.read_text())
+        self.assertEqual(migration_gaps(MIGRATED, set(CASES), set(self.replay), set(stored)), [])
 
     def test_every_entry_has_the_agreed_shape(self):
         for case, entries in self.replay.items():
@@ -198,10 +275,9 @@ class ReplayTests(unittest.TestCase):
 
 
 class FixtureParityTests(unittest.TestCase):
-    def test_every_folder_builds_the_tree_the_first_builder_made(self):
+    def test_every_listed_folder_builds_the_tree_the_first_builder_made(self):
         stored = json.loads(MANIFEST.read_text())
-        self.assertEqual(sorted(stored), sorted(CASES))
-        for case in CASES:
+        for case in sorted(set(stored) & set(CASES)):
             with self.subTest(case=case):
                 self.assertEqual(differences(build_from_folder(case), stored[case]), [], f'{case}: the folder builds a different fixture')
 
@@ -209,6 +285,27 @@ class FixtureParityTests(unittest.TestCase):
         want = {'files': {'a': '1', 'b': '2'}, 'commits': ['x m'], 'status': [], 'evidence': 'e'}
         got = {'files': {'a': '1', 'b': '3', 'c': '4'}, 'commits': ['y m'], 'status': [], 'evidence': 'e'}
         self.assertEqual(differences(got, want), ['commits', 'file b', 'file c'])
+
+
+class MigrationGapTests(unittest.TestCase):
+    migrated = {'a', 'b'}
+
+    def test_a_new_case_with_no_replay_file_and_no_manifest_entry_is_no_gap(self):
+        self.assertEqual(migration_gaps(self.migrated, {'a', 'b', 'new'}, {'a', 'b'}, {'a', 'b'}), [])
+
+    def test_a_migrated_case_whose_replay_file_is_missing_is_named(self):
+        self.assertEqual(migration_gaps(self.migrated, {'a', 'b'}, {'a'}, {'a', 'b'}), ['b: migrated case has no replay file'])
+
+    def test_a_migrated_case_whose_manifest_entry_is_missing_is_named(self):
+        self.assertEqual(migration_gaps(self.migrated, {'a', 'b'}, {'a', 'b'}, {'a'}), ['b: migrated case has no manifest entry'])
+
+    def test_a_migrated_case_whose_folder_is_missing_is_named(self):
+        self.assertEqual(migration_gaps(self.migrated, {'a'}, {'a', 'b'}, {'a', 'b'}),
+                         ['b: migrated case has no case folder', 'b: replay file has no case folder', 'b: manifest entry has no case folder'])
+
+    def test_a_replay_file_or_manifest_entry_of_no_case_is_named(self):
+        self.assertEqual(migration_gaps(self.migrated, {'a', 'b'}, {'a', 'b', 'old'}, {'a', 'b', 'gone'}),
+                         ['old: replay file has no case folder', 'gone: manifest entry has no case folder'])
 
 
 if __name__ == '__main__':

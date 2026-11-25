@@ -365,21 +365,26 @@ call a change a gain because one case moved by one trial.
 
 - **Add.** Copy a folder in `tools/evals/workflow/cases/` and edit its
   `case.json` and `files/`. `tools/evals/workflow/cases.py` describes the
-  fields, the setup steps and the check rules. Then run
-  `python3 tools/evals/eval.py gates --case <id>`. CI also needs three more
-  things, and the tests fail until you add them:
-  - `tools/evals/workflow/replay/<id>.json` with real outputs, where each
-    check has one output that gives true and one that gives false;
-  - the case's entry in `fixture_manifest.json`. Write it from the workflow
-    folder with
-    `python3 -c "import test_migration; test_migration.write_manifest()"`;
-  - the case count of 60 in two tests in `test_runner.py`.
+  fields, the setup steps and the check rules. Run the free workflow tests
+  (the last lines of this section), then
+  `python3 tools/evals/eval.py gates --case <id>`. No `.py` file changes. The tests take their case counts from the folder, and they need no
+  replay file and no manifest entry for a new case.
+- **Replay and manifest.** The 60 migrated cases (`MIGRATED` in
+  `test_migration.py`) keep a replay file in `workflow/replay/` and an entry in
+  `fixture_manifest.json`. They prove that the migration kept every assertion.
+  A test fails when one of them goes missing, or when a listed fixture drifts.
+  A new case does not need them. Change a migrated case's fixture only on
+  purpose. Then write the manifest again from the workflow folder with
+  `python3 -c "import test_migration; test_migration.write_manifest()"` and
+  review the diff. That call also adds an entry for each case that has none.
 - **Change.** Edit the folder. Never edit an `expected` map in `replay/` to
-  make a changed check pass. Regenerate the manifest if the fixture changed.
+  make a changed check pass. Regenerate the manifest if the fixture of a
+  migrated case changed.
   The baseline still holds the old version of the case, so the next run
   compares new against old.
-- **Retire.** Delete the case folder, its replay file and its manifest entry.
-  Lower the two counts. Write the watched list again with
+- **Retire.** Delete the case folder. For a migrated case, also delete its
+  replay file and its manifest entry, and remove its id from `MIGRATED`. Write
+  the watched list again with
   `python3 tools/evals/eval.py gates --write-watched`. A unit test fails when
   `watched.txt` is stale. A baseline that still holds the case does no harm: a
   run compares only the cases it ran.
