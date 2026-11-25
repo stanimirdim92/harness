@@ -50,9 +50,15 @@ a word in the verdict. A user who types `/go` might expect it to proceed.
 (`shipgate`). Two things would share one name.
 
 **Rejected — *(keep /ship).*** The built-in hides the harness command in the
-command list, and the owner cannot reach the gate from the list. A user who
-types the name runs the built-in, which pushes. Keeping the name is the one
-choice that leaves the defect in place.
+command list, and the owner cannot reach the gate from the list. Which
+command runs when the owner types the name was not tested; if it is the
+built-in, it pushes. Keeping the name is the one choice that leaves the defect
+in place.
 
 **Revisit if** Claude Code adds a built-in `/release`. Then the same collision
 returns, and the command needs another name.
+
+**Evidence.** The 11 gate cases that read the gate file ran 3 trials each
+before the rename (run `2026-11-25-115705-9cde39a`, 33/33 trials pass, $7.10)
+and after it (run `2026-11-25-120857-e7c1218`, 33/33 pass, $7.43). No case
+changed state: no measured change. The runs are local and ignored by git.
