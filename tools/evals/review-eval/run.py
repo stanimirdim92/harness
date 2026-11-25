@@ -287,16 +287,32 @@ def harness_hashes(harness=sandbox.HARNESS):
     """{path relative to the harness: sha256} of every file `install_harness()` copies into a review project."""
     files = [harness / 'AGENTS.md', harness / 'settings.json']
     for name in sandbox.HARNESS_DIRS:
-        files += sorted(p for p in (harness / name).rglob('*') if p.is_file() and 'evals' not in p.parts)
+        files += sorted(p for p in (harness / name).rglob('*')
+                        if p.is_file() and 'evals' not in p.relative_to(harness).parts)
     return {str(p.relative_to(harness)): hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
 
 
 def kept_cost(folder):
-    """What a review that raised still spent, read from the `meta.json` `keep()` saved. 0 when none was saved."""
+    """What a review that raised still spent, or None when it cannot be known. `keep()` saves `meta.json`
+    once the session ended. A session that exited non-zero left only its trace, which ends with the
+    `result` event; one that timed out left neither."""
+    folder = Path(folder)
     try:
-        return json.loads((Path(folder) / 'meta.json').read_text()).get('total_cost_usd') or 0
+        return json.loads((folder / 'meta.json').read_text()).get('total_cost_usd') or 0
     except (OSError, ValueError):
-        return 0
+        pass
+    try:
+        lines = (folder / 'trace.jsonl').read_text().splitlines()
+    except OSError:
+        return None
+    for line in reversed(lines):
+        try:
+            event = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(event, dict) and event.get('type') == 'result':
+            return event.get('total_cost_usd')
+    return None
 
 
 def verdict_word(kind, result):
@@ -331,6 +347,8 @@ class BugsSuite:
     def run_trial(self, case, folder):
         """The core retries a trial that raises, so what the first attempt spent comes off the budget of the retry."""
         full = load(case['id'])
+        if full['kind'] == 'bug' and not full.get('defect'):
+            print(f'  {case["id"]}: no "defect" terms in case.json; it can score LOCATED at best', file=sys.stderr)
         key = str(folder)
         left = float(self.budget) - self.spent.get(key, 0)
         if left <= 0:
@@ -338,7 +356,8 @@ class BugsSuite:
         try:
             findings, meta, source = produce(full, self.repo, left, Path(folder))
         except Exception:
-            self.spent[key] = self.spent.get(key, 0) + kept_cost(folder)
+            cost = kept_cost(folder)
+            self.spent[key] = self.spent.get(key, 0) + (float(self.budget) if cost is None else cost)
             raise
         result = judge(full, findings)
         return {'checks': None, 'kind': full['kind'], 'verdict': verdict_word(full['kind'], result),

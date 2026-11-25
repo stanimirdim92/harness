@@ -10,9 +10,10 @@ import json
 import os
 import stat
 import subprocess
+import sys
 import tempfile
 import unittest
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from unittest import mock
 
@@ -389,6 +390,38 @@ class BugsSuite(unittest.TestCase):
         self.assertEqual(self.trial()['verdict'], 'CAUGHT')
         self.assertEqual([c[2] for c in self.calls], [10, 3])
 
+    def test_a_review_that_died_before_it_saved_its_result_is_costed_from_its_trace(self):
+        # run_session() raises on a non-zero exit after it has written the trace and before keep() runs.
+        def dies(case, repo, budget, out):
+            (out / 'trace.jsonl').write_text('{"type": "assistant"}\n'
+                                             '{"type": "result", "subtype": "error_max_turns", "total_cost_usd": 4}\n')
+            raise RuntimeError('claude exited 1')
+
+        with mock.patch.object(rev, 'produce', dies), self.assertRaises(RuntimeError):
+            self.trial()
+        self.play([NEAR])
+        self.assertEqual(self.trial()['verdict'], 'CAUGHT')
+        self.assertEqual(self.calls[-1][2], 6)
+
+    def test_a_review_that_left_no_cost_anywhere_counts_as_having_spent_the_budget(self):
+        def dies(case, repo, budget, out):
+            raise subprocess.TimeoutExpired('claude', 1800)
+
+        with mock.patch.object(rev, 'produce', dies), self.assertRaises(subprocess.TimeoutExpired):
+            self.trial()
+        with self.assertRaisesRegex(RuntimeError, 'budget'):
+            self.trial()
+
+    def test_a_bug_case_without_defect_terms_says_it_can_reach_located_at_best(self):
+        (self.fixtures / 'bare').mkdir()
+        (self.fixtures / 'bare' / 'case.json').write_text(json.dumps({'name': 'bare', **{**BUG, 'defect': []}}))
+        self.play([NEAR], [NEAR])
+        with redirect_stderr(io.StringIO()) as err:
+            trial = self.trial('bare')
+            self.trial()
+        self.assertEqual((trial['verdict'], err.getvalue().count('bare')), ('LOCATED', 1))
+        self.assertIn('no "defect" terms', err.getvalue())
+
     def test_a_retry_with_nothing_left_is_not_started(self):
         self.play(RuntimeError('review did not finish'), cost=10)
         with self.assertRaises(RuntimeError):
@@ -398,8 +431,8 @@ class BugsSuite(unittest.TestCase):
         self.assertEqual(len(self.calls), 1)
 
     def test_each_installed_harness_file_is_hashed_and_the_evals_are_not(self):
-        harness = Path(self.tmp.name) / 'claude'
-        for rel in ('AGENTS.md', 'settings.json', 'commands/review.md', 'skills/a/SKILL.md', 'evals/hidden/check.sh', 'other/x.md'):
+        harness = Path(self.tmp.name) / 'evals' / 'claude'   # a parent named evals is not an evals folder of the harness
+        for rel in ('AGENTS.md', 'settings.json', 'commands/review.md', 'skills/a/SKILL.md', 'commands/evals/hidden.md', 'other/x.md'):
             (harness / rel).parent.mkdir(parents=True, exist_ok=True)
             (harness / rel).write_text(rel)
         before = rev.harness_hashes(harness)
@@ -407,6 +440,64 @@ class BugsSuite(unittest.TestCase):
         (harness / 'commands/review.md').write_text('changed')
         after = rev.harness_hashes(harness)
         self.assertEqual([k for k in before if before[k] != after[k]], ['commands/review.md'])
+
+
+class BugsEndToEnd(unittest.TestCase):
+    """`eval.py bugs` through the real core and the real BugsSuite, with a stub `claude` on PATH."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        base = Path(self.tmp.name)
+        self.repo = base / 'repo'
+        self.repo.mkdir()
+        git(self.repo, 'init', '-q')
+        (self.repo / 'feed.py').write_text('x = 1\n')
+        git(self.repo, 'add', '-A')
+        git(self.repo, 'commit', '-qm', 'A')
+        (self.repo / 'feed.py').write_text('x = 2\n')
+        git(self.repo, 'commit', '-qam', 'B')
+        change = git(self.repo, 'rev-parse', 'HEAD')
+        fixtures = base / 'fixtures'
+        for name, case in (('shipped', {'kind': 'bug', 'change': change, 'targets': {'feed.py': [1]}, 'defect': ['wrong']}),
+                           ('quiet', {'kind': 'clean', 'change': change, 'targets': {}})):
+            (fixtures / name).mkdir(parents=True)
+            (fixtures / name / 'case.json').write_text(json.dumps({'name': name, 'tags': [], 'split': 'optimization', **case}))
+        saved, rev.FIXTURES = rev.FIXTURES, fixtures
+        self.addCleanup(setattr, rev, 'FIXTURES', saved)
+        self.root = base / 'harness'
+        self.root.mkdir()
+        (self.root / '.gitignore').write_text('tools/evals/results/\n')
+        git(self.root, 'init', '-q')
+        git(self.root, 'add', '-A')
+        git(self.root, 'commit', '-qm', 'base')
+        self.bin = base / 'bin'
+        self.bin.mkdir()
+        self.addCleanup(os.environ.__setitem__, 'PATH', os.environ['PATH'])
+        os.environ['PATH'] = f'{self.bin}:{os.environ["PATH"]}'
+        event = json.dumps({'type': 'result', 'is_error': False, 'total_cost_usd': 0.5, 'duration_ms': 900,
+                            'result': '### BLOCKER\n- [CODE-1] [feed.py:1] The value is wrong.\n'})
+        claude = self.bin / 'claude'
+        claude.write_text(f"#!/bin/sh\ncat <<'EOF'\n{event}\nEOF\n")
+        claude.chmod(claude.stat().st_mode | stat.S_IEXEC)
+
+    def test_the_suite_runs_its_cases_with_trials_and_ends_the_report_with_the_review_eval_line(self):
+        sys.path.insert(0, str(HERE.parent))
+        import eval as eval_cli
+        registry = {name: {'question': 'q', 'when': 'w', 'cost': None, 'build': None} for name in ('gates', 'tasks', 'recall')}
+        registry['bugs'] = {'question': 'q', 'when': 'w', 'cost': None, 'build': lambda: rev.BugsSuite()}
+        with redirect_stdout(io.StringIO()) as out, redirect_stderr(io.StringIO()):
+            code = eval_cli.main(['bugs', '--repo', str(self.repo), '--trials', '2', '--budget', '3'],
+                                 suites=registry, root=self.root)
+        run = next((self.root / 'tools/evals/results/bugs').iterdir())
+        doc = json.loads((run / 'results.json').read_text())
+        states = {c['id']: (c['result']['state'], [t['verdict'] for t in c['trials']]) for c in doc['cases']}
+        self.assertEqual(states, {'quiet': ('FAIL', ['NOISY', 'NOISY']), 'shipped': ('PASS', ['CAUGHT', 'CAUGHT'])})
+        self.assertEqual((code, doc['trials'], doc['cost_usd'], doc['schema']), (0, 2, 2.0, 1))
+        self.assertEqual(doc['instruction_hashes'], rev.harness_hashes())
+        self.assertTrue((run / 'shipped' / 't1' / 'trace.jsonl').is_file())
+        self.assertEqual(out.getvalue().rstrip('\n').splitlines()[-1],
+                         f'Review-eval: bugs 1/1, clean 0/1; tools/evals/results/bugs/{run.name}')
 
 
 if __name__ == '__main__':
