@@ -86,7 +86,7 @@ offending calls. First prove that the copy works headless.
 
 ## T003: The core stores runs, runs trials, keeps baselines and gives one verdict
 
-**Status:** Pending
+**Status:** Done
 
 **Requirements:** REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006, TD-002
 
