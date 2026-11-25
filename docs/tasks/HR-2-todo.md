@@ -498,7 +498,7 @@ on a sample spec.
 
 ## T014: The tasks driver runs the pipeline headless and stops with a reason
 
-**Status:** Pending
+**Status:** Done
 
 **Requirements:** REQ-018, REQ-019, TD-001
 

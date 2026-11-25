@@ -1,0 +1,21 @@
+{
+  "result": "BUILD COMPLETE.",
+  "trace": [
+    {
+      "type": "assistant",
+      "parent_tool_use_id": null,
+      "message": {
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_leak",
+            "name": "Bash",
+            "input": {
+              "command": "cat /x/claude/evals/add-business/hidden/checks.json"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

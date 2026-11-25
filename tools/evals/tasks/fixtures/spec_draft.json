@@ -1,0 +1,6 @@
+{
+  "result": "The spec is saved as a Draft in docs/specs/ADD-1-SPEC.md. The shape check passed. Reply with your approval to continue.",
+  "writes": {
+    "docs/specs/ADD-1-SPEC.md": "# ADD-1 Spec\n\nStatus: Draft\nTicket: ADD-1\nChange kind: New\n"
+  }
+}

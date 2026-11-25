@@ -1,0 +1,6 @@
+{
+  "result": "Status: Approved. Approved by: owner. The spec is committed.",
+  "writes": {
+    "docs/specs/ADD-1-SPEC.md": "# ADD-1 Spec\n\nStatus: Approved\nTicket: ADD-1\nChange kind: New\n"
+  }
+}

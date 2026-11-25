@@ -1,0 +1,6 @@
+{
+  "result": "Planning stops. The plan holds a SPEC CONFLICT: the spec asks for a column the schema does not allow. Which resolution do you choose?",
+  "writes": {
+    "docs/tasks/ADD-1-plan.md": "# Implementation Plan: ADD-1\n\nStatus: Draft\nSpec: docs/specs/ADD-1-SPEC.md\n\n## SPEC CONFLICT\nREQ-004 needs a column that the schema forbids.\n"
+  }
+}

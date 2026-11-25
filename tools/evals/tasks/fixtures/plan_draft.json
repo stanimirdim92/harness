@@ -1,0 +1,6 @@
+{
+  "result": "The plan is saved as a Draft in docs/tasks/ADD-1-plan.md. Pre-authorizations: none needed. Reply with your approval to continue.",
+  "writes": {
+    "docs/tasks/ADD-1-plan.md": "# Implementation Plan: ADD-1\n\nStatus: Draft\nSpec: docs/specs/ADD-1-SPEC.md\n"
+  }
+}

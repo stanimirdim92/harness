@@ -1,0 +1,6 @@
+{
+  "result": "Status: Approved. The plan and the todo are committed.",
+  "writes": {
+    "docs/tasks/ADD-1-plan.md": "# Implementation Plan: ADD-1\n\nStatus: Approved\nSpec: docs/specs/ADD-1-SPEC.md\n"
+  }
+}
