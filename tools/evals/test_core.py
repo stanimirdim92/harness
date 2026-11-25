@@ -8,8 +8,10 @@ import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from datetime import datetime
 from pathlib import Path
+from unittest import mock
 
 import core
+import eval as eval_cli
 
 NOW = datetime(2026, 12, 1, 10, 15, 0)
 
@@ -633,6 +635,202 @@ class SemanticReview(CoreCase):
     def test_report_marks_a_pending_review(self):
         _, out, _ = self.run_core(FakeSuite(), [case('a')], now=NOW)
         self.assertRegex(out, r'semantic review pending: a')
+
+
+class BuiltSuite(FakeSuite):
+    """A fake suite that also lists its cases, as eval.py needs."""
+
+    def __init__(self, cases, **kwargs):
+        super().__init__(**kwargs)
+        self.listed = cases
+
+    def all_cases(self):
+        return self.listed
+
+
+CASES = [case('a', 'optimization', ['ship']), case('b', 'holdout', ['ship', 'fix']), case('c', 'optimization', ['fix'])]
+README_TEXT = """# evals
+
+## Measured
+
+One full run of every `workflow/` case.
+
+| Item | Value |
+| --- | --- |
+| Cases | 60, one trial each |
+| Total cost | $15.6664 |
+
+| Case | Cost (USD) |
+| --- | --- |
+| `a` | 0.9385 |
+
+## Next
+"""
+
+
+class EvalEntry(CoreCase):
+    """eval.py with a registry of fake suites. `claude` is never invoked."""
+
+    def cli(self, *argv, built=('gates', 'tasks', 'bugs'), suite=None, readme=README_TEXT):
+        self.suite = suite or BuiltSuite(CASES, name='gates')
+        registry = {name: {'question': f'Q of {name}?', 'when': f'W of {name}', 'cost': None,
+                           'build': (lambda: self.suite) if name in built else None}
+                    for name in ('gates', 'tasks', 'bugs', 'recall')}
+        registry['recall']['cost'] = 'free'
+        readme_file = self.root / 'README.md'
+        readme_file.write_text(readme)
+        out, err = io.StringIO(), io.StringIO()
+        with redirect_stdout(out), redirect_stderr(err):
+            code = eval_cli.main(list(argv), suites=registry, root=self.root, readme=readme_file)
+        return code, out.getvalue(), err.getvalue()
+
+    def test_no_arguments_prints_the_four_suites_and_exits_0(self):
+        code, out, _ = self.cli()
+        self.assertEqual(code, 0)
+        for name in ('gates', 'tasks', 'bugs', 'recall'):
+            self.assertIn(f'Q of {name}?', out)
+            self.assertIn(f'W of {name}', out)
+
+    def test_cost_comes_from_the_measured_section_or_says_unmeasured(self):
+        _, out, _ = self.cli()
+        self.assertIn('last measured cost: $15.67 (60 cases, one trial each)', out)
+        self.assertEqual(out.count('last measured cost: unmeasured'), 2)
+        self.assertIn('last measured cost: free', out)
+
+    def test_every_suite_is_unmeasured_when_the_readme_has_no_measured_section(self):
+        _, out, _ = self.cli(readme='# evals\n')
+        self.assertNotIn('$', out)
+        self.assertEqual(out.count('unmeasured'), 3)
+
+    def test_the_real_readme_gives_gates_a_dollar_figure(self):
+        text = eval_cli.suite_table(eval_cli.SUITES, eval_cli.README.read_text())
+        self.assertRegex(text, r'gates\n.*\n.*\n  last measured cost: \$\d+\.\d\d')
+
+    def test_the_real_registry_lists_four_suites_none_built(self):
+        self.assertEqual(list(eval_cli.SUITES), ['gates', 'tasks', 'bugs', 'recall'])
+        self.assertTrue(all(entry['build'] is None for entry in eval_cli.SUITES.values()))
+
+    def test_a_suite_not_built_yet_says_so_and_exits_2(self):
+        for argv in (('gates',), ('baseline', 'gates'), ('recall',)):
+            code, _, err = self.cli(*argv, built=())
+            self.assertEqual(code, 2)
+            self.assertIn('not built yet', err)
+        self.assertFalse((self.root / 'tools/evals/results').exists())
+
+    def test_case_and_tag_repeat_and_select_the_union(self):
+        code, _, _ = self.cli('gates', '--case', 'c', '--tag', 'ship', '--tag', 'nothing')
+        self.assertEqual(code, 0)
+        self.assertEqual(sorted({c for c, _ in self.suite.calls}), ['a', 'b', 'c'])
+
+    def test_case_alone_selects_only_that_case(self):
+        self.cli('gates', '--case', 'a', '--case', 'c')
+        self.assertEqual(sorted({c for c, _ in self.suite.calls}), ['a', 'c'])
+
+    def test_tag_alone_selects_only_the_tagged_cases(self):
+        self.cli('gates', '--tag', 'fix')
+        self.assertEqual(sorted({c for c, _ in self.suite.calls}), ['b', 'c'])
+
+    def test_split_keeps_only_that_split(self):
+        self.cli('gates', '--split', 'holdout')
+        self.assertEqual(sorted({c for c, _ in self.suite.calls}), ['b'])
+
+    def test_split_narrows_a_tag_selection(self):
+        self.cli('gates', '--tag', 'ship', '--split', 'optimization')
+        self.assertEqual(sorted({c for c, _ in self.suite.calls}), ['a'])
+
+    def test_no_flags_runs_every_case_with_the_default_three_trials(self):
+        self.cli('gates')
+        self.assertEqual(len(self.suite.calls), 9)
+
+    def test_trials_and_jobs_reach_the_core(self):
+        self.cli('gates', '--case', 'a', '--trials', '2', '--jobs', '2')
+        self.assertEqual(self.suite.calls.count(('a', 1)) + self.suite.calls.count(('a', 2)), 2)
+        self.assertNotIn(('a', 3), self.suite.calls)
+
+    def test_jobs_value_is_handed_to_the_core(self):
+        with mock.patch.object(core, 'run', return_value=0) as run:
+            self.cli('gates', '--jobs', '4', '--trials', '5')
+        self.assertEqual((run.call_args.kwargs['jobs'], run.call_args.kwargs['trials']), (4, 5))
+
+    def test_tasks_and_bugs_take_the_same_flags(self):
+        for name in ('tasks', 'bugs'):
+            suite = BuiltSuite(CASES, name=name)
+            code, _, _ = self.cli(name, '--tag', 'fix', '--split', 'holdout', '--trials', '1', '--jobs', '2', suite=suite)
+            self.assertEqual(code, 0)
+            self.assertEqual(sorted({c for c, _ in suite.calls}), ['b'])
+
+    def test_unknown_case_exits_2_before_any_run(self):
+        code, _, err = self.cli('gates', '--case', 'nope')
+        self.assertEqual(code, 2)
+        self.assertIn('nope', err)
+        self.assertFalse((self.root / 'tools/evals/results').exists())
+
+    def test_flags_that_select_nothing_exit_2(self):
+        code, _, err = self.cli('gates', '--tag', 'zzz')
+        self.assertEqual(code, 2)
+        self.assertIn('no case matches', err)
+        self.assertEqual(self.suite.calls, [])
+
+    def test_bad_flag_values_exit_2(self):
+        self.assertEqual(self.cli('gates', '--split', 'bogus')[0], 2)
+        self.assertEqual(self.cli('gates', '--trials', '0')[0], 2)
+        self.assertEqual(self.cli('gates', '--jobs', 'x')[0], 2)
+
+    def test_recall_does_not_take_run_flags(self):
+        self.assertEqual(self.cli('recall', '--case', 'a')[0], 2)
+
+    def test_baseline_refuses_a_subset_run_using_the_suites_full_case_list(self):
+        suite = BuiltSuite(CASES, name='gates')
+        self.run_core(suite, [CASES[0]])
+        code, _, err = self.cli('baseline', 'gates', suite=suite)
+        self.assertEqual(code, 2)
+        self.assertIn('not every case ran', err)
+        self.assertIn('b', err)
+
+    def test_baseline_promotes_a_full_run_and_honours_a_named_run(self):
+        suite = BuiltSuite(CASES, name='gates')
+        self.run_core(suite, CASES)
+        first = self.runs()[0].name
+        self.run_core(suite, CASES[:1])
+        code, out, _ = self.cli('baseline', 'gates', first, suite=suite)
+        self.assertEqual(code, 0)
+        self.assertEqual((self.root / 'tools/evals/results/gates/BASELINE').read_text().strip(), first)
+
+    def test_report_reprints_the_last_run_without_running_anything(self):
+        suite = BuiltSuite(CASES, name='gates')
+        _, shown, _ = self.run_core(suite, CASES)
+        calls = len(suite.calls)
+        code, out, _ = self.cli('report', suite=suite)
+        self.assertEqual((code, out.strip()), (0, shown.strip()))
+        self.assertEqual(len(suite.calls), calls)
+
+    def test_report_works_with_no_suite_built(self):
+        self.run_core(BuiltSuite(CASES, name='gates'), CASES)
+        self.assertEqual(self.cli('report', built=())[0], 0)
+
+    def test_review_records_the_note_in_the_run(self):
+        self.run_core(BuiltSuite(CASES, name='gates'), CASES)
+        run = self.runs()[0]
+        code, _, _ = self.cli('review', run.name, 'b', 'bad', 'names the wrong file', built=())
+        self.assertEqual(code, 0)
+        review = self.doc(run)['cases'][1]['semantic_review']
+        self.assertEqual((review['verdict'], review['note']), ('bad', 'names the wrong file'))
+
+    def test_review_needs_ok_or_bad(self):
+        self.run_core(BuiltSuite(CASES, name='gates'), CASES)
+        self.assertEqual(self.cli('review', self.runs()[0].name, 'a', 'maybe', 'n')[0], 2)
+
+    def test_unknown_suite_for_baseline_exits_2(self):
+        self.assertEqual(self.cli('baseline', 'nope')[0], 2)
+
+    def test_core_exit_code_passes_through(self):
+        self.run_core(BuiltSuite(CASES, name='gates'), CASES)
+        self.cli('baseline', 'gates')
+        suite = BuiltSuite(CASES, name='gates', any_loss_is_worse=True,
+                           script={('a', 1): [{'ok': False}], ('a', 2): [{'ok': False}], ('a', 3): [{'ok': False}]})
+        code, out, _ = self.cli('gates', suite=suite)
+        self.assertEqual(code, 1)
+        self.assertIn('Verdict: WORSE', out)
 
 
 class RunName(unittest.TestCase):

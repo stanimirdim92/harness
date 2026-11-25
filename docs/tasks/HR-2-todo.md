@@ -125,7 +125,7 @@ interface (CP-001).
 
 ## T004: `eval.py` prints the suite table and runs baseline, report and review
 
-**Status:** Pending
+**Status:** Done
 
 **Requirements:** REQ-007
 
