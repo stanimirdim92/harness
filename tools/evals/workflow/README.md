@@ -9,6 +9,12 @@ No model override is applied. Each case starts a new session.
 (default 4) and a PASS, FLAKY or FAIL result per case. Each trial builds its own
 fixture in `<case>/t<n>/fixture/`. `run.py` stays as the single-trial runner.
 
+`watched.txt` lists the harness files that the gate cases read, as
+`claude/<path>`. A commit that touches one of them carries an `Eval:` trailer.
+Write the list with `python3 tools/evals/eval.py gates --write-watched`. A unit
+test fails when the file differs from the generated list. The gates report ends
+with a ready `Eval:` line to paste into the commit.
+
 The runner supplies current harness files explicitly, disables ambient Claude
 customizations, and allows only Read and Glob. All source and output artifacts
 live in a temporary directory unless an explicit output directory is supplied.

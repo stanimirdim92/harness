@@ -381,7 +381,7 @@ trials and promote the run.
 
 ## T011: Generated watched list and the ready `Eval:` line
 
-**Status:** Pending
+**Status:** Done
 
 **Requirements:** REQ-015, REQ-016
 

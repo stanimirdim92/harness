@@ -3,6 +3,7 @@
 
     eval.py                                  print the suites
     eval.py gates|tasks|bugs [--case ID] [--tag TAG] [--split S] [--trials N] [--jobs N]
+    eval.py gates --write-watched            write the watched list, run nothing
     eval.py recall <recall.py flags>         plan-recall, flags passed on unchanged
     eval.py baseline <suite> [<run>]         make a run the suite's baseline
     eval.py report [<suite>]                 print the last run's report again
@@ -98,6 +99,15 @@ def select(cases, ids, tags, split):
     return [c for c in picked if not split or c.get('split') == split]
 
 
+def describe_selection(every, picked, args):
+    """How the `Eval:` line names a subset: None for every case, the tags when only tags chose, else the case count."""
+    if len(picked) == len(every):
+        return None
+    if args.tag and not (args.case or args.split):
+        return ' '.join(f'--tag {tag}' for tag in args.tag)
+    return f'{len(picked)} of {len(every)} cases'
+
+
 def positive(text):
     value = int(text)
     if value < 1:
@@ -117,6 +127,9 @@ def parser_for(suites):
                          help=f'trials per case (default {core.DEFAULT_TRIALS})')
         jobs = suites[name].get('jobs', 1)
         sub.add_argument('--jobs', type=positive, default=jobs, help=f'trials to run at the same time (default {jobs})')
+        if name == 'gates':
+            sub.add_argument('--write-watched', action='store_true',
+                             help='write workflow/watched.txt, the harness files the cases read; run nothing')
     commands.add_parser('recall', help=suites['recall']['question'])
     sub = commands.add_parser('baseline', help='make a run the suite baseline')
     sub.add_argument('suite', choices=list(suites))
@@ -163,15 +176,19 @@ def main(argv=None, suites=None, root=core.ROOT, readme=README):
         return 2
     if args.command == 'baseline':
         return core.baseline(args.suite, [c['id'] for c in suite.all_cases()], run=args.run, root=root)
+    if getattr(args, 'write_watched', False):
+        return suite.write_watched()
+    every = suite.all_cases()
     try:
-        cases = select(suite.all_cases(), args.case, args.tag, args.split)
+        cases = select(every, args.case, args.tag, args.split)
     except ValueError as why:
         print(why, file=sys.stderr)
         return 2
     if not cases:
         print('no case matches those flags', file=sys.stderr)
         return 2
-    return core.run(suite, cases, trials=args.trials, jobs=args.jobs, root=root)
+    return core.run(suite, cases, trials=args.trials, jobs=args.jobs, root=root,
+                    selection=describe_selection(every, cases, args))
 
 
 if __name__ == '__main__':

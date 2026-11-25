@@ -139,6 +139,20 @@ def stage_files(stage):
     return STAGES[stage] + (COMMON_FILES if stage not in ('jira', 'build', 'review') + PROBE_STAGES else [])
 
 
+WATCHED = Path(__file__).resolve().parent / 'watched.txt'
+
+
+def watched_paths(cases):
+    """The sorted `claude/<path>` of every harness file the stage of any case supplies in its prompt."""
+    return sorted({f'claude/{p}' for c in cases for p in stage_files(c['stage'])})
+
+
+def watched_drift(text, generated):
+    """`(missing, extra)`: the generated paths the text lacks, and the text paths that are not generated."""
+    listed = set(text.split())
+    return sorted(set(generated) - listed), sorted(listed - set(generated))
+
+
 def file_hashes(files):
     return {p: hashlib.sha256((HARNESS / p).read_bytes()).hexdigest() for p in files}
 
@@ -268,6 +282,12 @@ class GatesSuite:
 
     def run_trial(self, case, folder):
         return run_trial(case,folder)
+
+    def write_watched(self):
+        paths=watched_paths(self.all_cases())
+        WATCHED.write_text('\n'.join(paths)+'\n')
+        print(f'Wrote {len(paths)} paths to {WATCHED}')
+        return 0
 
     def state(self, trial):
         checks=trial.get('checks')

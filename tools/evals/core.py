@@ -181,14 +181,33 @@ def _names(items, counts):
     return ', '.join(f'{n} ({counts[n][0]}/{counts[n][1]})' if n in counts else n for n in items) or 'none'
 
 
-def render_report(doc, run_dir, base=None, diff=None, word=None, why=None):
-    """The report as text. `run_dir` is the run folder as printed, relative to the repository."""
+def eval_line(doc, run_dir, base=None, word=None, selection=None):
+    """The `Eval:` trailer line of the gates report (REQ-016). A baseline is compared on the cases the run ran."""
+    def tally(cases):
+        return sum(c['result']['state'] == PASS for c in cases), sum(c['result']['state'] == FLAKY for c in cases)
+
+    ran = {c['id'] for c in doc['cases']}
+    passed, flaky = tally(doc['cases'])
+    total = len(doc['cases'])
+    where = f' [{selection}]' if selection else ''
+    if base is None:
+        return f'Eval: gates{where} {passed}/{total} PASS, flaky {flaky}; {run_dir}'
+    before, before_flaky = tally([c for c in base['cases'] if c['id'] in ran])
+    return (f'Eval: gates{where} {before}/{total} PASS -> {passed}/{total} PASS, '
+            f'flaky {before_flaky} -> {flaky} ({word}); {run_dir}')
+
+
+def render_report(doc, run_dir, base=None, diff=None, word=None, why=None, selection=None, is_baseline=False):
+    """The report as text. `run_dir` is the run folder as printed, relative to the repository.
+    `is_baseline` is true when the run is the suite's baseline: it has no verdict."""
     suite = doc['suite']
     lines = [f'# {suite} run {doc["run"]}',
              f'Harness commit {doc["harness_commit"]}{" (dirty)" if doc["dirty"] else ""}, '
              f'{doc["trials"]} trials per case, {len(doc["cases"])} cases.']
     counts = {n: pair for c in doc['cases'] for n, pair in c['result'].get('counts', {}).items()}
-    if base is None:
+    if is_baseline:
+        lines.append(f'This run is the {suite} baseline.')
+    elif base is None:
         lines.append(f'No baseline yet for {suite}. These results have no verdict. To promote this run: '
                      f'python3 tools/evals/eval.py baseline {suite} {doc["run"]}')
     else:
@@ -223,10 +242,12 @@ def render_report(doc, run_dir, base=None, diff=None, word=None, why=None):
     lines.append('Read these:')
     for entry in doc['cases']:
         names = set(entry['result']['items'])
-        if not (names & changed or FLAKY in entry['result']['items'].values()):
+        if not (names & changed or {FLAKY, FAIL} & set(entry['result']['items'].values())):
             continue
         folders = [t['folder'] for t in entry['trials'] if t['state'] != 'pass'] or [entry['id']]
         lines.append(f'- {entry["id"]}: ' + ', '.join(f'{run_dir}/{f}' for f in folders))
+    if suite == 'gates':
+        lines.append(eval_line(doc, run_dir, None if is_baseline else base, word, selection))
     return '\n'.join(lines)
 
 
@@ -313,8 +334,9 @@ def _start(suite, root, now):
     return run_dir, name, commit.stdout.strip(), dirty, base
 
 
-def run(suite, cases, trials=DEFAULT_TRIALS, jobs=1, root=ROOT, now=None):
-    """Run every case `trials` times, write the run folder, print the report. Returns the exit code."""
+def run(suite, cases, trials=DEFAULT_TRIALS, jobs=1, root=ROOT, now=None, selection=None):
+    """Run every case `trials` times, write the run folder, print the report. Returns the exit code.
+    `selection` names a subset for the `Eval:` line, such as `--tag ship`."""
     now = now or datetime.now()
     try:
         run_dir, name, commit, dirty, base = _start(suite, root, now)
@@ -344,11 +366,11 @@ def run(suite, cases, trials=DEFAULT_TRIALS, jobs=1, root=ROOT, now=None):
     _write(run_dir / 'results.json', doc)
     shown = str(run_dir.relative_to(Path(root)))
     if base is None:
-        text, code = render_report(doc, shown), 0
+        text, code = render_report(doc, shown, selection=selection), 0
     else:
         diff = compare(base, doc)
         word, why = verdict(diff, getattr(suite, 'any_loss_is_worse', False))
-        text = render_report(doc, shown, base, diff, word, why)
+        text = render_report(doc, shown, base, diff, word, why, selection)
         code = 2 if diff['unscored'] else 0 if word in ('BETTER', 'SAME') else 1
     (run_dir / 'report.md').write_text(text + '\n')
     print(text)
@@ -379,6 +401,8 @@ def baseline(suite, case_ids, run=None, root=ROOT):
         print(why, file=sys.stderr)
         return 2
     (_results(root) / suite / 'BASELINE').write_text(folder.name + '\n')
+    shown = str(folder.relative_to(Path(root)))
+    (folder / 'report.md').write_text(render_report(doc, shown, is_baseline=True) + '\n')
     print(f'{suite} baseline is now {folder.name}')
     return 0
 

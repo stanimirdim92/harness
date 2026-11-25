@@ -18,7 +18,7 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 import cases as casefolders
 import core
 import eval as eval_cli
-from run import HARNESS, MUTANTS, GatesSuite, audit_reads, parse_decisions
+from run import HARNESS, MUTANTS, WATCHED, GatesSuite, audit_reads, parse_decisions, stage_files, watched_drift, watched_paths
 from run import main as run_main
 
 
@@ -329,6 +329,50 @@ class GatesSuiteTests(unittest.TestCase):
         listed = {c['id']: c for c in self.suite.all_cases()}
         self.assertEqual(len(listed), 60)
         self.assertEqual((listed['ship_open_blocker']['split'], listed['ship_open_blocker']['tags']), ('optimization', ['shipverdict']))
+
+
+class WatchedListTests(unittest.TestCase):
+    """`watched.txt` is the files the gate cases read, generated (REQ-015)."""
+
+    def test_the_file_on_disk_is_the_generated_list(self):
+        generated = watched_paths(casefolders.load_cases().values())
+        drift = watched_drift(WATCHED.read_text(), generated)
+        self.assertEqual(drift, ([], []), f'watched.txt is stale. Missing: {drift[0]}. Extra: {drift[1]}. Run `eval.py gates --write-watched`.')
+
+    def test_the_list_is_sorted_claude_paths_without_repeats(self):
+        paths = watched_paths(casefolders.load_cases().values())
+        self.assertEqual(paths, sorted(set(paths)))
+        self.assertTrue(all(p.startswith('claude/') and (HARNESS.parent / p).is_file() for p in paths))
+
+    def test_the_list_holds_the_release_command_and_not_the_old_ship_command(self):
+        paths = watched_paths(casefolders.load_cases().values())
+        self.assertIn('claude/commands/release.md', paths)
+        self.assertNotIn('claude/commands/ship.md', paths)
+
+    def test_the_list_holds_the_union_of_the_stage_files(self):
+        listed = [{'stage': 'jira'}, {'stage': 'executor'}]
+        expected = sorted({f'claude/{p}' for stage in ('jira', 'executor') for p in stage_files(stage)})
+        self.assertEqual(watched_paths(listed), expected)
+        self.assertIn('claude/skills/jira-ticket/SKILL.md', expected)
+        self.assertIn('claude/agents/executor.md', expected)
+
+    def test_a_stage_that_gains_a_file_is_named_as_missing(self):
+        generated = ['claude/a.md', 'claude/references/findings.md']
+        self.assertEqual(watched_drift('claude/a.md\n', generated), (['claude/references/findings.md'], []))
+
+    def test_a_file_no_stage_supplies_is_named_as_extra(self):
+        self.assertEqual(watched_drift('claude/a.md\nclaude/old.md\n', ['claude/a.md']), ([], ['claude/old.md']))
+
+    def test_write_watched_writes_the_list_and_prints_the_count(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / 'watched.txt'
+            out = io.StringIO()
+            with mock.patch('run.WATCHED', target), redirect_stdout(out):
+                code = GatesSuite().write_watched()
+            lines = target.read_text().splitlines()
+            self.assertEqual(code, 0)
+            self.assertEqual(lines, watched_paths(casefolders.load_cases().values()))
+            self.assertIn(f'{len(lines)} paths', out.getvalue())
 
 
 class GatesCommandTests(unittest.TestCase):

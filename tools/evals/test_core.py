@@ -458,6 +458,17 @@ class Comparison(CoreCase):
             self.assertIn(f'b/t{n}', read)
         self.assertIn('Flaky: a (2/3)', out)
 
+    def test_read_these_also_names_a_fail_case_with_all_its_trial_folders_when_it_did_not_change(self):
+        both_fail = {('b', n): [{'ok': False}] for n in (1, 2, 3)}
+        self.baseline_run(script=both_fail)
+        _, out, _ = self.run_core(FakeSuite(script=both_fail, hashes={'f': '2'}), [case('a'), case('b')])
+        self.assertIn('Lost: none', out)
+        self.assertIn('Gained: none', out)
+        read = out.split('Read these:')[1]
+        for n in (1, 2, 3):
+            self.assertIn(f'b/t{n}', read)
+        self.assertNotIn('a/t', read)
+
     def test_new_case_is_listed_by_name(self):
         self.baseline_run()
         _, out, _ = self.run_core(FakeSuite(hashes={'f': '2'}), [case('a'), case('b'), case('fresh')])
@@ -497,6 +508,97 @@ class Comparison(CoreCase):
         self.assertIn('Verdict: NOT BETTER', out)
         self.assertIn('Lost: AC3', out)
         self.assertIn('Gained: IR', out)
+
+
+class EvalLine(CoreCase):
+    """The gates report ends with a ready `Eval:` trailer line."""
+
+    def last_line(self, out):
+        return out.rstrip('\n').splitlines()[-1]
+
+    def shown(self):
+        return f'tools/evals/results/gates/{self.runs()[-1].name}'
+
+    def test_with_a_baseline_the_line_shows_both_counts_the_flaky_change_and_the_verdict(self):
+        cases = [case(x) for x in 'abcde']
+        script = {('d', 2): [{'ok': False}], **{('e', n): [{'ok': False}] for n in (1, 2, 3)}}
+        self.run_core(FakeSuite(script=script), cases)
+        self.promote('gates', list('abcde'))
+        _, out, _ = self.run_core(FakeSuite(), cases)
+        self.assertEqual(self.last_line(out), f'Eval: gates 3/5 PASS -> 5/5 PASS, flaky 1 -> 0 (BETTER); {self.shown()}')
+
+    def test_a_loss_prints_the_worse_verdict_in_the_line(self):
+        self.run_core(FakeSuite(), [case('a'), case('b')])
+        self.promote('gates', ['a', 'b'])
+        suite = FakeSuite(script={('a', 1): [{'ok': False}]}, any_loss_is_worse=True)
+        _, out, _ = self.run_core(suite, [case('a'), case('b')])
+        self.assertEqual(self.last_line(out), f'Eval: gates 2/2 PASS -> 1/2 PASS, flaky 0 -> 1 (WORSE); {self.shown()}')
+
+    def test_without_a_baseline_the_arrow_parts_and_the_verdict_are_left_out(self):
+        _, out, _ = self.run_core(FakeSuite(), [case('a'), case('b')])
+        self.assertEqual(self.last_line(out), f'Eval: gates 2/2 PASS, flaky 0; {self.shown()}')
+
+    def test_a_subset_is_compared_on_its_own_cases_and_names_its_selection(self):
+        self.run_core(FakeSuite(), [case('a'), case('b'), case('c')])
+        self.promote('gates', ['a', 'b', 'c'])
+        _, out, _ = self.run_core(FakeSuite(), [case('a')], selection='--tag ship')
+        self.assertEqual(self.last_line(out), f'Eval: gates [--tag ship] 1/1 PASS -> 1/1 PASS, flaky 0 -> 0 (SAME); {self.shown()}')
+
+    def test_the_saved_report_ends_with_the_same_line(self):
+        _, out, _ = self.run_core(FakeSuite(), [case('a')])
+        saved = (self.runs()[-1] / 'report.md').read_text()
+        self.assertEqual(self.last_line(saved), self.last_line(out))
+
+    def test_another_suite_gets_no_eval_line(self):
+        _, out, _ = self.run_core(FakeSuite(name='bugs'), [case('a')])
+        self.assertNotIn('Eval:', out)
+
+
+class BaselineReport(CoreCase):
+    """Promoting a run regenerates its saved report: the run is now the baseline."""
+
+    def promoted(self):
+        self.run_core(FakeSuite(), [case('a'), case('b')])
+        run = self.runs()[-1]
+        self.assertIn('No baseline yet', (run / 'report.md').read_text())
+        self.assertEqual(self.promote('gates', ['a', 'b'])[0], 0)
+        return run
+
+    def test_the_saved_report_says_the_run_is_the_baseline_and_no_longer_says_no_baseline(self):
+        saved = (self.promoted() / 'report.md').read_text()
+        self.assertIn('This run is the gates baseline.', saved)
+        self.assertNotIn('No baseline yet', saved)
+        self.assertNotIn('Verdict:', saved)
+
+    def test_report_prints_the_regenerated_report(self):
+        self.promoted()
+        out, err = io.StringIO(), io.StringIO()
+        with redirect_stdout(out), redirect_stderr(err):
+            core.report(root=self.root, suite='gates')
+        self.assertIn('This run is the gates baseline.', out.getvalue())
+        self.assertNotIn('No baseline yet', out.getvalue())
+
+    def test_the_regenerated_report_still_ends_with_the_eval_line(self):
+        run = self.promoted()
+        last = (run / 'report.md').read_text().rstrip('\n').splitlines()[-1]
+        self.assertEqual(last, f'Eval: gates 2/2 PASS, flaky 0; tools/evals/results/gates/{run.name}')
+
+    def test_a_refused_promotion_leaves_the_saved_report_alone(self):
+        self.run_core(FakeSuite(), [case('a')])
+        before = (self.runs()[-1] / 'report.md').read_text()
+        self.assertEqual(self.promote('gates', ['a', 'b'])[0], 2)
+        self.assertEqual((self.runs()[-1] / 'report.md').read_text(), before)
+
+    def test_a_report_with_a_verdict_against_an_older_baseline_becomes_the_baseline_report(self):
+        self.run_core(FakeSuite(), [case('a'), case('b')])
+        self.promote('gates', ['a', 'b'])
+        self.run_core(FakeSuite(), [case('a'), case('b')])
+        second = self.runs()[-1]
+        self.assertIn('Verdict: SAME', (second / 'report.md').read_text())
+        self.promote('gates', ['a', 'b'])
+        saved = (second / 'report.md').read_text()
+        self.assertIn('This run is the gates baseline.', saved)
+        self.assertNotIn('Verdict:', saved)
 
 
 class Baseline(CoreCase):
@@ -765,6 +867,34 @@ class EvalEntry(CoreCase):
         with mock.patch.object(core, 'run', return_value=0) as run:
             self.cli('gates', '--jobs', '4', '--trials', '5')
         self.assertEqual((run.call_args.kwargs['jobs'], run.call_args.kwargs['trials']), (4, 5))
+
+    def test_a_full_selection_names_no_selection_to_the_core(self):
+        with mock.patch.object(core, 'run', return_value=0) as run:
+            self.cli('gates')
+        self.assertIsNone(run.call_args.kwargs['selection'])
+
+    def test_tags_alone_name_themselves_as_the_selection(self):
+        with mock.patch.object(core, 'run', return_value=0) as run:
+            self.cli('gates', '--tag', 'fix', '--tag', 'nothing')
+        self.assertEqual(run.call_args.kwargs['selection'], '--tag fix --tag nothing')
+
+    def test_any_other_subset_names_its_case_count(self):
+        for argv in (('--case', 'a'), ('--split', 'holdout'), ('--tag', 'ship', '--split', 'optimization')):
+            with mock.patch.object(core, 'run', return_value=0) as run:
+                self.cli('gates', *argv)
+            self.assertRegex(run.call_args.kwargs['selection'], r'^\d of 3 cases$', argv)
+
+    def test_write_watched_writes_the_list_and_runs_no_trial(self):
+        suite = BuiltSuite(CASES, name='gates')
+        suite.written = []
+        suite.write_watched = lambda: suite.written.append(True) or 0
+        with mock.patch.object(core, 'run') as run:
+            code, _, _ = self.cli('gates', '--write-watched', suite=suite)
+        self.assertEqual((code, suite.written, suite.calls), (0, [True], []))
+        run.assert_not_called()
+
+    def test_write_watched_belongs_to_gates_only(self):
+        self.assertEqual(self.cli('tasks', '--write-watched')[0], 2)
 
     def test_tasks_and_bugs_take_the_same_flags(self):
         for name in ('tasks', 'bugs'):
