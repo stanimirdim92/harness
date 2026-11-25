@@ -145,6 +145,46 @@ What the trace shows:
 - The probe ran once. It was not rerun: no setup bug of the probe caused the
   failure, and an unchanged rerun on this host fails the same way.
 
+## Task trial
+
+`python3 tools/evals/eval.py tasks --trials 1` runs the add-business pipeline
+once and grades it with the hidden checks (`tasks/run.py`). One trial ran on
+2026-11-25.
+
+| Item | Value |
+| --- | --- |
+| Command | `python3 tools/evals/eval.py tasks --trials 1` (a session may spend $10, the trial $30) |
+| Harness commit | `9209f99` |
+| Claude CLI version | 2.1.331 |
+| Cost | $2.0240 (the `/spec` session: 13 turns, then the owner turn in the same session). The saved record says $3.9718: it counted the resumed session twice, because a resumed session reports the cost of the whole session. The driver now counts each turn once. |
+| Duration | 7.3 min |
+| Result | 2 of 49 checks passed (the two baseline checks of the untouched seed), 0 of 1 trials passed every check |
+| Stopped | at `/spec`. The saved record says `not_approved`; the driver now says `question`. |
+| Prevention | off: detection only (the sandbox probe says `fail`). Not LEAKED. |
+| Run folder | `tools/evals/results/tasks/2026-11-25-130631-9209f99/` (git ignores it) |
+
+What happened:
+
+- `/spec ADD-1` drafted a spec of 15 requirements and left two `OPEN QUESTION`
+  blocks in it: where the multi-token search rule applies (Q1), and the test
+  layer for the modal (Q2). It did not call the draft ready for approval.
+- The driver sent the owner turn "I read the whole spec. I approve it." in
+  that session. `/spec` kept the gate: a spec with an open question cannot be
+  approved, and the turn picks no option. The spec stayed a Draft.
+- No later stage ran, so the grade is the grade of the untouched seed
+  (the `grade.sh` self-test: baseline 2 of 2, feature 0 of 47).
+- A trial that stops at `/spec` on a real owner question will end this way
+  each time, until the scripted owner answers such questions too. REQ-019
+  stops the trial on any question other than the approval, so the driver
+  does what the spec says. The result is one data point, not a baseline.
+- The UI checks cannot run on this machine yet. Playwright asks for
+  `chromium_headless_shell-1243`, and only version 1255 is installed. On
+  2026-11-25 `grade.sh` scored the reference at 26 of 49: all 23 `UI-` checks
+  failed with `browserType.launch: Executable doesn't exist`. Run
+  `npx playwright install chromium` in `claude/evals/add-business/hidden/` once
+  before a trial that builds the feature. This trial built nothing, so it is
+  not affected.
+
 ## Measured
 
 One full run of every `workflow/` case with the runner as it stood before the

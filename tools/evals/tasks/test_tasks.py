@@ -254,6 +254,7 @@ class Replay:
         self.steps = [json.loads((FIXTURES / f'{name}.json').read_text()) for name in names]
         self.clock = clock or Clock()
         self.calls = []
+        self.session_cost = {}
 
     def __call__(self, args, cwd, trace=None, timeout=None):
         if not self.steps:
@@ -267,8 +268,10 @@ class Replay:
         for rel, content in step.get('writes', {}).items():
             (Path(cwd) / rel).parent.mkdir(parents=True, exist_ok=True)
             (Path(cwd) / rel).write_text(content)
+        session = resume or f's{len(self.calls)}'
+        self.session_cost[session] = self.session_cost.get(session, 0) + 0.1
         event = {'type': 'result', 'result': step.get('result', ''), 'is_error': step.get('is_error', False),
-                 'session_id': resume or f's{len(self.calls)}', 'total_cost_usd': 0.1, 'num_turns': 2,
+                 'session_id': session, 'total_cost_usd': self.session_cost[session], 'num_turns': 2,
                  'duration_ms': 1000}
         Path(trace).write_text('\n'.join(json.dumps(e) for e in [*step.get('trace', []), event]) + '\n')
         return event
@@ -350,6 +353,41 @@ class ApprovalTurn(DriverCase):
         record, replay = self.trial(['spec_approved', 'plan_approved', 'build_complete', 'test_pass', 'review_clean'])
         self.assertEqual(self.prompts(replay), ['/spec ADD-1', '/plan ADD-1', '/build ADD-1', '/test ADD-1', '/review ADD-1'])
         self.assertEqual(record['stop_reason'], 'complete')
+
+
+class OpenQuestion(DriverCase):
+    """REQ-019: a Draft that holds an OPEN QUESTION asks the owner something other than the approval."""
+
+    def test_a_spec_draft_with_an_open_question_stops_with_reason_question_and_no_approval_turn(self):
+        record, replay = self.trial(['spec_draft_open_question'])
+        self.assertEqual((record['stop_reason'], record['stop_stage']), ('question', 'spec'))
+        self.assertIn('OPEN QUESTION', record['stop_detail'])
+        self.assertEqual(len(replay.calls), 1)
+
+    def test_a_plan_draft_with_an_open_question_stops_with_reason_question(self):
+        record, replay = self.trial(['spec_draft', 'spec_approved', 'plan_draft_open_question'])
+        self.assertEqual((record['stop_reason'], record['stop_stage']), ('question', 'plan'))
+        self.assertEqual(len(replay.calls), 3)
+
+    def test_a_line_that_only_mentions_an_open_question_is_not_one(self):
+        record, replay = self.trial(['spec_draft_mentions_open_question', 'spec_approved', 'timeout'])
+        self.assertEqual(replay.calls[1]['prompt'], 'I read the whole spec. I approve it.')
+        self.assertNotEqual(record['stop_reason'], 'question')
+
+
+class SessionCost(DriverCase):
+    """A resumed session reports the cost of the whole session so far. The trial cost counts each turn once."""
+
+    def test_the_approval_turn_adds_only_what_it_cost_on_top_of_the_draft_turn(self):
+        record, _ = self.trial(['spec_draft', 'spec_approved', 'timeout'])
+        self.assertAlmostEqual(record['turns'][0]['cost_usd'], 0.1)
+        self.assertAlmostEqual(record['turns'][1]['cost_usd'], 0.1)
+        self.assertAlmostEqual(record['cost_usd'], 0.2)
+
+    def test_a_resumed_session_may_spend_up_to_the_session_cap_in_all(self):
+        _, replay = self.trial(['spec_draft', 'spec_approved', 'timeout'], session_budget=1, trial_budget=0.25)
+        caps = [call['args'][call['args'].index('--max-budget-usd') + 1] for call in replay.calls]
+        self.assertEqual(caps, ['0.25', '0.25', '0.05'])
 
 
 class FixRound(DriverCase):

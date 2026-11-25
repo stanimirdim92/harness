@@ -536,7 +536,7 @@ then `/spec`, `/plan`, `/build`, `/test`, `/review` with `claude -p` and
 
 ## T015: Task trials are graded by the hidden tests
 
-**Status:** Pending
+**Status:** Done
 
 **Requirements:** REQ-007, REQ-020
 

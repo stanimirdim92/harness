@@ -1,0 +1,6 @@
+{
+  "result": "The spec is a Draft, but two questions are open. Which one do you pick?",
+  "writes": {
+    "docs/specs/ADD-1-SPEC.md": "# ADD-1 Spec\n\nStatus: Draft\nTicket: ADD-1\nChange kind: New\n\nOPEN QUESTION Q1: Where does the rule apply?\n  A: the fixture only\n  B: also the real API\n"
+  }
+}

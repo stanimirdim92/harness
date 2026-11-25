@@ -1,0 +1,6 @@
+{
+  "result": "The plan is a Draft with one open question.",
+  "writes": {
+    "docs/tasks/ADD-1-plan.md": "# Implementation Plan: ADD-1\n\nStatus: Draft\nSpec: docs/specs/ADD-1-SPEC.md\n\nOPEN QUESTION Q1: Which test layer?\n"
+  }
+}

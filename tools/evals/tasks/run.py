@@ -19,9 +19,9 @@ finding, the driver runs one fix round the way `/review` routes it:
 The trial stops with a reason and the stage it stopped at:
 
 - `blocked`: a stage reports BLOCKED;
-- `question`: a stage returns without its artifact or report, which means it
-  asked the owner something other than the approval (a decision brief, a
-  `SPEC CONFLICT`);
+- `question`: a stage returns without its artifact or report, or leaves a
+  Draft with an `OPEN QUESTION` or a `SPEC CONFLICT`. Each means it asked the
+  owner something other than the approval;
 - `time`: a stage passes its limit, or the trial passes 90 minutes;
 - `not_approved`: the approval turn left the header at Draft;
 - `error`: a session failed, or the trial budget is spent;
@@ -80,6 +80,7 @@ REPORT = {
     'review': re.compile(r'Findings: \d+ BLOCKER|Nothing to fix'),
 }
 STATUS = re.compile(r'^\**Status:?\**:?[ \t]*(\w+)', re.M)
+OPEN_QUESTION = re.compile(r'^[ \t]*OPEN QUESTION.*$', re.M)
 SPEC_CONFLICT = re.compile(r'^## SPEC CONFLICT\b', re.M)
 
 
@@ -126,6 +127,7 @@ class Trial:
         self.runner, self.clock = runner, clock
         self.session_budget, self.trial_budget = session_budget, trial_budget
         self.start = clock()
+        self.session_cost = {}
         self.record = {'prevention': prevention, 'turns': [], 'leaked': False, 'leaks': [], 'cost_usd': 0.0,
                        'last_stage': None, 'fix_round': False, 'stop_reason': None, 'stop_stage': None,
                        'stop_detail': ''}
@@ -140,7 +142,10 @@ class Trial:
         if left <= 0:
             raise Stop('error', stage, 'the trial budget is spent')
         timeout = min(STAGE_LIMIT[stage], remaining)
-        args = sandbox.session_args(prompt, round(min(self.session_budget, left), 4), resume, allowed_tools=TASK_TOOLS)
+        # A resumed session reports, and is capped on, the cost of the whole session.
+        before = self.session_cost.get(resume, 0)
+        args = sandbox.session_args(prompt, round(min(self.session_budget, left + before), 4), resume,
+                                    allowed_tools=TASK_TOOLS)
         trace = self.out / f'{len(record["turns"]) + 1:02d}-{stage}.jsonl'
         try:
             event = self.runner(args, self.project, trace=trace, timeout=timeout)
@@ -151,9 +156,12 @@ class Trial:
         leaked, calls = sandbox.audit(trace) if trace.is_file() else (False, [])
         record['leaked'] = record['leaked'] or leaked
         record['leaks'].extend(calls)
-        record['cost_usd'] += event.get('total_cost_usd') or 0
+        total = event.get('total_cost_usd') or 0
+        spent = max(total - before, 0)
+        self.session_cost[event.get('session_id')] = total
+        record['cost_usd'] += spent
         record['turns'].append({'stage': stage, 'prompt': prompt, 'resume': resume, 'trace': trace.name,
-                                'session_id': event.get('session_id'), 'cost_usd': event.get('total_cost_usd'),
+                                'session_id': event.get('session_id'), 'cost_usd': spent,
                                 'num_turns': event.get('num_turns'), 'duration_ms': event.get('duration_ms')})
         if event.get('is_error'):
             raise Stop('error', stage, str(event.get('subtype') or event.get('result'))[:300])
@@ -177,8 +185,11 @@ class Trial:
         status = header_status(path)
         if status is None:
             raise Stop('question', stage, f'no {rel}: the stage asked the owner something')
-        if SPEC_CONFLICT.search(path.read_text()):
+        text = path.read_text()
+        if SPEC_CONFLICT.search(text):
             raise Stop('question', stage, 'SPEC CONFLICT in the plan')
+        if OPEN_QUESTION.search(text):
+            raise Stop('question', stage, f'the draft holds an OPEN QUESTION: {OPEN_QUESTION.search(text).group(0).strip()}')
         if status == 'Draft':
             self.approve(stage, event, rel)
 
