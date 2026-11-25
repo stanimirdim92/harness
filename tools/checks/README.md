@@ -15,6 +15,7 @@ edit what it guards.
 | `validate-artifact-paths.py` | A spec, plan or todo path is spelled differently somewhere | every file that names `docs/specs/…` or `docs/tasks/…` |
 | `check-references.py` | A link between harness files points at a file, `#anchor` or `§Section` that no longer exists | every harness markdown file |
 | `check-rescore.py` | A commit changes a reviewer persona, `/review`, the reviewer triggers or risk tiers without a `Review-eval:` trailer (a result, or "not run - <reason>") | the commits pushed or in the pull request |
+| `check-eval-trailer.py` | A commit changes a file the gate cases read (`tools/evals/workflow/watched.txt`) without an `Eval:` trailer (the gates result line, or "not run - <reason>"). Commits before the one that added the check are skipped | the commits pushed or in the pull request |
 | `check-writing.py` | More than 20% of an ADR's sentences are over 25 words (the "Writing for humans" rule) | ADRs from 0073 on; pass a file to check any spec or plan |
 | `harness-map.py` | `docs/harness-map.html` no longer matches the files it describes | the generated map. Without `--check`, it rebuilds the page |
 

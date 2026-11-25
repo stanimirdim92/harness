@@ -175,6 +175,15 @@ jobs:
           python3 tools/tests/test-check-rescore.py
           if [ -n "$BASE" ]; then range="$BASE..HEAD"; elif [ -n "$BEFORE" ] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then range="$BEFORE..HEAD"; else exit 0; fi
           python3 tools/checks/check-rescore.py --range "$range"
+      # A change to a file the gate cases read says how the gates scored it (REQ-017).
+      - name: Gate-file changes carry an Eval line
+        env:
+          BEFORE: ${{ github.event.before }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          python3 tools/tests/test-check-eval-trailer.py
+          if [ -n "$BASE" ]; then range="$BASE..HEAD"; elif [ -n "$BEFORE" ] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then range="$BEFORE..HEAD"; else exit 0; fi
+          python3 tools/checks/check-eval-trailer.py --range "$range"
 
       # How review findings ended, per reviewer, and which classes repeat (adr/0093, adr/0105).
       - name: Review noise count

@@ -412,7 +412,7 @@ trials and promote the run.
 
 ## T012: CI fails a watched-file commit without an `Eval:` line
 
-**Status:** Pending
+**Status:** Done
 
 **Requirements:** REQ-017
 
