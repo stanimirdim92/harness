@@ -1,0 +1,16 @@
+{
+  "title": "CSV safety",
+  "children": [],
+  "links": [],
+  "description": "Neutralize spreadsheet formula prefixes in exported cells.",
+  "comments": [],
+  "key": "WF-4",
+  "status": "Open",
+  "type": "Sub-task",
+  "priority": "Medium",
+  "assignee": "Fixture owner",
+  "parent": null,
+  "enumeration_complete": true,
+  "comments_complete": false,
+  "comments_next_page": "WF-4.comments-2.json"
+}

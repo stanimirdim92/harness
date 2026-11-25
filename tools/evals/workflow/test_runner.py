@@ -763,6 +763,34 @@ class FixtureBuildTests(CaseFolderTestCase):
         self.assertNotEqual(first, second)
         self.assertEqual(subprocess.check_output(['git', '-C', str(self.fixture), 'rev-parse', 'HEAD~1'], text=True).strip(), first)
 
+    def test_capture_short_keeps_the_abbreviated_commit_id(self):
+        case = self.load(
+            setup=[{'step': 'git_init'}, {'step': 'write', 'path': 'a.txt', 'text': 'a'}, {'step': 'commit', 'message': 'A'},
+                   {'step': 'capture', 'name': 'full'}, {'step': 'capture', 'name': 'short', 'short': True}],
+            evidence='{full} {short}')
+        full, short = casefolders.build_fixture(case, self.fixture).split()
+        self.assertEqual(full, self.head())
+        self.assertEqual(short, subprocess.check_output(['git', '-C', str(self.fixture), 'rev-parse', '--short', 'HEAD'], text=True).strip())
+        self.assertLess(len(short), len(full))
+
+    def test_stage_adds_the_tree_without_committing(self):
+        case = self.load(
+            setup=[{'step': 'git_init'}, {'step': 'write', 'path': 'a.txt', 'text': 'a'}, {'step': 'commit', 'message': 'A'},
+                   {'step': 'write', 'path': 'a.txt', 'text': 'b'}, {'step': 'write', 'path': 'new.txt', 'text': 'n'}, {'step': 'stage'}])
+        casefolders.build_fixture(case, self.fixture)
+        status = subprocess.check_output(['git', '-C', str(self.fixture), 'status', '--porcelain'], text=True)
+        self.assertEqual(status.splitlines(), ['M  a.txt', 'A  new.txt'])
+
+    def test_the_fixture_directory_is_a_placeholder(self):
+        case = self.load(setup=[{'step': 'write', 'path': 'a.txt', 'text': 'at {directory}'}], evidence='Repo root: {directory}.')
+        evidence = casefolders.build_fixture(case, self.fixture)
+        self.assertEqual(evidence, f'Repo root: {self.fixture}.')
+        self.assertEqual((self.fixture / 'a.txt').read_text(), f'at {self.fixture}')
+
+    def test_directory_cannot_be_captured(self):
+        with self.assertRaisesRegex(casefolders.CaseError, "c1.*step 2.*'directory'"):
+            self.load(setup=[{'step': 'git_init'}, {'step': 'capture', 'name': 'directory'}])
+
     def test_write_takes_its_text_from_a_file_in_the_case_folder(self):
         case = self.load(
             templates={'templates/plan.md': 'Pinned at {sha}\n'},
@@ -797,7 +825,7 @@ class FixtureBuildTests(CaseFolderTestCase):
             casefolders.build_fixture(case, self.fixture)
 
     def test_a_commit_or_capture_before_git_init_is_refused_at_load(self):
-        for n, step in enumerate(({'step': 'commit', 'message': 'A'}, {'step': 'capture', 'name': 'a'})):
+        for n, step in enumerate(({'step': 'commit', 'message': 'A'}, {'step': 'capture', 'name': 'a'}, {'step': 'stage'})):
             with self.assertRaisesRegex(casefolders.CaseError, f'init{n}.*step 1.*git_init'):
                 casefolders.load_case(make_case(self.root, f'init{n}', setup=[step]))
 

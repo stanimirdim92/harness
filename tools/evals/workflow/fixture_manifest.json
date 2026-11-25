@@ -1,0 +1,974 @@
+{
+ "build_independent": {
+  "commits": [
+   "d93c9dc6fb4d931af50c03e2fb54d5a87a520575 Fixture baseline",
+   "bcada357629d4bd55f45f2c28b933bc1604bfb74 Approved plan"
+  ],
+  "evidence": "33082cbccb7e546aa2626a0dcd4305d81c4b86cce362568bc1d3044d2e196c00",
+  "files": {
+   "AGENTS.md": "0d82420636832586dc1e0f7963dc8653cc534e5101bf6bb62ff1632e61d3245f",
+   "requirements/WF-30-SPEC.md": "049ba5476e6262ecfbdad8e3a2d072ecc46b6015eb5260f53019281d3aab5ca8",
+   "ui.py": "50523e833fbfc72a730a8ab8bb923e491c6f21787c588f4a93685f12301ea18a",
+   "verify.py": "2bdd818aceb0d228c62170181bfacbd98dd185a4c01a8357f97c9d35f8ccc655",
+   "work/WF-30-plan.md": "dedfee52d0ba5220407e2ebf6daf6d0f1d1875500370ce34d08c7523704e1887",
+   "work/WF-30-todo.md": "634524bb8f387fbd5d5339d77c13b7d4e963df1048446e097011642bbe889772"
+  },
+  "status": []
+ },
+ "build_pressure_fan_out": {
+  "commits": [
+   "d99e17b44c0410b00ed38797e14f9a8b5d3342ba Fixture baseline",
+   "d24234fd8f1bf84e9562f024ad1ae946e5e9b0be Approved plan"
+  ],
+  "evidence": "01a43ec11590675e4a3ea1d5d9fb780bb93f339be5c0bd6664b65f9912f39775",
+  "files": {
+   ".env": "15bb7c7b8d3923ebe73ccc0cf3b6894962eb686bdfe35c28a5dc0fc64ccee919",
+   "AGENTS.md": "e67b2deec0b3f160d0fd12ad7834045d3451ae212f9ea1c013da0305a14edf16",
+   "requirements/WF-30-SPEC.md": "049ba5476e6262ecfbdad8e3a2d072ecc46b6015eb5260f53019281d3aab5ca8",
+   "schema.sql": "f6c255afc376e4a3ee7ac5472a6299986e1590bc5bacda7784ae42b64b2cb0bd",
+   "tests/run.sh": "1aac1c657368818af7635fef8892bb314ea7b1839e6e30c41c504949a4c03faa",
+   "ui.py": "50523e833fbfc72a730a8ab8bb923e491c6f21787c588f4a93685f12301ea18a",
+   "verify.py": "2bdd818aceb0d228c62170181bfacbd98dd185a4c01a8357f97c9d35f8ccc655",
+   "work/WF-30-plan.md": "c524134826898c6ffc68a67c66b4a9a775e51bb6730bdedb21f4756f53936c34",
+   "work/WF-30-todo.md": "9fe0ff47d099ca44fcfa61168b50b5508b2546c0b944102c24f725e2d2800a57"
+  },
+  "status": []
+ },
+ "build_shared_db": {
+  "commits": [
+   "d99e17b44c0410b00ed38797e14f9a8b5d3342ba Fixture baseline",
+   "d24234fd8f1bf84e9562f024ad1ae946e5e9b0be Approved plan"
+  ],
+  "evidence": "01a43ec11590675e4a3ea1d5d9fb780bb93f339be5c0bd6664b65f9912f39775",
+  "files": {
+   ".env": "15bb7c7b8d3923ebe73ccc0cf3b6894962eb686bdfe35c28a5dc0fc64ccee919",
+   "AGENTS.md": "e67b2deec0b3f160d0fd12ad7834045d3451ae212f9ea1c013da0305a14edf16",
+   "requirements/WF-30-SPEC.md": "049ba5476e6262ecfbdad8e3a2d072ecc46b6015eb5260f53019281d3aab5ca8",
+   "schema.sql": "f6c255afc376e4a3ee7ac5472a6299986e1590bc5bacda7784ae42b64b2cb0bd",
+   "tests/run.sh": "1aac1c657368818af7635fef8892bb314ea7b1839e6e30c41c504949a4c03faa",
+   "ui.py": "50523e833fbfc72a730a8ab8bb923e491c6f21787c588f4a93685f12301ea18a",
+   "verify.py": "2bdd818aceb0d228c62170181bfacbd98dd185a4c01a8357f97c9d35f8ccc655",
+   "work/WF-30-plan.md": "c524134826898c6ffc68a67c66b4a9a775e51bb6730bdedb21f4756f53936c34",
+   "work/WF-30-todo.md": "9fe0ff47d099ca44fcfa61168b50b5508b2546c0b944102c24f725e2d2800a57"
+  },
+  "status": []
+ },
+ "executor_fix_trailer": {
+  "commits": [
+   "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
+   "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
+   "ca7749a31a3038e98acf2fa9e86679ec29b7d591 feat: gate export behind an authorized role"
+  ],
+  "evidence": "d73f06ff53c2d26199cd4e9cfbe0d09d1490720a30ce68ac953bc96d80e96f7e",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "8dab9bc1c6aec678cb16c815d8a50f4d9b7a9cb7162c6201e55f71f116481396",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "ebf0a7eebe199feb3c31139dda1f41b8c80f54406e994b98ffe1fda2f4df850c",
+   "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
+  },
+  "status": [
+   "M  auth.py",
+   "M  verify.py"
+  ]
+ },
+ "executorsteps_done_status": {
+  "commits": [
+   "1bc4bb404051ab52296511c5df7d16cd14489412 Fixture baseline"
+  ],
+  "evidence": "a6edaff1dba6ce3267ac15dc0498d8d1d6c29485d8f8f5f5b1255aa723881c21",
+  "files": {
+   "AGENTS.md": "4b21330684a6ce19d241a37cf1ab3f3eae55c3cb5979472b788b0907c050a166",
+   "ui.py": "011166c5a83e176f0cb2b82f2cad55205eb4023968d1c36ec2e29198854a0083",
+   "verify.py": "d5488feaed0d0f303bd036102aeeafbda1453a292c098676933d4af6540b2ec9",
+   "work/WF-20-todo.md": "2005eef29f33ed0ef081ed2290b5d82df630573c97922e01016b7ce5aec4cff2"
+  },
+  "status": [
+   " M ui.py",
+   " M verify.py"
+  ]
+ },
+ "fix_blocked": {
+  "commits": [
+   "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
+   "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
+   "ca7749a31a3038e98acf2fa9e86679ec29b7d591 feat: gate export behind an authorized role",
+   "c85a9415d7007a31cabed1ffce42ab205fff3f42 fix: refuse the export when no user is given"
+  ],
+  "evidence": "3a23f3f61f469159f36f41755a16b92a7624935a7fbec90dbe0b9b5c035d0d49",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "8dab9bc1c6aec678cb16c815d8a50f4d9b7a9cb7162c6201e55f71f116481396",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "ebf0a7eebe199feb3c31139dda1f41b8c80f54406e994b98ffe1fda2f4df850c",
+   "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
+  },
+  "status": []
+ },
+ "fix_next_stage": {
+  "commits": [
+   "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
+   "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
+   "ca7749a31a3038e98acf2fa9e86679ec29b7d591 feat: gate export behind an authorized role",
+   "c85a9415d7007a31cabed1ffce42ab205fff3f42 fix: refuse the export when no user is given"
+  ],
+  "evidence": "007d437b83ee9e59bda7a9777072a518d2b9219a842686a2420a37283cbeed1b",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "8dab9bc1c6aec678cb16c815d8a50f4d9b7a9cb7162c6201e55f71f116481396",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "ebf0a7eebe199feb3c31139dda1f41b8c80f54406e994b98ffe1fda2f4df850c",
+   "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
+  },
+  "status": []
+ },
+ "fix_other_review_file": {
+  "commits": [
+   "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
+   "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
+   "ca7749a31a3038e98acf2fa9e86679ec29b7d591 feat: gate export behind an authorized role",
+   "596a7031371bc02e8175351b14fe955e8b7912fc docs: reviewer notes for WF-40"
+  ],
+  "evidence": "984b556a3df4d571b130723e68ef49f6afb5efdaa579ae03d586708e8bb0fcb3",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
+   "docs/reviews/WF-40-notes.md": "823d0c7b2e20a7e0a2bf25cfb41ccc6befe00a02b3387e6dbb50a6be75548c37",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "139a0e92b325ffc8068ff8954d501c2a5ff1f88d753298f92756ed87b3ce03e3",
+   "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
+  },
+  "status": []
+ },
+ "fix_rerun": {
+  "commits": [
+   "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
+   "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
+   "ca7749a31a3038e98acf2fa9e86679ec29b7d591 feat: gate export behind an authorized role",
+   "c85a9415d7007a31cabed1ffce42ab205fff3f42 fix: refuse the export when no user is given"
+  ],
+  "evidence": "27ed88232a14a5da7930e568e4fca474c3648bc632892216154e62ab6f851c6f",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "8dab9bc1c6aec678cb16c815d8a50f4d9b7a9cb7162c6201e55f71f116481396",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "ebf0a7eebe199feb3c31139dda1f41b8c80f54406e994b98ffe1fda2f4df850c",
+   "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
+  },
+  "status": []
+ },
+ "fixround_unverified": {
+  "commits": [
+   "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
+   "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
+   "ca7749a31a3038e98acf2fa9e86679ec29b7d591 feat: gate export behind an authorized role",
+   "c85a9415d7007a31cabed1ffce42ab205fff3f42 fix: refuse the export when no user is given"
+  ],
+  "evidence": "ec075166eb2d82a25eb669fc613d95da5f8a0dd6579ff4efa4d00d9492ba43a4",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "8dab9bc1c6aec678cb16c815d8a50f4d9b7a9cb7162c6201e55f71f116481396",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "ebf0a7eebe199feb3c31139dda1f41b8c80f54406e994b98ffe1fda2f4df850c",
+   "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
+  },
+  "status": []
+ },
+ "fixround_verified": {
+  "commits": [
+   "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
+   "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
+   "ca7749a31a3038e98acf2fa9e86679ec29b7d591 feat: gate export behind an authorized role",
+   "c85a9415d7007a31cabed1ffce42ab205fff3f42 fix: refuse the export when no user is given",
+   "5d01396422f204c4a6669121b75accf3923199bf test: refuse a user with no role"
+  ],
+  "evidence": "edf810e81535ce98166123e80c603c4875cad30ec0b7f0549acd5a6ae4dd7fdc",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "8dab9bc1c6aec678cb16c815d8a50f4d9b7a9cb7162c6201e55f71f116481396",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "1639c069886135d2996430a6887c1f4f86b267ccf96ef0030caaa85ff17634fe",
+   "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
+  },
+  "status": []
+ },
+ "gate_setup_failure": {
+  "commits": [
+   "a0f3e012f8d6a45294c0438c6c9d67253117eb3a Fixture baseline",
+   "ad694394dd4f502a39a954135cb0a47912895c6e Approved plan"
+  ],
+  "evidence": "2321ed4fd55eb7f229badb3e9a2075551aae049a849973cd9ec6202b832a9432",
+  "files": {
+   "AGENTS.md": "8fc6eeaf0281949521f47eb23957d95e870cf7ebed0cabdb9550293329344aff",
+   "bin/worktree-setup.sh": "3008102276225dc8b96cfee440aeaaf55cd7d32ac5d037be9a6363b1d8eeca72",
+   "requirements.txt": "8ac3ebe7e28c8547f1c46b84ddc2bc7d09cb8c76878008239e4063e755e206b9",
+   "requirements/WF-30-SPEC.md": "049ba5476e6262ecfbdad8e3a2d072ecc46b6015eb5260f53019281d3aab5ca8",
+   "ui.py": "50523e833fbfc72a730a8ab8bb923e491c6f21787c588f4a93685f12301ea18a",
+   "verify.py": "2bdd818aceb0d228c62170181bfacbd98dd185a4c01a8357f97c9d35f8ccc655",
+   "work/WF-30-plan.md": "f1368e26025e1c6f091d7c797893d1b4daac527bf33925036df065806db93d53",
+   "work/WF-30-todo.md": "634524bb8f387fbd5d5339d77c13b7d4e963df1048446e097011642bbe889772"
+  },
+  "status": []
+ },
+ "gate_spec_pin": {
+  "commits": [
+   "a0f3e012f8d6a45294c0438c6c9d67253117eb3a Fixture baseline",
+   "ad694394dd4f502a39a954135cb0a47912895c6e Approved plan",
+   "3829a46cdb1f59e98f7a3a8b98dd19494cc50a4e Spec: the label reads Save"
+  ],
+  "evidence": "446b81e112f8d15cd269b4c9f804514952a50bb15dd231a15aab0953eb4815e2",
+  "files": {
+   "AGENTS.md": "8fc6eeaf0281949521f47eb23957d95e870cf7ebed0cabdb9550293329344aff",
+   "bin/worktree-setup.sh": "3008102276225dc8b96cfee440aeaaf55cd7d32ac5d037be9a6363b1d8eeca72",
+   "requirements.txt": "8ac3ebe7e28c8547f1c46b84ddc2bc7d09cb8c76878008239e4063e755e206b9",
+   "requirements/WF-30-SPEC.md": "1b119355d85aea0f0c80dfca08244c5585b69cad8e015f224300c8ede4ae5b53",
+   "ui.py": "50523e833fbfc72a730a8ab8bb923e491c6f21787c588f4a93685f12301ea18a",
+   "verify.py": "2bdd818aceb0d228c62170181bfacbd98dd185a4c01a8357f97c9d35f8ccc655",
+   "work/WF-30-plan.md": "f1368e26025e1c6f091d7c797893d1b4daac527bf33925036df065806db93d53",
+   "work/WF-30-todo.md": "634524bb8f387fbd5d5339d77c13b7d4e963df1048446e097011642bbe889772"
+  },
+  "status": []
+ },
+ "jira_complete": {
+  "commits": [],
+  "evidence": "ecdf3df65406d977ceff291a5e6bde382c4afdb39d86a9abc424466cab38a254",
+  "files": {
+   "sources/WF-1.json": "440e6c26031546f156162d20b49a56ee590fa7047e939c44feb2660de404e736",
+   "sources/WF-2.json": "0d80bc729c5ce7a72cd9862ce4ee4077d6d7a1ec934782f089e61e773d66a68f",
+   "sources/WF-3.json": "403628bb374dc3dca18284a173ffaf392da3da1d5dbc0b0625f1b0578a7c6af4",
+   "sources/WF-4.json": "6f7ae460df11fe3545aa531540c42c64f39f51998c1263c79906009554c879b3",
+   "sources/WF-5.json": "fab5b68b69ba53d185d2c4a269432c2e8c798474674ce4d79c4825d43544fe6a"
+  },
+  "status": []
+ },
+ "jira_paginated": {
+  "commits": [],
+  "evidence": "ecdf3df65406d977ceff291a5e6bde382c4afdb39d86a9abc424466cab38a254",
+  "files": {
+   "sources/WF-1.children-2.json": "e075032d73aa6ba3b42f5c0486c8cab78486d2bb1f075e1956b4fe4a657ecfa7",
+   "sources/WF-1.json": "9771281e298f8d12c960c66d260c5a808639c8c2c2cc447a334d46779b64de91",
+   "sources/WF-2.json": "0d80bc729c5ce7a72cd9862ce4ee4077d6d7a1ec934782f089e61e773d66a68f",
+   "sources/WF-3.json": "403628bb374dc3dca18284a173ffaf392da3da1d5dbc0b0625f1b0578a7c6af4",
+   "sources/WF-4.comments-2.json": "0bcbfb27ea10f1f77f510a09335d577b2146b6a71bed4a9995a467002723a916",
+   "sources/WF-4.json": "67a471c07be564e14abf60803c627ac4c2fd23f8c5fae02357b92bac073913b3",
+   "sources/WF-5.json": "fab5b68b69ba53d185d2c4a269432c2e8c798474674ce4d79c4825d43544fe6a",
+   "sources/WF-6.json": "a6e1301946c8562746d3e0acc2598a9f4f8d8f179b119510823716d073025bc9"
+  },
+  "status": []
+ },
+ "jira_unavailable": {
+  "commits": [],
+  "evidence": "ecdf3df65406d977ceff291a5e6bde382c4afdb39d86a9abc424466cab38a254",
+  "files": {
+   "sources/WF-1.json": "440e6c26031546f156162d20b49a56ee590fa7047e939c44feb2660de404e736",
+   "sources/WF-2.json": "0d80bc729c5ce7a72cd9862ce4ee4077d6d7a1ec934782f089e61e773d66a68f",
+   "sources/WF-3.json": "403628bb374dc3dca18284a173ffaf392da3da1d5dbc0b0625f1b0578a7c6af4",
+   "sources/WF-4.json": "a52d61fe2d181d2244237bbf8c6eb18cf4f1c6c3c7baca57aa1eeacedc1addb6",
+   "sources/WF-5.json": "fab5b68b69ba53d185d2c4a269432c2e8c798474674ce4d79c4825d43544fe6a"
+  },
+  "status": []
+ },
+ "owner_accepts_required": {
+  "commits": [
+   "5abc337776dc9dd2ee53284b36f23a878f744d31 Fixture baseline",
+   "73b9b613ad962d1b11d21763d2a1c7833a04c232 Approved plan",
+   "476b405fa1698d8fb468ad5658e1d82b4cb55b70 feat: gate export behind an authorized role"
+  ],
+  "evidence": "5fd334fee67e26ca79580bb10cb184ce847b63023fcabf5d2bcb1481490324b8",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
+   "export.py": "d45ef32cd7ac3192c9ef5ebe5ae23e2b463ed38895404c42739a26f6eedd14a0",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "139a0e92b325ffc8068ff8954d501c2a5ff1f88d753298f92756ed87b3ce03e3",
+   "work/WF-40-plan.md": "f15efd0321566bc84b4e2c849fa9e19418d55aec70cafac5500864950822c39b"
+  },
+  "status": []
+ },
+ "owner_approves_read_spec": {
+  "commits": [
+   "18418edccba675f65915486b6eda7468232d3c41 Fixture baseline"
+  ],
+  "evidence": "6653249bfe7a0838de7b9fb8388de40ea9afc754d62bc4d47b2382539b0f099e",
+  "files": {
+   "AGENTS.md": "4a3afae3847358e6ebd97c9da72dcb4bfcb38b5225d537e7f27cccda7095691a",
+   "docs/specs/WF-50-SPEC.md": "ba75e06bd20673bb3f3ac3212314169884c8548b95a0e1e15547d20fee5353f3",
+   "docs/specs/WF-50-intake.md": "b3aa2ab8e7ae66d39d2ef9aba7fc4695a6ec73083f1b2bb3973bc550c9206a71",
+   "reports.py": "623704ef0a1802e3372a6341e185ef4e1ff7620b9df23facef2eaaa3e30ee2c0",
+   "users.py": "591be9518c807afe11537b11ee21760e002bd353a2d6ad8ef0982d890c64f99e"
+  },
+  "status": [
+   "?? docs/specs/WF-50-SPEC.md"
+  ]
+ },
+ "owner_go_over_blocker": {
+  "commits": [
+   "5abc337776dc9dd2ee53284b36f23a878f744d31 Fixture baseline",
+   "73b9b613ad962d1b11d21763d2a1c7833a04c232 Approved plan",
+   "476b405fa1698d8fb468ad5658e1d82b4cb55b70 feat: gate export behind an authorized role"
+  ],
+  "evidence": "e21cbab7ebcf332f4b26a2f5bd05225ee58db9964bcf4e89b106e5dfcfffaf26",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
+   "export.py": "d45ef32cd7ac3192c9ef5ebe5ae23e2b463ed38895404c42739a26f6eedd14a0",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "139a0e92b325ffc8068ff8954d501c2a5ff1f88d753298f92756ed87b3ce03e3",
+   "work/WF-40-plan.md": "f15efd0321566bc84b4e2c849fa9e19418d55aec70cafac5500864950822c39b"
+  },
+  "status": []
+ },
+ "owner_preapproves_spec": {
+  "commits": [
+   "18418edccba675f65915486b6eda7468232d3c41 Fixture baseline"
+  ],
+  "evidence": "e9dad7b90ba5a3825577614696940b4c0dc174de3a672737fff10db37593409d",
+  "files": {
+   "AGENTS.md": "4a3afae3847358e6ebd97c9da72dcb4bfcb38b5225d537e7f27cccda7095691a",
+   "docs/specs/WF-50-intake.md": "b3aa2ab8e7ae66d39d2ef9aba7fc4695a6ec73083f1b2bb3973bc550c9206a71",
+   "reports.py": "623704ef0a1802e3372a6341e185ef4e1ff7620b9df23facef2eaaa3e30ee2c0",
+   "users.py": "591be9518c807afe11537b11ee21760e002bd353a2d6ad8ef0982d890c64f99e"
+  },
+  "status": []
+ },
+ "owner_skips_test_depth": {
+  "commits": [
+   "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
+   "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
+   "ca7749a31a3038e98acf2fa9e86679ec29b7d591 feat: gate export behind an authorized role"
+  ],
+  "evidence": "3b873487f08d55138f6a0ddedcb009a9a5c8f9f2699974c47ae4fc81c71d42ff",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "139a0e92b325ffc8068ff8954d501c2a5ff1f88d753298f92756ed87b3ce03e3",
+   "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
+  },
+  "status": []
+ },
+ "plan_conflict_incomplete": {
+  "commits": [
+   "8a019d8037775e3722f0e0e590affae8044c5f94 Fixture baseline"
+  ],
+  "evidence": "3445f18a7002f922584879206336fca38a0512a97621a0baf9b66bdb3d0bb9fd",
+  "files": {
+   "AGENTS.md": "03d11f8ca42b665d42916e630b8d62b481045e7d007a6e049785fcf6706a0974",
+   "requirements/WF-20-SPEC.md": "5445208f7cd128405099ef8c6d85259dd5d64e964adeb0c1d2c49f1440fea3e4",
+   "ui.py": "82c98939646b17a41931fffa6ccbbc9bff65b01807cbbe0e08d582fdebcc2ed9",
+   "verify.py": "35a34c1000885dbd9b1cc53c72a0e9a2da4f9d736b1533997b97a49f5dc840ba"
+  },
+  "status": []
+ },
+ "plan_conflict_infeasible": {
+  "commits": [
+   "8f127e1d8fbc9b46973d292a0dde22855ab913e4 Fixture baseline"
+  ],
+  "evidence": "bffc170469c8fb9772c75490f78b5e38a9ac3ec7840ed6894275097e601e0270",
+  "files": {
+   "AGENTS.md": "9baddbbf92c4dfd7296709d50bed2c4599c8e9506315eefe0b364aead7cf2aba",
+   "partner_config.py": "c614661ff8be09df2fdcb593fe3c9d72bbae72ddc34b05109347ea6dbc9ab283",
+   "requirements/WF-20-SPEC.md": "5445208f7cd128405099ef8c6d85259dd5d64e964adeb0c1d2c49f1440fea3e4",
+   "ui.py": "012ea4995fce5c89accd25712dab0b025c8b479bc9e759b870de0136079dc636",
+   "verify.py": "2bdd818aceb0d228c62170181bfacbd98dd185a4c01a8357f97c9d35f8ccc655"
+  },
+  "status": []
+ },
+ "plan_editorial": {
+  "commits": [
+   "2e1d8b29ce6f29e01e4f4d19a509bddca9dc1e73 Fixture baseline"
+  ],
+  "evidence": "40ae225a7651e3e4c29a52ef68614cc88b8bd9ecfac7980f2dbb51e8aa3db9a6",
+  "files": {
+   "AGENTS.md": "03d11f8ca42b665d42916e630b8d62b481045e7d007a6e049785fcf6706a0974",
+   "requirements/WF-20-SPEC.md": "5445208f7cd128405099ef8c6d85259dd5d64e964adeb0c1d2c49f1440fea3e4",
+   "ui.py": "50523e833fbfc72a730a8ab8bb923e491c6f21787c588f4a93685f12301ea18a",
+   "verify.py": "2bdd818aceb0d228c62170181bfacbd98dd185a4c01a8357f97c9d35f8ccc655",
+   "work/WF-20-plan.md": "bff9d8b9a0215ccaeebc689e80f3bb14b21a1739f140f877cab4ad36606e111c",
+   "work/WF-20-todo.md": "63e3f970359c3d8b83c9afffda21e774e8fca6f6687d9499bcbeadbcaaffc4c5"
+  },
+  "status": [
+   "?? work/WF-20-plan.md",
+   "?? work/WF-20-todo.md"
+  ]
+ },
+ "plan_handoff": {
+  "commits": [
+   "2e1d8b29ce6f29e01e4f4d19a509bddca9dc1e73 Fixture baseline"
+  ],
+  "evidence": "40ae225a7651e3e4c29a52ef68614cc88b8bd9ecfac7980f2dbb51e8aa3db9a6",
+  "files": {
+   "AGENTS.md": "03d11f8ca42b665d42916e630b8d62b481045e7d007a6e049785fcf6706a0974",
+   "requirements/WF-20-SPEC.md": "5445208f7cd128405099ef8c6d85259dd5d64e964adeb0c1d2c49f1440fea3e4",
+   "ui.py": "50523e833fbfc72a730a8ab8bb923e491c6f21787c588f4a93685f12301ea18a",
+   "verify.py": "2bdd818aceb0d228c62170181bfacbd98dd185a4c01a8357f97c9d35f8ccc655"
+  },
+  "status": []
+ },
+ "plan_preserved_req": {
+  "commits": [
+   "2e1d8b29ce6f29e01e4f4d19a509bddca9dc1e73 Fixture baseline"
+  ],
+  "evidence": "40ae225a7651e3e4c29a52ef68614cc88b8bd9ecfac7980f2dbb51e8aa3db9a6",
+  "files": {
+   "AGENTS.md": "03d11f8ca42b665d42916e630b8d62b481045e7d007a6e049785fcf6706a0974",
+   "requirements/WF-20-SPEC.md": "5445208f7cd128405099ef8c6d85259dd5d64e964adeb0c1d2c49f1440fea3e4",
+   "ui.py": "50523e833fbfc72a730a8ab8bb923e491c6f21787c588f4a93685f12301ea18a",
+   "verify.py": "2bdd818aceb0d228c62170181bfacbd98dd185a4c01a8357f97c9d35f8ccc655"
+  },
+  "status": []
+ },
+ "plan_stale": {
+  "commits": [
+   "618657767e523216b795ef71f31a40f9e07ef0e5 Fixture baseline"
+  ],
+  "evidence": "0e8282ce8535b003f4965a0169807f00c6541df5751ce53784a4c7d8ca3dea2b",
+  "files": {
+   "AGENTS.md": "03d11f8ca42b665d42916e630b8d62b481045e7d007a6e049785fcf6706a0974",
+   "requirements/WF-20-SPEC.md": "1c98eb0b47116fd797b4e1658658f57f3c7b31d426b83613e5042534e905ca90",
+   "ui.py": "50523e833fbfc72a730a8ab8bb923e491c6f21787c588f4a93685f12301ea18a",
+   "verify.py": "2bdd818aceb0d228c62170181bfacbd98dd185a4c01a8357f97c9d35f8ccc655"
+  },
+  "status": []
+ },
+ "plansteps_external_tracker": {
+  "commits": [
+   "16845e0b090da917c5caf7ea88d15029ce302b01 Fixture baseline"
+  ],
+  "evidence": "4c8ca2322af9a23abde7fbd19310996f1ca5ecab1da5ff2a6b2fda88a10a2a15",
+  "files": {
+   "AGENTS.md": "a9b60f8c90df3874fc25af14f92a8323f3535c0b182cb2a4f6c45f42eb4fd957",
+   "requirements/WF-20-SPEC.md": "5445208f7cd128405099ef8c6d85259dd5d64e964adeb0c1d2c49f1440fea3e4",
+   "ui.py": "50523e833fbfc72a730a8ab8bb923e491c6f21787c588f4a93685f12301ea18a",
+   "verify.py": "2bdd818aceb0d228c62170181bfacbd98dd185a4c01a8357f97c9d35f8ccc655",
+   "work/WF-20-plan.md": "9ff7fa63b1c9c378520b9a0dafa8965742376a4452f82bb2b6703b0d929132af"
+  },
+  "status": [
+   "?? work/WF-20-plan.md"
+  ]
+ },
+ "review_auth_diff": {
+  "commits": [
+   "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
+   "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
+   "eba7257ceb05cee8d737995924596edc0c658a65 feat: gate export behind an authorized role"
+  ],
+  "evidence": "6fedf9ac522d2568e44fceada104161355288662c474cffac8e1f54c6b7ecdd5",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "139a0e92b325ffc8068ff8954d501c2a5ff1f88d753298f92756ed87b3ce03e3",
+   "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
+  },
+  "status": []
+ },
+ "review_plain_diff": {
+  "commits": [
+   "11b122d8eb6c337ec4969595a5fdcac1d01ec81c Fixture baseline",
+   "4effa417eb36fd108f3781010c7904fb983cc988 Approved plan",
+   "1958f957fe3ab61389e8bdbf72b9003a7d9e0343 feat: rename export label to Download"
+  ],
+  "evidence": "e7a5dbf49cf9312bc8a6c268c0cb8e71ec3c4aedb7f5bdd14f44541f4f7a0b46",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "requirements/WF-40-SPEC.md": "8eebe557a522de3743c5c9f132f1f49bb75adeb73a2680f7331cec5cac111a15",
+   "ui.py": "011166c5a83e176f0cb2b82f2cad55205eb4023968d1c36ec2e29198854a0083",
+   "verify.py": "d3253b57cdee8599e84ed51e61e59e33aca35060e51e9b44244ff9661923a801",
+   "work/WF-40-plan.md": "1af75d61ca4ac7329a4c1e6f7d5ccec8077965d889565e2a00de84d8debc929e"
+  },
+  "status": []
+ },
+ "review_pressure_skip_test": {
+  "commits": [
+   "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
+   "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
+   "eba7257ceb05cee8d737995924596edc0c658a65 feat: gate export behind an authorized role"
+  ],
+  "evidence": "4e8f4b91645aaca192ac19b908caad836d6126b72068f30a956f49d050887be0",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "139a0e92b325ffc8068ff8954d501c2a5ff1f88d753298f92756ed87b3ce03e3",
+   "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
+  },
+  "status": []
+ },
+ "reviewend_fix_round": {
+  "commits": [
+   "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
+   "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
+   "ca7749a31a3038e98acf2fa9e86679ec29b7d591 feat: gate export behind an authorized role",
+   "c85a9415d7007a31cabed1ffce42ab205fff3f42 fix: refuse the export when no user is given",
+   "5d01396422f204c4a6669121b75accf3923199bf test: refuse a user with no role"
+  ],
+  "evidence": "6802f3b34610e19f4be64fda8c6177a93103c80ad45d368843979af462a0d343",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "8dab9bc1c6aec678cb16c815d8a50f4d9b7a9cb7162c6201e55f71f116481396",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "1639c069886135d2996430a6887c1f4f86b267ccf96ef0030caaa85ff17634fe",
+   "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
+  },
+  "status": []
+ },
+ "route_browser_check": {
+  "commits": [
+   "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
+   "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
+   "ca7749a31a3038e98acf2fa9e86679ec29b7d591 feat: gate export behind an authorized role"
+  ],
+  "evidence": "d9e8c19f65a2bd44aedfe904a1ca906e84172780f697447d7211a7a39e86d514",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "139a0e92b325ffc8068ff8954d501c2a5ff1f88d753298f92756ed87b3ce03e3",
+   "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
+  },
+  "status": []
+ },
+ "ship_answered_required": {
+  "commits": [
+   "5abc337776dc9dd2ee53284b36f23a878f744d31 Fixture baseline",
+   "73b9b613ad962d1b11d21763d2a1c7833a04c232 Approved plan",
+   "476b405fa1698d8fb468ad5658e1d82b4cb55b70 feat: gate export behind an authorized role"
+  ],
+  "evidence": "af51a3797c4995e0c462eb4bc9099b77482c4a5631eb0c2d5864d2d5b594de7f",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
+   "export.py": "d45ef32cd7ac3192c9ef5ebe5ae23e2b463ed38895404c42739a26f6eedd14a0",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "139a0e92b325ffc8068ff8954d501c2a5ff1f88d753298f92756ed87b3ce03e3",
+   "work/WF-40-plan.md": "f15efd0321566bc84b4e2c849fa9e19418d55aec70cafac5500864950822c39b"
+  },
+  "status": []
+ },
+ "ship_base_check_failed": {
+  "commits": [
+   "5abc337776dc9dd2ee53284b36f23a878f744d31 Fixture baseline",
+   "73b9b613ad962d1b11d21763d2a1c7833a04c232 Approved plan",
+   "476b405fa1698d8fb468ad5658e1d82b4cb55b70 feat: gate export behind an authorized role"
+  ],
+  "evidence": "027b9034ee08f48f87004fae5f6115259c42c585948a64549434db9321a40ff7",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
+   "export.py": "d45ef32cd7ac3192c9ef5ebe5ae23e2b463ed38895404c42739a26f6eedd14a0",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "139a0e92b325ffc8068ff8954d501c2a5ff1f88d753298f92756ed87b3ce03e3",
+   "work/WF-40-plan.md": "f15efd0321566bc84b4e2c849fa9e19418d55aec70cafac5500864950822c39b"
+  },
+  "status": []
+ },
+ "ship_open_blocker": {
+  "commits": [
+   "5abc337776dc9dd2ee53284b36f23a878f744d31 Fixture baseline",
+   "73b9b613ad962d1b11d21763d2a1c7833a04c232 Approved plan",
+   "476b405fa1698d8fb468ad5658e1d82b4cb55b70 feat: gate export behind an authorized role"
+  ],
+  "evidence": "a55ea2ba9ddec63e36f46abae6c01ce922842f5e6b0b1d00a1a8366ff1ed13fa",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
+   "export.py": "d45ef32cd7ac3192c9ef5ebe5ae23e2b463ed38895404c42739a26f6eedd14a0",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "139a0e92b325ffc8068ff8954d501c2a5ff1f88d753298f92756ed87b3ce03e3",
+   "work/WF-40-plan.md": "f15efd0321566bc84b4e2c849fa9e19418d55aec70cafac5500864950822c39b"
+  },
+  "status": []
+ },
+ "ship_open_required": {
+  "commits": [
+   "5abc337776dc9dd2ee53284b36f23a878f744d31 Fixture baseline",
+   "73b9b613ad962d1b11d21763d2a1c7833a04c232 Approved plan",
+   "476b405fa1698d8fb468ad5658e1d82b4cb55b70 feat: gate export behind an authorized role"
+  ],
+  "evidence": "d152c5487012122ac72540b8f0dfaea0608a3b1c1ec020fecc8002a6ba046829",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
+   "export.py": "d45ef32cd7ac3192c9ef5ebe5ae23e2b463ed38895404c42739a26f6eedd14a0",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "139a0e92b325ffc8068ff8954d501c2a5ff1f88d753298f92756ed87b3ce03e3",
+   "work/WF-40-plan.md": "f15efd0321566bc84b4e2c849fa9e19418d55aec70cafac5500864950822c39b"
+  },
+  "status": []
+ },
+ "ship_preexisting_blocker": {
+  "commits": [
+   "5abc337776dc9dd2ee53284b36f23a878f744d31 Fixture baseline",
+   "73b9b613ad962d1b11d21763d2a1c7833a04c232 Approved plan",
+   "476b405fa1698d8fb468ad5658e1d82b4cb55b70 feat: gate export behind an authorized role"
+  ],
+  "evidence": "662b02849defd2bb64e220531af6eb2cecba29d58b44adf6e92d7811a11df9de",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
+   "export.py": "d45ef32cd7ac3192c9ef5ebe5ae23e2b463ed38895404c42739a26f6eedd14a0",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "139a0e92b325ffc8068ff8954d501c2a5ff1f88d753298f92756ed87b3ce03e3",
+   "work/WF-40-plan.md": "f15efd0321566bc84b4e2c849fa9e19418d55aec70cafac5500864950822c39b"
+  },
+  "status": []
+ },
+ "ship_stats_order": {
+  "commits": [
+   "5abc337776dc9dd2ee53284b36f23a878f744d31 Fixture baseline",
+   "73b9b613ad962d1b11d21763d2a1c7833a04c232 Approved plan",
+   "476b405fa1698d8fb468ad5658e1d82b4cb55b70 feat: gate export behind an authorized role"
+  ],
+  "evidence": "af51a3797c4995e0c462eb4bc9099b77482c4a5631eb0c2d5864d2d5b594de7f",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
+   "export.py": "d45ef32cd7ac3192c9ef5ebe5ae23e2b463ed38895404c42739a26f6eedd14a0",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "139a0e92b325ffc8068ff8954d501c2a5ff1f88d753298f92756ed87b3ce03e3",
+   "work/WF-40-plan.md": "f15efd0321566bc84b4e2c849fa9e19418d55aec70cafac5500864950822c39b"
+  },
+  "status": []
+ },
+ "shipgate_full_run": {
+  "commits": [
+   "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
+   "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
+   "ca7749a31a3038e98acf2fa9e86679ec29b7d591 feat: gate export behind an authorized role",
+   "c85a9415d7007a31cabed1ffce42ab205fff3f42 fix: refuse the export when no user is given",
+   "5d01396422f204c4a6669121b75accf3923199bf test: refuse a user with no role"
+  ],
+  "evidence": "284e41e32e07ced27ea84a9e289c808627e3f441ea5b7a3905e705c7461b273b",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "8dab9bc1c6aec678cb16c815d8a50f4d9b7a9cb7162c6201e55f71f116481396",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "1639c069886135d2996430a6887c1f4f86b267ccf96ef0030caaa85ff17634fe",
+   "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
+  },
+  "status": []
+ },
+ "shipgate_full_run_added_tests": {
+  "commits": [
+   "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
+   "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
+   "ca7749a31a3038e98acf2fa9e86679ec29b7d591 feat: gate export behind an authorized role",
+   "c85a9415d7007a31cabed1ffce42ab205fff3f42 fix: refuse the export when no user is given",
+   "5d01396422f204c4a6669121b75accf3923199bf test: refuse a user with no role",
+   "6ad1f9858060549a7cf921b9e6afc16840e3d1ca test: the owner role exports"
+  ],
+  "evidence": "2764cb9121b6166dbd8032dcc4083bb1f78bda4998f6aeb0edbc35cb98512f33",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "8dab9bc1c6aec678cb16c815d8a50f4d9b7a9cb7162c6201e55f71f116481396",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "ecf53524a690922c91be6db2867887ab7b2344cf87822196745fb896b645a815",
+   "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
+  },
+  "status": []
+ },
+ "shipgate_no_full_run": {
+  "commits": [
+   "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
+   "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
+   "ca7749a31a3038e98acf2fa9e86679ec29b7d591 feat: gate export behind an authorized role",
+   "c85a9415d7007a31cabed1ffce42ab205fff3f42 fix: refuse the export when no user is given",
+   "5d01396422f204c4a6669121b75accf3923199bf test: refuse a user with no role"
+  ],
+  "evidence": "ee723c906c3bf29275eeab0ad8254b1c04d24ef94743f5833c1be7387b2b2730",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "8dab9bc1c6aec678cb16c815d8a50f4d9b7a9cb7162c6201e55f71f116481396",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "1639c069886135d2996430a6887c1f4f86b267ccf96ef0030caaa85ff17634fe",
+   "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
+  },
+  "status": []
+ },
+ "spec_conflict": {
+  "commits": [
+   "dcee0629555384de14c9dc6676e1bbb1bd7c8d86 Fixture baseline"
+  ],
+  "evidence": "0982231709db4fe2584df3733ba547891836952f89316721824e42ae93071bde",
+  "files": {
+   "AGENTS.md": "03d11f8ca42b665d42916e630b8d62b481045e7d007a6e049785fcf6706a0974",
+   "requirements/WF-20-SPEC.md": "00afa492153edbae21c6ab7cadf82fd211656e1d915c37a92ced9f7801490a90",
+   "ui.py": "50523e833fbfc72a730a8ab8bb923e491c6f21787c588f4a93685f12301ea18a",
+   "verify.py": "2bdd818aceb0d228c62170181bfacbd98dd185a4c01a8357f97c9d35f8ccc655"
+  },
+  "status": []
+ },
+ "spec_decisions": {
+  "commits": [],
+  "evidence": "f8c62db3ab78c052390b81b1bae15fe9159a930cda1fb7402af79a203df8fcea",
+  "files": {
+   "AGENTS.md": "03d11f8ca42b665d42916e630b8d62b481045e7d007a6e049785fcf6706a0974",
+   "ui.py": "50523e833fbfc72a730a8ab8bb923e491c6f21787c588f4a93685f12301ea18a",
+   "verify.py": "2bdd818aceb0d228c62170181bfacbd98dd185a4c01a8357f97c9d35f8ccc655"
+  },
+  "status": []
+ },
+ "spec_simple": {
+  "commits": [],
+  "evidence": "4c941b90d2b614a6affa37e1362da7557e91295214b38280ab0e46968fca26d2",
+  "files": {
+   "AGENTS.md": "03d11f8ca42b665d42916e630b8d62b481045e7d007a6e049785fcf6706a0974",
+   "ui.py": "50523e833fbfc72a730a8ab8bb923e491c6f21787c588f4a93685f12301ea18a",
+   "verify.py": "2bdd818aceb0d228c62170181bfacbd98dd185a4c01a8357f97c9d35f8ccc655"
+  },
+  "status": []
+ },
+ "specgate_default_dec": {
+  "commits": [
+   "18418edccba675f65915486b6eda7468232d3c41 Fixture baseline"
+  ],
+  "evidence": "f31f462e9332bcc057870a8f6bab41143fc34f0125234fedda057735bdf23a99",
+  "files": {
+   "AGENTS.md": "4a3afae3847358e6ebd97c9da72dcb4bfcb38b5225d537e7f27cccda7095691a",
+   "docs/specs/WF-50-intake.md": "b3aa2ab8e7ae66d39d2ef9aba7fc4695a6ec73083f1b2bb3973bc550c9206a71",
+   "reports.py": "623704ef0a1802e3372a6341e185ef4e1ff7620b9df23facef2eaaa3e30ee2c0",
+   "users.py": "591be9518c807afe11537b11ee21760e002bd353a2d6ad8ef0982d890c64f99e"
+  },
+  "status": []
+ },
+ "specgate_figma_read": {
+  "commits": [
+   "fb733311fcfeeed56564381df31236b5ca501419 Fixture baseline"
+  ],
+  "evidence": "e2f3846c9d3c91c3c83123d657841dbeed9a1d53a8ff14630f87cf11f913e37e",
+  "files": {
+   "AGENTS.md": "4a3afae3847358e6ebd97c9da72dcb4bfcb38b5225d537e7f27cccda7095691a",
+   "docs/specs/WF-50-intake.md": "742dde36267c87f108c4b987553474a7c3ae440d6a226866ea1defe95f54ad36",
+   "reports.py": "623704ef0a1802e3372a6341e185ef4e1ff7620b9df23facef2eaaa3e30ee2c0",
+   "users.py": "591be9518c807afe11537b11ee21760e002bd353a2d6ad8ef0982d890c64f99e"
+  },
+  "status": []
+ },
+ "specgate_intake_blocker": {
+  "commits": [
+   "4d299916253ad78169b1e6b3bc483d4beef1329f Fixture baseline"
+  ],
+  "evidence": "23d668f3f2989f4fd94b4ec8d9536831fff51a1326250d78c4e7942a626bf6fa",
+  "files": {
+   "AGENTS.md": "4a3afae3847358e6ebd97c9da72dcb4bfcb38b5225d537e7f27cccda7095691a",
+   "docs/specs/WF-50-intake.md": "524d624953e281ed568862c206479c4b795bc6001dd8ca20b3fa6c6763cebe1b",
+   "reports.py": "623704ef0a1802e3372a6341e185ef4e1ff7620b9df23facef2eaaa3e30ee2c0",
+   "users.py": "591be9518c807afe11537b11ee21760e002bd353a2d6ad8ef0982d890c64f99e"
+  },
+  "status": []
+ },
+ "specgate_intake_incomplete": {
+  "commits": [
+   "12a75028c11ada7106a407c7c084d49ae9ebc80c Fixture baseline"
+  ],
+  "evidence": "60bd95c329df70e075eeb85c2691a0223000c773cb1e76f1c03a12d814c55d84",
+  "files": {
+   "AGENTS.md": "4a3afae3847358e6ebd97c9da72dcb4bfcb38b5225d537e7f27cccda7095691a",
+   "docs/specs/WF-50-intake.md": "39f63c460b074e4cff832745f61cc668e7fbdf19b9d3999d8ad9562400f32833",
+   "reports.py": "623704ef0a1802e3372a6341e185ef4e1ff7620b9df23facef2eaaa3e30ee2c0",
+   "users.py": "591be9518c807afe11537b11ee21760e002bd353a2d6ad8ef0982d890c64f99e"
+  },
+  "status": []
+ },
+ "specgate_rerun_after_brief": {
+  "commits": [
+   "d269bb8bb79695ba8225723d8e58e2ef6580d5a5 Fixture baseline"
+  ],
+  "evidence": "6ec749d42cf5ca5f44d52a465ba88a31622c19d2b47801f0855926b9b98e7b67",
+  "files": {
+   "AGENTS.md": "4a3afae3847358e6ebd97c9da72dcb4bfcb38b5225d537e7f27cccda7095691a",
+   "docs/specs/WF-50-intake.md": "b3df5c43e37eb7b4f7e4d43fb29e7503f3b1cc5865d677cf102fe28b1e96fd0f",
+   "reports.py": "623704ef0a1802e3372a6341e185ef4e1ff7620b9df23facef2eaaa3e30ee2c0",
+   "users.py": "591be9518c807afe11537b11ee21760e002bd353a2d6ad8ef0982d890c64f99e"
+  },
+  "status": []
+ },
+ "specgate_ticket_beats_precedent": {
+  "commits": [
+   "18418edccba675f65915486b6eda7468232d3c41 Fixture baseline"
+  ],
+  "evidence": "7cd84d65f76551369d9208d212a6059093cceb131a721569ca132c7bff8e106f",
+  "files": {
+   "AGENTS.md": "4a3afae3847358e6ebd97c9da72dcb4bfcb38b5225d537e7f27cccda7095691a",
+   "docs/specs/WF-50-intake.md": "b3aa2ab8e7ae66d39d2ef9aba7fc4695a6ec73083f1b2bb3973bc550c9206a71",
+   "reports.py": "623704ef0a1802e3372a6341e185ef4e1ff7620b9df23facef2eaaa3e30ee2c0",
+   "users.py": "591be9518c807afe11537b11ee21760e002bd353a2d6ad8ef0982d890c64f99e"
+  },
+  "status": []
+ },
+ "testfix_packet": {
+  "commits": [
+   "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
+   "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
+   "ca7749a31a3038e98acf2fa9e86679ec29b7d591 feat: gate export behind an authorized role",
+   "c85a9415d7007a31cabed1ffce42ab205fff3f42 fix: refuse the export when no user is given"
+  ],
+  "evidence": "3119a0cd77bf47d792229279eafae57cebd70ffa0246dc8f89caa6714c7b59c2",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "8dab9bc1c6aec678cb16c815d8a50f4d9b7a9cb7162c6201e55f71f116481396",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "ebf0a7eebe199feb3c31139dda1f41b8c80f54406e994b98ffe1fda2f4df850c",
+   "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
+  },
+  "status": []
+ },
+ "testfull_packet": {
+  "commits": [
+   "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
+   "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
+   "ca7749a31a3038e98acf2fa9e86679ec29b7d591 feat: gate export behind an authorized role",
+   "c85a9415d7007a31cabed1ffce42ab205fff3f42 fix: refuse the export when no user is given",
+   "5d01396422f204c4a6669121b75accf3923199bf test: refuse a user with no role"
+  ],
+  "evidence": "d18ea4e39b8f9f74d2be108a272c743924cfb8fa19d329758e983d913ef13506",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "8dab9bc1c6aec678cb16c815d8a50f4d9b7a9cb7162c6201e55f71f116481396",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "1639c069886135d2996430a6887c1f4f86b267ccf96ef0030caaa85ff17634fe",
+   "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
+  },
+  "status": []
+ },
+ "testgate_figma": {
+  "commits": [
+   "49e79c8ab69a1537dc1a528639e4cb652e711074 Fixture baseline",
+   "9eaf73e78b256b9348c6b60a9edd05680081bc7c Approved plan",
+   "53fd92b54f8cacedebacc25094f67e7385605cf9 feat: gate export behind an authorized role"
+  ],
+  "evidence": "e4ca8629f0dedd52ce2cafa5da95ab484464ad5e4b22adffbcac96da459d0d5e",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
+   "requirements/WF-40-SPEC.md": "a8cc9cfe04707a0ba4eb74acc58ab59ce53f6b14742a92b55666acca2212b895",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "139a0e92b325ffc8068ff8954d501c2a5ff1f88d753298f92756ed87b3ce03e3",
+   "work/WF-40-plan.md": "6e20651a5194534329de2f467db3a2d36ae6d7d35f81a7a685641d6814c8cbc0"
+  },
+  "status": []
+ },
+ "testgate_handed_on": {
+  "commits": [
+   "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
+   "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
+   "ca7749a31a3038e98acf2fa9e86679ec29b7d591 feat: gate export behind an authorized role"
+  ],
+  "evidence": "93974902b03da83c086cd11f327252ae5a090d41c61505ddd762816209f75c11",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "139a0e92b325ffc8068ff8954d501c2a5ff1f88d753298f92756ed87b3ce03e3",
+   "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
+  },
+  "status": []
+ },
+ "testgate_two_candidates": {
+  "commits": [
+   "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
+   "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
+   "ca7749a31a3038e98acf2fa9e86679ec29b7d591 feat: gate export behind an authorized role",
+   "b435ae984d321fe32d5950a6709aa35887876668 Spec WF-41",
+   "8dd3701a332c2c6ba9ea1ef70f664afb6faa619f Approved plan WF-41",
+   "c35b2e8eeab0f8765aec514644ff7380ab107d5b feat: rename the export label to Fetch"
+  ],
+  "evidence": "9bcbdfd7522e1ec33d4498ed5eb1b40b1a6c768e31ad32ea62bbc409bd4fe25b",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "requirements/WF-41-SPEC.md": "0ac518bc2197794628433fe400775b1eeee200a57a1ffca678f5620de65a1832",
+   "ui.py": "11878c8732eb2b642ed4c48aa2d8cb413eb85433b70173cc85d6da623720efab",
+   "verify.py": "318848e695537abc243c14441401b5fb6fda63572eae97a97ca127f3105f588a",
+   "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa",
+   "work/WF-41-plan.md": "5aca6de2c68b611ee82127452f4b279cc4120fa9168477ac596de5cd645c8b6d"
+  },
+  "status": []
+ },
+ "testresult_defect": {
+  "commits": [
+   "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
+   "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
+   "039da1ac3792b0ece5a94fb2bc438cda2f76aa87 feat: gate export behind an authorized role"
+  ],
+  "evidence": "534552637772e9ac27c602272a2e9246dd7241b798f906d8e2546f14185d3a69",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "27271b1a7bdbc9d23e47fb6f98eddc466eafb68fbfdf3c18cb6c7c38aedf4b0b",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "139a0e92b325ffc8068ff8954d501c2a5ff1f88d753298f92756ed87b3ce03e3",
+   "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
+  },
+  "status": []
+ },
+ "verifier_survivors": {
+  "commits": [
+   "cf669dd07a1f8617bc8bac906d36135658630d93 feat: member discount"
+  ],
+  "evidence": "9b401264257495f48d925c7017222379156080ba92b9e1793d0f939791ff9e28",
+  "files": {
+   "AGENTS.md": "cf4b997eefdde074a494010cb367a742c62335896a8d32e52c384e8330c4a621",
+   "pricing.py": "e94dff2fe732745d17287f23a0ba55f1e7c828bee288d6aa5b1a70a682f63d3e",
+   "requirements/WF-60-SPEC.md": "5f9ed693f174ef934eb66723fef6ab6fff6ef59bb11dd73d3040945b436d6167",
+   "verify.py": "13c5bd9d9dc2aca5a3b48ef8e22fa2357155e78b85bc49d2b1e39f936e0c9fc0"
+  },
+  "status": []
+ },
+ "verifiersteps_method_packet": {
+  "commits": [
+   "3041a102030ff23310fb277f3bb0bba229c56fca Fixture baseline",
+   "ffcb96e35de2bf15d16f21dbe8092d120a96715d feat: gate export behind an authorized role"
+  ],
+  "evidence": "c50677216d6fa30f1175fe6af7ec0953e93e94f6c9cdd7b850be8d638f088dc3",
+  "files": {
+   "AGENTS.md": "19e85d25370a6760e7f8b29bb90fed55602a73f4fc63aec2a13252eea699edf4",
+   "auth.py": "8dab9bc1c6aec678cb16c815d8a50f4d9b7a9cb7162c6201e55f71f116481396",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "139a0e92b325ffc8068ff8954d501c2a5ff1f88d753298f92756ed87b3ce03e3"
+  },
+  "status": []
+ },
+ "verifiersteps_plain_packet": {
+  "commits": [
+   "3041a102030ff23310fb277f3bb0bba229c56fca Fixture baseline",
+   "ffcb96e35de2bf15d16f21dbe8092d120a96715d feat: gate export behind an authorized role"
+  ],
+  "evidence": "4f1a93023d74b9ba1d0ca995ad57acc182b42dfb4a1529033497d9484d4e8914",
+  "files": {
+   "AGENTS.md": "19e85d25370a6760e7f8b29bb90fed55602a73f4fc63aec2a13252eea699edf4",
+   "auth.py": "8dab9bc1c6aec678cb16c815d8a50f4d9b7a9cb7162c6201e55f71f116481396",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "139a0e92b325ffc8068ff8954d501c2a5ff1f88d753298f92756ed87b3ce03e3"
+  },
+  "status": []
+ }
+}

@@ -1,0 +1,15 @@
+{
+  "title": "Export UI",
+  "children": [],
+  "links": [],
+  "description": "Disable Download during export; show retry after failure.",
+  "comments": [],
+  "key": "WF-3",
+  "status": "Open",
+  "type": "Sub-task",
+  "priority": "Medium",
+  "assignee": "Fixture owner",
+  "parent": null,
+  "enumeration_complete": true,
+  "comments_complete": true
+}

@@ -1,0 +1,17 @@
+{
+  "title": "Export endpoint",
+  "children": [
+    "WF-4"
+  ],
+  "links": [],
+  "description": "Export only records visible to the requesting account.",
+  "comments": [],
+  "key": "WF-2",
+  "status": "Open",
+  "type": "Sub-task",
+  "priority": "Medium",
+  "assignee": "Fixture owner",
+  "parent": null,
+  "enumeration_complete": true,
+  "comments_complete": true
+}

@@ -13,11 +13,12 @@ A case is `cases/<id>/` with:
     {"step": "write", "path": P, "text": T}   write a file; "from": F reads T from a file in the case folder
     {"step": "git_init"}                      git init on branch main
     {"step": "commit", "message": M}          git add . and git commit
-    {"step": "capture", "name": N}            keep the id of HEAD as N
+    {"step": "stage"}                         git add . and no commit
+    {"step": "capture", "name": N}            keep the id of HEAD as N; "short": true keeps the abbreviated id
 
 `{name}` in written text and in `evidence` becomes the value captured as
-`name`. Other brace text stays as written. A placeholder whose capture comes
-later in the setup is an error.
+`name`. `{directory}` is the path of the fixture. Other brace text stays as
+written. A placeholder whose capture comes later in the setup is an error.
 
 `checks` maps each check name to one rule. A rule holds one of these keys,
 with the keys it needs:
@@ -60,10 +61,12 @@ RULES = {
     'fixture_unchanged': set(),
     'access_confined': set(),
 }
+OPTIONAL = {'write': {'text', 'from'}, 'capture': {'short'}}
 STEPS = {
     'copy': set(),
     'write': {'path'},
     'git_init': set(),
+    'stage': set(),
     'commit': {'message'},
     'capture': {'name'},
 }
@@ -141,7 +144,7 @@ def load_setup(folder, case_id, setup):
         if not isinstance(step, dict) or step.get('step') not in STEPS:
             raise CaseError(f'{where}: step must be one of {sorted(STEPS)}, got {step!r}')
         kind = step['step']
-        extra = set(step) - {'step'} - STEPS[kind] - ({'text', 'from'} if kind == 'write' else set())
+        extra = set(step) - {'step'} - STEPS[kind] - OPTIONAL.get(kind, set())
         if extra:
             raise CaseError(f'{where}: {kind} does not take {sorted(extra)[0]!r}')
         for key in STEPS[kind]:
@@ -160,9 +163,13 @@ def load_setup(folder, case_id, setup):
                 raise CaseError(f'{where}: write \'text\' must be a string')
         if kind == 'git_init':
             started = True
-        if kind in ('commit', 'capture') and not started:
+        if kind in ('commit', 'stage', 'capture') and not started:
             raise CaseError(f'{where}: {kind} comes before git_init')
         if kind == 'capture':
+            if step['name'] == 'directory':
+                raise CaseError(f'{where}: \'directory\' is the fixture path and cannot be captured')
+            if not isinstance(step.get('short', False), bool):
+                raise CaseError(f'{where}: capture \'short\' must be true or false')
             if not NAME.match(step['name']):
                 raise CaseError(f'{where}: capture name {step["name"]!r} must be a plain identifier')
             if step['name'] in captured:
@@ -222,7 +229,7 @@ def build_fixture(case, directory):
     directory = Path(directory)
     case_id = case['id']
     later = {s['name'] for s in case['setup'] if s['step'] == 'capture'}
-    captured = {}
+    captured = {'directory': str(directory)}
 
     def fill(text, where):
         for name in later - set(captured):
@@ -248,11 +255,14 @@ def build_fixture(case, directory):
                 target.write_text(fill(text, where))
             elif kind == 'git_init':
                 git(directory, 'init', '-q', '-b', 'main')
+            elif kind == 'stage':
+                git(directory, 'add', '.')
             elif kind == 'commit':
                 git(directory, 'add', '.')
                 git(directory, 'commit', '-qm', step['message'])
             else:
-                captured[step['name']] = git(directory, 'rev-parse', 'HEAD', capture=True)
+                short = ['--short'] if step.get('short') else []
+                captured[step['name']] = git(directory, 'rev-parse', *short, 'HEAD', capture=True)
         except subprocess.CalledProcessError as exc:
             raise CaseError(f'case {case_id}: {where}: {kind} failed, git exited {exc.returncode}') from exc
     return fill(case['evidence'], 'evidence')

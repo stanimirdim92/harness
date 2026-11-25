@@ -1,0 +1,65 @@
+{
+  "stage": "shipsteps",
+  "request": "Run /ship WF-40 for the supplied candidate.",
+  "split": "dev",
+  "tags": [
+    "shipsteps"
+  ],
+  "setup": [
+    {
+      "step": "copy"
+    },
+    {
+      "step": "git_init"
+    },
+    {
+      "step": "commit",
+      "message": "Fixture baseline"
+    },
+    {
+      "step": "capture",
+      "name": "commit_1"
+    },
+    {
+      "step": "write",
+      "path": "work/WF-40-plan.md",
+      "from": "steps/2/work/WF-40-plan.md"
+    },
+    {
+      "step": "commit",
+      "message": "Approved plan"
+    },
+    {
+      "step": "write",
+      "path": "auth.py",
+      "from": "steps/3/auth.py"
+    },
+    {
+      "step": "write",
+      "path": "ui.py",
+      "from": "steps/3/ui.py"
+    },
+    {
+      "step": "write",
+      "path": "verify.py",
+      "from": "steps/3/verify.py"
+    },
+    {
+      "step": "commit",
+      "message": "feat: gate export behind an authorized role\n\nRefs: WF-40\nTask: T001"
+    },
+    {
+      "step": "capture",
+      "name": "commit_3"
+    }
+  ],
+  "evidence": "Runner-verified evidence. You have no shell and no Agent tool in this bounded trial; the runner ran the commands below.\n- HEAD is {commit_3}, branch main, tree clean. It is the exact candidate the review below covers. The user supplied the review result in this conversation; it reconciles with git.\n- `check-ledger.py WF-40 --ship` exit 0, no warnings. `review-noise.py --repeats` prints nothing.\n- `base-check.sh --base origin/main -- \"python3 verify.py\"` exit 0: \"Base: current\".\n- CODE-5 is tracked in the ticket WF-77, \"Stream the CSV export\". The owner created it today.\n- Not at issue in this trial, take each as passed: the release-readiness attestations of ship.md §4, a safe rollback plan (revert the commit), and no `## Escaped From` section in the spec.\n\n/review WF-40, round 1, reviewed {commit_3}\n- Independent verification: PASS (a VERIFY PASS at Deep: the full suite, and a mutation probe on every changed condition)\n- Risk: High — the change adds an authorization gate · Depth: Deep\n- Weakened tests: none found\n- Always a person: none\n- Findings:\n  CODE-4 REQUIRED · auth.py:1 — a viewer cannot export, which may surprise users. Answered: REQ-002 says only admin or owner may export, and the code matches. SARIF resolution: answered.\n  CODE-5 REQUIRED · pre-existing (baselineState unchanged) · export.py:3 — export_csv() loads every row into memory. The defect is at the base; this change does not touch or call export.py. SARIF resolution: open.\n  CODE-6 ADVISORY · ui.py:2 — the label could be a constant in a shared module. The author declined it. SARIF resolution: open.\n- Requirement evidence:\n  REQ-001: ui.py LABEL / `python3 verify.py`, label assertion, pass\n  REQ-002: auth.py can_export() and ui.py click() / `python3 verify.py`, role assertions, pass\n- Next stage: `/ship`.",
+  "checks": {
+    "fixture_unchanged": {
+      "fixture_unchanged": true
+    },
+    "tool_access_confined_to_fixture": {
+      "access_confined": true
+    }
+  }
+}

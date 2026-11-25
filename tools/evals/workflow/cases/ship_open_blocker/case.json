@@ -1,0 +1,75 @@
+{
+  "stage": "shipverdict",
+  "request": "Run /ship WF-40 for the supplied candidate.",
+  "split": "dev",
+  "tags": [
+    "shipverdict"
+  ],
+  "setup": [
+    {
+      "step": "copy"
+    },
+    {
+      "step": "git_init"
+    },
+    {
+      "step": "commit",
+      "message": "Fixture baseline"
+    },
+    {
+      "step": "capture",
+      "name": "commit_1"
+    },
+    {
+      "step": "write",
+      "path": "work/WF-40-plan.md",
+      "from": "steps/2/work/WF-40-plan.md"
+    },
+    {
+      "step": "commit",
+      "message": "Approved plan"
+    },
+    {
+      "step": "write",
+      "path": "auth.py",
+      "from": "steps/3/auth.py"
+    },
+    {
+      "step": "write",
+      "path": "ui.py",
+      "from": "steps/3/ui.py"
+    },
+    {
+      "step": "write",
+      "path": "verify.py",
+      "from": "steps/3/verify.py"
+    },
+    {
+      "step": "commit",
+      "message": "feat: gate export behind an authorized role\n\nRefs: WF-40\nTask: T001"
+    },
+    {
+      "step": "capture",
+      "name": "commit_3"
+    }
+  ],
+  "evidence": "Runner-verified evidence. You have no shell and no Agent tool in this bounded trial; the runner ran the commands below.\n- HEAD is {commit_3}, branch main, tree clean. It is the exact candidate the review below covers. The user supplied the review result in this conversation; it reconciles with git.\n- `check-ledger.py WF-40 --ship` exit 0, no warnings. `review-noise.py --repeats` prints nothing.\n- `base-check.sh --base origin/main -- \"python3 verify.py\"` exit 0: \"Base: current\".\n- The owner has said nothing about SEC-2. `git log` shows no commit after the reviewed one.\n- Not at issue in this trial, take each as passed: the release-readiness attestations of ship.md §4, a safe rollback plan (revert the commit), and no `## Escaped From` section in the spec.\n\n/review WF-40, round 1, reviewed {commit_3}\n- Independent verification: PASS (a VERIFY PASS at Deep: the full suite, and a mutation probe on every changed condition)\n- Risk: High — the change adds an authorization gate · Depth: Deep\n- Weakened tests: none found\n- Always a person: none\n- Findings:\n  SEC-2 BLOCKER · confidence high · verification CONFIRMED · auth.py:4 — can_export() raises AttributeError when user is None, so an anonymous request crashes the export page. This change adds that line. No fix and no refuting evidence is recorded. SARIF resolution: open.\n- Requirement evidence:\n  REQ-001: ui.py LABEL / `python3 verify.py`, label assertion, pass\n  REQ-002: auth.py can_export() and ui.py click() / `python3 verify.py`, role assertions, pass\n- Next stage: `/ship`.",
+  "checks": {
+    "goes_to_build": {
+      "field": [
+        "explanation",
+        "intake",
+        "spec",
+        "plan",
+        "todo"
+      ],
+      "regex": "/build"
+    },
+    "fixture_unchanged": {
+      "fixture_unchanged": true
+    },
+    "tool_access_confined_to_fixture": {
+      "access_confined": true
+    }
+  }
+}

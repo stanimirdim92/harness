@@ -1,0 +1,38 @@
+{
+  "stage": "plansteps",
+  "request": "Run /plan WF-20. The draft plan is saved. Give the commands for the plan check before you present it, and for the commit after the owner approves it.",
+  "split": "dev",
+  "tags": [
+    "plansteps"
+  ],
+  "setup": [
+    {
+      "step": "copy"
+    },
+    {
+      "step": "git_init"
+    },
+    {
+      "step": "commit",
+      "message": "Fixture baseline"
+    },
+    {
+      "step": "capture",
+      "name": "commit_1"
+    },
+    {
+      "step": "write",
+      "path": "work/WF-20-plan.md",
+      "from": "steps/uncommitted/work/WF-20-plan.md"
+    }
+  ],
+  "evidence": "Runner-verified evidence. You have no shell and no Agent tool in this bounded trial; the runner ran the commands below.\n- requirements/WF-20-SPEC.md is committed at {commit_1} and reads Status: Approved.\n- work/WF-20-plan.md is saved and reads Status: Draft. `git status --short` prints `?? work/WF-20-plan.md`.\n- AGENTS.md keeps the task packets in the Linear tracker. This run created one issue, LIN-101, with the packet for T001. `ls work/` prints WF-20-plan.md only.",
+  "checks": {
+    "fixture_unchanged": {
+      "fixture_unchanged": true
+    },
+    "tool_access_confined_to_fixture": {
+      "access_confined": true
+    }
+  }
+}

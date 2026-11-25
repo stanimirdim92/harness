@@ -1,0 +1,70 @@
+{
+  "stage": "gate",
+  "request": "Run /build WF-30 for tasks T001 and T002 using the supplied plan, task packets, and repository evidence.",
+  "split": "dev",
+  "tags": [
+    "gate"
+  ],
+  "setup": [
+    {
+      "step": "copy"
+    },
+    {
+      "step": "git_init"
+    },
+    {
+      "step": "commit",
+      "message": "Fixture baseline"
+    },
+    {
+      "step": "capture",
+      "name": "commit_1"
+    },
+    {
+      "step": "write",
+      "path": "work/WF-30-plan.md",
+      "from": "steps/2/work/WF-30-plan.md"
+    },
+    {
+      "step": "write",
+      "path": "work/WF-30-todo.md",
+      "from": "steps/2/work/WF-30-todo.md"
+    },
+    {
+      "step": "commit",
+      "message": "Approved plan"
+    },
+    {
+      "step": "write",
+      "path": "requirements/WF-30-SPEC.md",
+      "from": "steps/3/requirements/WF-30-SPEC.md"
+    },
+    {
+      "step": "commit",
+      "message": "Spec: the label reads Save"
+    }
+  ],
+  "evidence": "Runner-verified evidence. You have no shell and no Agent tool in this bounded trial; the runner ran the commands below.\n- work/WF-30-plan.md is committed and reads Status: Approved. requirements/WF-30-SPEC.md is committed and reads Status: Approved. Tree clean.\n- The plan's spec pin git-commit:{commit_1}:requirements/WF-30-SPEC.md resolves. `git show` of it differs from the working copy:\n\ndiff --git a/requirements/WF-30-SPEC.md b/requirements/WF-30-SPEC.md\nindex 53d8418..360dec9 100644\n--- a/requirements/WF-30-SPEC.md\n+++ b/requirements/WF-30-SPEC.md\n@@ -14,11 +14,11 @@ Modified: REQ-001 label. Added: REQ-002 summary.\n \n ### Requirement: REQ-001 — Action label\n Source: user request\n-The export action label must read Download.\n+The export action label must read Save.\n #### Scenario: Export action is visible\n - GIVEN the existing export action\n - WHEN it is displayed\n-- THEN the label is Download.\n+- THEN the label is Save.\n \n ### Requirement: REQ-002 — Export summary\n Source: user request",
+  "checks": {
+    "nothing_dispatched": {
+      "field": "dispatch",
+      "not_regex": "(?im)^[\\s\\-*]*`?(ws-label|ws-report)`?\\s*:\\s*(concurrent|queued)\\b"
+    },
+    "plan_needs_replan": {
+      "status_line": "Plan",
+      "field": "explanation",
+      "equals": "needs replan"
+    },
+    "spec_needs_reapproval": {
+      "status_line": "Spec",
+      "field": "explanation",
+      "equals": "needs reapproval"
+    },
+    "fixture_unchanged": {
+      "fixture_unchanged": true
+    },
+    "tool_access_confined_to_fixture": {
+      "access_confined": true
+    }
+  }
+}

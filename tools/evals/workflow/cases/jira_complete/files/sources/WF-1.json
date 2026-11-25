@@ -1,0 +1,20 @@
+{
+  "title": "Export records",
+  "children": [
+    "WF-2",
+    "WF-3"
+  ],
+  "links": [
+    "WF-5"
+  ],
+  "description": "Export filtered records as CSV.",
+  "comments": [],
+  "key": "WF-1",
+  "status": "Open",
+  "type": "Story",
+  "priority": "Medium",
+  "assignee": "Fixture owner",
+  "parent": null,
+  "enumeration_complete": true,
+  "comments_complete": true
+}

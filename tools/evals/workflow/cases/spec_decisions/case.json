@@ -1,0 +1,34 @@
+{
+  "stage": "spec",
+  "request": "Run /spec for WF-10 as new work. User decisions: call the Google Places API from this application directly, without the companion service; database-enforced uniqueness is required for all specified identity signals. No approval has been given.",
+  "split": "dev",
+  "tags": [
+    "spec"
+  ],
+  "evidence": "Supplied completed intake WF-10: search businesses; duplicate signals are Google Place ID, normalized root domain, name+ZIP, and phone. Concurrent submissions matching ANY signal must produce at most one advertiser. Failed enrichment must retry or enter a visible failure state, never remain pending forever. No design artifact is required. Current recon: the existing companion service supports single-place lookup only. Existing application checks race. Root domain lives on a separate website table; no concurrency-safe identity mechanism has been established for all writers. This is factual evidence, not a decision to reuse those limitations. The user's decisions in the request are binding. No human has approved exclusions. Repository evidence is supplied; further recon/external access is unavailable in this bounded trial.",
+  "checks": {
+    "stops_before_ready": {
+      "state": "blocked"
+    },
+    "no_dispatchable_tasks": {
+      "field": "todo",
+      "not_regex": "(?m)^(?:#{1,3} |Status:|Handoff:|\\*\\*Requirements:|- \\[ \\])"
+    },
+    "no_ready_handoff": {
+      "field": [
+        "explanation",
+        "intake",
+        "spec",
+        "plan",
+        "todo"
+      ],
+      "not_regex": "(?m)^Handoff:\\s*Ready for /build"
+    },
+    "fixture_unchanged": {
+      "fixture_unchanged": true
+    },
+    "tool_access_confined_to_fixture": {
+      "access_confined": true
+    }
+  }
+}

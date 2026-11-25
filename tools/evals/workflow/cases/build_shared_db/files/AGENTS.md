@@ -1,0 +1,1 @@
+Specs live in requirements/. Plans and tasks live in work/. Verification command: bash tests/run.sh. It migrates and truncates the shared Postgres database from .env (DB_DATABASE=app_test) before every run. There is no per-worktree, per-process, or in-memory database configuration; every checkout uses the same database.

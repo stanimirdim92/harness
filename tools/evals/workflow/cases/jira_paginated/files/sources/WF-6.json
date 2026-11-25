@@ -1,0 +1,15 @@
+{
+  "title": "Export initiative",
+  "children": [],
+  "links": [],
+  "description": "CSV downloads use UTF-8.",
+  "comments": [],
+  "key": "WF-6",
+  "status": "Open",
+  "type": "Sub-task",
+  "priority": "Medium",
+  "assignee": "Fixture owner",
+  "parent": null,
+  "enumeration_complete": true,
+  "comments_complete": true
+}

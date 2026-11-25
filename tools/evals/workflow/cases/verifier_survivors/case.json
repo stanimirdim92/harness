@@ -1,0 +1,33 @@
+{
+  "stage": "verifier",
+  "request": "You are the verifier for the supplied packet. Your mutation probes have run; decide what each result needs.",
+  "split": "dev",
+  "tags": [
+    "verifier"
+  ],
+  "setup": [
+    {
+      "step": "copy"
+    },
+    {
+      "step": "git_init"
+    },
+    {
+      "step": "commit",
+      "message": "feat: member discount\n\nRefs: WF-60\nTask: T001"
+    },
+    {
+      "step": "capture",
+      "name": "commit_1"
+    }
+  ],
+  "evidence": "Verification packet, ticket WF-60: candidate HEAD {commit_1}, clean tree. Risk · Depth: Medium · Standard. Requirements REQ-001 and REQ-002 in requirements/WF-60-SPEC.md. Verification command: python3 verify.py.\n\nRunner-verified evidence. You have no shell and no Agent tool in this bounded trial; the runner ran the commands below.\n- `python3 verify.py` passes on the candidate (exit 0).\n- Your probe script ran three mutants, one per run. After each run it restored pricing.py, and `git diff --quiet -- pricing.py` passed.\n  M1 pricing.py: `total >= 100` became `total > 100`. `python3 verify.py` passed (exit 0).\n  M2 pricing.py: `if n < 0:` became `if n <= 0:`. `python3 verify.py` passed (exit 0).\n  M3 pricing.py: `total >= 100 and member` became `total >= 100 or member`. `python3 verify.py` failed (exit 1, AssertionError).\n- The runner runs any assertion you add to verify.py against the candidate and against each mutant after this trial.",
+  "checks": {
+    "fixture_unchanged": {
+      "fixture_unchanged": true
+    },
+    "tool_access_confined_to_fixture": {
+      "access_confined": true
+    }
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "stage": "fix",
+  "request": "Run /build WF-40 review fixes.",
+  "split": "dev",
+  "tags": [
+    "fix"
+  ],
+  "setup": [
+    {
+      "step": "copy"
+    },
+    {
+      "step": "git_init"
+    },
+    {
+      "step": "commit",
+      "message": "Fixture baseline"
+    },
+    {
+      "step": "capture",
+      "name": "commit_1"
+    },
+    {
+      "step": "write",
+      "path": "work/WF-40-plan.md",
+      "from": "steps/2/work/WF-40-plan.md"
+    },
+    {
+      "step": "commit",
+      "message": "Approved plan"
+    },
+    {
+      "step": "write",
+      "path": "auth.py",
+      "from": "steps/3/auth.py"
+    },
+    {
+      "step": "write",
+      "path": "ui.py",
+      "from": "steps/3/ui.py"
+    },
+    {
+      "step": "write",
+      "path": "verify.py",
+      "from": "steps/3/verify.py"
+    },
+    {
+      "step": "commit",
+      "message": "feat: gate export behind an authorized role\n\nRefs: WF-40\nTask: T001"
+    },
+    {
+      "step": "capture",
+      "name": "commit_3"
+    },
+    {
+      "step": "write",
+      "path": "docs/reviews/WF-40-notes.md",
+      "from": "steps/4/docs/reviews/WF-40-notes.md"
+    },
+    {
+      "step": "commit",
+      "message": "docs: reviewer notes for WF-40\n\nRefs: WF-40"
+    }
+  ],
+  "evidence": "Runner-verified evidence. You have no shell and no Agent tool in this bounded trial; the runner ran the commands below.\n- work/WF-40-plan.md and requirements/WF-40-SPEC.md are committed and read Status: Approved; the spec pin resolves with an empty diff. Tree clean.\n- `review-sarif.py latest WF-40 --open` prints reviewedCommit {commit_3} and one open finding, with baselineState new:\n  CODE-1 REQUIRED auth.py:4 — can_export() raises AttributeError when user is None. Failure scenario: an anonymous request passes user=None. Recommendation: treat a missing user as unauthorized.\n- `review-sarif.py round WF-40` prints counted=1.\n- `git diff --name-only {commit_3} HEAD` prints one path: docs/reviews/WF-40-notes.md. `git log {commit_3}..HEAD --format=%s` prints \"docs: reviewer notes for WF-40\". The review SARIF is docs/reviews/WF-40.sarif, and that commit does not touch it.",
+  "checks": {
+    "names_the_review": {
+      "field": [
+        "explanation",
+        "intake",
+        "spec",
+        "plan",
+        "todo"
+      ],
+      "regex": "/review"
+    },
+    "fixture_unchanged": {
+      "fixture_unchanged": true
+    },
+    "tool_access_confined_to_fixture": {
+      "access_confined": true
+    }
+  }
+}

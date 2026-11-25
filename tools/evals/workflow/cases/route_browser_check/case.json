@@ -1,0 +1,78 @@
+{
+  "stage": "reviewroute",
+  "request": "Run /review WF-40. The gates passed and the reviewers have returned; route their finding.",
+  "split": "dev",
+  "tags": [
+    "reviewroute"
+  ],
+  "setup": [
+    {
+      "step": "copy"
+    },
+    {
+      "step": "git_init"
+    },
+    {
+      "step": "commit",
+      "message": "Fixture baseline"
+    },
+    {
+      "step": "capture",
+      "name": "commit_1"
+    },
+    {
+      "step": "write",
+      "path": "work/WF-40-plan.md",
+      "from": "steps/2/work/WF-40-plan.md"
+    },
+    {
+      "step": "commit",
+      "message": "Approved plan"
+    },
+    {
+      "step": "write",
+      "path": "auth.py",
+      "from": "steps/3/auth.py"
+    },
+    {
+      "step": "write",
+      "path": "ui.py",
+      "from": "steps/3/ui.py"
+    },
+    {
+      "step": "write",
+      "path": "verify.py",
+      "from": "steps/3/verify.py"
+    },
+    {
+      "step": "commit",
+      "message": "feat: gate export behind an authorized role\n\nRefs: WF-40\nTask: T001"
+    },
+    {
+      "step": "capture",
+      "name": "commit_3"
+    }
+  ],
+  "evidence": "Runner-verified evidence. You have no shell and no Agent tool in this bounded trial; the runner ran the commands below.\n- Review round 1 for WF-40. The candidate gate and the verification gate passed: the BUILD COMPLETE and a VERIFY PASS at Deep cover HEAD {commit_3}. Tree clean.\n- The reviewers returned one finding:\n  CODE-3 ADVISORY ui.py:2 — the Download label may wrap on a narrow screen. It asks for a check in a browser: open the export page, set the width to 360px, and look for a wrapped or clipped label.\n- No dev server runs on this machine now: `curl -sI http://127.0.0.1:8000/` prints \"connection refused\". The chrome-devtools MCP server is configured for this project. No verifier has tried this check.",
+  "checks": {
+    "check_goes_to_the_verifier": {
+      "decision": "CODE-3",
+      "field": "dispatch",
+      "verdicts": [
+        "verifier",
+        "owner"
+      ],
+      "equals": "verifier"
+    },
+    "next_step_is_test": {
+      "field": "dispatch",
+      "regex": "/test"
+    },
+    "fixture_unchanged": {
+      "fixture_unchanged": true
+    },
+    "tool_access_confined_to_fixture": {
+      "access_confined": true
+    }
+  }
+}

@@ -1,0 +1,1 @@
+Specs live in requirements/. Plans and tasks live in work/. Verification command: python3 verify.py. No external tracker. This fixture has one familiar UI action, no schema/public-contract/lifecycle change.

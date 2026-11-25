@@ -1,0 +1,105 @@
+{
+  "stage": "fix",
+  "request": "Run /build WF-40 review fixes.",
+  "split": "dev",
+  "tags": [
+    "fix"
+  ],
+  "setup": [
+    {
+      "step": "copy"
+    },
+    {
+      "step": "git_init"
+    },
+    {
+      "step": "commit",
+      "message": "Fixture baseline"
+    },
+    {
+      "step": "capture",
+      "name": "commit_1"
+    },
+    {
+      "step": "write",
+      "path": "work/WF-40-plan.md",
+      "from": "steps/2/work/WF-40-plan.md"
+    },
+    {
+      "step": "commit",
+      "message": "Approved plan"
+    },
+    {
+      "step": "write",
+      "path": "auth.py",
+      "from": "steps/3/auth.py"
+    },
+    {
+      "step": "write",
+      "path": "ui.py",
+      "from": "steps/3/ui.py"
+    },
+    {
+      "step": "write",
+      "path": "verify.py",
+      "from": "steps/3/verify.py"
+    },
+    {
+      "step": "commit",
+      "message": "feat: gate export behind an authorized role\n\nRefs: WF-40\nTask: T001"
+    },
+    {
+      "step": "capture",
+      "name": "commit_3"
+    },
+    {
+      "step": "write",
+      "path": "auth.py",
+      "from": "steps/4/auth.py"
+    },
+    {
+      "step": "write",
+      "path": "verify.py",
+      "from": "steps/4/verify.py"
+    },
+    {
+      "step": "commit",
+      "message": "fix: refuse the export when no user is given\n\nRefs: WF-40\nTask: CODE-1"
+    },
+    {
+      "step": "capture",
+      "name": "commit_4_short",
+      "short": true
+    }
+  ],
+  "evidence": "Runner-verified evidence. You have no shell and no Agent tool in this bounded trial; the runner ran the commands below.\n- work/WF-40-plan.md and requirements/WF-40-SPEC.md are committed and read Status: Approved; the spec pin resolves with an empty diff. Tree clean.\n- `review-sarif.py latest WF-40 --open` prints reviewedCommit {commit_3} and two open findings, both with baselineState new:\n  CODE-1 REQUIRED auth.py:4 — can_export() raises AttributeError when user is None. Failure scenario: an anonymous request passes user=None. Recommendation: treat a missing user as unauthorized.\n  CODE-2 REQUIRED auth.py:4 — can_export() raises AttributeError when user is a role string, not a dict. Failure scenario: the batch exporter passes \"admin\". Recommendation: accept only a mapping and refuse anything else.\n- `review-sarif.py round WF-40` prints counted=1.\n- `git diff --name-only {commit_3} HEAD` prints: auth.py, verify.py.\n- `git log {commit_3}..HEAD --format=\"%h %(trailers:key=Task,valueonly) %(trailers:key=Refs,valueonly)\"` prints one line: \"{commit_4_short} CODE-1 WF-40\". That commit comes from an earlier `/build WF-40 review fixes` run in another session. That run ended BUILD BLOCKED: CODE-1 fixed in {commit_4_short}, CODE-2 blocked because the batch exporter's client stub was absent.\n- The user has since put the stub on the test path, outside this repository. `python3 verify.py` passes on HEAD (exit 0). Tree clean.\n- No `/review` round ran after {commit_3}.",
+  "checks": {
+    "rerun_starts": {
+      "state": "decided"
+    },
+    "fixed_finding_left_out": {
+      "decision": "CODE-1",
+      "field": "dispatch",
+      "verdicts": [
+        "dispatch",
+        "skip"
+      ],
+      "equals": "skip"
+    },
+    "blocked_finding_dispatched": {
+      "decision": "CODE-2",
+      "field": "dispatch",
+      "verdicts": [
+        "dispatch",
+        "skip"
+      ],
+      "equals": "dispatch"
+    },
+    "fixture_unchanged": {
+      "fixture_unchanged": true
+    },
+    "tool_access_confined_to_fixture": {
+      "access_confined": true
+    }
+  }
+}

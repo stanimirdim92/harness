@@ -1,0 +1,99 @@
+{
+  "stage": "testgate",
+  "request": "Run /test WF-40 for the supplied candidate. Decide the verifier dispatch only.",
+  "split": "dev",
+  "tags": [
+    "testgate"
+  ],
+  "setup": [
+    {
+      "step": "copy"
+    },
+    {
+      "step": "git_init"
+    },
+    {
+      "step": "commit",
+      "message": "Fixture baseline"
+    },
+    {
+      "step": "capture",
+      "name": "commit_1"
+    },
+    {
+      "step": "write",
+      "path": "work/WF-40-plan.md",
+      "from": "steps/2/work/WF-40-plan.md"
+    },
+    {
+      "step": "commit",
+      "message": "Approved plan"
+    },
+    {
+      "step": "write",
+      "path": "auth.py",
+      "from": "steps/3/auth.py"
+    },
+    {
+      "step": "write",
+      "path": "ui.py",
+      "from": "steps/3/ui.py"
+    },
+    {
+      "step": "write",
+      "path": "verify.py",
+      "from": "steps/3/verify.py"
+    },
+    {
+      "step": "commit",
+      "message": "feat: gate export behind an authorized role\n\nRefs: WF-40\nTask: T001"
+    },
+    {
+      "step": "capture",
+      "name": "commit_3"
+    },
+    {
+      "step": "write",
+      "path": "auth.py",
+      "from": "steps/4/auth.py"
+    },
+    {
+      "step": "write",
+      "path": "verify.py",
+      "from": "steps/4/verify.py"
+    },
+    {
+      "step": "commit",
+      "message": "fix: refuse the export when no user is given\n\nRefs: WF-40\nTask: CODE-1"
+    },
+    {
+      "step": "capture",
+      "name": "commit_4"
+    },
+    {
+      "step": "capture",
+      "name": "commit_4_short",
+      "short": true
+    }
+  ],
+  "evidence": "Runner-verified evidence. You have no shell and no Agent tool in this bounded trial; the runner ran the commands below.\n- Review round 1 reviewed {commit_3}. Its candidate had a VERIFY PASS at Deep: the full suite, and a mutation probe on every changed condition. Risk · Depth: High · Deep (the change adds an authorization gate). The round left one open REQUIRED finding, CODE-1.\n- `git log {commit_3}..HEAD --format=\"%h %s %(trailers:key=Task,valueonly)\"` prints: \"{commit_4_short} fix: refuse the export when no user is given CODE-1\". The first commit comes from `/build WF-40 review fixes`. HEAD is {commit_4}. Tree clean.\n- The user supplied the message below in this conversation; it reconciles with git.\n\nBUILD COMPLETE (review fixes)\n- Repository root: {directory}; branch main; HEAD {commit_4}; commit range {commit_3}..{commit_4}; tree clean\n- CODE-1: fixed ({commit_4_short}), test-first. `python3 verify.py` — pass (exit 0). No other instance of the failure nearby.\n- The plan and todo are unchanged.\n\nNo `/review` round has run on {commit_4}.",
+  "checks": {
+    "verifies_now": {
+      "state": "decided"
+    },
+    "packet_scope_is_fix_diff": {
+      "field": "dispatch",
+      "regex": "(?i)Scope:\\W*fix diff"
+    },
+    "no_full_suite": {
+      "field": "dispatch",
+      "regex": "(?i)Full suite:\\W*do not run"
+    },
+    "fixture_unchanged": {
+      "fixture_unchanged": true
+    },
+    "tool_access_confined_to_fixture": {
+      "access_confined": true
+    }
+  }
+}

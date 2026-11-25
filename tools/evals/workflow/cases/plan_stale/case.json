@@ -1,0 +1,50 @@
+{
+  "stage": "plan",
+  "request": "Run /plan WF-20 using the supplied spec and repository evidence.",
+  "split": "dev",
+  "tags": [
+    "plan"
+  ],
+  "setup": [
+    {
+      "step": "copy"
+    },
+    {
+      "step": "git_init"
+    },
+    {
+      "step": "commit",
+      "message": "Fixture baseline"
+    },
+    {
+      "step": "capture",
+      "name": "commit_1"
+    }
+  ],
+  "evidence": "Runner-verified Git evidence: spec committed, git diff HEAD -- requirements/WF-20-SPEC.md is empty. git log -1 --format=%H -- requirements/WF-20-SPEC.md returns {commit_1}. Current bounded recon: ui.py owns label and callback, verify.py is the existing test precedent; exact verification command python3 verify.py. No test result is claimed. All evidence is current for this isolated directory. You have no shell; use this supplied evidence and read the files. Relevant sources and targets are under this directory only.",
+  "checks": {
+    "stops_before_ready": {
+      "state": "blocked"
+    },
+    "no_dispatchable_tasks": {
+      "field": "todo",
+      "not_regex": "(?m)^(?:#{1,3} |Status:|Handoff:|\\*\\*Requirements:|- \\[ \\])"
+    },
+    "no_ready_handoff": {
+      "field": [
+        "explanation",
+        "intake",
+        "spec",
+        "plan",
+        "todo"
+      ],
+      "not_regex": "(?m)^Handoff:\\s*Ready for /build"
+    },
+    "fixture_unchanged": {
+      "fixture_unchanged": true
+    },
+    "tool_access_confined_to_fixture": {
+      "access_confined": true
+    }
+  }
+}

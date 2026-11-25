@@ -1,0 +1,1 @@
+Specs live in requirements/. Plans and tasks live in work/. Verification command: python3 verify.py. No external tracker. partner_config.py is generated from the partner's hosted config on every deploy; this team cannot change that config. Contract WF-3 forbids overriding a partner label in code.

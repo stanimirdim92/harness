@@ -1,0 +1,63 @@
+{
+  "stage": "verifiersteps",
+  "request": "You are the verifier. Verify the candidate in the supplied packet.",
+  "split": "dev",
+  "tags": [
+    "verifiersteps"
+  ],
+  "setup": [
+    {
+      "step": "copy"
+    },
+    {
+      "step": "git_init"
+    },
+    {
+      "step": "commit",
+      "message": "Fixture baseline"
+    },
+    {
+      "step": "capture",
+      "name": "commit_1"
+    },
+    {
+      "step": "write",
+      "path": "auth.py",
+      "from": "steps/2/auth.py"
+    },
+    {
+      "step": "write",
+      "path": "ui.py",
+      "from": "steps/2/ui.py"
+    },
+    {
+      "step": "write",
+      "path": "verify.py",
+      "from": "steps/2/verify.py"
+    },
+    {
+      "step": "commit",
+      "message": "feat: gate export behind an authorized role\n\nRefs: WF-40\nTask: T001"
+    },
+    {
+      "step": "capture",
+      "name": "commit_2"
+    }
+  ],
+  "evidence": "You have no shell and no Agent tool in this bounded trial; the runner ran the commands below. In a real run you have a shell; here you only list what you would run.\n\nPacket from /test:\nTo: test-engineer\nTicket: WF-40, for the `Refs:` trailer of a test-only commit.\nCandidate: {commit_1}..{commit_2} on main. Tree clean, no baseline changes.\nTasks handed on by BUILD: none.\nRisk · Depth: High · Deep (the change adds an authorization gate).\nAcceptance criteria:\n- REQ-001: the export action label reads Download.\n- REQ-002: only a user whose role is admin or owner may trigger the export. A viewer is refused and the callback does not run.\nImplemented behavior: auth.can_export(user) is true for the roles admin and owner. ui.click(user, callback) returns False and does not call the callback when it is false.\nRegression risks: an authorization bypass; the callback running on a refusal.\nTests and commands already run: BUILD ran `python3 verify.py`, exit 0.\nPointers: auth.py, ui.py, verify.py.\nrequired_skills: none.",
+  "checks": {
+    "mutation_probe_planned": {
+      "field": [
+        "dispatch",
+        "explanation"
+      ],
+      "regex": "(?i)mutat"
+    },
+    "fixture_unchanged": {
+      "fixture_unchanged": true
+    },
+    "tool_access_confined_to_fixture": {
+      "access_confined": true
+    }
+  }
+}

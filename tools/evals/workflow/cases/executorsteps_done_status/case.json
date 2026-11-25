@@ -1,0 +1,43 @@
+{
+  "stage": "executorsteps",
+  "request": "You are the executor for the supplied task packet. The work is done and verified; make the completing commit.",
+  "split": "dev",
+  "tags": [
+    "executorsteps"
+  ],
+  "setup": [
+    {
+      "step": "copy"
+    },
+    {
+      "step": "git_init"
+    },
+    {
+      "step": "commit",
+      "message": "Fixture baseline"
+    },
+    {
+      "step": "write",
+      "path": "ui.py",
+      "from": "steps/uncommitted/ui.py"
+    },
+    {
+      "step": "write",
+      "path": "verify.py",
+      "from": "steps/uncommitted/verify.py"
+    }
+  ],
+  "evidence": "You have no shell and no Agent tool in this bounded trial; the runner ran the commands below.\n\nPacket from /build:\n- task: T001, the export action label reads Download;\n- requirements: [REQ-001];\n- acceptance criteria: the label is Download;\n- dependencies: none; workstream: ws-main;\n- checkout: this directory, sequential inherited checkout;\n- expected scope: ui.py, verify.py;\n- verification: python3 verify.py;\n- required_skills: executor-development-discipline;\n- is_last_selected_task_in_workstream: yes;\n- todo: work/WF-20-todo.md, task T001;\n- ticket: WF-20.\n\nRunner-verified evidence:\n- ui.py and verify.py hold the change, uncommitted. `git status --short` prints ` M ui.py` and ` M verify.py`.\n- `python3 verify.py` failed before the change to ui.py (the new assertion, RED) and exits 0 after it.",
+  "checks": {
+    "todo_in_the_commit": {
+      "field": "dispatch",
+      "regex": "WF-20-todo\\.md"
+    },
+    "fixture_unchanged": {
+      "fixture_unchanged": true
+    },
+    "tool_access_confined_to_fixture": {
+      "access_confined": true
+    }
+  }
+}

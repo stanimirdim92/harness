@@ -1,0 +1,55 @@
+{
+  "stage": "gate",
+  "request": "Run /build WF-30 for tasks T001 and T002 using the supplied plan, task packets, and repository evidence.",
+  "split": "dev",
+  "tags": [
+    "gate"
+  ],
+  "setup": [
+    {
+      "step": "copy"
+    },
+    {
+      "step": "git_init"
+    },
+    {
+      "step": "commit",
+      "message": "Fixture baseline"
+    },
+    {
+      "step": "capture",
+      "name": "commit_1"
+    },
+    {
+      "step": "write",
+      "path": "work/WF-30-plan.md",
+      "from": "steps/2/work/WF-30-plan.md"
+    },
+    {
+      "step": "write",
+      "path": "work/WF-30-todo.md",
+      "from": "steps/2/work/WF-30-todo.md"
+    },
+    {
+      "step": "commit",
+      "message": "Approved plan"
+    }
+  ],
+  "evidence": "Runner-verified evidence. You have no shell and no Agent tool in this bounded trial; the runner ran the commands below.\n- requirements/WF-30-SPEC.md and work/WF-30-plan.md are committed and both read Status: Approved. The plan's spec pin git-commit:{commit_1}:requirements/WF-30-SPEC.md resolves, and `git show` of it is identical to the working copy (empty diff). Tree clean.\n- `bash bin/worktree-setup.sh` ran in this checkout and failed at `pip install -r requirements.txt` with exit 1: \"ERROR: No matching distribution found for exportlib==9.9\".\n- `rg -n -i \"override|skip setup|setup fail\" .` prints nothing.",
+  "checks": {
+    "nothing_dispatched": {
+      "field": "dispatch",
+      "not_regex": "(?im)^[\\s\\-*]*`?(ws-label|ws-report)`?\\s*:\\s*(concurrent|queued)\\b"
+    },
+    "route_is_human_decision": {
+      "field": "explanation",
+      "regex": "(?i)human decision"
+    },
+    "fixture_unchanged": {
+      "fixture_unchanged": true
+    },
+    "tool_access_confined_to_fixture": {
+      "access_confined": true
+    }
+  }
+}

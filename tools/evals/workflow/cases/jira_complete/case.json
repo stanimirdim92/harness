@@ -1,0 +1,28 @@
+{
+  "stage": "jira",
+  "request": "Use jira-ticket for WF-1 using the supplied offline Jira source files. Complete intake and stop.",
+  "split": "dev",
+  "tags": [
+    "jira"
+  ],
+  "evidence": "Offline reader: use Read on sources/<KEY>.json. Begin at WF-1. Completeness flags and next-page filenames describe the supplied pagination. No external connector is available or needed for these supplied contents.",
+  "checks": {
+    "completion_state": {
+      "state": "ready_for_review"
+    },
+    "no_later_stage_artifact": {
+      "field": [
+        "spec",
+        "plan",
+        "todo"
+      ],
+      "not_regex": "(?m)^(?:#{1,3} |Status:|Handoff:|\\*\\*Requirements:|- \\[ \\])"
+    },
+    "fixture_unchanged": {
+      "fixture_unchanged": true
+    },
+    "tool_access_confined_to_fixture": {
+      "access_confined": true
+    }
+  }
+}

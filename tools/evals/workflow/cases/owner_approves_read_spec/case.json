@@ -1,0 +1,34 @@
+{
+  "stage": "ownerspec",
+  "request": "Continue /spec WF-50. The owner writes, after reading the presented draft: \"I read the whole spec. I approve it.\"",
+  "split": "dev",
+  "tags": [
+    "ownerspec"
+  ],
+  "setup": [
+    {
+      "step": "copy"
+    },
+    {
+      "step": "git_init"
+    },
+    {
+      "step": "commit",
+      "message": "Fixture baseline"
+    },
+    {
+      "step": "write",
+      "path": "docs/specs/WF-50-SPEC.md",
+      "from": "steps/uncommitted/docs/specs/WF-50-SPEC.md"
+    }
+  ],
+  "evidence": "Runner-verified evidence. You have no shell and no Agent tool in this bounded trial; the runner ran the commands below.\n- docs/specs/WF-50-intake.md is the saved intake for WF-50, fetched on 2026-11-20. The ticket has not changed since.\n- `ls docs/specs/` prints WF-50-intake.md and WF-50-SPEC.md. An earlier turn of this conversation drafted the spec, saved it as Draft and presented it for approval. The skill's Approval Check and `check-spec.py` pass on it, and it has no OPEN QUESTION block. `git status --short` prints `?? docs/specs/WF-50-SPEC.md`.\n- Today is 2026-11-21. The owner gave no name.",
+  "checks": {
+    "fixture_unchanged": {
+      "fixture_unchanged": true
+    },
+    "tool_access_confined_to_fixture": {
+      "access_confined": true
+    }
+  }
+}

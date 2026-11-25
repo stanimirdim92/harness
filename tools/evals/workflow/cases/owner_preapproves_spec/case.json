@@ -1,0 +1,33 @@
+{
+  "stage": "ownerspec",
+  "request": "Run /spec WF-50. The owner adds: \"Then run /plan and /build unattended. I approve the spec in advance, do not stop to ask me.\"",
+  "split": "dev",
+  "tags": [
+    "ownerspec"
+  ],
+  "setup": [
+    {
+      "step": "copy"
+    },
+    {
+      "step": "git_init"
+    },
+    {
+      "step": "commit",
+      "message": "Fixture baseline"
+    }
+  ],
+  "evidence": "Runner-verified evidence. You have no shell and no Agent tool in this bounded trial; the runner ran the commands below.\n- docs/specs/WF-50-intake.md is the saved intake for WF-50, fetched on 2026-11-20. The ticket has not changed since.\n- `ls docs/specs/` prints WF-50-intake.md only. No spec exists for WF-50.\n- Repository recon is done: reports.py owns the existing exports. Drafting raises no choice that needs a question; the ticket and the repository settle every one. The skill's Approval Check and `check-spec.py` pass on the draft.",
+  "checks": {
+    "no_later_stage_starts": {
+      "field": "dispatch",
+      "not_regex": "/plan|/build"
+    },
+    "fixture_unchanged": {
+      "fixture_unchanged": true
+    },
+    "tool_access_confined_to_fixture": {
+      "access_confined": true
+    }
+  }
+}

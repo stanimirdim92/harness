@@ -1,0 +1,1 @@
+Specs live in requirements/. Plans and tasks live in work/. Verification command: python3 verify.py. It is in-process only: no database, queue, cache, network, or fixed port is used by any check. A new checkout is prepared with bin/worktree-setup.sh.

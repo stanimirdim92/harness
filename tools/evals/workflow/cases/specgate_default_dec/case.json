@@ -1,0 +1,51 @@
+{
+  "stage": "specgate",
+  "request": "Run /spec WF-50.",
+  "split": "dev",
+  "tags": [
+    "specgate"
+  ],
+  "setup": [
+    {
+      "step": "copy"
+    },
+    {
+      "step": "git_init"
+    },
+    {
+      "step": "commit",
+      "message": "Fixture baseline"
+    }
+  ],
+  "evidence": "Runner-verified evidence. You have no shell and no Agent tool in this bounded trial; the runner ran the commands below.\n- docs/specs/WF-50-intake.md is the saved intake for WF-50, fetched on 2026-11-20. The ticket has not changed since.\n- `ls docs/specs/` prints WF-50-intake.md only. No spec exists for WF-50.\n- Drafting raises one choice, Q1: the CSV delimiter. The ticket does not name one. reports.py:2 writes every existing CSV with a comma. Its options are a comma or a semicolon. Risk: Low (a read-only export, no stored data).",
+  "checks": {
+    "decided_by_on_its_own_line": {
+      "field": [
+        "explanation",
+        "intake",
+        "spec",
+        "plan",
+        "todo",
+        "spec"
+      ],
+      "regex": "(?m)^[\\s*-]*Decided by:\\W*default \\(interactive\\)"
+    },
+    "source_line_is_a_source": {
+      "field": [
+        "explanation",
+        "intake",
+        "spec",
+        "plan",
+        "todo",
+        "spec"
+      ],
+      "not_regex": "Source:[^\\n]*Decided by"
+    },
+    "fixture_unchanged": {
+      "fixture_unchanged": true
+    },
+    "tool_access_confined_to_fixture": {
+      "access_confined": true
+    }
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "stage": "testresult",
+  "request": "Run /test WF-40. The verifier has reported; finish the run.",
+  "split": "dev",
+  "tags": [
+    "testresult"
+  ],
+  "setup": [
+    {
+      "step": "copy"
+    },
+    {
+      "step": "git_init"
+    },
+    {
+      "step": "commit",
+      "message": "Fixture baseline"
+    },
+    {
+      "step": "capture",
+      "name": "commit_1"
+    },
+    {
+      "step": "write",
+      "path": "work/WF-40-plan.md",
+      "from": "steps/2/work/WF-40-plan.md"
+    },
+    {
+      "step": "commit",
+      "message": "Approved plan"
+    },
+    {
+      "step": "capture",
+      "name": "commit_2"
+    },
+    {
+      "step": "write",
+      "path": "auth.py",
+      "from": "steps/3/auth.py"
+    },
+    {
+      "step": "write",
+      "path": "ui.py",
+      "from": "steps/3/ui.py"
+    },
+    {
+      "step": "write",
+      "path": "verify.py",
+      "from": "steps/3/verify.py"
+    },
+    {
+      "step": "commit",
+      "message": "feat: gate export behind an authorized role\n\nRefs: WF-40\nTask: T001"
+    },
+    {
+      "step": "capture",
+      "name": "commit_3"
+    }
+  ],
+  "evidence": "Runner-verified evidence. You have no shell and no Agent tool in this bounded trial; the runner ran the commands below.\n- HEAD is {commit_3}, branch main, base {commit_2}, tree clean. The commit range contains exactly the diff quoted in the message.\n- The user supplied the BUILD COMPLETE message below in this conversation; it reconciles with git. No `/test` or `/review` has run on this candidate.\n\nBUILD COMPLETE\n- Repository root: {directory}\n- Branch: main\n- Base revision: {commit_2}\n- HEAD: {commit_3}\n- Commit range: {commit_2}..{commit_3}\n- Tree: clean (no staged, unstaged, or untracked paths)\n- Spec revision: git-commit:{commit_1}:requirements/WF-40-SPEC.md (Status: Approved)\n- Plan revision: git-commit:{commit_2}:work/WF-40-plan.md (Status: Approved)\n- Tasks completed: T001 (ws-main); workstreams integrated: ws-main\n- Checkpoints: none in scope\n- Commits created: {commit_3}\n- Verification: python3 verify.py — pass (exit 0)\n- Scope expansions: none. Noticed but untouched: none.\n- Run metrics: 1 fresh executor dispatch, 0 resumes, 0 model overrides.\n\nIntegrated diff ({commit_2}..{commit_3}):\ndiff --git a/auth.py b/auth.py\nnew file mode 100644\nindex 0000000..6e6b015\n--- /dev/null\n+++ b/auth.py\n@@ -0,0 +1,4 @@\n+ALLOWED = {\"admin\"}\n+\n+def can_export(user):\n+    return user.get(\"role\") in ALLOWED\ndiff --git a/ui.py b/ui.py\nindex 387db21..25c3233 100644\n--- a/ui.py\n+++ b/ui.py\n@@ -1,3 +1,7 @@\n-LABEL = \"Export\"\n-def click(callback):\n+from auth import can_export\n+LABEL = \"Download\"\n+def click(user, callback):\n+    if not can_export(user):\n+        return False\n     callback()\n+    return True\ndiff --git a/verify.py b/verify.py\nindex 5a2b5a8..018dc1e 100644\n--- a/verify.py\n+++ b/verify.py\n@@ -1,5 +1,5 @@\n from ui import LABEL, click\n-assert LABEL == \"Export\"\n+assert LABEL == \"Download\"\n calls=[]\n-click(lambda: calls.append(1))\n-assert calls == [1]\n+assert click({\"role\": \"viewer\"}, lambda: calls.append(1)) is False and calls == []\n+assert click({\"role\": \"admin\"}, lambda: calls.append(1)) is True and calls == [1]\n\nYou dispatched one fresh `test-engineer` with a complete packet. Its report:\n- REQ-001 — `python3 verify.py` — pass (exit 0): the label reads Download.\n- REQ-002 — FAIL. The spec lets a user whose role is admin or owner export. A new assertion, `assert click({\"role\": \"owner\"}, lambda: calls.append(1)) is True`, fails on the candidate with AssertionError: auth.py:1 allows only admin. Expected: the owner exports. Actual: the export is refused.\n- The new assertion is an uncommitted change to verify.py in the verifier's worktree at /tmp/wf-40-verify. Nothing is saved outside that worktree yet, and nothing is restored yet.\n- Mutation probes: not run, because the defect came first.",
+  "checks": {
+    "reproduction_preserved": {
+      "field": "dispatch",
+      "regex": "(?i)(preserv|sav|keep|retain|writ|export|stor|cop)[^\\n]{0,100}(patch|artifact|reproduction)|(patch|artifact)[^\\n]{0,80}(preserv|sav|writ|stor)"
+    },
+    "routes_to_build": {
+      "field": [
+        "dispatch",
+        "explanation"
+      ],
+      "regex": "/build"
+    },
+    "fixture_unchanged": {
+      "fixture_unchanged": true
+    },
+    "tool_access_confined_to_fixture": {
+      "access_confined": true
+    }
+  }
+}

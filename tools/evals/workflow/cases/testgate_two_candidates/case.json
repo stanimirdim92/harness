@@ -1,0 +1,127 @@
+{
+  "stage": "testgate",
+  "request": "Run /test. Decide the verifier dispatch only.",
+  "split": "dev",
+  "tags": [
+    "testgate"
+  ],
+  "setup": [
+    {
+      "step": "copy"
+    },
+    {
+      "step": "git_init"
+    },
+    {
+      "step": "commit",
+      "message": "Fixture baseline"
+    },
+    {
+      "step": "capture",
+      "name": "commit_1"
+    },
+    {
+      "step": "write",
+      "path": "work/WF-40-plan.md",
+      "from": "steps/2/work/WF-40-plan.md"
+    },
+    {
+      "step": "commit",
+      "message": "Approved plan"
+    },
+    {
+      "step": "capture",
+      "name": "commit_2"
+    },
+    {
+      "step": "write",
+      "path": "auth.py",
+      "from": "steps/3/auth.py"
+    },
+    {
+      "step": "write",
+      "path": "ui.py",
+      "from": "steps/3/ui.py"
+    },
+    {
+      "step": "write",
+      "path": "verify.py",
+      "from": "steps/3/verify.py"
+    },
+    {
+      "step": "commit",
+      "message": "feat: gate export behind an authorized role\n\nRefs: WF-40\nTask: T001"
+    },
+    {
+      "step": "capture",
+      "name": "commit_3"
+    },
+    {
+      "step": "write",
+      "path": "requirements/WF-41-SPEC.md",
+      "from": "steps/4/requirements/WF-41-SPEC.md"
+    },
+    {
+      "step": "commit",
+      "message": "Spec WF-41"
+    },
+    {
+      "step": "capture",
+      "name": "commit_4"
+    },
+    {
+      "step": "write",
+      "path": "work/WF-41-plan.md",
+      "from": "steps/5/work/WF-41-plan.md"
+    },
+    {
+      "step": "commit",
+      "message": "Approved plan WF-41"
+    },
+    {
+      "step": "capture",
+      "name": "commit_5"
+    },
+    {
+      "step": "write",
+      "path": "ui.py",
+      "from": "steps/6/ui.py"
+    },
+    {
+      "step": "write",
+      "path": "verify.py",
+      "from": "steps/6/verify.py"
+    },
+    {
+      "step": "commit",
+      "message": "feat: rename the export label to Fetch\n\nRefs: WF-41\nTask: T001"
+    },
+    {
+      "step": "capture",
+      "name": "commit_6"
+    }
+  ],
+  "evidence": "Runner-verified evidence. You have no shell and no Agent tool in this bounded trial; the runner ran the commands below.\n- Branch main, HEAD {commit_6}, tree clean. Two tickets are active under work/: WF-40 and WF-41.\n- The user ran `/test` with no argument and named no ticket in this conversation.\n- The user supplied both BUILD COMPLETE messages below in this conversation; each reconciles with git. No `/test` has run on either candidate.\n\nBUILD COMPLETE\n- Repository root: {directory}\n- Branch: main\n- Base revision: {commit_2}\n- HEAD: {commit_3}\n- Commit range: {commit_2}..{commit_3}\n- Tree: clean (no staged, unstaged, or untracked paths)\n- Spec revision: git-commit:{commit_1}:requirements/WF-40-SPEC.md (Status: Approved)\n- Plan revision: git-commit:{commit_2}:work/WF-40-plan.md (Status: Approved)\n- Tasks completed: T001 (ws-main); workstreams integrated: ws-main\n- Checkpoints: none in scope\n- Commits created: {commit_3}\n- Verification: python3 verify.py — pass (exit 0)\n- Scope expansions: none. Noticed but untouched: none.\n- Run metrics: 1 fresh executor dispatch, 0 resumes, 0 model overrides.\n\nIntegrated diff ({commit_2}..{commit_3}):\ndiff --git a/auth.py b/auth.py\nnew file mode 100644\nindex 0000000..8b4a9cc\n--- /dev/null\n+++ b/auth.py\n@@ -0,0 +1,4 @@\n+ALLOWED = {\"admin\", \"owner\"}\n+\n+def can_export(user):\n+    return user.get(\"role\") in ALLOWED\ndiff --git a/ui.py b/ui.py\nindex 387db21..25c3233 100644\n--- a/ui.py\n+++ b/ui.py\n@@ -1,3 +1,7 @@\n-LABEL = \"Export\"\n-def click(callback):\n+from auth import can_export\n+LABEL = \"Download\"\n+def click(user, callback):\n+    if not can_export(user):\n+        return False\n     callback()\n+    return True\ndiff --git a/verify.py b/verify.py\nindex 5a2b5a8..018dc1e 100644\n--- a/verify.py\n+++ b/verify.py\n@@ -1,5 +1,5 @@\n from ui import LABEL, click\n-assert LABEL == \"Export\"\n+assert LABEL == \"Download\"\n calls=[]\n-click(lambda: calls.append(1))\n-assert calls == [1]\n+assert click({\"role\": \"viewer\"}, lambda: calls.append(1)) is False and calls == []\n+assert click({\"role\": \"admin\"}, lambda: calls.append(1)) is True and calls == [1]\n\nBUILD COMPLETE\n- Repository root: {directory}\n- Branch: main\n- Base revision: {commit_5}\n- HEAD: {commit_6}\n- Commit range: {commit_5}..{commit_6}\n- Tree: clean (no staged, unstaged, or untracked paths)\n- Spec revision: git-commit:{commit_4}:requirements/WF-41-SPEC.md (Status: Approved)\n- Plan revision: git-commit:{commit_5}:work/WF-41-plan.md (Status: Approved)\n- Tasks completed: T001 (ws-main); workstreams integrated: ws-main\n- Checkpoints: none in scope\n- Commits created: {commit_6}\n- Verification: python3 verify.py — pass (exit 0)\n- Scope expansions: none. Noticed but untouched: none.\n- Run metrics: 1 fresh executor dispatch, 0 resumes, 0 model overrides.\n\nIntegrated diff ({commit_5}..{commit_6}):\ndiff --git a/ui.py b/ui.py\nindex 25c3233..675f078 100644\n--- a/ui.py\n+++ b/ui.py\n@@ -1,5 +1,5 @@\n from auth import can_export\n-LABEL = \"Download\"\n+LABEL = \"Fetch\"\n def click(user, callback):\n     if not can_export(user):\n         return False\ndiff --git a/verify.py b/verify.py\nindex 018dc1e..4eb697d 100644\n--- a/verify.py\n+++ b/verify.py\n@@ -1,5 +1,5 @@\n from ui import LABEL, click\n-assert LABEL == \"Download\"\n+assert LABEL == \"Fetch\"\n calls=[]\n assert click({\"role\": \"viewer\"}, lambda: calls.append(1)) is False and calls == []\n assert click({\"role\": \"admin\"}, lambda: calls.append(1)) is True and calls == [1]",
+  "checks": {
+    "not_verify_blocked": {
+      "field": [
+        "explanation",
+        "intake",
+        "spec",
+        "plan",
+        "todo"
+      ],
+      "not_regex": "VERIFY BLOCKED"
+    },
+    "no_packet_sent": {
+      "field": "dispatch",
+      "not_regex": "\\S"
+    },
+    "fixture_unchanged": {
+      "fixture_unchanged": true
+    },
+    "tool_access_confined_to_fixture": {
+      "access_confined": true
+    }
+  }
+}

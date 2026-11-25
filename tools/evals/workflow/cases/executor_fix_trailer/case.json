@@ -1,0 +1,74 @@
+{
+  "stage": "executor",
+  "request": "You are the executor for the supplied review-fix packet. The fix is done and verified; commit it.",
+  "split": "dev",
+  "tags": [
+    "executor"
+  ],
+  "setup": [
+    {
+      "step": "copy"
+    },
+    {
+      "step": "git_init"
+    },
+    {
+      "step": "commit",
+      "message": "Fixture baseline"
+    },
+    {
+      "step": "capture",
+      "name": "commit_1"
+    },
+    {
+      "step": "write",
+      "path": "work/WF-40-plan.md",
+      "from": "steps/2/work/WF-40-plan.md"
+    },
+    {
+      "step": "commit",
+      "message": "Approved plan"
+    },
+    {
+      "step": "write",
+      "path": "auth.py",
+      "from": "steps/3/auth.py"
+    },
+    {
+      "step": "write",
+      "path": "ui.py",
+      "from": "steps/3/ui.py"
+    },
+    {
+      "step": "write",
+      "path": "verify.py",
+      "from": "steps/3/verify.py"
+    },
+    {
+      "step": "commit",
+      "message": "feat: gate export behind an authorized role\n\nRefs: WF-40\nTask: T001"
+    },
+    {
+      "step": "write",
+      "path": "auth.py",
+      "from": "steps/uncommitted/auth.py"
+    },
+    {
+      "step": "write",
+      "path": "verify.py",
+      "from": "steps/uncommitted/verify.py"
+    },
+    {
+      "step": "stage"
+    }
+  ],
+  "evidence": "Review-fix packet from /build, ticket WF-40, workstream ws-code-1:\n  CODE-1 REQUIRED auth.py:4 — can_export() raises AttributeError when user is None. Failure scenario: an anonymous request passes user=None. Recommendation: treat a missing user as unauthorized.\n\nRunner-verified evidence. You have no shell and no Agent tool in this bounded trial; the runner ran the commands below.\n- You wrote a failing assertion in verify.py, then the fix in auth.py. `python3 verify.py` passes (exit 0).\n- `git log -3 --oneline` prints subjects such as \"feat: gate export behind an authorized role\". `git status --short` prints \"M  auth.py\" and \"M  verify.py\": both are staged, and nothing else differs from HEAD.",
+  "checks": {
+    "fixture_unchanged": {
+      "fixture_unchanged": true
+    },
+    "tool_access_confined_to_fixture": {
+      "access_confined": true
+    }
+  }
+}

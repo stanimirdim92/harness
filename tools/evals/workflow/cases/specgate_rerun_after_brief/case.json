@@ -1,0 +1,40 @@
+{
+  "stage": "specgate",
+  "request": "/spec WF-50 decisions: Q1=the ticket wins: archived users are exported",
+  "split": "dev",
+  "tags": [
+    "specgate"
+  ],
+  "setup": [
+    {
+      "step": "copy"
+    },
+    {
+      "step": "git_init"
+    },
+    {
+      "step": "commit",
+      "message": "Fixture baseline"
+    }
+  ],
+  "evidence": "Runner-verified evidence. You have no shell and no Agent tool in this bounded trial; the runner ran the commands below.\n- docs/specs/WF-50-intake.md is the saved intake for WF-50, fetched on 2026-11-20. The ticket has not changed since.\n- `ls docs/specs/` prints WF-50-intake.md only. No spec exists for WF-50.\n- An earlier `/spec WF-50` run, in another session, ended at a decision brief with one question. Q1: the ticket includes archived users and the design note excludes them; which one holds? That run wrote no spec and did no repository recon.",
+  "checks": {
+    "run_goes_on": {
+      "state": "decided"
+    },
+    "recon_runs": {
+      "field": "dispatch",
+      "regex": "(?i)recon|repositor|precedent"
+    },
+    "spec_is_drafted": {
+      "field": "dispatch",
+      "regex": "(?i)\\b(draft|write|creat)"
+    },
+    "fixture_unchanged": {
+      "fixture_unchanged": true
+    },
+    "tool_access_confined_to_fixture": {
+      "access_confined": true
+    }
+  }
+}

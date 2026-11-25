@@ -1,0 +1,32 @@
+{
+  "stage": "spec",
+  "request": "Run /spec WF-20: change the existing export label from Export to Download and preserve the existing callback behavior. No other behavior changes, no additional domain constraints, and no approval has been given.",
+  "split": "dev",
+  "tags": [
+    "spec"
+  ],
+  "evidence": "Current bounded recon: ui.py owns the action label and callback; verify.py is the existing verification precedent and python3 verify.py is the exact repository command. All relevant files are supplied. No schema, public-contract, lifecycle, concurrency, or external-service change. No existing spec. Project paths are in AGENTS.md. No additional domain history or product decisions are unresolved.",
+  "checks": {
+    "stable_requirement_ids": {
+      "field": "spec",
+      "regex": "(?m)^### Requirement: REQ-\\d{3}"
+    },
+    "no_downstream_artifacts": {
+      "field": [
+        "plan",
+        "todo"
+      ],
+      "not_regex": "(?m)^(?:#{1,3} |Status:|Handoff:|\\*\\*Requirements:|- \\[ \\])"
+    },
+    "repository_verification": {
+      "field": "spec",
+      "regex": "python3\\s+verify\\.py"
+    },
+    "fixture_unchanged": {
+      "fixture_unchanged": true
+    },
+    "tool_access_confined_to_fixture": {
+      "access_confined": true
+    }
+  }
+}
