@@ -454,7 +454,7 @@ adds the check: earlier commits are not checked.
 
 ## T013: Probe the Bash sandbox and record whether prevention is on
 
-**Status:** Pending
+**Status:** Done
 
 **Requirements:** REQ-031
 

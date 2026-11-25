@@ -62,6 +62,68 @@ What the trace shows:
   `parent_tool_use_id` that is the id of the main session's `Agent` call.
 - `audit()` on this trace returns `LEAKED` false.
 
+## Bash sandbox probe
+
+`tasks/probe_sandbox.py` asks whether Claude Code's Bash sandbox can stop a
+headless session, and its subagent, from reading `claude/evals/` while the
+stage scripts still run. The setting denies that one folder. It does not deny
+the rest of the repository, because `/spec` and `/plan` run `check-spec.py` and
+`check-plan.py` through `~/.claude/` links into it. The probe passes only when
+both `cat` reads are refused and the `check-spec.py` call runs and prints its
+result. The unit tests for the record parser and the written deny paths are in
+`tasks/test_tasks.py`.
+
+Bash sandbox probe: fail (2026-11-25, Claude Code 2.1.331)
+
+Prevention off: detection only. Task trials run with the copy (`install_harness()`)
+and `audit()`, and every `tasks` report states "prevention off: detection only".
+
+| Item | Value |
+| --- | --- |
+| Command | `python3 tasks/probe_sandbox.py <project> results/hr2-t013-sandbox-probe --budget 4`: one headless session with `--allowedTools Bash Agent Task`, no `--add-dir` |
+| Claude CLI version | 2.1.331 |
+| Cost | $0.4708 (4 turns, 15.1 s, `stop_reason` `end_turn`) |
+| Trace | `tools/evals/results/hr2-t013-sandbox-probe/trace.jsonl` (git ignores it; the folder also holds `record.json`, `command.txt` and `prompt.txt`) |
+
+The exact setting, in the project's `.claude/settings.local.json`:
+
+```json
+"sandbox": {
+  "enabled": true,
+  "failIfUnavailable": true,
+  "allowUnsandboxedCommands": false,
+  "autoAllowBashIfSandboxed": true,
+  "filesystem": { "denyRead": ["/var/www/html/personal/harness/claude/evals"] }
+}
+```
+
+The keys come from the schema inside the installed CLI binary (2.1.331), not
+from memory. `sandbox.filesystem.denyRead` takes absolute paths and `~`.
+`allowUnsandboxedCommands: false` stops the session from leaving the sandbox.
+`failIfUnavailable: true` stops a session that cannot start the sandbox. No
+`~/.claude/` entry resolves into `claude/evals/` on this machine, so the deny
+list holds the one repository path.
+
+What the trace shows:
+
+- The session `cat`, the subagent `cat` and the `check-spec.py` call all
+  failed with the same error:
+  `apply-seccomp: write /proc/self/setgroups (nested userns is capability-restricted; caller must provide CAP_SYS_ADMIN): Permission denied`.
+- That is not a deny of the eval file. The sandbox could not start for any
+  Bash command, so the stage script was refused as well. The probe records
+  `fail` because `check-spec.py` did not run (REQ-031, "Stage scripts blocked").
+- `failIfUnavailable: true` did not stop the session. The sandbox started, and
+  each command failed when it applied its seccomp filter.
+- The cause is this host (Ubuntu 26.04, `kernel.apparmor_restrict_unprivileged_userns=1`).
+  `unshare --user --map-root-user true` fails with `Operation not permitted`, and
+  so does a nested `unshare --user` inside `bwrap`. The sandbox needs a nested
+  user namespace for its seccomp step.
+- The CLI has `sandbox.allowNestedUserNamespaces`. Its own description says it
+  removes `filesystem.denyRead`, so it cannot be used to prevent reads. The
+  probe did not try it.
+- The probe ran once. It was not rerun: no setup bug of the probe caused the
+  failure, and an unchanged rerun on this host fails the same way.
+
 ## Measured
 
 One full run of every `workflow/` case with the runner as it stood before the
