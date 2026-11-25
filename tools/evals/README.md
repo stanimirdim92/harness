@@ -14,7 +14,7 @@ free.
 | --- | --- | --- |
 | `plan-recall/` | Did the plan name the files that really changed? Before coding, a plan lists the files it expects to touch. After the ticket ships, this compares that list with the real diff. 18 of 20 files named is 90%. | Free: it reads git and the plan |
 | `spec-eval/` | How close does today's harness get to the spec you approved? It writes a fresh spec for a shipped ticket, on the code as it was before the work began, then compares it with the approved one. | One real `/spec` run, about $1.40. Scoring a spec you already have is free |
-| `review-eval/` | Does `/review` catch bugs that really shipped? A bugfix commit points, through blame, at the commit that wrote the bug; `/review` runs on that commit and must flag those lines. Clean commits count noise. | One real `/review` per case |
+| `review-eval/` | Does `/review` catch bugs that really shipped? A bugfix commit points, through blame, at the commit that wrote the bug; `/review` runs on that commit and must flag those lines. Clean commits count noise. Run it with `eval.py bugs --repo <project>`. | One real `/review` per case and trial, about $7 each |
 | `workflow/` | Does the pipeline make the right calls on small made-up cases: which reviewers run, and whether `/test` is needed? | Real model runs |
 
 ## Did my harness change help?
@@ -81,7 +81,8 @@ fixtures did: the `review-eval` cases `ld-585` and `ld-585-builder` (change
 `11c44ce9`) and the `spec-eval` fixture `LD-380`. The `review-eval` cases
 `ld-585-filter` and `ld-585-order`, and the `spec-eval` `example` fixture, have
 neither file, so they ran with the rules. Score those three again before you
-compare them with an older run.
+compare them with an older run. The four `review-eval` cases were scored again
+with the rules in the "Bugs run" below.
 
 ## Bash sandbox probe
 
@@ -226,6 +227,51 @@ What happened:
   ran, so the grade is the grade of the untouched seed.
 - The conflict is a finding about the spec that `/spec` wrote, not a driver
   fault. The trial was not rerun for a better result.
+
+## Bugs run
+
+`python3 tools/evals/eval.py bugs --repo <project>` runs every `review-eval/`
+case with trials and writes a schema 1 `results.json` (`BugsSuite` in
+`review-eval/run.py`). The judge is unchanged. A bug trial passes when it is
+CAUGHT. A bug case is PASS when every trial is CAUGHT, FLAKY when some are, and
+FAIL when none are. A clean trial passes when it has no BLOCKER or REQUIRED
+finding. `--budget` caps what one `/review` may spend (default $10). A retry of
+an errored trial gets only what the first attempt left of that cap. When no
+cost can be read from the failed attempt, the retry does not start. The report
+ends with a `Review-eval:` line to paste into a commit that changes a reviewer
+(`tools/checks/check-rescore.py` accepts it). One real run was made on
+2026-11-25.
+
+| Item | Value |
+| --- | --- |
+| Command | `python3 tools/evals/eval.py bugs --repo <project> --trials 1 --budget 10` |
+| Cases | the four `ld-585*` cases, one trial each, run one after another |
+| Harness commit | `ccf957f` (not dirty). It is the first scoring of `ld-585` and `ld-585-builder` with the harness rules loaded (see "Harness rules loading"). `ld-585-filter` and `ld-585-order` ran with them before as well. |
+| Claude CLI version | 2.1.331 |
+| Cost | $28.7448 (a trial cost $6.87 to $7.47). The limit was $40. No trial errored and no trial was retried. |
+| Duration | 44.4 min |
+| Run folder | `tools/evals/results/bugs/2026-11-25-141741-ccf957f/` (git ignores it; each trial folder keeps `report.md`, `meta.json`, the SARIF file and `trace.jsonl`) |
+
+| Case | Result | Trial | Findings (BLOCKER or REQUIRED) |
+| --- | --- | --- | --- |
+| `ld-585` | FAIL | LOCATED | 31 (24) |
+| `ld-585-builder` | FAIL | LOCATED | 36 (23) |
+| `ld-585-filter` | FAIL | LOCATED | 60 (41) |
+| `ld-585-order` | FAIL | LOCATED | 38 (22) |
+
+The report line:
+
+```
+Review-eval: bugs 0/4; tools/evals/results/bugs/2026-11-25-141741-ccf957f
+```
+
+None of the four cases has `defect` terms in its `case.json`. A case without
+terms can reach LOCATED at best (ADR 0143), so this run could not score
+CAUGHT. In each case `/review` raised a BLOCKER or REQUIRED finding within 3
+lines of a line the fix changed. Read `report.md` of each trial to learn
+whether any of them names the defect. The terms are the owner's to write; a
+trial that says "LOCATED" here is not a measure of what `/review` catches.
+There is no baseline yet, so the report has no verdict.
 
 ## Measured
 

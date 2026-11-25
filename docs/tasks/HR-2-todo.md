@@ -619,7 +619,7 @@ same rule applies to the `/plan` Draft.
 
 ## T016: `eval.py bugs` runs shipped-bug cases with trials
 
-**Status:** Pending
+**Status:** Done
 
 **Requirements:** REQ-007, REQ-021
 
