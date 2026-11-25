@@ -196,7 +196,7 @@ tests from `spec-eval/test_produce.py` into `tools/evals/test_sandbox.py`.
 
 ## T006: A gate case is a folder with setup steps and declared checks
 
-**Status:** Pending
+**Status:** Done
 
 **Requirements:** REQ-010, REQ-011
 
