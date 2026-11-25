@@ -12,16 +12,21 @@ fresh session per stage.
 The owner is scripted. When `/spec` or `/plan` leaves a Draft on disk, the
 driver sends one more turn in that session: "I read the whole spec. I approve
 it." (ADR 0148: that turn carries no gate override, and nothing before a draft
-exists carries approval text.) When `/review` reports a BLOCKER or REQUIRED
-finding, the driver runs one fix round the way `/review` routes it:
-`/build ADD-1 review fixes`, `/test`, `/review`.
+exists carries approval text.) When the Draft holds `OPEN QUESTION` blocks that
+each mark one option `(recommended)`, the driver first sends one decision turn
+in that session: "For every open question, take the recommended option." It
+sends the approval turn only when the revised Draft holds none. When `/review`
+reports a BLOCKER or REQUIRED finding, the driver runs one fix round the way
+`/review` routes it: `/build ADD-1 review fixes`, `/test`, `/review`.
 
 The trial stops with a reason and the stage it stopped at:
 
 - `blocked`: a stage reports BLOCKED;
 - `question`: a stage returns without its artifact or report, or leaves a
-  Draft with an `OPEN QUESTION` or a `SPEC CONFLICT`. Each means it asked the
-  owner something other than the approval;
+  Draft with a `SPEC CONFLICT`, with an `OPEN QUESTION` that does not mark
+  exactly one option `(recommended)`, or with an `OPEN QUESTION` left after the
+  decision turn. Each means it asked the owner something other than the
+  approval and the decision turn;
 - `time`: a stage passes its limit, or the trial passes 90 minutes;
 - `not_approved`: the approval turn left the header at Draft;
 - `error`: a session failed, or the trial budget is spent;
@@ -62,6 +67,7 @@ STAGE_PROMPT = {
     'test': f'/test {TICKET}', 'review': f'/review {TICKET}', 'fix': f'/build {TICKET} review fixes',
 }
 APPROVAL = {'spec': 'I read the whole spec. I approve it.', 'plan': 'I read the whole plan. I approve it.'}
+DECISION = 'For every open question, take the recommended option.'
 
 WALL_LIMIT = 90 * 60
 STAGE_LIMIT = {'spec': 20 * 60, 'plan': 20 * 60, 'build': 45 * 60, 'test': 25 * 60, 'review': 25 * 60}
@@ -81,6 +87,7 @@ REPORT = {
 }
 STATUS = re.compile(r'^\**Status:?\**:?[ \t]*(\w+)', re.M)
 OPEN_QUESTION = re.compile(r'^[ \t]*OPEN QUESTION.*$', re.M)
+RECOMMENDED = re.compile(r'\(recommended\b')
 SPEC_CONFLICT = re.compile(r'^## SPEC CONFLICT\b', re.M)
 
 
@@ -110,6 +117,23 @@ def prepare(project, readme_text, harness=sandbox.HARNESS):
     if prevention:
         probe_sandbox.write_setting(project, probe_sandbox.deny_paths(harness))
     return prevention
+
+
+def open_questions(text):
+    """The OPEN QUESTION blocks of a draft as `(first line, number of options marked (recommended))`.
+    A block runs to the next block, the next heading, its `→ Decision needed` line, or the end."""
+    blocks = []
+    for line in text.splitlines():
+        if OPEN_QUESTION.match(line):
+            blocks.append([line.strip(), 0, True])
+        elif blocks and blocks[-1][2]:
+            if line.startswith('#'):
+                blocks[-1][2] = False
+                continue
+            blocks[-1][1] += len(RECOMMENDED.findall(line))
+            if line.startswith('→'):
+                blocks[-1][2] = False
+    return [(title, count) for title, count, _ in blocks]
 
 
 def header_status(path):
@@ -171,16 +195,19 @@ class Trial:
             raise Stop('blocked', stage, text[max(0, found.start() - 20):found.end() + 120].strip())
         return event
 
-    def approve(self, stage, event, rel):
-        """The scripted owner turn, in the session that presented the draft."""
+    def owner_turn(self, stage, event, prompt):
+        """A scripted owner turn, in the session that presented the draft."""
         if not event.get('session_id'):
             raise Stop('error', stage, 'the draft session has no id to resume')
-        self.send(stage, APPROVAL[stage], resume=event['session_id'])
+        return self.send(stage, prompt, resume=event['session_id'])
+
+    def approve(self, stage, event, rel):
+        self.owner_turn(stage, event, APPROVAL[stage])
         if header_status(self.project / rel) != 'Approved':
             raise Stop('not_approved', stage, f'{rel} is still not Approved after the owner turn')
 
-    def draft_stage(self, stage, rel):
-        event = self.send(stage, STAGE_PROMPT[stage])
+    def read_draft(self, stage, rel):
+        """The header status of the draft, and its `open_questions()`."""
         path = self.project / rel
         status = header_status(path)
         if status is None:
@@ -188,8 +215,21 @@ class Trial:
         text = path.read_text()
         if SPEC_CONFLICT.search(text):
             raise Stop('question', stage, 'SPEC CONFLICT in the plan')
-        if OPEN_QUESTION.search(text):
-            raise Stop('question', stage, f'the draft holds an OPEN QUESTION: {OPEN_QUESTION.search(text).group(0).strip()}')
+        return status, open_questions(text)
+
+    def draft_stage(self, stage, rel):
+        event = self.send(stage, STAGE_PROMPT[stage])
+        status, questions = self.read_draft(stage, rel)
+        if questions:
+            for title, recommended in questions:
+                if recommended != 1:
+                    raise Stop('question', stage, f'the draft holds an OPEN QUESTION that marks {recommended} '
+                                                  f'options (recommended), not one: {title}')
+            event = self.owner_turn(stage, event, DECISION)
+            status, questions = self.read_draft(stage, rel)
+            if questions:
+                raise Stop('question', stage, f'the draft still holds an OPEN QUESTION after the decision turn: '
+                                              f'{questions[0][0]}')
         if status == 'Draft':
             self.approve(stage, event, rel)
 

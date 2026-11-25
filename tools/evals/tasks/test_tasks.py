@@ -374,6 +374,87 @@ class OpenQuestion(DriverCase):
         self.assertEqual(replay.calls[1]['prompt'], 'I read the whole spec. I approve it.')
         self.assertNotEqual(record['stop_reason'], 'question')
 
+    def test_a_spec_draft_where_one_block_marks_no_option_recommended_gets_no_turn_and_stops(self):
+        record, replay = self.trial(['spec_draft_one_unmarked'])
+        self.assertEqual((record['stop_reason'], record['stop_stage']), ('question', 'spec'))
+        self.assertIn('Q2', record['stop_detail'])
+        self.assertEqual(self.prompts(replay), ['/spec ADD-1'])
+
+    def test_a_block_that_marks_two_options_recommended_gets_no_turn_and_stops(self):
+        record, replay = self.trial(['spec_draft_two_recommended'])
+        self.assertEqual((record['stop_reason'], record['stop_stage']), ('question', 'spec'))
+        self.assertEqual(self.prompts(replay), ['/spec ADD-1'])
+
+    def test_a_plan_draft_that_marks_no_option_recommended_gets_no_turn_and_stops(self):
+        record, replay = self.trial(['spec_draft', 'spec_approved', 'plan_draft_open_question'])
+        self.assertEqual((record['stop_reason'], record['stop_stage']), ('question', 'plan'))
+        self.assertEqual(self.prompts(replay)[-1], '/plan ADD-1')
+
+
+class DecisionTurn(DriverCase):
+    """REQ-018, DEC-013: open questions that all carry one recommended option get one decision turn, then the approval."""
+
+    DECISION = 'For every open question, take the recommended option.'
+
+    def test_the_spec_decision_turn_then_the_approval_turn_run_in_the_session_that_presented_the_draft(self):
+        _, replay = self.trial(['spec_draft_recommended', 'spec_decided', 'spec_approved', 'timeout'])
+        self.assertEqual(self.prompts(replay)[:3],
+                         ['/spec ADD-1', self.DECISION, 'I read the whole spec. I approve it.'])
+        self.assertEqual([call['resume'] for call in replay.calls[:3]], [None, 's1', 's1'])
+
+    def test_the_spec_header_reads_approved_after_the_decision_and_approval_turns(self):
+        self.trial(['spec_draft_recommended', 'spec_decided', 'spec_approved', 'timeout'])
+        self.assertIn('Status: Approved', (self.project / 'docs/specs/ADD-1-SPEC.md').read_text())
+
+    def test_the_plan_decision_turn_then_the_approval_turn_run_in_the_session_that_presented_the_draft(self):
+        _, replay = self.trial(['spec_draft', 'spec_approved', 'plan_draft_recommended', 'plan_decided',
+                                'plan_approved', 'timeout'])
+        self.assertEqual(self.prompts(replay)[2:5],
+                         ['/plan ADD-1', self.DECISION, 'I read the whole plan. I approve it.'])
+        self.assertEqual([call['resume'] for call in replay.calls[2:5]], [None, 's3', 's3'])
+
+    def test_the_trial_goes_on_to_build_after_both_decision_turns(self):
+        record, replay = self.trial(['spec_draft_recommended', 'spec_decided', 'spec_approved',
+                                     'plan_draft_recommended', 'plan_decided', 'plan_approved',
+                                     'build_complete', 'test_pass', 'review_clean'])
+        self.assertEqual(record['stop_reason'], 'complete')
+        self.assertEqual(record['stop_stage'], None)
+        self.assertEqual([p for p in self.prompts(replay) if p == self.DECISION], [self.DECISION] * 2)
+
+    def test_a_spec_that_still_holds_an_open_question_after_the_decision_turn_stops_with_no_second_decision(self):
+        record, replay = self.trial(['spec_draft_recommended', 'spec_draft_recommended'])
+        self.assertEqual((record['stop_reason'], record['stop_stage']), ('question', 'spec'))
+        self.assertIn('OPEN QUESTION', record['stop_detail'])
+        self.assertEqual(self.prompts(replay), ['/spec ADD-1', self.DECISION])
+
+    def test_a_plan_that_still_holds_an_open_question_after_the_decision_turn_stops_with_no_second_decision(self):
+        record, replay = self.trial(['spec_draft', 'spec_approved', 'plan_draft_recommended',
+                                     'plan_draft_recommended'])
+        self.assertEqual((record['stop_reason'], record['stop_stage']), ('question', 'plan'))
+        self.assertEqual(self.prompts(replay)[2:], ['/plan ADD-1', self.DECISION])
+
+    def test_a_decision_turn_that_leaves_the_draft_unapproved_after_the_approval_turn_stops_not_approved(self):
+        record, _ = self.trial(['spec_draft_recommended', 'spec_decided', 'noop'])
+        self.assertEqual((record['stop_reason'], record['stop_stage']), ('not_approved', 'spec'))
+
+    def test_a_decision_turn_that_leaves_an_approved_spec_gets_no_approval_turn(self):
+        _, replay = self.trial(['spec_draft_recommended', 'spec_approved', 'plan_approved', 'timeout'])
+        self.assertEqual(self.prompts(replay)[:3], ['/spec ADD-1', self.DECISION, '/plan ADD-1'])
+
+    def test_no_turn_sent_before_a_draft_exists_names_the_recommended_option(self):
+        _, replay = self.trial(['spec_draft_recommended', 'spec_decided', 'spec_approved',
+                                'plan_draft_recommended', 'plan_decided', 'plan_approved',
+                                'build_complete', 'test_pass', 'review_clean'])
+        first_turns = [call['prompt'] for call in replay.calls if call['resume'] is None]
+        self.assertEqual(len(first_turns), 5)
+        for prompt in first_turns:
+            self.assertNotIn('recommended option', prompt.lower())
+        for stage, prompt in run.STAGE_PROMPT.items():
+            self.assertNotIn('recommended', prompt.lower(), stage)
+
+    def test_the_decision_turn_holds_no_approval_text(self):
+        self.assertNotIn('approv', run.DECISION.lower())
+
 
 class SessionCost(DriverCase):
     """A resumed session reports the cost of the whole session so far. The trial cost counts each turn once."""

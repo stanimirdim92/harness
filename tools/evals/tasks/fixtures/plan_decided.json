@@ -1,0 +1,6 @@
+{
+  "result": "I took the recommended option for Q1 and recorded it as TD-001. The plan is a Draft. Reply with your approval to continue.",
+  "writes": {
+    "docs/tasks/ADD-1-plan.md": "# Implementation Plan: ADD-1\n\nStatus: Draft\nSpec: docs/specs/ADD-1-SPEC.md\n\n### TD-001 — Feature tests\n"
+  }
+}

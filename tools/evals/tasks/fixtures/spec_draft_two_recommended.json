@@ -1,0 +1,6 @@
+{
+  "result": "The spec is a Draft, with one open question. It recommends both options.",
+  "writes": {
+    "docs/specs/ADD-1-SPEC.md": "# ADD-1 Spec\n\nStatus: Draft\nTicket: ADD-1\nChange kind: New\n\n## Open Questions\n\nOPEN QUESTION Q1: Where does the rule apply?\n- Option A (recommended — the client owns matching): only the fixture client.\n- Option B (recommended — one rule for every client): filter in the endpoint.\n- Risk: Medium\n→ Decision needed before this spec can be approved.\n"
+  }
+}

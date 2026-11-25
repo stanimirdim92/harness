@@ -1,0 +1,6 @@
+{
+  "result": "The plan is a Draft with one open question. It has a recommended option.",
+  "writes": {
+    "docs/tasks/ADD-1-plan.md": "# Implementation Plan: ADD-1\n\nStatus: Draft\nSpec: docs/specs/ADD-1-SPEC.md\n\nOPEN QUESTION Q1: Which test layer?\n- Option A (recommended — the repository has feature tests only): feature tests.\n- Option B: add unit tests for the matcher.\n- Risk: Low\n→ Decision needed before this plan can be approved.\n"
+  }
+}

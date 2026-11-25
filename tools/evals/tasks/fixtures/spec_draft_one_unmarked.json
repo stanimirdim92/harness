@@ -1,0 +1,6 @@
+{
+  "result": "The spec is a Draft, with two open questions. Q2 has no recommended option.",
+  "writes": {
+    "docs/specs/ADD-1-SPEC.md": "# ADD-1 Spec\n\nStatus: Draft\nTicket: ADD-1\nChange kind: New\n\n## Open Questions\n\nOPEN QUESTION Q1: Where does the rule apply?\n- Option A (recommended — repository precedent: the client owns matching;\n  smallest change): only the fixture client implements the rule.\n- Option B: also filter the results in the search endpoint.\n- Risk: Medium\n→ Decision needed before this spec can be approved.\n\nOPEN QUESTION Q2: Test layer for the modal\n- Option A: `/test` checks the UI in a real browser.\n- Option B: add a committed browser suite with its own npm dependency.\n- Risk: Medium\n→ Decision needed before this spec can be approved.\n"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "result": "I took the recommended option for Q1 and Q2 and recorded both in the spec. The spec is a Draft. Reply with your approval to continue.",
+  "writes": {
+    "docs/specs/ADD-1-SPEC.md": "# ADD-1 Spec\n\nStatus: Draft\nTicket: ADD-1\nChange kind: New\n\n## Material Decisions\n\n### DEC-001 — Only the fixture client implements the rule\n### DEC-002 — `/test` checks the UI in a real browser\n"
+  }
+}
