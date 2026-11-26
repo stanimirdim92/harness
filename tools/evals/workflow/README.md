@@ -96,8 +96,6 @@ Four cases pin the fix-round order of ADR 0147, build then test then review:
   returns REVIEW BLOCKED and names `/test`.
 - `testfix_packet`: `/test` verifies a fix candidate now. Its packet says
   `Scope: fix diff` and does not run the full suite.
-- `testfull_packet`: `/review` converged on fix-diff verification. `/test`
-  runs once at the tier's depth: no `Scope: fix diff`, and the full suite.
 
 `route_browser_check` pins where a reviewer's browser check goes. With no dev
 server running, `/review` still sends it to the verifier through `/test`,
@@ -118,16 +116,17 @@ Four cases pin `/test`'s own gate:
   preserves the reproduction as a patch or report, and routes the fix to
   `/build`.
 
-`reviewend_fix_round` pins the stage a converged fix round names next: the
-full-depth `/test`, not `/release`.
+`reviewend_fix_round` pins the stage a converged fix round names next:
+`/release`, not a full-depth `/test` (ADR 0153).
 
-Two cases pin `/release`'s verification check after a fix round (ADR 0147).
-The review recorded `PASS (fix diff)`:
+Two cases pin `/release`'s verification check after a fix round (ADR 0153).
+The review recorded `PASS (fix diff)` and left no open BLOCKER or REQUIRED
+finding:
 
-- `shipgate_full_run`: the full-depth `/test` ran and added no commits, so
-  no closing review round exists. `/release` accepts that VERIFY PASS.
-- `shipgate_no_full_run`: no full run exists. `/release` is SHIP BLOCKED and
-  names `/test`.
+- `shipgate_full_run`: a full-depth `/test` also ran and added no commits.
+  `/release` accepts it.
+- `shipgate_no_full_run`: no full run exists. `/release` accepts the
+  `PASS (fix diff)` and is not SHIP BLOCKED.
 
 Four cases pin `/release`'s verdict. The trial states every other check as
 passed:
@@ -146,10 +145,8 @@ passed:
 - `ship_open_blocker`: an open BLOCKER is NO-GO, and the fix goes to
   `/build`.
 
-Two more cases pin gates that must stop:
+One more case pins a gate that must stop:
 
-- `shipgate_full_run_added_tests`: the full-depth `/test` added a test
-  commit. `/release` is SHIP BLOCKED until the closing review round.
 - `fix_other_review_file`: after the review, a commit adds a file under
   `docs/reviews/` that is not the ticket's SARIF. `/build <TICKET> review
   fixes` does not start; the candidate goes to `/review` first.

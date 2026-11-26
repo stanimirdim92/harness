@@ -154,12 +154,13 @@ that explanation here, just the index.
 | [0144](0144-fix-rounds-skip-test-until-review-converges.md) | Fix rounds skip /test until review converges | Partially superseded by [0147](0147-fix-rounds-run-test-on-the-fix-diff.md) (fix rounds run `/test` on the fix diff; the closing round and the executor's same-failure sweep stand) |
 | [0145](0145-one-review-sarif-per-ticket.md) | One review SARIF per ticket | Accepted |
 | [0146](0146-remove-explain-command.md) | Remove the /explain command | Accepted |
-| [0147](0147-fix-rounds-run-test-on-the-fix-diff.md) | Fix rounds run /test on the fix diff | Accepted |
+| [0147](0147-fix-rounds-run-test-on-the-fix-diff.md) | Fix rounds run /test on the fix diff | Partially superseded by [0153](0153-converged-fix-round-goes-to-release.md) (no full-depth `/test` and no closing round after a converged fix round; the fix-diff `/test` stands) |
 | [0148](0148-owner-messages-do-not-override-pipeline-gates.md) | Owner messages do not override pipeline gates | Accepted |
 | [0149](0149-laravel-kit-mirrors-leadbuster-verbatim.md) | The Laravel kit mirrors Leadbuster verbatim | Partially superseded by [0150](0150-harness-private-laravel-kit-complete.md) (repository visibility, SECURITY.md and ARCHITECTURE.md) |
 | [0150](0150-harness-private-laravel-kit-complete.md) | The harness is private; the Laravel kit mirrors the security and architecture docs | Accepted |
 | [0151](0151-ship-renamed-release.md) | `/ship` is renamed `/release`, so the built-in `/ship` no longer hides it | Accepted |
 | [0152](0152-one-eval-runner-trials-and-baselines.md) | One eval runner, with trials, baselines and a verdict | Accepted |
+| [0153](0153-converged-fix-round-goes-to-release.md) | A converged fix round goes straight to /release | Accepted |
 
 Adding a new decision: create the next-numbered `NNNN-kebab-title.md`
 (4-digit, zero-padded — MADR-style, matches the files already here) and

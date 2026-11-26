@@ -125,10 +125,8 @@ re-runs every check that diff can affect and probes the conditions it adds or
 changes. It does not run the full suite, at any depth. The packet says
 `Scope: fix diff`. Report **VERIFY PASS (fix diff)**.
 
-When a supplied `/review` result records `PASS (fix diff)` and no open
-BLOCKER or REQUIRED finding, `/test` runs once at the tier's depth instead.
-The packet's diff starts at the last full VERIFY PASS, and it has no `Scope`
-line.
+A `/review` result that records `PASS (fix diff)` and no open BLOCKER or
+REQUIRED finding goes to `/release`, not to `/test` (ADR 0153).
 
 The fresh verifier re-runs every check the diff can affect, not only the
 changed lines. At Deep, a full run executes the full suite again; a fix-diff

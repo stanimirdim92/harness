@@ -670,26 +670,6 @@
   },
   "status": []
  },
- "shipgate_full_run_added_tests": {
-  "commits": [
-   "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
-   "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
-   "ca7749a31a3038e98acf2fa9e86679ec29b7d591 feat: gate export behind an authorized role",
-   "c85a9415d7007a31cabed1ffce42ab205fff3f42 fix: refuse the export when no user is given",
-   "5d01396422f204c4a6669121b75accf3923199bf test: refuse a user with no role",
-   "6ad1f9858060549a7cf921b9e6afc16840e3d1ca test: the owner role exports"
-  ],
-  "evidence": "33adfde187dc5e64492873adf07e2c9c513401170d47335e77438c61370dca13",
-  "files": {
-   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
-   "auth.py": "8dab9bc1c6aec678cb16c815d8a50f4d9b7a9cb7162c6201e55f71f116481396",
-   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
-   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
-   "verify.py": "ecf53524a690922c91be6db2867887ab7b2344cf87822196745fb896b645a815",
-   "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
-  },
-  "status": []
- },
  "shipgate_no_full_run": {
   "commits": [
    "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
@@ -698,7 +678,7 @@
    "c85a9415d7007a31cabed1ffce42ab205fff3f42 fix: refuse the export when no user is given",
    "5d01396422f204c4a6669121b75accf3923199bf test: refuse a user with no role"
   ],
-  "evidence": "6d7e9092e67e918693d212b20b59d03ad394c843c5bc049b4cbf272a2e1ff384",
+  "evidence": "bbb323a250040063303e1977479159c71365851d5e5ae16d7e3f94b2bb78c660",
   "files": {
    "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
    "auth.py": "8dab9bc1c6aec678cb16c815d8a50f4d9b7a9cb7162c6201e55f71f116481396",
@@ -834,25 +814,6 @@
    "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
    "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
    "verify.py": "ebf0a7eebe199feb3c31139dda1f41b8c80f54406e994b98ffe1fda2f4df850c",
-   "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
-  },
-  "status": []
- },
- "testfull_packet": {
-  "commits": [
-   "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
-   "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
-   "ca7749a31a3038e98acf2fa9e86679ec29b7d591 feat: gate export behind an authorized role",
-   "c85a9415d7007a31cabed1ffce42ab205fff3f42 fix: refuse the export when no user is given",
-   "5d01396422f204c4a6669121b75accf3923199bf test: refuse a user with no role"
-  ],
-  "evidence": "d18ea4e39b8f9f74d2be108a272c743924cfb8fa19d329758e983d913ef13506",
-  "files": {
-   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
-   "auth.py": "8dab9bc1c6aec678cb16c815d8a50f4d9b7a9cb7162c6201e55f71f116481396",
-   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
-   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
-   "verify.py": "1639c069886135d2996430a6887c1f4f86b267ccf96ef0030caaa85ff17634fe",
    "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
   },
   "status": []

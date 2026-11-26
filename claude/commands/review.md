@@ -42,9 +42,7 @@ and count again.
 Round 1 reviews the whole candidate. A later round reviews a fix (§3 Later
 rounds). `counted=4` means three rounds did not converge. Return **REVIEW
 BLOCKED**, list the findings that came back in more than one round, and ask
-the user to reconsider the approach before another fix (ADR 0089). The
-closing round after the full-depth `/test` never counts, so ignore `counted` for it
-(ADR 0144). When the
+the user to reconsider the approach before another fix (ADR 0089). When the
 user starts a new approach, pass `--new-approach` to `round` and `add` on its
 first round only; a second one starts yet another approach. The count starts
 again, and the file keeps the earlier rounds.
@@ -66,9 +64,8 @@ Require `/test`'s result for this exact candidate.
   this candidate (ADR 0147). It covers the fix diff only, so the depth rule
   below does not make it stale. Record **Independent verification: PASS (fix
   diff)**. When the round leaves no open BLOCKER or REQUIRED finding, the
-  next step is `/test` once at the tier's depth, on the whole candidate. Then run one closing round on
-  the commits `/test` added, or none when it added none. The closing round
-  records **PASS** and does not count toward the round-4 stop.
+  next step is `/release` (ADR 0153). No full-depth `/test` and no closing
+  round follow.
 - No result for this candidate: return **REVIEW BLOCKED** with `/test` as the
   next step.
 - A **VERIFY PASS** run at a lower depth than the tier §3 sets for this
@@ -392,8 +389,8 @@ a scratch file, then append them to the ticket's file:
 python3 ~/.claude/skills/code-review-and-quality/scripts/review-sarif.py add <TICKET> <round-file> --commit $(git rev-parse --short HEAD)
 ```
 
-Add `--closing` only for the closing round after the full-depth `/test`
-(ADR 0144). A fix round is never a closing round.
+Never add `--closing`: closing rounds are gone (ADR 0153). The flag stays
+only to read older records.
 
 Each id stays its own SARIF result. Record a group's aliases in each member's `properties.aliases`.
 
@@ -409,8 +406,8 @@ findings`. Its `reviewedCommit` is the commit before this one (ADR 0120). Give
 its path in the report. The markdown report stays the gate artifact; the SARIF file is a copy
 of its findings for tools.
 
-Then stop. The next stage is `/release`, or the full-depth `/test` when this
-round recorded `PASS (fix diff)` (§2).
+Then stop. The next stage is `/release`, also when this round recorded
+`PASS (fix diff)` (§2, ADR 0153).
 
 Any candidate change after REVIEW invalidates the review. A production fix
 returns to `/build`, then `/test` on the fix diff, then `/review` (ADR 0147).

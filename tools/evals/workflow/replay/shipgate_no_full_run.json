@@ -14,7 +14,7 @@
     "reads": [],
     "fixture": "shipgate_no_full_run",
     "expected": {
-      "ship_blocked_pending_test": true
+      "accepts_fix_diff_pass": false
     }
   },
   {
@@ -32,7 +32,7 @@
     "reads": [],
     "fixture": "shipgate_no_full_run",
     "expected": {
-      "ship_blocked_pending_test": false
+      "accepts_fix_diff_pass": true
     }
   },
   {
@@ -50,7 +50,7 @@
     "reads": [],
     "fixture": "shipgate_no_full_run",
     "expected": {
-      "ship_blocked_pending_test": true
+      "accepts_fix_diff_pass": false
     }
   }
 ]

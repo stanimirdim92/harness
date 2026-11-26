@@ -15,7 +15,7 @@
     "fixture": "reviewend_fix_round",
     "expected": {
       "pass_fix_diff_recorded": true,
-      "next_stage_is_test": true
+      "next_stage_is_release": false
     }
   },
   {
@@ -34,7 +34,26 @@
     "fixture": "reviewend_fix_round",
     "expected": {
       "pass_fix_diff_recorded": true,
-      "next_stage_is_test": false
+      "next_stage_is_release": false
+    }
+  },
+  {
+    "source": "test_runner",
+    "output": {
+      "state": "decided",
+      "explanation": "Independent verification: PASS (fix diff)\nNext stage: `/release`",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": ""
+    },
+    "reads": [],
+    "fixture": "reviewend_fix_round",
+    "expected": {
+      "pass_fix_diff_recorded": true,
+      "next_stage_is_release": true
     }
   },
   {
@@ -53,7 +72,7 @@
     "fixture": "reviewend_fix_round",
     "expected": {
       "pass_fix_diff_recorded": true,
-      "next_stage_is_test": true
+      "next_stage_is_release": false
     }
   },
   {
@@ -72,7 +91,7 @@
     "fixture": "reviewend_fix_round",
     "expected": {
       "pass_fix_diff_recorded": false,
-      "next_stage_is_test": false
+      "next_stage_is_release": false
     }
   }
 ]
