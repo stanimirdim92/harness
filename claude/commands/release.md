@@ -92,7 +92,9 @@ top of the report. Say what the owner should read before merging, from the
 depth's row in `../references/risk-tiers.md`: the summary, the diff, or every
 changed file and a second person. A missing Risk line is **SHIP BLOCKED**.
 At Deep, a missing full-suite run or mutation probe in the VERIFY PASS is
-**SHIP BLOCKED** too.
+**SHIP BLOCKED** too. After a converged fix round, that check reads the last
+full VERIFY PASS before the fix rounds. The `PASS (fix diff)` needs only its
+mutation probes (ADR 0153).
 
 ### Paths that always need a person
 

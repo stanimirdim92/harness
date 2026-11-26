@@ -659,7 +659,7 @@
    "c85a9415d7007a31cabed1ffce42ab205fff3f42 fix: refuse the export when no user is given",
    "5d01396422f204c4a6669121b75accf3923199bf test: refuse a user with no role"
   ],
-  "evidence": "a37491591f171a69a45bd58c654e4b310f0105942c7038e35b4f95cfb8f5721a",
+  "evidence": "9c146855f01be29aaffd5202627497446207c52a8f6b72dd4bdfe39e330127ee",
   "files": {
    "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
    "auth.py": "8dab9bc1c6aec678cb16c815d8a50f4d9b7a9cb7162c6201e55f71f116481396",

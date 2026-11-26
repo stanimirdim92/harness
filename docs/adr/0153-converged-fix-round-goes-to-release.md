@@ -21,9 +21,11 @@ test after review".
   depth, and the round-4 stop stay as they were.
 
 Affected files: `claude/commands/review.md` §1, §2 and §4,
-`claude/commands/test.md` §Re-verification, `claude/commands/release.md` §1,
-and the workflow eval cases `reviewend_fix_round`, `shipgate_no_full_run`,
-`shipgate_full_run_added_tests`.
+`claude/commands/test.md` §Re-verification, `claude/commands/release.md` §1
+and §Risk (at Deep, the full-suite check reads the last full VERIFY PASS
+before the fix rounds), and the workflow eval cases `reviewend_fix_round`,
+`shipgate_no_full_run`, `shipgate_full_run`; `testfull_packet` and
+`shipgate_full_run_added_tests` are retired.
 
 **Rejected — *(keep the full-depth /test at the end, 0147).*** It catches a
 fix that breaks a test outside the fix diff. The owner accepts that risk: the
