@@ -164,8 +164,8 @@ def git(*args):
 
 def branch_commits(ticket, base):
     """The ticket's commits in base..HEAD (named in the subject or a Refs:
-    trailer) that change more than its own docs, with their task id."""
-    ours = (f'docs/specs/{ticket}-', f'docs/tasks/{ticket}-')
+    trailer) that change more than its own docs and review file, with their task id."""
+    ours = (f'docs/specs/{ticket}-', f'docs/tasks/{ticket}-', f'docs/reviews/{ticket}.sarif')
     out = []
     for row in git('log', '--format=%H%x1f%s%x1f%(trailers:key=Task,valueonly,separator=%x2C)'
                    '%x1f%(trailers:key=Refs,valueonly,separator=%x2C)', f'{base}..HEAD').splitlines():

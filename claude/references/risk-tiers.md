@@ -41,7 +41,7 @@ ask for a deeper review; nobody can ask for a shallower one than the tier.
 | Reviewers | the three always-on reviewers, plus specialists by trigger | the same | the same, and a specialist whose trigger might match is dispatched |
 | Independent check (ADR 0092) | BLOCKER findings | BLOCKER and REQUIRED findings | BLOCKER and REQUIRED findings |
 | Gap sweep (`/review` §Sweep for gaps) | not run | one fresh `code-reviewer` | one fresh `code-reviewer` |
-| `/test` | per `verification-triggers.md` | per `verification-triggers.md` | required, with a mutation probe on every changed condition and the full suite |
+| `/test` | per `verification-triggers.md` | per `verification-triggers.md` | required, with a mutation probe on every changed condition, and the full suite once when `suite-scope.py` says the change reaches shared code (ADR 0154) |
 | `/release` asks the owner to | read the summary | read the diff | read every changed file, and get a second person where the team has one |
 
 Security review runs at every depth (ADR 0102). Depth never removes a

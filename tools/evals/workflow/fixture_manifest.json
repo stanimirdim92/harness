@@ -346,7 +346,7 @@
    "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
    "ca7749a31a3038e98acf2fa9e86679ec29b7d591 feat: gate export behind an authorized role"
   ],
-  "evidence": "3b873487f08d55138f6a0ddedcb009a9a5c8f9f2699974c47ae4fc81c71d42ff",
+  "evidence": "54ec231e825705057639be59a1cacdef3d58275415479463a0db5fa670713c01",
   "files": {
    "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
    "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
@@ -474,6 +474,23 @@
   },
   "status": []
  },
+ "review_deep_no_full_suite": {
+  "commits": [
+   "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
+   "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
+   "eba7257ceb05cee8d737995924596edc0c658a65 feat: gate export behind an authorized role"
+  ],
+  "evidence": "3923fdcacc63d9e6daa0119f9e2957ad8297238cd06f37b1ad040edc0fdb6e32",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "139a0e92b325ffc8068ff8954d501c2a5ff1f88d753298f92756ed87b3ce03e3",
+   "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
+  },
+  "status": []
+ },
  "review_plain_diff": {
   "commits": [
    "11b122d8eb6c337ec4969595a5fdcac1d01ec81c Fixture baseline",
@@ -504,6 +521,38 @@
    "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
    "verify.py": "139a0e92b325ffc8068ff8954d501c2a5ff1f88d753298f92756ed87b3ce03e3",
    "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
+  },
+  "status": []
+ },
+ "review_scope_default": {
+  "commits": [
+   "11b122d8eb6c337ec4969595a5fdcac1d01ec81c Fixture baseline",
+   "4effa417eb36fd108f3781010c7904fb983cc988 Approved plan",
+   "1958f957fe3ab61389e8bdbf72b9003a7d9e0343 feat: rename export label to Download"
+  ],
+  "evidence": "8088ee40ace1a405c27cd4773c1ca3a8c848413ce45ff1e375957b43f7e4891e",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "requirements/WF-40-SPEC.md": "8eebe557a522de3743c5c9f132f1f49bb75adeb73a2680f7331cec5cac111a15",
+   "ui.py": "011166c5a83e176f0cb2b82f2cad55205eb4023968d1c36ec2e29198854a0083",
+   "verify.py": "d3253b57cdee8599e84ed51e61e59e33aca35060e51e9b44244ff9661923a801",
+   "work/WF-40-plan.md": "1af75d61ca4ac7329a4c1e6f7d5ccec8077965d889565e2a00de84d8debc929e"
+  },
+  "status": []
+ },
+ "review_scope_wide": {
+  "commits": [
+   "11b122d8eb6c337ec4969595a5fdcac1d01ec81c Fixture baseline",
+   "4effa417eb36fd108f3781010c7904fb983cc988 Approved plan",
+   "1958f957fe3ab61389e8bdbf72b9003a7d9e0343 feat: rename export label to Download"
+  ],
+  "evidence": "8088ee40ace1a405c27cd4773c1ca3a8c848413ce45ff1e375957b43f7e4891e",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "requirements/WF-40-SPEC.md": "8eebe557a522de3743c5c9f132f1f49bb75adeb73a2680f7331cec5cac111a15",
+   "ui.py": "011166c5a83e176f0cb2b82f2cad55205eb4023968d1c36ec2e29198854a0083",
+   "verify.py": "d3253b57cdee8599e84ed51e61e59e33aca35060e51e9b44244ff9661923a801",
+   "work/WF-40-plan.md": "1af75d61ca4ac7329a4c1e6f7d5ccec8077965d889565e2a00de84d8debc929e"
   },
   "status": []
  },
@@ -648,6 +697,24 @@
    "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
    "verify.py": "139a0e92b325ffc8068ff8954d501c2a5ff1f88d753298f92756ed87b3ce03e3",
    "work/WF-40-plan.md": "f15efd0321566bc84b4e2c849fa9e19418d55aec70cafac5500864950822c39b"
+  },
+  "status": []
+ },
+ "shipgate_fix_not_run": {
+  "commits": [
+   "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
+   "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
+   "ca7749a31a3038e98acf2fa9e86679ec29b7d591 feat: gate export behind an authorized role",
+   "c85a9415d7007a31cabed1ffce42ab205fff3f42 fix: refuse the export when no user is given"
+  ],
+  "evidence": "803df44f890a8be7d2142e1e085097174ad144e2d5c67b8e9bae5a301a8542d8",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "8dab9bc1c6aec678cb16c815d8a50f4d9b7a9cb7162c6201e55f71f116481396",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "ebf0a7eebe199feb3c31139dda1f41b8c80f54406e994b98ffe1fda2f4df850c",
+   "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
   },
   "status": []
  },
@@ -842,6 +909,23 @@
    "ca7749a31a3038e98acf2fa9e86679ec29b7d591 feat: gate export behind an authorized role"
   ],
   "evidence": "93974902b03da83c086cd11f327252ae5a090d41c61505ddd762816209f75c11",
+  "files": {
+   "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
+   "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",
+   "requirements/WF-40-SPEC.md": "5e4a7e7881e1185cfbf3f9e257c12b2d2c726e888da581f1c7aa868eaf805d34",
+   "ui.py": "b61344ef443bcb8ff2e88300b62ea35a406f2c5738c6920affeb0ad4364f135f",
+   "verify.py": "139a0e92b325ffc8068ff8954d501c2a5ff1f88d753298f92756ed87b3ce03e3",
+   "work/WF-40-plan.md": "da62ecb97029fc94aaa967e3dc1300f8409046402cd2c2ea584f81bc3d7c99aa"
+  },
+  "status": []
+ },
+ "testgate_suite_focused": {
+  "commits": [
+   "16b26e23d660bb7654a2a11eb2104529c58c5a05 Fixture baseline",
+   "50d4b6674608fa95dffe597a31bb79282a674695 Approved plan",
+   "ca7749a31a3038e98acf2fa9e86679ec29b7d591 feat: gate export behind an authorized role"
+  ],
+  "evidence": "c25bbf3ebc1ce768ecf0dd104ebdbc6d92b8237cad3556e33ab604b1d899599d",
   "files": {
    "AGENTS.md": "4a822f6be7372eab4ea54f9de0557c8fc846114f5553541e227d7fcfad76faa6",
    "auth.py": "ebf76368cbeac5c693b31c2c2ea0deffc6926e1d1c2b43de932b2149004685a4",

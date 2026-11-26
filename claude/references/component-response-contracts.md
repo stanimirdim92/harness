@@ -311,11 +311,13 @@ Every finding, ADVISORY included, states what a user or developer would
 notice and a recommended action. A finding only a browser can settle is
 written as a check (page, steps, what to look for); `/review` routes it to
 `/test`, and to the owner only when the verifier cannot run it.
-A defect present at the candidate base that the
-diff does not introduce or reach is marked `pre-existing` (`findings.md` §Dispositions).
+Under `Scope: diff` (the default) a persona reports only defects the diff
+introduces, reaches or makes worse, and writes ADVISORY findings as one line;
+under `Scope: wide`, a defect present at the candidate base that the
+diff does not introduce or reach is marked `pre-existing` (`findings.md` §Scope, §Dispositions, ADR 0154).
 When the packet holds the project's `REVIEW.md`, its definition of Important
 (BLOCKER or REQUIRED), its do-not-report list and its always-check rules apply
-(ADR 0091, 0094). Report every ADVISORY finding; no nit cap applies (ADR 0130).
+(ADR 0091, 0094). Report every ADVISORY finding within the scope; no nit cap applies (ADR 0130).
 A `maxTurns` cap ending a run early is reported as a partial result with everything unexamined named explicitly; a truncated
 report is never presented as clean or complete. No persona issues GO/NO-GO,
 and no persona invokes another agent or slash command — only a command or the
@@ -406,7 +408,7 @@ The dispositions and the `pre-existing` mark are defined once, in
 Report includes: candidate branch/diff scope, BUILD candidate and any accepted
 post-BUILD test-only commits, the **Risk · Depth** line (`risk-tiers.md`),
 **Independent verification: NOT REQUIRED \| PASS \| PASS (fix diff) \|
-STALE (depth)**, required-reviewer list and trigger decisions, each reviewer's result,
+NOT RUN (fix round) \| STALE (depth)**, the `Scope: diff \| wide` line, required-reviewer list and trigger decisions, each reviewer's result,
 every finding with disposition and its `REQ-###` where applicable, and one
 requirement-evidence line per spec `REQ-###` (implementation + verification, or
 an explicit gap — `/release` blocks on a missing entry). Confidence travels with

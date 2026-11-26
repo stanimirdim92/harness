@@ -10,5 +10,5 @@ def checks(result, reads, directory):
     test_at, review_at = after.find('/test'), after.find('/review')
     return {
         'build_complete': result['state'] == 'decided' and report_name(report) == 'BUILD COMPLETE',
-        'test_is_the_next_stage': test_at != -1 and (review_at == -1 or test_at < review_at),
+        'review_is_the_next_stage': review_at != -1 and (test_at == -1 or review_at < test_at),
     }

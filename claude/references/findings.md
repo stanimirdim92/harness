@@ -22,6 +22,25 @@ input, state or timing, and the wrong result it produces. A claim with no
 nameable failure scenario is ADVISORY at most, or goes under Not verified. The
 independent check in `/review` tests this scenario.
 
+## Scope
+
+Every review packet states its scope: `Scope: diff` (the default) or
+`Scope: wide` (the owner passed `wide` to `/review`).
+
+**`Scope: diff`.** Look for defects the diff introduces, makes reachable, or
+makes worse. Do not search code the diff does not touch; read it only as
+evidence. Report:
+
+- BLOCKER and REQUIRED findings, in full, with their ids;
+- every ADVISORY finding, in every round, as one line: `file:line` and one
+  sentence with the recommended action. They get no id, no confidence, no
+  independent check and no SARIF result. Fixing one is optional: `/build`
+  fixes it only when the owner names it, and none blocks `/release`;
+- no pre-existing finding.
+
+**`Scope: wide`.** Report every finding at every disposition, pre-existing
+ones included, in full. Use it when the owner asks for the wider search.
+
 **Pre-existing.** A finding is marked `pre-existing` when the defect already
 exists at the candidate base and the change neither introduces it nor makes it
 reachable or worse. It keeps its disposition, so its seriousness stays visible.

@@ -1,6 +1,6 @@
 ---
 description: Conduct independent review of a candidate that /test has verified
-argument-hint: "[commit range, PR, diff, task, or feature]"
+argument-hint: "[commit range, PR, diff, task, or feature] [wide]"
 ---
 
 `/review` is the independent **REVIEW** gate after `/test` (ADR 0132). It
@@ -11,6 +11,10 @@ It reports findings. `/release` owns the release verdict.
 ## 1. Establish the candidate
 
 Resolve the target per `../references/target-selection.md`, and announce it ("Using: <target>") before anything else.
+
+Set the review scope (`../references/findings.md` §Scope): `Scope: wide` when
+the owner passed `wide`, `Scope: diff` otherwise. Every reviewer packet in this
+review carries that line, the blind one included.
 
 Require `/build`'s **BUILD COMPLETE** message from one of the valid sources in
 `../references/target-selection.md` §Gate handoffs and record its candidate
@@ -40,7 +44,10 @@ per-round files, run its `merge <TICKET>` command, commit the result alone,
 and count again.
 
 Round 1 reviews the whole candidate. A later round reviews a fix (§3 Later
-rounds). `counted=4` means three rounds did not converge. Return **REVIEW
+rounds). The first round of a new approach is a later round too when every
+commit after the last `reviewedCommit` comes from `/build <TICKET> review
+fixes` or touches only the ticket's SARIF file or open-items ledger: it
+reviews that fix. `counted=4` means three rounds did not converge. Return **REVIEW
 BLOCKED**, list the findings that came back in more than one round, and ask
 the user to reconsider the approach before another fix (ADR 0089). When the
 user starts a new approach, pass `--new-approach` to `round` and `add` on its
@@ -58,19 +65,23 @@ Require `/test`'s result for this exact candidate.
   **Independent verification: NOT REQUIRED** and use `/build`'s verification
   evidence. When it does not, return **REVIEW BLOCKED** with `/test` as the
   next step.
-- **Fix round** (a later round whose new commits come only from
-  `/build <TICKET> review fixes`, plus the test-only commits its VERIFY PASS
-  (fix diff) declared): require a **VERIFY PASS (fix diff)** for
-  this candidate (ADR 0147). It covers the fix diff only, so the depth rule
-  below does not make it stale. Record **Independent verification: PASS (fix
-  diff)**. When the round leaves no open BLOCKER or REQUIRED finding, the
-  next step is `/release` (ADR 0153). No full-depth `/test` and no closing
-  round follow.
+- **Fix round** (a later round, including the first round of a new approach
+  as §1 defines it, whose new commits come only from
+  `/build <TICKET> review fixes`, plus the test-only commits a VERIFY PASS
+  (fix diff) declared): `/test` is optional here (ADR 0154). With a
+  **VERIFY PASS (fix diff)** for this candidate, record **Independent
+  verification: PASS (fix diff)**. Without one, record **Independent
+  verification: NOT RUN (fix round)**; the evidence is the fix build's
+  failing-then-passing test for each finding. Neither is made stale by the
+  depth rule below. When the round leaves no open BLOCKER or REQUIRED
+  finding, the next step is `/release` (ADR 0153). No full-depth `/test` and
+  no closing round follow.
 - No result for this candidate: return **REVIEW BLOCKED** with `/test` as the
   next step.
 - A **VERIFY PASS** run at a lower depth than the tier §3 sets for this
-  candidate is stale: Deep needs the full suite and a mutation probe on
-  every changed condition (`../references/risk-tiers.md`). Record
+  candidate is stale: Deep needs a mutation probe on every changed condition,
+  and the full suite when the report's **Full suite** line says
+  `suite-scope.py` asked for it (`../references/risk-tiers.md`, ADR 0154). Record
   **Independent verification: STALE (depth)**.
 - If required verification is missing or stale, return **REVIEW BLOCKED** with
   `/test` as the next step, at the depth it names. The review repeats after
@@ -124,7 +135,8 @@ including any `## Review depth` floor in the base branch's `REVIEW.md`.
 Record **Risk: <Low | Medium | High> — <the line that matched> · Depth:
 <Quick | Standard | Deep>** and apply that depth's column to dispatch, the
 independent check and the `/test` packet. Reviewers report every ADVISORY
-finding, and the report keeps all of them (ADR 0130). Do not lower the tier
+finding within the scope, and the report keeps all of them (ADR 0130); under
+`Scope: diff` each is one line (ADR 0154). Do not lower the tier
 for a small diff or a trusted author.
 
 Dispatch `code-reviewer` with:
@@ -139,7 +151,8 @@ Dispatch `code-reviewer` with:
 - the weakened-test list, when there is one.
 
 Dispatch `blind-reviewer` with **the integrated diff and nothing else**, except
-the project's `REVIEW.md`, which describes the area rather than the change. No
+the project's `REVIEW.md`, which describes the area rather than the change,
+and the scope line. No
 goal, no acceptance criteria, no build evidence, no ticket id in the packet
 text. Assembling this packet is a deliberate act of withholding: everything you
 naturally reach for is exactly what must not go in. A reviewer told what the
@@ -189,6 +202,9 @@ whether it finds what the personas miss.
   - a conventions finding that quotes a broken CLAUDE.md rule: REQUIRED;
   - reuse, simplification, efficiency and altitude findings: ADVISORY.
 
+  Under `Scope: diff`, drop its findings on code the diff does not introduce,
+  reach or make worse, and turn its ADVISORY findings into one line each.
+
   Its verdict sets the confidence: CONFIRMED high, PLAUSIBLE medium, none low.
 - **After that,** treat `CR-#` findings like any other reviewer's. Group
   duplicates, run the independent check (the checker is `code-reviewer`), and
@@ -214,8 +230,8 @@ diff a reviewer gets (`git diff <sha>..HEAD -- . ':!docs/reviews'`).
 - Run `security-auditor` again on the new diff; run
   `distributed-systems-reviewer` again only when the new diff matches its
   trigger.
-- Report no new ADVISORY or pre-existing finding. Count them, and end the
-  summary with "<n> found and not reported in this round".
+- List every new ADVISORY finding as a one-line `A-#` entry, as in round 1
+  (ADR 0154). Report no pre-existing finding unless the scope is `wide`.
 - Run the weakened-test guard and the ledger check on the whole candidate, as
   in round 1.
 
@@ -337,10 +353,11 @@ Report, starting with one count line before anything else (ADR 0099):
 
 - `**Findings: N BLOCKER · N REQUIRED · N ADVISORY**`, adding `· N pre-existing`
   when there are any; or `**Nothing to fix.**` when every count is zero;
+- the scope: `Scope: diff` or `Scope: wide`;
 - the review round, and for a later round the commit it was reviewed from;
 - candidate branch/diff scope;
 - BUILD candidate and any accepted post-BUILD test-only commits;
-- **Independent verification: NOT REQUIRED | PASS | PASS (fix diff) | STALE (depth)**;
+- **Independent verification: NOT REQUIRED | PASS | PASS (fix diff) | NOT RUN (fix round) | STALE (depth)**;
 - **Risk: <tier> — <reason> · Depth: <depth>** (ADR 0106);
 - required-reviewer list and trigger decisions;
 - whether the project has a `REVIEW.md`, and which ones were used;
@@ -373,7 +390,11 @@ Write the findings so the owner can act on them without the code open:
   of <id>" for any finding it raises. Never lower one.
 - Each line says, in plain words: what a user or developer would notice, the
   recommended action, and the choice it asks of the owner (or "none").
-- An ADVISORY finding carries a recommendation too.
+- An ADVISORY finding carries a recommendation too. Under `Scope: diff`, list
+  the one-line ADVISORY findings last, under **Advisory (optional, one line
+  each)**, in every round,
+  numbered `A-1`, `A-2` within this report so the owner can name one.
+  Merge lines that point at the same `file:line`.
 - Put the findings the spec answers, or that restate the owner's request, in
   one line: `Answered: CODE-4, BLIND-2 (REQ-003, DEC-005)`.
 
@@ -381,7 +402,8 @@ Example: `CODE-1 = BLIND-12 · REQUIRED · An import of 50k rows takes about
 a minute with no progress shown. Fix: add a progress bar. Your choice: fix
 now, or accept and measure after release.`
 
-Also write every finding as SARIF 2.1.0, so code-scanning tools can read the
+Also write every finding as SARIF 2.1.0 (under `Scope: diff`, the BLOCKER and
+REQUIRED findings only), so code-scanning tools can read the
 review (`../references/findings.md` §Review SARIF). Write this round's runs to
 a scratch file, then append them to the ticket's file:
 
@@ -401,8 +423,9 @@ first, and reuse one when it fits:
 python3 ~/.claude/skills/code-review-and-quality/scripts/review-noise.py --classes
 ```
 
-Commit `docs/reviews/<TICKET>.sarif` alone: `review: <TICKET> round <n>
-findings`. Its `reviewedCommit` is the commit before this one (ADR 0120). Give
+Commit `docs/reviews/<TICKET>.sarif`, with this round's ledger and spec changes,
+in one docs-only commit: `review: <TICKET> round <n> findings`
+(`../references/ticket-ledger.md`, **Commits**). Its `reviewedCommit` is the commit before this one (ADR 0120). Give
 its path in the report. The markdown report stays the gate artifact; the SARIF file is a copy
 of its findings for tools.
 
@@ -410,4 +433,5 @@ Then stop. The next stage is `/release`, also when this round recorded
 `PASS (fix diff)` (§2, ADR 0153).
 
 Any candidate change after REVIEW invalidates the review. A production fix
-returns to `/build`, then `/test` on the fix diff, then `/review` (ADR 0147).
+returns to `/build`, then `/review`; `/test` on the fix diff runs between them
+only when the owner asks (ADR 0154).

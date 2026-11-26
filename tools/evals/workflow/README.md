@@ -85,17 +85,32 @@ give, and asserts the decision:
   for the first and reports the second with a reason, never as a kill. The
   unit tests run every mutant, so the fixture cannot claim a false result.
 
-Four cases pin the fix-round order of ADR 0147, build then test then review:
+Four cases pin the fix-round order of ADR 0154: build then review, with
+`/test` on the fix diff only when the owner asks:
 
-- `fix_next_stage`: a review-fix run names `/test` on the fix diff as its
-  next stage, before `/review`.
+- `fix_next_stage`: a review-fix run names `/review` as its next stage, not
+  `/test`.
 - `fixround_verified`: `/review` accepts a **VERIFY PASS (fix diff)** for a
   fix round at Deep depth, and does not call it stale. The candidate carries
   one test-only commit that the fix-diff run declared.
 - `fixround_unverified`: with no VERIFY for the fix candidate, `/review`
-  returns REVIEW BLOCKED and names `/test`.
-- `testfix_packet`: `/test` verifies a fix candidate now. Its packet says
-  `Scope: fix diff` and does not run the full suite.
+  records **NOT RUN (fix round)** and dispatches the reviewers.
+- `testfix_packet`: the owner asks for `/test` on a fix candidate. Its packet
+  says `Scope: fix diff` and does not run the full suite.
+
+`testgate_suite_focused` pins the full-suite decision of ADR 0154: at Deep,
+when `suite-scope.py` exits 0, the packet runs focused tests and mutation
+probes, not the full suite. `owner_skips_test_depth` supplies the exit-1
+output, so the full suite runs there.
+
+`review_deep_no_full_suite` pins that a Deep VERIFY PASS whose full suite
+was not needed (`suite-scope.py` exit 0) is not STALE at `/review`.
+`shipgate_fix_not_run` pins that `/release` accepts a converged fix round that
+recorded **NOT RUN (fix round)**.
+
+`review_scope_default` and `review_scope_wide` pin the review scope of ADR
+0154: `/review` records `Scope: diff` by default and `Scope: wide` when the
+request says `wide`.
 
 `route_browser_check` pins where a reviewer's browser check goes. With no dev
 server running, `/review` still sends it to the verifier through `/test`,

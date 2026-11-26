@@ -35,9 +35,9 @@ def git(*args):
     return out.returncode, out.stdout
 
 
-def globs_in(text, directory=''):
-    """The globs under the "Always a person" heading, rooted at directory."""
-    m = HEADING.search(text)
+def globs_in(text, directory='', heading=HEADING):
+    """The globs under the heading ("Always a person"), rooted at directory."""
+    m = heading.search(text)
     if not m:
         return []
     section = text[m.end():]
@@ -45,6 +45,21 @@ def globs_in(text, directory=''):
     section = section[:nxt.start()] if nxt else section
     prefix = f'{directory}/' if directory else ''
     return [prefix + g.strip().lstrip('/') for g in GLOB.findall(section)]
+
+
+def review_globs(base, changed, heading=HEADING):
+    """The globs under heading in every base-branch REVIEW.md the change sits under.
+
+    The change set is base...HEAD (from the merge base); the rules come from
+    the base ref itself, so a rule added to base after branching still applies.
+    """
+    dirs = {''} | {str(p) for f in changed for p in PurePosixPath(f).parents if str(p) != '.'}
+    globs = []
+    for d in sorted(dirs):
+        rc, text = git('show', f'{base}:{d + "/" if d else ""}REVIEW.md')
+        if rc == 0:
+            globs += globs_in(text, d, heading)
+    return globs
 
 
 def matches(path, glob):
@@ -68,14 +83,7 @@ def main(argv=None):
         return 2
     changed = [p for p in out.split('\0') if p]
 
-    # The change set is base...HEAD (from the merge base); the rules come from
-    # the base ref itself, so a rule added to base after branching still applies.
-    dirs = {''} | {str(p) for f in changed for p in PurePosixPath(f).parents if str(p) != '.'}
-    globs = []
-    for d in sorted(dirs):
-        rc, text = git('show', f'{args.base}:{d + "/" if d else ""}REVIEW.md')
-        if rc == 0:
-            globs += globs_in(text, d)
+    globs = review_globs(args.base, changed)
 
     hits = {f: [g for g in globs if matches(f, g)] for f in changed}
     hits = {f: g for f, g in hits.items() if g}

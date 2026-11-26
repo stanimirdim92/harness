@@ -60,6 +60,10 @@ jobs:
       # (adr/0096).
       - name: Always-a-person paths
         run: python3 tools/tests/test-always-person.py
+      # Whether a change needs the full test suite, decided from the diff
+      # (adr/0154).
+      - name: Full-suite scope
+        run: python3 tools/tests/test-suite-scope.py
       # Instruction lines a change makes untrue: renamed or deleted files and
       # removed scripts (adr/0098).
       - name: Stale instructions

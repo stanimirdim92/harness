@@ -157,6 +157,26 @@ class CheckLedger(unittest.TestCase):
         _, warn = run(commits=commits, open_items=OPEN + '| OPEN-002 | a1b2c3d drop old columns | unplanned commit | owner | Done — DEC-002 |\n')
         self.assertEqual(warn, [], messages(warn))
 
+    def test_docs_and_review_file_commits_are_not_listed(self):
+        import os, subprocess, tempfile
+        cwd = os.getcwd()
+        with tempfile.TemporaryDirectory() as tmp:
+            os.chdir(tmp)
+            try:
+                g = lambda *a: subprocess.run(['git', '-c', 'user.email=t@t', '-c', 'user.name=t', *a],
+                                              check=True, capture_output=True)
+                g('init', '-q', '-b', 'main'); g('commit', '-q', '--allow-empty', '-m', 'base')
+                for path, msg in (('docs/reviews/LD-9.sarif', 'review: LD-9 round 1 findings'),
+                                  ('docs/tasks/LD-9-open.md', 'docs(LD-9): owner rulings'),
+                                  ('app.py', 'fix(LD-9): guard the export')):
+                    Path(path).parent.mkdir(parents=True, exist_ok=True)
+                    Path(path).write_text('x\n')
+                    g('add', '-A'); g('commit', '-q', '-m', msg)
+                subjects = [c[1] for c in cl.branch_commits('LD-9', 'main~3')]
+            finally:
+                os.chdir(cwd)
+        self.assertEqual(subjects, ['fix(LD-9): guard the export'])
+
     def test_missing_open_file_is_empty_register(self):
         fail, _ = run(open_items=None)
         self.assertEqual(fail, [], messages(fail))

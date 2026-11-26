@@ -57,6 +57,10 @@ Check the changed semantics that apply:
 State the concrete production failure for every finding, not just "could be an
 issue."
 
+Report within the packet's scope (`../references/findings.md` §Scope). Under
+`Scope: diff`, an ADVISORY finding is one line, and you mark nothing
+pre-existing.
+
 Disposition (`../references/findings.md` §Dispositions):
 
 - **BLOCKER** — concrete path to data loss, duplicate irreversible effects, or
@@ -93,13 +97,14 @@ either correctness or failure.
 **Scope:** [which of the checks above the change touches, and why the others do not apply]
 
 ### BLOCKER
-- [DIST-1] [file:line] [REQ-### if it bears on one] (confidence: high|med|low) [pre-existing, if so] [failure scenario in production + recommended fix]
+- [DIST-1] [file:line] [REQ-### if it bears on one] (confidence: high|med|low) [pre-existing, if so — wide only] [failure scenario in production + recommended fix]
 
 ### REQUIRED
-- [DIST-2] [file:line] [REQ-### if it bears on one] (confidence: high|med|low) [pre-existing, if so] [failure scenario + recommended fix]
+- [DIST-2] [file:line] [REQ-### if it bears on one] (confidence: high|med|low) [pre-existing, if so — wide only] [failure scenario + recommended fix]
 
 ### ADVISORY
-- [DIST-3] [file:line] (confidence: high|med|low) [pre-existing, if so] [failure scenario + recommended action]
+Scope: diff — one line each: - [file:line] [recommended action]
+Scope: wide — - [DIST-3] [file:line] (confidence: high|med|low) [pre-existing, if so] [failure scenario + recommended action]
 
 ### Not verified
 - [mechanism you could not verify from the diff and repository, and the evidence that would settle it]

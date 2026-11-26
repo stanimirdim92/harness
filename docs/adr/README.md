@@ -113,7 +113,7 @@ that explanation here, just the index.
 | [0103](0103-reviewers-answer-every-review-md-rule.md) | Reviewers answer every REVIEW.md rule | Accepted |
 | [0104](0104-test-runs-every-production-change.md) | `/test` runs every production change, and runs it for real | Amended by [0132](0132-test-before-review.md) (`/test` decides the exemption) |
 | [0105](0105-repeated-findings-fixed-at-the-source.md) | Repeated findings are fixed at the source | Amended by [0135](0135-shared-tests-catch-repeated-classes.md) (shared tests second in the order) |
-| [0106](0106-risk-tiers-and-review-depth.md) | Risk tiers set review depth | Accepted |
+| [0106](0106-risk-tiers-and-review-depth.md) | Risk tiers set review depth | Accepted; `/test` column amended by [0154](0154-review-scope-optional-fix-test-full-suite-by-impact.md) (the full suite runs when `suite-scope.py` says so) |
 | [0107](0107-project-formatter-hook-and-no-style-findings.md) | The project's formatter formats; reviewers drop style | Accepted |
 | [0108](0108-overnight-review-fixes.md) | Review findings are fixed overnight | Accepted; the overnight runner removed by [0119](0119-headless-runners-removed.md) |
 | [0109](0109-unattended-pipeline-with-batched-decisions.md) | Unattended pipeline with batched decisions | Superseded by [0119](0119-headless-runners-removed.md) |
@@ -137,7 +137,7 @@ that explanation here, just the index.
 | [0127](0127-repo-recon-writes-its-report-file.md) | repo-recon writes its report to a file | Accepted |
 | [0128](0128-explore-runs-on-haiku.md) | Explore runs on Haiku | Accepted |
 | [0129](0129-compaction-window-400k.md) | Compaction window raised to 400k | Accepted |
-| [0130](0130-no-advisory-cap.md) | No cap on ADVISORY findings | Accepted |
+| [0130](0130-no-advisory-cap.md) | No cap on ADVISORY findings | Partially superseded by [0154](0154-review-scope-optional-fix-test-full-suite-by-impact.md) (under the default `Scope: diff`, ADVISORY findings are one line each) |
 | [0131](0131-executor-searches-before-adding.md) | The executor searches before it adds, and checks its own diff | Accepted |
 | [0132](0132-test-before-review.md) | `/test` runs after every `/build`, before `/review` | Accepted |
 | [0133](0133-reviewers-run-at-once.md) | Reviewers run at once | Accepted |
@@ -154,13 +154,15 @@ that explanation here, just the index.
 | [0144](0144-fix-rounds-skip-test-until-review-converges.md) | Fix rounds skip /test until review converges | Partially superseded by [0147](0147-fix-rounds-run-test-on-the-fix-diff.md) (fix rounds run `/test` on the fix diff; the closing round and the executor's same-failure sweep stand) |
 | [0145](0145-one-review-sarif-per-ticket.md) | One review SARIF per ticket | Accepted |
 | [0146](0146-remove-explain-command.md) | Remove the /explain command | Accepted |
-| [0147](0147-fix-rounds-run-test-on-the-fix-diff.md) | Fix rounds run /test on the fix diff | Partially superseded by [0153](0153-converged-fix-round-goes-to-release.md) (no full-depth `/test` and no closing round after a converged fix round; the fix-diff `/test` stands) |
+| [0147](0147-fix-rounds-run-test-on-the-fix-diff.md) | Fix rounds run /test on the fix diff | Partially superseded by [0153](0153-converged-fix-round-goes-to-release.md) (no full-depth `/test` and no closing round after a converged fix round) and by [0154](0154-review-scope-optional-fix-test-full-suite-by-impact.md) (the fix-diff `/test` runs only when the owner asks) |
 | [0148](0148-owner-messages-do-not-override-pipeline-gates.md) | Owner messages do not override pipeline gates | Accepted |
 | [0149](0149-laravel-kit-mirrors-leadbuster-verbatim.md) | The Laravel kit mirrors Leadbuster verbatim | Partially superseded by [0150](0150-harness-private-laravel-kit-complete.md) (repository visibility, SECURITY.md and ARCHITECTURE.md) |
 | [0150](0150-harness-private-laravel-kit-complete.md) | The harness is private; the Laravel kit mirrors the security and architecture docs | Accepted |
 | [0151](0151-ship-renamed-release.md) | `/ship` is renamed `/release`, so the built-in `/ship` no longer hides it | Accepted |
 | [0152](0152-one-eval-runner-trials-and-baselines.md) | One eval runner, with trials, baselines and a verdict | Accepted |
 | [0153](0153-converged-fix-round-goes-to-release.md) | A converged fix round goes straight to /release | Accepted |
+| [0154](0154-review-scope-optional-fix-test-full-suite-by-impact.md) | Review stays on the diff; the fix-round /test is optional; the full suite runs by impact | Accepted |
+| [0155](0155-one-docs-commit-per-stage.md) | One docs commit per stage | Accepted |
 
 Adding a new decision: create the next-numbered `NNNN-kebab-title.md`
 (4-digit, zero-padded — MADR-style, matches the files already here) and

@@ -358,7 +358,8 @@ The plan checks in §1 still apply; task resume does not.
    (ADR 0089).
 2. The scope is every finding still `open` that is BLOCKER or REQUIRED and not
    pre-existing (`baselineState` is not `unchanged`), plus any ADVISORY the user
-   named. Nothing else: no refactor, no plan task, no other finding.
+   named: a SARIF id, or an `A-#` line from the review report, which the packet
+   carries verbatim. Nothing else: no refactor, no plan task, no other finding.
    When the user names a pre-existing finding, recommend a follow-up ticket
    first: its fix changes behavior outside the ticket and gives the next round
    new code to review. Include it only when the user confirms after that
@@ -382,7 +383,8 @@ The plan checks in §1 still apply; task resume does not.
    (ADR 0144).
 5. Report one line per finding: fixed (commit), disputed (evidence), or
    blocked (why). With no blocked finding, report BUILD COMPLETE; the next
-   stage is `/test` on the fix diff, then `/review` (ADR 0147). Otherwise report BUILD BLOCKED, with the stage each
+   stage is `/review`. `/test` on the fix diff runs first only when the owner
+   asks for it (ADR 0154). Otherwise report BUILD BLOCKED, with the stage each
    blocker routes to. The plan and todo do not change.
 
 ## Verify fixes

@@ -122,7 +122,8 @@ spec with those decisions.
 When the user approves in this conversation, set `Status: Approved`,
 `Approved by` and `Approved at` in one edit. Read the header back from disk and
 quote its Status and Approved lines in the report. Rerun the shape check, and
-commit the spec file alone in the same turn. Approval is the user's; the commit
+commit the spec file in the same turn, with the ticket's other uncommitted
+docs in the same commit (`../references/ticket-ledger.md`, **Commits**). Approval is the user's; the commit
 only stops an approved spec from staying uncommitted, which blocks `/plan`.
 On the default branch of the main checkout, first warn in one line that ticket
 work belongs in the ticket worktree (`AGENTS.md` §Worktrees).

@@ -24,9 +24,9 @@ Use `/review`'s independent-verification status:
 
 - `NOT REQUIRED` is valid when REVIEW recorded that decision for this candidate;
 - `PASS` is required when REVIEW required `/test`;
-- `PASS (fix diff)` is valid when that fix round left no open BLOCKER or
-  REQUIRED finding. No full-depth `/test` or closing round is needed
-  (ADR 0153).
+- `PASS (fix diff)` or `NOT RUN (fix round)` is valid when that fix round
+  left no open BLOCKER or REQUIRED finding. No full-depth `/test` or closing
+  round is needed (ADR 0153, 0154).
 
 Use `/review`'s weakened-test result: **Weakened tests: none found**, or every
 listed entry resolved as a finding or a stated reason. A missing result or
@@ -91,10 +91,11 @@ Carry `/review`'s **Risk · Depth** line forward (ADR 0106) and put it at the
 top of the report. Say what the owner should read before merging, from the
 depth's row in `../references/risk-tiers.md`: the summary, the diff, or every
 changed file and a second person. A missing Risk line is **SHIP BLOCKED**.
-At Deep, a missing full-suite run or mutation probe in the VERIFY PASS is
-**SHIP BLOCKED** too. After a converged fix round, that check reads the last
-full VERIFY PASS before the fix rounds. The `PASS (fix diff)` needs only its
-mutation probes (ADR 0153).
+At Deep, a missing mutation probe in the VERIFY PASS is **SHIP BLOCKED** too,
+and so is a missing full-suite run when its `suite-scope.py` output said the
+suite was due (ADR 0154). After a converged fix round, that check reads the
+last full VERIFY PASS before the fix rounds. A `PASS (fix diff)` needs only
+its mutation probes; a `NOT RUN (fix round)` needs none (ADR 0153, 0154).
 
 ### Paths that always need a person
 
@@ -169,7 +170,9 @@ Write each finding's resolution into the review SARIF file
 the id; pass `--round <n>` for an earlier one. The resolutions are `fixed`,
 `refuted`, `answered`, `accepted`, `deferred`, `follow-up` for a tracked
 pre-existing finding, or `open`.
-ADVISORY findings the author declined are `declined`. Never write `refuted`
+ADVISORY findings the author declined are `declined`. A one-line `A-#`
+ADVISORY finding of a `Scope: diff` review has no SARIF result and no
+resolution to write. Never write `refuted`
 for an `answered` finding: `refuted` means the claim is false, and
 `answered` means the spec or the owner already settled it. `answered` comes
 from `/review` only; `/release` never gives it to a finding itself. `review-noise.py`
@@ -325,7 +328,8 @@ release, protected-branch mutation, or history rewriting.
 After the verdict, ask the owner one multi-select question:
 
 1. send the selected ADVISORY findings to `/build` as a fix round, listed by
-   id with the recommended action; `/test` and `/review` follow as usual.
+   id (a SARIF id, or an `A-#` line quoted verbatim) with the recommended
+   action; `/review` follows, and `/test` first only when the owner asks.
    Mark each pre-existing finding as pre-existing, and recommend a follow-up
    ticket for it instead (`build.md` §Review fixes);
 2. post the ship summary as a comment on the Jira ticket.

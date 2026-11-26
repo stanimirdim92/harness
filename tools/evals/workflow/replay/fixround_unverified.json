@@ -14,8 +14,9 @@
     "reads": [],
     "fixture": "fixround_unverified",
     "expected": {
-      "review_blocked_pending_test": true,
-      "no_reviewer_dispatched": true
+      "reviewed_without_test": false,
+      "not_run_recorded": false,
+      "code_reviewer_dispatched": false
     }
   },
   {
@@ -33,8 +34,9 @@
     "reads": [],
     "fixture": "fixround_unverified",
     "expected": {
-      "review_blocked_pending_test": false,
-      "no_reviewer_dispatched": false
+      "reviewed_without_test": true,
+      "not_run_recorded": false,
+      "code_reviewer_dispatched": true
     }
   },
   {
@@ -52,8 +54,29 @@
     "reads": [],
     "fixture": "fixround_unverified",
     "expected": {
-      "review_blocked_pending_test": true,
-      "no_reviewer_dispatched": true
+      "reviewed_without_test": false,
+      "not_run_recorded": false,
+      "code_reviewer_dispatched": false
+    }
+  },
+  {
+    "source": "hand",
+    "output": {
+      "state": "decided",
+      "explanation": "Independent verification: NOT RUN (fix round)",
+      "intake": "",
+      "spec": "",
+      "plan": "",
+      "todo": "",
+      "dispatch": "",
+      "reviewers": "code-reviewer: dispatched — fix round\nblind-reviewer: dispatched — fix round\nsecurity-auditor: dispatched — every round\ndistributed-systems-reviewer: not dispatched — none"
+    },
+    "reads": [],
+    "fixture": "fixround_unverified",
+    "expected": {
+      "reviewed_without_test": true,
+      "not_run_recorded": true,
+      "code_reviewer_dispatched": true
     }
   }
 ]

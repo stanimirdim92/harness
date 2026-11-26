@@ -46,7 +46,7 @@ depend on, and internal consistency:
   ordering, or error; a signature change without its call sites; a schema or
   serialization change without a migration path.
 - **Invariants held by neighbours**: read the surrounding module. When sibling
-  code guards something this change does not, that gap is a finding.
+  code guards something the changed code does not, that gap is a finding.
 - **Tests as evidence, not as blessing**: read the added tests as a description
   of intended behavior and check the implementation against *them*. Tests that
   assert the implementation back to itself establish nothing — say so.
@@ -69,7 +69,13 @@ holds the spec that settles it. Mark each one clearly so `/review` can route it.
 
 ## Finding standard
 
-Record every issue, including uncertain and low-severity ones; filter by label,
+The packet states the scope: `Scope: diff` or `Scope: wide`
+(`../references/findings.md` §Scope). Under `Scope: diff`, look only for
+defects the diff introduces, makes reachable, or makes worse; the surrounding
+code is evidence, not a search target. Write each ADVISORY finding as one line
+and mark nothing pre-existing.
+
+Within that scope, record every issue, including uncertain and low-severity ones; filter by label,
 never by omission. The one class you omit is pure formatting: whitespace,
 layout, quote style, import order, anything the project's formatter already
 fixes (ADR 0107). Report one only when the project's linter fails on a
@@ -109,7 +115,8 @@ it against the actual intent, and a mismatch here is itself a finding.]
 - [BLIND-2] [file:line] (confidence: high|med|low) [behavior found, as a user or developer would notice it] Failure: [input or state → wrong result] Fix: [fix]
 
 ### ADVISORY
-- [BLIND-3] [file:line] (confidence: high|med|low) [behavior found + recommended action]
+Scope: diff — one line each: - [file:line] [recommended action]
+Scope: wide — - [BLIND-3] [file:line] (confidence: high|med|low) [pre-existing, if so] [behavior found + recommended action]
 
 ### Intent-dependent
 - [BLIND-4] [file:line] (confidence: high|med|low; if the worse reading holds: BLOCKER|REQUIRED|ADVISORY) [the two readings, and what would settle it]

@@ -25,9 +25,15 @@ standalone use; do not load it during a review. When the rubric does not
 settle a case, decide it from the code and state your reasoning in the
 finding.
 
-## Finding standard — record everything, filter by label
+## Finding standard — record everything in scope, filter by label
 
-Finding and filtering are separate steps. Record **every** issue you find,
+The packet states the scope: `Scope: diff` or `Scope: wide`
+(`../references/findings.md` §Scope). Under `Scope: diff`, look only for
+defects the diff introduces, makes reachable, or makes worse; read other code
+as evidence, not as a search target. Write each ADVISORY finding as one line
+and mark nothing pre-existing.
+
+Finding and filtering are separate steps. Within that scope, record **every** issue you find,
 including ones you are uncertain about or consider low-severity — do not
 pre-filter for importance or confidence. It is better to surface a finding that
 gets labeled ADVISORY (or declined) than to silently drop a real bug. The only
@@ -132,8 +138,9 @@ mutation probe; `/test` runs the probe, because you are read-only.
 ## Dead code
 
 Code the change leaves unused is a REQUIRED finding: a function, an import, a
-branch, a config key, a flag, a test helper. List each location. Dead code
-that already existed at the base is ADVISORY and marked pre-existing. Report
+branch, a config key, a flag, a test helper. List each location. Under
+`Scope: wide`, dead code that already existed at the base is ADVISORY and
+marked pre-existing. Report
 only what you can show is unused, and give the search that found no caller.
 
 ## Dependency changes
@@ -154,7 +161,8 @@ list of findings other reviewers already made. The goal and criteria are left
 out on purpose. Look only for defects that are not on the list. Re-read the
 diff and the functions around each hunk. Do not re-check or restate listed
 findings. Return at most 8 new findings, numbered `GAP-#`, or **Nothing to
-add.** Do not pad.
+add.** Do not pad. Under `Scope: diff`, return BLOCKER and REQUIRED findings
+only.
 
 ## Follow the project's REVIEW.md
 
@@ -247,7 +255,8 @@ your label as the finding's disposition, unchanged.
 - [CODE-2] [file:line] [REQ-### if it bears on one] (confidence: high|med|low) [problem, as a user or developer would notice it] Failure: [input or state → wrong result] Fix: [recommended fix]
 
 ### ADVISORY
-- [CODE-3] [file:line] [REQ-### if it bears on one] (confidence: high|med|low) [problem, as a user or developer would notice it + recommended action]
+Scope: diff — one line each: - [file:line] [recommended action]
+Scope: wide — - [CODE-3] [file:line] [REQ-### if it bears on one] (confidence: high|med|low) [pre-existing, if so] [problem, as a user or developer would notice it + recommended action]
 
 ### REVIEW.md checklist (when the packet holds a REVIEW.md)
 - [rule from "Always check", verbatim] — checked: `file:line` [what you saw] | not applicable: [why]
@@ -285,7 +294,8 @@ CHANGES** while any BLOCKER or REQUIRED finding is unresolved; otherwise
 3. Record every finding; never drop one to keep the list short (finding standard
    above).
 4. Every BLOCKER and REQUIRED finding includes a specific fix recommendation.
-   Every ADVISORY finding includes a recommended action.
+   Every ADVISORY finding includes a recommended action, in one line under
+   `Scope: diff`.
 5. Don't approve code with BLOCKER findings.
 6. Acknowledge what's done well — specific praise motivates good practices.
 7. If uncertain about something, record it with low confidence and suggest

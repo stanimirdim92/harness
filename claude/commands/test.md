@@ -46,7 +46,17 @@ Resolve:
 - the risk tier and depth, from `../references/risk-tiers.md` applied to the
   candidate's diff. When `/review` has already set a Risk · Depth line, take
   the higher of the two;
-- tests and commands `/build` already ran.
+- tests and commands `/build` already ran;
+- at Deep, the full-suite decision (ADR 0154):
+
+  ```bash
+  python3 ~/.claude/skills/code-review-and-quality/scripts/suite-scope.py --base <base>
+  ```
+
+  Exit 1: the full suite runs once, for the reasons it prints. Exit 0: the
+  focused tests it lists, plus the checks the requirements need; no full
+  suite. Exit 2: **Full suite: Not verified**; run the full suite. On a later
+  run, pass the commit of the last full run as `--base`.
 
 Prefer the handoff and pointers over re-reading the full implementation in the
 main context. Detailed inspection belongs to the verifier.
@@ -62,6 +72,7 @@ Send `test-engineer` a bounded packet containing:
 - candidate identity, baseline tree changes, and selected scope;
 - the tasks BUILD handed on to `/test` (§1);
 - the Risk · Depth line from §1, always (`../references/risk-tiers.md`);
+- at Deep, the `suite-scope.py` output, verbatim;
 - acceptance criteria;
 - implemented behavior;
 - relevant regression risks;
@@ -119,18 +130,20 @@ Its packet carries the usual §2 fields, plus:
 - the diff since the verified commit;
 - the full requirement list, not only the changed ones.
 
-A candidate that comes from `/build <TICKET> review fixes`, and that no
-`/review` round has seen, gets a fix-diff run (ADR 0147). The verifier
+A candidate that comes from `/build <TICKET> review fixes` goes to `/review`
+without `/test` (ADR 0154). When the owner asks for `/test` on it before that
+`/review` round, it gets a fix-diff run (ADR 0147). The verifier
 re-runs every check that diff can affect and probes the conditions it adds or
 changes. It does not run the full suite, at any depth. The packet says
 `Scope: fix diff`. Report **VERIFY PASS (fix diff)**.
 
-A `/review` result that records `PASS (fix diff)` and no open BLOCKER or
-REQUIRED finding goes to `/release`, not to `/test` (ADR 0153).
+A `/review` result that records `PASS (fix diff)` or `NOT RUN (fix round)`
+and no open BLOCKER or REQUIRED finding goes to `/release`, not to `/test`
+(ADR 0153, 0154).
 
 The fresh verifier re-runs every check the diff can affect, not only the
-changed lines. At Deep, a full run executes the full suite again; a fix-diff
-run does not. A check the diff cannot
+changed lines. At Deep, a full run executes the full suite again only when
+`suite-scope.py` from the last full run says so; a fix-diff run never does. A check the diff cannot
 affect keeps its earlier evidence, cited with the verified commit. When unsure
 whether the diff can affect a check, re-run it.
 
@@ -184,7 +197,9 @@ coverage exclusion; obtain it or report why verification is blocked.
 
 Report acceptance criteria verified **per `REQ-###`** — one line per
 requirement in scope, with its evidence — plus tests changed, exact
-commands/outcomes, test-only commits with their exact files, coverage gaps
+commands/outcomes, at Deep one line **Full suite: run (<reasons>) | not
+needed (suite-scope.py exit 0) | run (suite-scope.py not verified)**,
+test-only commits with their exact files, coverage gaps
 intentionally left out, the BUILD candidate identity, and the resulting
 branch/commits/diff/tree state. A requirement in scope with no evidence line is
 a gap to report, not one to omit. Preserve evidence provenance in the summary:

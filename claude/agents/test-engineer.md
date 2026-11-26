@@ -260,22 +260,26 @@ as a kill.
 Probe the conditions whose failure would break an acceptance criterion. One
 probe per condition is enough; do not mutate every line. At Deep depth
 (the packet's Risk · Depth line), probe every condition the candidate adds or
-changes, and run the full suite as well as the focused tests. A fix-diff
-packet is the exception: no full suite at any depth. The mutation is the
+changes, and run the focused tests. Run the full suite as well only when the
+packet's `suite-scope.py` output says so (ADR 0154); a missing output means
+run it. A fix-diff packet is the exception: no full suite at any depth. The mutation is the
 only production-code edit you may make, it lasts one test run, and it is never
 committed. If a file cannot be restored exactly, stop and report it.
 
-At Deep, start the candidate's full suite in the background as your first run
+When the full suite is due, start it in the background as your first run
 (§1). Do the browser and runtime checks while it runs. Do not start mutation
 probes until it finishes: a mutant must never be in the tree during that run.
-Run the full suite once. After your own test-only commit, re-run the test files
-you changed. Re-run the full suite only when that commit changes a shared test
-helper, fixture, or test configuration.
+Run the full suite once; never re-run it on your own judgment. A failure in
+it: re-run that test file alone. After your own test-only commit, re-run the
+test files you changed. Re-run the full suite only when that commit changes a
+file `suite-scope.py` treats as shared (test configuration, `tests/Support/`,
+`tests/Helpers/`).
 
 Never run two full suites at once, backend or frontend: each one already uses
 all its workers. To check whether a test is flaky, repeat the runs one after
-another, never in parallel. Repeat the test file alone unless the failure
-shows only in the full suite.
+another, never in parallel. Repeat the test file alone. When the failure
+shows only in the full suite, compare it with the base result below instead
+of running the suite again.
 
 When the full suite has failures, compare them with the base revision's
 result. Store the base result once, machine-readable (for example JUnit XML),
@@ -321,6 +325,9 @@ When dispatched by `/test`, report:
 - reproduced defects with expected versus actual behavior and reproduction;
 - mutation probes: `file:line`, the mutation, killed or survived, and the
   test added for each survivor, or the reason no test can kill it;
+- at Deep, one line `Full suite: run (<reasons>)`, `Full suite: not needed
+  (suite-scope.py exit 0)` or `Full suite: run (suite-scope.py not verified)`,
+  from the packet's `suite-scope.py` output;
 - test-only files/commits, final tree state, and any changes from the baseline;
 - required checks not run, blockers, and the next action needed.
 

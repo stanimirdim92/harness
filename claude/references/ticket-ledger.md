@@ -27,6 +27,14 @@ a compaction summary.
 - A DEC that changes an earlier DEC or a Boundaries `Never:` rule says so in an
   `Amends:` line that names the rule.
 
+**Commits.** A stage commits the ticket's docs once, at its end, before it
+reports: the spec, plan, todo, open items and review SARIF it changed, in one
+commit (ADR 0155). Do not commit each owner ruling or ledger item on its own.
+A ruling recorded between stages waits, uncommitted, for the next stage's
+docs commit. When that stage needs a clean tree before it starts, it first
+commits the waiting docs in one commit. Code and test commits stay as `/build`
+and `/test` make them.
+
 **The check.** `check-ledger.py` compares the four files, the plan's spec pin
 and the branch's commits:
 
